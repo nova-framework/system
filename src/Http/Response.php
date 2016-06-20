@@ -2,7 +2,7 @@
 
 namespace Nova\Http;
 
-use Nova\Core\BaseView;
+use Nova\Core\Renderer;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\RenderableInterface;
 
@@ -64,7 +64,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             $content = $this->morphToJson($content);
         } else if ($content instanceof RenderableInterface) {
             $content = $content->render();
-        } else if ($content instanceof BaseView) {
+        } else if ($content instanceof Renderer) {
             $content = $content->fetch();
         }
 

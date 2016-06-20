@@ -9,9 +9,10 @@
 
 namespace Nova\Core;
 
-use Nova\Response;
 use Nova\Core\View;
 use Nova\Helpers\Inflector;
+
+use Response;
 
 use ArrayAccess;
 
@@ -312,7 +313,7 @@ abstract class Renderer implements ArrayAccess
      *
      * @param  string  $method
      * @param  array   $params
-     * @return \Core\BaseView|static|void
+     * @return \Core\Renderer|static|void
      *
      * @throws \BadMethodCallException
      */

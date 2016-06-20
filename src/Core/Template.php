@@ -8,14 +8,14 @@
 
 namespace Nova\Core;
 
-use Nova\Core\BaseView;
+use Nova\Core\Renderer;
 use Nova\Support\Facades\Language as Translator;
 
 
 /**
  * View class to load templates files.
  */
-class Template extends BaseView
+class Template extends Renderer
 {
     /**
      * Constructor

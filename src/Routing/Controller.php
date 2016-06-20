@@ -8,7 +8,7 @@
 
 namespace Nova\Routing;
 
-use Nova\Core\BaseView;
+use Nova\Core\Renderer;
 use Nova\Core\Template;
 use Nova\Core\View;
 
@@ -144,7 +144,7 @@ abstract class Controller
      */
     protected function createResponse($result)
     {
-        if (! $result instanceof BaseView) {
+        if (! $result instanceof Renderer) {
             // Create a Response instance and return it.
             return Response::make($result);
         }

@@ -9,7 +9,7 @@
 
 namespace Nova\Core;
 
-use Nova\Core\BaseView;
+use Nova\Core\Renderer;
 use Nova\Core\Template;
 
 use Response;
@@ -18,7 +18,7 @@ use Response;
 /**
  * View class to load views files.
  */
-class View extends BaseView
+class View extends Renderer
 {
     /**
      * Constructor
