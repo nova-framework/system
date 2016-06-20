@@ -8,7 +8,7 @@
 
 namespace Nova\Cache;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 use Nova\Cache\StoreInterface;
 
 use phpFastCache\CacheManager as FastCacheManager;

@@ -2,7 +2,7 @@
 
 namespace Nova\Cache;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 use Nova\Cache\ArrayStore;
 use Nova\Cache\FastCacheStore;
 use Nova\Cache\Repository;

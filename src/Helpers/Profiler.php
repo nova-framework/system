@@ -8,7 +8,7 @@
 
 namespace Nova\Helpers;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 
 use DB;
 

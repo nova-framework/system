@@ -8,7 +8,7 @@
 
 namespace Nova\Routing;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 
 use Symfony\Component\HttpFoundation\Response;
 

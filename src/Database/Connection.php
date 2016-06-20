@@ -8,7 +8,7 @@
 
 namespace Nova\Database;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 use Nova\Database\Connectors\Connector;
 use Nova\Database\Connectors\MySqlConnector;
 use Nova\Database\Connectors\PostgresConnector;

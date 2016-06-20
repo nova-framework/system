@@ -24,7 +24,7 @@
 
 namespace Nova\Forensics;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 
 use Nova\Forensics\Console;
 use Nova\Forensics\PdoDebugger;

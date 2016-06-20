@@ -8,7 +8,7 @@
 
 namespace Nova\Routing;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 use Nova\View\View;
 use Nova\Events\Dispatcher;
 use Nova\Routing\Controller;

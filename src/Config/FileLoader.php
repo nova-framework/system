@@ -8,7 +8,7 @@
  */
 namespace Nova\Config;
 
-use Nova\Core\Config;
+use Nova\Config\Config;
 
 
 class FileLoader implements LoaderInterface

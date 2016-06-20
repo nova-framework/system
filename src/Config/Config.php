@@ -7,7 +7,7 @@
  * @date April 12th, 2016
  */
 
-namespace Nova\Core;
+namespace Nova\Config;
 
 
 class Config

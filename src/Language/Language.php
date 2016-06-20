@@ -8,8 +8,7 @@
 
 namespace Nova\Language;
 
-use Nova\Core\Config;
-use Nova\Core\Error;
+use Nova\Config\Config;
 use Nova\Helpers\Inflector;
 
 use Cookie;
