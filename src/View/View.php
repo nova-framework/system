@@ -8,6 +8,8 @@
 
 namespace Nova\View;
 
+use Nova\Support\Facades\View as Facade;
+
 use Response;
 
 use ArrayAccess;
@@ -185,7 +187,7 @@ class View implements ArrayAccess
             $data = $this->data;
         }
 
-        return $this->with($key, View::make($view, $data, $module));
+        return $this->with($key, Facade::make($view, $data, $module));
     }
 
     /**
