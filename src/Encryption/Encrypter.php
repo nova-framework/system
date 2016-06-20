@@ -9,8 +9,8 @@
 namespace Nova\Encryption;
 
 use Nova\Support\Str;
-use Nova\Nova\Encryption\EncryptException;
-use Nova\Nova\Encryption\DecryptException;
+use Nova\Encryption\EncryptException;
+use Nova\Encryption\DecryptException;
 
 use RuntimeException;
 
