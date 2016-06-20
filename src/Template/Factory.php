@@ -79,7 +79,7 @@ class Factory
         $path = $basePath .$ltrFile;
 
         // Depending on the Language direction, adjust to RTL Template file, if case.
-        if ((Translator::direction() == 'rtl') && file_exists($basePath .$rtlFile)) {
+        if ((Language::direction() == 'rtl') && file_exists($basePath .$rtlFile)) {
             $path = $basePath .$rtlFile;
         }
 
