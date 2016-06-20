@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Collection;
-use Database\ORM\Relations\MorphOneOrMany;
+use Nova\Database\ORM\Collection;
+use Nova\Database\ORM\Relations\MorphOneOrMany;
 
 
 class MorphMany extends MorphOneOrMany
@@ -38,7 +38,7 @@ class MorphMany extends MorphOneOrMany
      * Match the eagerly loaded results to their parents.
      *
      * @param  array   $models
-     * @param  \Database\ORM\Collection  $results
+     * @param  \Nova\Database\ORM\Collection  $results
      * @param  string  $relation
      * @return array
      */

@@ -7,7 +7,7 @@
  * @date April 12th, 2016
  */
 
-namespace Core;
+namespace Nova\Core;
 
 
 class Config
@@ -32,7 +32,7 @@ class Config
      * @param string $key
      * @return bool
      */
-    public static function exists($key)
+    public static function has($key)
     {
         return ! is_null(array_get(static::$settings, $key));
     }

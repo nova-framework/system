@@ -1,10 +1,10 @@
 <?php
 
-namespace Auth;
+namespace Nova\Auth;
 
-use Cookie\CookieJar;
-use Events\Dispatcher;
-use Session\Store as SessionStore;
+use Nova\Cookie\CookieJar;
+use Nova\Events\Dispatcher;
+use Nova\Session\Store as SessionStore;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,14 +15,14 @@ class Guard
     /**
      * The currently authenticated user.
      *
-     * @var \Auth\UserInterface
+     * @var \Nova\Auth\UserInterface
      */
     protected $user;
 
     /**
      * The user we last attempted to retrieve.
      *
-     * @var \Auth\UserInterface
+     * @var \Nova\Auth\UserInterface
      */
     protected $lastAttempted;
 
@@ -36,21 +36,21 @@ class Guard
     /**
      * The user provider implementation.
      *
-     * @var \Auth\UserProviderInterface
+     * @var \Nova\Auth\UserProviderInterface
      */
     protected $provider;
 
     /**
      * The session store used by the guard.
      *
-     * @var \Session\Store
+     * @var \Nova\Session\Store
      */
     protected $session;
 
     /**
      * The Illuminate cookie creator service.
      *
-     * @var \Cookie\CookieJar
+     * @var \Nova\Cookie\CookieJar
      */
     protected $cookie;
 
@@ -64,7 +64,7 @@ class Guard
     /**
      * The event dispatcher instance.
      *
-     * @var \Events\Dispatcher
+     * @var \Nova\Events\Dispatcher
      */
     protected $events;
 
@@ -85,8 +85,8 @@ class Guard
     /**
      * Create a new authentication guard.
      *
-     * @param  \Auth\UserProviderInterface  $provider
-     * @param  \Session\Store  $session
+     * @param  \Nova\Auth\UserProviderInterface  $provider
+     * @param  \Nova\Session\Store  $session
      * @return void
      */
     public function __construct(UserProviderInterface $provider, SessionStore $session, Request $request = null)
@@ -119,7 +119,7 @@ class Guard
     /**
      * Get the currently authenticated user.
      *
-     * @return \Auth\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function user()
     {
@@ -387,7 +387,7 @@ class Guard
     /**
      * Log a user into the application.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  bool  $remember
      * @return void
      */
@@ -426,7 +426,7 @@ class Guard
      *
      * @param  mixed  $id
      * @param  bool   $remember
-     * @return \Auth\UserInterface
+     * @return \Nova\Auth\UserInterface
      */
     public function loginUsingId($id, $remember = false)
     {
@@ -453,7 +453,7 @@ class Guard
     /**
      * Queue the recaller cookie into the cookie jar.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @return void
      */
     protected function queueRecallerCookie(UserInterface $user)
@@ -515,7 +515,7 @@ class Guard
     /**
      * Refresh the remember token for the user.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @return void
      */
     protected function refreshRememberToken(UserInterface $user)
@@ -528,7 +528,7 @@ class Guard
     /**
      * Create a new remember token for the user if one doesn't already exist.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @return void
      */
     protected function createRememberTokenIfDoesntExist(UserInterface $user)
@@ -541,7 +541,7 @@ class Guard
     /**
      * Get the cookie creator instance used by the guard.
      *
-     * @return \Cookie\CookieJar
+     * @return \Nova\Cookie\CookieJar
      *
      * @throws \RuntimeException
      */
@@ -557,7 +557,7 @@ class Guard
     /**
      * Set the cookie creator instance used by the guard.
      *
-     * @param  \Cookie\CookieJar  $cookie
+     * @param  \Nova\Cookie\CookieJar  $cookie
      * @return void
      */
     public function setCookieJar(CookieJar $cookie)
@@ -568,7 +568,7 @@ class Guard
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Events\Dispatcher
+     * @return \Nova\Events\Dispatcher
      */
     public function getDispatcher()
     {
@@ -578,7 +578,7 @@ class Guard
     /**
      * Set the event dispatcher instance.
      *
-     * @param  \Events\Dispatcher
+     * @param  \Nova\Events\Dispatcher
      */
     public function setDispatcher(Dispatcher $events)
     {
@@ -588,7 +588,7 @@ class Guard
     /**
      * Get the session store used by the guard.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     public function getSession()
     {
@@ -598,7 +598,7 @@ class Guard
     /**
      * Get the user provider used by the guard.
      *
-     * @return \Auth\UserProviderInterface
+     * @return \Nova\Auth\UserProviderInterface
      */
     public function getProvider()
     {
@@ -608,7 +608,7 @@ class Guard
     /**
      * Set the user provider used by the guard.
      *
-     * @param  \Auth\UserProviderInterface  $provider
+     * @param  \Nova\Auth\UserProviderInterface  $provider
      * @return void
      */
     public function setProvider(UserProviderInterface $provider)
@@ -619,7 +619,7 @@ class Guard
     /**
      * Return the currently cached user of the application.
      *
-     * @return \Auth\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function getUser()
     {
@@ -629,7 +629,7 @@ class Guard
     /**
      * Set the current user of the application.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @return void
      */
     public function setUser(UserInterface $user)
@@ -653,7 +653,7 @@ class Guard
      * Set the current request instance.
      *
      * @param  \Symfony\Component\HttpFoundation\Request
-     * @return \Auth\Guard
+     * @return \Nova\Auth\Guard
      */
     public function setRequest(Request $request)
     {
@@ -665,7 +665,7 @@ class Guard
     /**
      * Get the last user we attempted to authenticate.
      *
-     * @return \Auth\UserInterface
+     * @return \Nova\Auth\UserInterface
      */
     public function getLastAttempted()
     {

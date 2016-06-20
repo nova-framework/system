@@ -1,8 +1,8 @@
 <?php
 
-namespace Database;
+namespace Nova\Database;
 
-use Database\Connection;
+use Nova\Database\Connection;
 
 
 class DatabaseManager implements ConnectionResolverInterface
@@ -37,7 +37,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Get a database Connection instance.
      *
      * @param  string  $name
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function connection($name = null)
     {
@@ -56,7 +56,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Reconnect to the given database.
      *
      * @param  string  $name
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function reconnect($name = null)
     {
@@ -84,7 +84,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Make the database connection instance.
      *
      * @param  string  $name
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     protected function makeConnection($name)
     {
@@ -96,8 +96,8 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Prepare the database connection instance.
      *
-     * @param  \Database\Connection  $connection
-     * @return \Database\Connection
+     * @param  \Nova\Database\Connection  $connection
+     * @return \Nova\Database\Connection
      */
     protected function prepare(Connection $connection)
     {

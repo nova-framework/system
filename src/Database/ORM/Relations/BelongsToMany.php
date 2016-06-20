@@ -1,12 +1,12 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Helpers\Inflector;
-use Database\ORM\Model;
-use Database\ORM\Builder;
-use Database\ORM\Collection;
-use Database\ORM\ModelNotFoundException;
+use Nova\Helpers\Inflector;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Builder;
+use Nova\Database\ORM\Collection;
+use Nova\Database\ORM\ModelNotFoundException;
 
 
 class BelongsToMany extends Relation
@@ -50,8 +50,8 @@ class BelongsToMany extends Relation
     /**
      * Create a new has many relationship instance.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Model  $parent
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $table
      * @param  string  $foreignKey
      * @param  string  $otherKey
@@ -85,7 +85,7 @@ class BelongsToMany extends Relation
      * @param  string  $operator
      * @param  mixed   $value
      * @param  string  $boolean
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     public function wherePivot($column, $operator = null, $value = null, $boolean = 'and')
     {
@@ -99,7 +99,7 @@ class BelongsToMany extends Relation
      * @param  string  $operator
      * @param  mixed   $value
      * @param  string  $boolean
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     public function orWherePivot($column, $operator = null, $value = null)
     {
@@ -123,9 +123,9 @@ class BelongsToMany extends Relation
      * Execute the query and get the first result or throw an exception.
      *
      * @param  array  $columns
-     * @return \Database\ORM\Model|static
+     * @return \Nova\Database\ORM\Model|static
      *
-     * @throws \Database\ORM\ModelNotFoundException
+     * @throws \Nova\Database\ORM\ModelNotFoundException
      */
     public function firstOrFail($columns = array('*'))
     {
@@ -138,7 +138,7 @@ class BelongsToMany extends Relation
      * Execute the query as a "select" statement.
      *
      * @param  array  $columns
-     * @return \Database\ORM\Collection
+     * @return \Nova\Database\ORM\Collection
      */
     public function get($columns = array('*'))
     {
@@ -203,7 +203,7 @@ class BelongsToMany extends Relation
     /**
      * Get the pivot attributes from a model.
      *
-     * @param  \Database\ORM\Model  $model
+     * @param  \Nova\Database\ORM\Model  $model
      * @return array
      */
     protected function cleanPivotAttributes(Model $model)
@@ -239,9 +239,9 @@ class BelongsToMany extends Relation
     /**
      * Add the constraints for a relationship count query.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Builder  $parent
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Builder  $parent
+     * @return \Nova\Database\ORM\Builder
      */
     public function getRelationCountQuery(Builder $query, Builder $parent)
     {
@@ -257,13 +257,13 @@ class BelongsToMany extends Relation
     /**
      * Add the constraints for a relationship count query on the same table.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Builder  $parent
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Builder  $parent
+     * @return \Nova\Database\ORM\Builder
      */
     public function getRelationCountQueryForSelfJoin(Builder $query, Builder $parent)
     {
-        $query->select(new \Database\Query\Expression('count(*)'));
+        $query->select(new \Nova\Database\Query\Expression('count(*)'));
 
         $tablePrefix = $this->query->getQuery()->getConnection()->getTablePrefix();
 
@@ -271,7 +271,7 @@ class BelongsToMany extends Relation
 
         $key = $this->wrap($this->getQualifiedParentKeyName());
 
-        return $query->where($hash.'.'.$this->foreignKey, '=', new \Database\Query\Expression($key));
+        return $query->where($hash.'.'.$this->foreignKey, '=', new \Nova\Database\Query\Expression($key));
     }
 
     /**
@@ -287,7 +287,7 @@ class BelongsToMany extends Relation
     /**
      * Set the select clause for the relation query.
      *
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     protected function getSelectColumns(array $columns = array('*'))
     {
@@ -322,8 +322,8 @@ class BelongsToMany extends Relation
     /**
      * Set the join clause for the relation query.
      *
-     * @param  \Database\ORM\Builder|null
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @param  \Nova\Database\ORM\Builder|null
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     protected function setJoin($query = null)
     {
@@ -344,7 +344,7 @@ class BelongsToMany extends Relation
     /**
      * Set the where clause for the relation query.
      *
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     protected function setWhere()
     {
@@ -386,7 +386,7 @@ class BelongsToMany extends Relation
      * Match the eagerly loaded results to their parents.
      *
      * @param  array   $models
-     * @param  \Database\ORM\Collection  $results
+     * @param  \Nova\Database\ORM\Collection  $results
      * @param  string  $relation
      * @return array
      */
@@ -411,7 +411,7 @@ class BelongsToMany extends Relation
     /**
      * Build model dictionary keyed by the relation's foreign key.
      *
-     * @param  \Database\ORM\Collection  $results
+     * @param  \Nova\Database\ORM\Collection  $results
      * @return array
      */
     protected function buildDictionary(Collection $results)
@@ -470,10 +470,10 @@ class BelongsToMany extends Relation
     /**
      * Save a new model and attach it to the parent model.
      *
-     * @param  \Database\ORM\Model  $model
+     * @param  \Nova\Database\ORM\Model  $model
      * @param  array  $joining
      * @param  bool   $touch
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function save(Model $model, array $joining = array(), $touch = true)
     {
@@ -508,7 +508,7 @@ class BelongsToMany extends Relation
      * @param  array  $attributes
      * @param  array  $joining
      * @param  bool   $touch
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function create(array $attributes, array $joining = array(), $touch = true)
     {
@@ -529,7 +529,7 @@ class BelongsToMany extends Relation
      *
      * @param  array  $records
      * @param  array  $joinings
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function createMany(array $records, array $joinings = array())
     {
@@ -857,7 +857,7 @@ class BelongsToMany extends Relation
     /**
      * Create a new query builder for the pivot table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     protected function newPivotQuery()
     {
@@ -869,7 +869,7 @@ class BelongsToMany extends Relation
     /**
      * Get a new plain query builder for the pivot table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     public function newPivotStatement()
     {
@@ -880,7 +880,7 @@ class BelongsToMany extends Relation
      * Get a new pivot statement for a given "other" ID.
      *
      * @param  mixed  $id
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     public function newPivotStatementForId($id)
     {
@@ -896,7 +896,7 @@ class BelongsToMany extends Relation
      *
      * @param  array  $attributes
      * @param  bool   $exists
-     * @return \Database\ORM\Relations\Pivot
+     * @return \Nova\Database\ORM\Relations\Pivot
      */
     public function newPivot(array $attributes = array(), $exists = false)
     {
@@ -909,7 +909,7 @@ class BelongsToMany extends Relation
      * Create a new existing pivot model instance.
      *
      * @param  array  $attributes
-     * @return \Database\ORM\Relations\Pivot
+     * @return \Nova\Database\ORM\Relations\Pivot
      */
     public function newExistingPivot(array $attributes = array())
     {
@@ -920,7 +920,7 @@ class BelongsToMany extends Relation
      * Set the columns on the pivot table to retrieve.
      *
      * @param  array  $columns
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     public function withPivot($columns)
     {
@@ -934,7 +934,7 @@ class BelongsToMany extends Relation
     /**
      * Specify that the pivot table has creation and update timestamps.
      *
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     public function withTimestamps($createdAt = null, $updatedAt = null)
     {

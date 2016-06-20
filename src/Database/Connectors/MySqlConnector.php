@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Database\Connectors;
+namespace Nova\Database\Connectors;
 
-use Database\Connectors\Connector;
-use Database\Connectors\ConnectorInterface;
+use Nova\Database\Connectors\Connector;
+use Nova\Database\Connectors\ConnectorInterface;
 
 use PDO;
 
@@ -62,7 +62,7 @@ class MySqlConnector extends Connector implements ConnectorInterface
         if (isset($config['port'])) {
             $dsn .= ";port={$port}";
         }
-        
+
         if (isset($config['unix_socket'])) {
             $dsn .= ";unix_socket={$config['unix_socket']}";
         }

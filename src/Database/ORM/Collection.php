@@ -1,8 +1,8 @@
 <?php
 
-namespace Database\ORM;
+namespace Nova\Database\ORM;
 
-use Support\Collection as BaseCollection;
+use Nova\Support\Collection as BaseCollection;
 
 
 class Collection extends BaseCollection
@@ -12,7 +12,7 @@ class Collection extends BaseCollection
      *
      * @param  mixed  $key
      * @param  mixed  $default
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function find($key, $default = null)
     {
@@ -31,7 +31,7 @@ class Collection extends BaseCollection
      * Load a set of relationships onto the collection.
      *
      * @param  dynamic  $relations
-     * @return \Database\ORM\Collection
+     * @return \Nova\Database\ORM\Collection
      */
     public function load($relations)
     {
@@ -50,7 +50,7 @@ class Collection extends BaseCollection
      * Add an item to the collection.
      *
      * @param  mixed  $item
-     * @return \Database\ORM\Collection
+     * @return \Nova\Database\ORM\Collection
      */
     public function add($item)
     {

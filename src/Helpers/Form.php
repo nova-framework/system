@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Helpers;
+namespace Nova\Helpers;
 
-use Helpers\Csrf;
+use Nova\Helpers\Csrf;
 
 /**
  * Create form elements quickly.

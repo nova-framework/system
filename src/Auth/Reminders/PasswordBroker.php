@@ -1,10 +1,10 @@
 <?php
 
-namespace Auth\Reminders;
+namespace Nova\Auth\Reminders;
 
-use Auth\Reminders\ReminderRepositoryInterface;
-use Auth\UserProviderInterface;
-use Mail\Mailer;
+use Nova\Auth\Reminders\ReminderRepositoryInterface;
+use Nova\Auth\UserProviderInterface;
+use Nova\Mail\Mailer;
 
 use Closure;
 
@@ -49,21 +49,21 @@ class PasswordBroker
     /**
      * The password reminder repository.
      *
-     * @var \Auth\Reminders\ReminderRepositoryInterface  $reminders
+     * @var \Nova\Auth\Reminders\ReminderRepositoryInterface  $reminders
      */
     protected $reminders;
 
     /**
      * The user provider implementation.
      *
-     * @var \Auth\UserProvider
+     * @var \Nova\Auth\UserProvider
      */
     protected $users;
 
     /**
      * The mailer instance.
      *
-     * @var \Mail\Mailer
+     * @var \Nova\Mail\Mailer
      */
     protected $mailer;
 
@@ -84,9 +84,9 @@ class PasswordBroker
     /**
      * Create a new password broker instance.
      *
-     * @param  \Auth\Reminders\ReminderRepositoryInterface  $reminders
-     * @param  \Auth\UserProviderInterface  $users
-     * @param  \Mail\Mailer  $mailer
+     * @param  \Nova\Auth\Reminders\ReminderRepositoryInterface  $reminders
+     * @param  \Nova\Auth\UserProviderInterface  $users
+     * @param  \Nova\Mail\Mailer  $mailer
      * @param  string  $reminderView
      * @return void
      */
@@ -125,7 +125,7 @@ class PasswordBroker
     /**
      * Send the password reminder e-mail.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @param  string   $token
      * @param  Closure  $callback
      * @return int
@@ -170,7 +170,7 @@ class PasswordBroker
      * Validate a password reset for the given credentials.
      *
      * @param  array  $credentials
-     * @return \Auth\Reminders\RemindableInterface
+     * @return \Nova\Auth\Reminders\RemindableInterface
      */
     protected function validateReset(array $credentials)
     {
@@ -234,7 +234,7 @@ class PasswordBroker
      * Get the user for the given credentials.
      *
      * @param  array  $credentials
-     * @return \Auth\Reminders\RemindableInterface
+     * @return \Nova\Auth\Reminders\RemindableInterface
      *
      * @throws \UnexpectedValueException
      */
@@ -254,7 +254,7 @@ class PasswordBroker
     /**
      * Get the Password Reminder Repository implementation.
      *
-     * @return \Auth\Reminders\ReminderRepositoryInterface
+     * @return \Nova\Auth\Reminders\ReminderRepositoryInterface
      */
     protected function getRepository()
     {

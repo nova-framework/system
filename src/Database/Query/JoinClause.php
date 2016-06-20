@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Database\Query;
+namespace Nova\Database\Query;
 
-use Database\Query\Builder as QueryBuilder;
+use Nova\Database\Query\Builder as QueryBuilder;
 
 
 class JoinClause
@@ -44,7 +44,7 @@ class JoinClause
     /**
     * Create a new join clause instance.
     *
-    * @param  \Database\Query  $query
+    * @param  \Nova\Database\Query  $query
     * @param  string  $type
     * @param  string  $table
     * @return void

@@ -6,11 +6,11 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
-use Core\Config;
-use Core\Error;
-use Helpers\Inflector;
+use Nova\Core\Config;
+use Nova\Core\Error;
+use Nova\Helpers\Inflector;
 
 use Cookie;
 use Session;

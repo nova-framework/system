@@ -1,10 +1,10 @@
 <?php
 
-namespace Auth\Reminders;
+namespace Nova\Auth\Reminders;
 
-use Auth\Reminders\PasswordBroker;
-use Auth\Reminders\ReminderRepository;
-use Support\ServiceProvider;
+use Nova\Auth\Reminders\PasswordBroker;
+use Nova\Auth\Reminders\ReminderRepository;
+use Nova\Support\ServiceProvider;
 
 
 class ReminderServiceProvider extends ServiceProvider

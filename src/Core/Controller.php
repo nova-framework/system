@@ -6,13 +6,13 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
-use Core\BaseView;
-use Core\Language;
-use Core\Template;
-use Core\View;
-use Helpers\Hooks;
+use Nova\Core\BaseView;
+use Nova\Core\Language;
+use Nova\Core\Template;
+use Nova\Core\View;
+use Nova\Helpers\Hooks;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 

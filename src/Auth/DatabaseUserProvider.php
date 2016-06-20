@@ -1,9 +1,9 @@
 <?php
 
-namespace Auth;
+namespace Nova\Auth;
 
-use Database\Connection;
-use Hashing\HasherInterface;
+use Nova\Database\Connection;
+use Nova\Hashing\HasherInterface;
 
 use Hash;
 
@@ -51,7 +51,7 @@ class DatabaseUserProvider implements UserProviderInterface
      * Retrieve a user by their unique identifier.
      *
      * @param  mixed  $identifier
-     * @return \Auth\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveById($identifier)
     {
@@ -67,7 +67,7 @@ class DatabaseUserProvider implements UserProviderInterface
      *
      * @param  mixed  $identifier
      * @param  string  $token
-     * @return \Auth\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveByToken($identifier, $token)
     {
@@ -84,7 +84,7 @@ class DatabaseUserProvider implements UserProviderInterface
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $token
      * @return void
      */
@@ -99,7 +99,7 @@ class DatabaseUserProvider implements UserProviderInterface
      * Retrieve a user by the given credentials.
      *
      * @param  array  $credentials
-     * @return \Auth\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveByCredentials(array $credentials)
     {
@@ -119,7 +119,7 @@ class DatabaseUserProvider implements UserProviderInterface
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Auth\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  array  $credentials
      * @return bool
      */
@@ -133,7 +133,7 @@ class DatabaseUserProvider implements UserProviderInterface
     /**
      * Begin a new database query against the table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     protected function getTable()
     {

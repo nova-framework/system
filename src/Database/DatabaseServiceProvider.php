@@ -6,13 +6,12 @@
  * @version 3.0
  */
 
-namespace Database;
+namespace Nova\Database;
 
-use Database\DatabaseManager;
-use Database\ORM\Model;
-use Database\Model as SimpleModel;
-use Helpers\Database as DatabaseHelper;
-use Support\ServiceProvider;
+use Nova\Database\DatabaseManager;
+use Nova\Database\ORM\Model;
+use Nova\Database\Model as SimpleModel;
+use Nova\Support\ServiceProvider;
 
 
 class DatabaseServiceProvider extends ServiceProvider
@@ -31,9 +30,6 @@ class DatabaseServiceProvider extends ServiceProvider
         Model::setConnectionResolver($this->app['db']);
 
         Model::setEventDispatcher($this->app['events']);
-
-        // Setup the legacy Database Helper.
-        DatabaseHelper::setConnectionResolver($this->app['db']);
     }
 
     /**

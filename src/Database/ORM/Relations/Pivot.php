@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Model;
-use Database\ORM\Builder;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Builder;
 
 
 class Pivot extends Model
@@ -11,7 +11,7 @@ class Pivot extends Model
     /**
      * The parent Model of the relationship.
      *
-     * @var \Database\ORM\Model
+     * @var \Nova\Database\ORM\Model
      */
     protected $parent;
 
@@ -40,7 +40,7 @@ class Pivot extends Model
     /**
      * Create a new pivot model instance.
      *
-     * @param  \Database\ORM\Model  $parent
+     * @param  \Nova\Database\ORM\Model  $parent
      * @param  array   $attributes
      * @param  string  $table
      * @param  bool    $exists
@@ -72,8 +72,8 @@ class Pivot extends Model
     /**
      * Set the keys for a save update query.
      *
-     * @param  \Database\ORM\Builder
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder
+     * @return \Nova\Database\ORM\Builder
      */
     protected function setKeysForSaveQuery(Builder $query)
     {
@@ -95,7 +95,7 @@ class Pivot extends Model
     /**
      * Get the query builder for a delete operation on the pivot.
      *
-     * @return \Database\ORM\Builder
+     * @return \Nova\Database\ORM\Builder
      */
     protected function getDeleteQuery()
     {
@@ -131,7 +131,7 @@ class Pivot extends Model
      *
      * @param  string  $foreignKey
      * @param  string  $otherKey
-     * @return \Database\ORM\Relations\Pivot
+     * @return \Nova\Database\ORM\Relations\Pivot
      */
     public function setPivotKeys($foreignKey, $otherKey)
     {

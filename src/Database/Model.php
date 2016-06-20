@@ -6,12 +6,12 @@
  * @version 3.0
  */
 
-namespace Database;
+namespace Nova\Database;
 
-use Database\Connection;
-use Database\ConnectionResolverInterface as Resolver;
-use Database\Query\Builder;
-use Helpers\Inflector;
+use Nova\Database\Connection;
+use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Database\Query\Builder;
+use Nova\Helpers\Inflector;
 
 use DB;
 
@@ -28,7 +28,7 @@ class Model
     /**
      * The database connection instance.
      *
-     * @var \Database\Connection
+     * @var \Nova\Database\Connection
      */
     protected $db;
 
@@ -56,7 +56,7 @@ class Model
     /**
      * The connection resolver instance.
      *
-     * @var \Database\ConnectionResolverInterface
+     * @var \Nova\Database\ConnectionResolverInterface
      */
     protected static $resolver;
 
@@ -204,7 +204,7 @@ class Model
     /**
      * Get the database Connection instance.
      *
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function getConnection()
     {
@@ -225,7 +225,7 @@ class Model
      * Set the Connection associated with the Model.
      *
      * @param  string  $name
-     * @return \Database\Model
+     * @return \Nova\Database\Model
      */
     public function setConnection($name)
     {
@@ -238,7 +238,7 @@ class Model
      * Resolve a connection instance.
      *
      * @param  string  $connection
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public static function resolveConnection($connection = null)
     {
@@ -248,7 +248,7 @@ class Model
     /**
      * Get the connection resolver instance.
      *
-     * @return \Database\ConnectionResolverInterface
+     * @return \Nova\Database\ConnectionResolverInterface
      */
     public static function getConnectionResolver()
     {
@@ -258,7 +258,7 @@ class Model
     /**
      * Set the connection resolver instance.
      *
-     * @param  \Database\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
      * @return void
      */
     public static function setConnectionResolver(Resolver $resolver)
@@ -279,7 +279,7 @@ class Model
     /**
      * Get a new Query for the Model's table.
      *
-     * @return \Database\Query
+     * @return \Nova\Database\Query
      */
     public function newQuery()
     {

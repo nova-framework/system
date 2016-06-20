@@ -1,9 +1,9 @@
 <?php
 
-namespace Auth\Reminders;
+namespace Nova\Auth\Reminders;
 
 use Carbon\Carbon;
-use Database\Connection;
+use Nova\Database\Connection;
 
 
 class ReminderRepository implements ReminderRepositoryInterface
@@ -57,7 +57,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     /**
      * Create a new reminder record and token.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @return string
      */
     public function create(RemindableInterface $user)
@@ -89,7 +89,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     /**
      * Determine if a reminder record exists and is valid.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @param  string  $token
      * @return bool
      */
@@ -151,7 +151,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     /**
      * Create a new token for the user.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @return string
      */
     public function createNewToken(RemindableInterface $user)

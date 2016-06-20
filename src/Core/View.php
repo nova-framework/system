@@ -7,10 +7,10 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
-use Core\BaseView;
-use Core\Template;
+use Nova\Core\BaseView;
+use Nova\Core\Template;
 
 use Response;
 

@@ -1,5 +1,5 @@
 <?php
-namespace Helpers;
+namespace Nova\Helpers;
 
 /**
  * Assets static helper.
@@ -9,10 +9,10 @@ namespace Helpers;
  * @version 3.0
  */
 
-use Helpers\Url;
-use Helpers\JsMin;
-use Helpers\Response;
-use Helpers\Inflector;
+use Nova\Helpers\Url;
+use Nova\Helpers\JsMin;
+use Nova\Helpers\Response;
+use Nova\Helpers\Inflector;
 
 class Assets
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Model;
-use Database\ORM\Builder;
-use Database\ORM\Collection;
-use Database\ORM\Relations\BelongsTo;
-use Support\Collection as BaseCollection;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Builder;
+use Nova\Database\ORM\Collection;
+use Nova\Database\ORM\Relations\BelongsTo;
+use Nova\Support\Collection as BaseCollection;
 
 
 class MorphTo extends BelongsTo
@@ -21,7 +21,7 @@ class MorphTo extends BelongsTo
     /**
      * The models whose relations are being eager loaded.
      *
-     * @var \Database\ORM\Collection
+     * @var \Nova\Database\ORM\Collection
      */
     protected $models;
 
@@ -32,12 +32,12 @@ class MorphTo extends BelongsTo
      */
     protected $dictionary = array();
 
-    
+
     /**
      * Create a new belongs to relationship instance.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Model  $parent
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $foreignKey
      * @param  string  $otherKey
      * @param  string  $type
@@ -65,7 +65,7 @@ class MorphTo extends BelongsTo
     /**
      * Build a dictionary with the models.
      *
-     * @param  \Database\ORM\Models  $models
+     * @param  \Nova\Database\ORM\Models  $models
      * @return void
      */
     protected function buildDictionary(Collection $models)
@@ -81,7 +81,7 @@ class MorphTo extends BelongsTo
      * Match the eagerly loaded results to their parents.
      *
      * @param  array   $models
-     * @param  \Database\ORM\Collection  $results
+     * @param  \Nova\Database\ORM\Collection  $results
      * @param  string  $relation
      * @return array
      */
@@ -93,8 +93,8 @@ class MorphTo extends BelongsTo
     /**
      * Associate the model instance to the given parent.
      *
-     * @param  \Database\ORM\Model  $model
-     * @return \Database\ORM\Model
+     * @param  \Nova\Database\ORM\Model  $model
+     * @return \Nova\Database\ORM\Model
      */
     public function associate(Model $model)
     {
@@ -125,7 +125,7 @@ class MorphTo extends BelongsTo
      * Match the results for a given type to their parents.
      *
      * @param  string  $type
-     * @param  \Database\ORM\Collection  $results
+     * @param  \Nova\Database\ORM\Collection  $results
      * @return void
      */
     protected function matchToMorphParents($type, Collection $results)
@@ -145,7 +145,7 @@ class MorphTo extends BelongsTo
      * Get all of the relation results for a type.
      *
      * @param  string  $type
-     * @return \Database\ORM\Collection
+     * @return \Nova\Database\ORM\Collection
      */
     protected function getResultsByType($type)
     {
@@ -177,7 +177,7 @@ class MorphTo extends BelongsTo
      * Create a new model instance by type.
      *
      * @param  string  $type
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function createModelByType($type)
     {

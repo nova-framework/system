@@ -6,7 +6,7 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
 /**
  * Error class.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Auth\Reminders;
+namespace Nova\Auth\Reminders;
 
 
 interface ReminderRepositoryInterface
@@ -8,7 +8,7 @@ interface ReminderRepositoryInterface
     /**
      * Create a new reminder record and token.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @return string
      */
     public function create(RemindableInterface $user);
@@ -16,7 +16,7 @@ interface ReminderRepositoryInterface
     /**
      * Determine if a reminder record exists and is valid.
      *
-     * @param  \Auth\Reminders\RemindableInterface  $user
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
      * @param  string  $token
      * @return bool
      */

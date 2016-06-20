@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Helpers;
+namespace Nova\Helpers;
 
-use Helpers\Database;
+use Nova\Helpers\Database;
 
 /**
  * Collection of useful methods.

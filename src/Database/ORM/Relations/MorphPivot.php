@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Builder;
-use Database\ORM\Relations\Pivot;
+use Nova\Database\ORM\Builder;
+use Nova\Database\ORM\Relations\Pivot;
 
 
 class MorphPivot extends Pivot
@@ -20,8 +20,8 @@ class MorphPivot extends Pivot
     /**
      * Set the keys for a save update query.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @return \Nova\Database\ORM\Builder
      */
     protected function setKeysForSaveQuery(Builder $query)
     {
@@ -48,7 +48,7 @@ class MorphPivot extends Pivot
      * Set the morph type for the pivot.
      *
      * @param  string  $morphType
-     * @return \Database\ORM\Relations\MorphPivot
+     * @return \Nova\Database\ORM\Relations\MorphPivot
      */
     public function setMorphType($morphType)
     {

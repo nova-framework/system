@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Cache;
+namespace Nova\Cache;
 
-use Core\Config;
-use Cache\StoreInterface;
+use Nova\Core\Config;
+use Nova\Cache\StoreInterface;
 
 use phpFastCache\CacheManager as FastCacheManager;
 

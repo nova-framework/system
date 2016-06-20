@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Model;
-use Database\ORM\Builder;
-use Database\ORM\Relations\HasOneMany;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Builder;
+use Nova\Database\ORM\Relations\HasOneMany;
 
 
 abstract class MorphOneOrMany extends HasOneOrMany
@@ -23,12 +23,12 @@ abstract class MorphOneOrMany extends HasOneOrMany
      */
     protected $morphClass;
 
-    
+
     /**
      * Create a new has many relationship instance.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Model  $parent
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $type
      * @param  string  $id
      * @param  string  $localKey
@@ -62,9 +62,9 @@ abstract class MorphOneOrMany extends HasOneOrMany
     /**
      * Add the constraints for a relationship count query.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Builder  $parent
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Builder  $parent
+     * @return \Nova\Database\ORM\Builder
      */
     public function getRelationCountQuery(Builder $query, Builder $parent)
     {
@@ -89,8 +89,8 @@ abstract class MorphOneOrMany extends HasOneOrMany
     /**
      * Attach a model instance to the parent model.
      *
-     * @param  \Database\ORM\Model  $model
-     * @return \Database\ORM\Model
+     * @param  \Nova\Database\ORM\Model  $model
+     * @return \Nova\Database\ORM\Model
      */
     public function save(Model $model)
     {
@@ -103,7 +103,7 @@ abstract class MorphOneOrMany extends HasOneOrMany
      * Create a new instance of the related model.
      *
      * @param  array  $attributes
-     * @return \Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function create(array $attributes)
     {

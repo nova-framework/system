@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Helpers;
+namespace Nova\Helpers;
 
 use PDO;
-use Helpers\Database;
+use Nova\Helpers\Database;
 
 /**
  * Table builder class for the Nova Framework.

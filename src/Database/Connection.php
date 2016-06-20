@@ -6,17 +6,16 @@
  * @version 3.0
  */
 
-namespace Database;
+namespace Nova\Database;
 
-use Core\Config;
-use Core\Logger;
-use Database\Connectors\Connector;
-use Database\Connectors\MySqlConnector;
-use Database\Connectors\PostgresConnector;
-use Database\Connectors\SQLiteConnector;
-use Database\Query\Expression;
-use Database\Query\Builder as QueryBuilder;
-use Database\QueryException;
+use Nova\Core\Config;
+use Nova\Database\Connectors\Connector;
+use Nova\Database\Connectors\MySqlConnector;
+use Nova\Database\Connectors\PostgresConnector;
+use Nova\Database\Connectors\SQLiteConnector;
+use Nova\Database\Query\Expression;
+use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Database\QueryException;
 
 use Closure;
 use PDO;
@@ -153,7 +152,7 @@ class Connection
      * Create a connector instance based on the configuration.
      *
      * @param  array  $config
-     * @return \Database\Connectors\ConnectorInterface
+     * @return \Nova\Database\Connectors\ConnectorInterface
      *
      * @throws \InvalidArgumentException
      */
@@ -188,7 +187,7 @@ class Connection
      * Begin a Fluent Query against a database table.
      *
      * @param  string  $table
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     public function table($table)
     {
@@ -201,7 +200,7 @@ class Connection
      * Get a new raw query expression.
      *
      * @param  mixed  $value
-     * @return \Database\Query\Expression
+     * @return \Nova\Database\Query\Expression
      */
     public function raw($value)
     {
@@ -469,7 +468,7 @@ class Connection
      * @param  \Closure  $callback
      * @return mixed
      *
-     * @throws \Database\QueryException
+     * @throws \Nova\Database\QueryException
      */
     protected function run($query, $bindings, Closure $callback)
     {
@@ -492,7 +491,7 @@ class Connection
      * @param  \Closure  $callback
      * @return mixed
      *
-     * @throws \Database\QueryException
+     * @throws \Nova\Database\QueryException
      */
     protected function runQueryCallback($query, $bindings, Closure $callback)
     {
@@ -585,7 +584,7 @@ class Connection
     /**
      * Get the Connector instance.
      *
-     * @return \Database\Connectors\Connector
+     * @return \Nova\Database\Connectors\Connector
      */
     public function getConnector()
     {
@@ -716,7 +715,7 @@ class Connection
      * Set the default fetch mode for the Connection.
      *
      * @param  int  $fetchMode
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function setFetchMode($fetchMode)
     {

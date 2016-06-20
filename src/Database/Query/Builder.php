@@ -6,13 +6,12 @@
  * @version 3.0
  */
 
-namespace Database\Query;
+namespace Nova\Database\Query;
 
-use Helpers\Inflector;
-use Database\Connection;
-use Database\Query\Expression;
-use Database\Query\JoinClause;
-use Support\Facades\Paginator;
+use Nova\Helpers\Inflector;
+use Nova\Database\Connection;
+use Nova\Database\Query\Expression;
+use Nova\Database\Query\JoinClause;
 
 use PDO;
 use Closure;
@@ -23,14 +22,14 @@ class Builder
     /**
      * The Database Connection instance.
      *
-     * @var \Database\Connection
+     * @var \Nova\Database\Connection
      */
     protected $connection;
 
     /**
      * The Model being queried.
      *
-     * @var \Database\Model|Database\ORM\Model
+     * @var \Nova\Database\Model|Nova\Database\ORM\Model
      */
     protected $model = null;
 
@@ -150,7 +149,7 @@ class Builder
      * Set the columns to be selected.
      *
      * @param  array  $columns
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function select($columns = array('*'))
     {
@@ -163,7 +162,7 @@ class Builder
      * Add a new "raw" select expression to the query.
      *
      * @param  string  $expression
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function selectRaw($expression)
     {
@@ -174,7 +173,7 @@ class Builder
      * Add a new select column to the query.
      *
      * @param  mixed  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function addSelect($column)
     {
@@ -188,7 +187,7 @@ class Builder
     /**
      * Force the query to only return distinct results.
      *
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function distinct()
     {
@@ -201,7 +200,7 @@ class Builder
      * Set the table which the query is targeting.
      *
      * @param  string  $table
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function from($table)
     {
@@ -219,7 +218,7 @@ class Builder
      * @param  string  $two
      * @param  string  $type
      * @param  bool  $where
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function join($table, $one, $operator = null, $two = null, $type = 'inner', $where = false)
     {
@@ -244,7 +243,7 @@ class Builder
      * @param  string  $operator
      * @param  string  $two
      * @param  string  $type
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function joinWhere($table, $one, $operator, $two, $type = 'inner')
     {
@@ -258,7 +257,7 @@ class Builder
      * @param  string  $first
      * @param  string  $operator
      * @param  string  $second
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function leftJoin($table, $first, $operator = null, $second = null)
     {
@@ -272,7 +271,7 @@ class Builder
      * @param  string  $first
      * @param  string  $operator
      * @param  string  $two
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function leftJoinWhere($table, $one, $operator, $two)
     {
@@ -285,7 +284,7 @@ class Builder
      * @param  string  $where
      * @param  array   $bindings
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereRaw($where, $bindings = array(), $boolean = 'and')
     {
@@ -303,7 +302,7 @@ class Builder
      *
      * @param  string  $where
      * @param  array   $bindings
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereRaw($where, $bindings = array())
     {
@@ -317,7 +316,7 @@ class Builder
      * @param  string  $operator
      * @param  mixed   $value
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      *
      * @throws \InvalidArgumentException
      */
@@ -360,7 +359,7 @@ class Builder
      * @param  string  $column
      * @param  string  $operator
      * @param  mixed   $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhere($column, $operator = null, $value = null)
     {
@@ -388,7 +387,7 @@ class Builder
      * @param  array   $values
      * @param  string  $boolean
      * @param  bool  $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereBetween($column, array $values, $boolean = 'and', $not = false)
     {
@@ -406,7 +405,7 @@ class Builder
      *
      * @param  string  $column
      * @param  array   $values
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereBetween($column, array $values)
     {
@@ -419,7 +418,7 @@ class Builder
      * @param  string  $column
      * @param  array   $values
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNotBetween($column, array $values, $boolean = 'and')
     {
@@ -431,7 +430,7 @@ class Builder
      *
      * @param  string  $column
      * @param  array   $values
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereNotBetween($column, array $values)
     {
@@ -443,7 +442,7 @@ class Builder
      *
      * @param  \Closure $callback
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNested(Closure $callback, $boolean = 'and')
     {
@@ -459,9 +458,9 @@ class Builder
     /**
      * Add another query builder as a nested where to the query builder.
      *
-     * @param  \Database\Query\Builder $query
+     * @param  \Nova\Database\Query\Builder $query
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function addNestedWhereQuery($query, $boolean = 'and')
     {
@@ -483,7 +482,7 @@ class Builder
      * @param  string   $operator
      * @param  \Closure $callback
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     protected function whereSub($column, $operator, Closure $callback, $boolean)
     {
@@ -506,7 +505,7 @@ class Builder
      * @param  \Closure $callback
      * @param  string   $boolean
      * @param  bool     $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereExists(Closure $callback, $boolean = 'and', $not = false)
     {
@@ -531,7 +530,7 @@ class Builder
      *
      * @param  \Closure $callback
      * @param  bool     $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereExists(Closure $callback, $not = false)
     {
@@ -543,7 +542,7 @@ class Builder
      *
      * @param  \Closure $callback
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNotExists(Closure $callback, $boolean = 'and')
     {
@@ -554,7 +553,7 @@ class Builder
      * Add a where not exists clause to the query.
      *
      * @param  \Closure  $callback
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereNotExists(Closure $callback)
     {
@@ -568,7 +567,7 @@ class Builder
      * @param  mixed   $values
      * @param  string  $boolean
      * @param  bool    $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereIn($column, $values, $boolean = 'and', $not = false)
     {
@@ -590,7 +589,7 @@ class Builder
      *
      * @param  string  $column
      * @param  mixed   $values
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereIn($column, $values)
     {
@@ -603,7 +602,7 @@ class Builder
      * @param  string  $column
      * @param  mixed   $values
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNotIn($column, $values, $boolean = 'and')
     {
@@ -615,7 +614,7 @@ class Builder
      *
      * @param  string  $column
      * @param  mixed   $values
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereNotIn($column, $values)
     {
@@ -629,7 +628,7 @@ class Builder
      * @param  \Closure $callback
      * @param  string   $boolean
      * @param  bool     $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     protected function whereInSub($column, Closure $callback, $boolean, $not)
     {
@@ -650,7 +649,7 @@ class Builder
      * @param  string  $column
      * @param  string  $boolean
      * @param  bool    $not
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNull($column, $boolean = 'and', $not = false)
     {
@@ -665,7 +664,7 @@ class Builder
      * Add an "OR WHERE NULL" clause to the query.
      *
      * @param  string  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereNull($column)
     {
@@ -677,7 +676,7 @@ class Builder
      *
      * @param  string  $column
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereNotNull($column, $boolean = 'and')
     {
@@ -688,7 +687,7 @@ class Builder
      * Add an "OR WHERE NOT NULL" clause to the query.
      *
      * @param  string  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orWhereNotNull($column)
     {
@@ -702,7 +701,7 @@ class Builder
      * @param  string   $operator
      * @param  int   $value
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereDay($column, $operator, $value, $boolean = 'and')
     {
@@ -716,7 +715,7 @@ class Builder
      * @param  string   $operator
      * @param  int   $value
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereMonth($column, $operator, $value, $boolean = 'and')
     {
@@ -730,7 +729,7 @@ class Builder
      * @param  string   $operator
      * @param  int   $value
      * @param  string   $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function whereYear($column, $operator, $value, $boolean = 'and')
     {
@@ -745,7 +744,7 @@ class Builder
      * @param  string  $operator
      * @param  int  $value
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     protected function addDateBasedWhere($type, $column, $operator, $value, $boolean = 'and')
     {
@@ -761,7 +760,7 @@ class Builder
      *
      * @param  string  $method
      * @param  string  $parameters
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function dynamicWhere($method, $parameters)
     {
@@ -809,7 +808,7 @@ class Builder
      * @param  string  $column
      * @param  string  $operator
      * @param  mixed   $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function having($column, $operator = null, $value = null)
     {
@@ -828,7 +827,7 @@ class Builder
      * @param  string  $sql
      * @param  array   $bindings
      * @param  string  $boolean
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function havingRaw($sql, array $bindings = array(), $boolean = 'and')
     {
@@ -846,7 +845,7 @@ class Builder
      *
      * @param  string  $sql
      * @param  array   $bindings
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orHavingRaw($sql, array $bindings = array())
     {
@@ -857,7 +856,7 @@ class Builder
      * Add a grouping to the query.
      *
      * @param  string  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function groupBy($column)
     {
@@ -871,7 +870,7 @@ class Builder
      *
      * @param  string  $column
      * @param  string  $direction
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orderBy($column, $direction = 'asc')
     {
@@ -887,7 +886,7 @@ class Builder
      *
      * @param  string  $sql
      * @param  array  $bindings
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function orderByRaw($sql, $bindings = array())
     {
@@ -904,7 +903,7 @@ class Builder
      * Add an "ORDER BY" clause for a timestamp to the query.
      *
      * @param  string  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function latest($column = 'created_at')
     {
@@ -915,7 +914,7 @@ class Builder
      * Add an "ORDER BY" clause for a timestamp to the query.
      *
      * @param  string  $column
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function oldest($column = 'created_at')
     {
@@ -926,7 +925,7 @@ class Builder
      * Set the "OFFSET" value of the query.
      *
      * @param  int  $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function offset($value)
     {
@@ -939,7 +938,7 @@ class Builder
      * Alias to set the "OFFSET" value of the query.
      *
      * @param  int  $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function skip($value)
     {
@@ -950,7 +949,7 @@ class Builder
      * Set the "LIMIT" value of the query.
      *
      * @param  int  $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function limit($value)
     {
@@ -965,7 +964,7 @@ class Builder
      * Alias to set the "LIMIT" value of the query.
      *
      * @param  int  $value
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function take($value)
     {
@@ -977,7 +976,7 @@ class Builder
      *
      * @param  int    $page
      * @param  int    $perPage
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function forPage($page, $perPage = 15)
     {
@@ -987,9 +986,9 @@ class Builder
     /**
      * Add a union statement to the query.
      *
-     * @param  \Database\Query\Builder|\Closure  $query
+     * @param  \Nova\Database\Query\Builder|\Closure  $query
      * @param  bool $all
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function union($query, $all = false)
     {
@@ -1005,8 +1004,8 @@ class Builder
     /**
      * Add a union all statement to the query.
      *
-     * @param  \Database\Query\Builder|\Closure  $query
-     * @return \Database\Query\Builder|static
+     * @param  \Nova\Database\Query\Builder|\Closure  $query
+     * @return \Nova\Database\Query\Builder|static
      */
     public function unionAll($query)
     {
@@ -1527,7 +1526,7 @@ class Builder
     /**
      * Get a new instance of the QueryBuilder.
      *
-     * @return \Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder|static
      */
     public function newQuery()
     {
@@ -1538,7 +1537,7 @@ class Builder
      * Create a raw Database Expression.
      *
      * @param  mixed  $value
-     * @return \Database\Query\Expression
+     * @return \Nova\Database\Query\Expression
      */
     public function raw($value)
     {
@@ -1559,7 +1558,7 @@ class Builder
      * Set the bindings on the query builder.
      *
      * @param  array  $bindings
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     public function setBindings(array $bindings)
     {
@@ -1572,7 +1571,7 @@ class Builder
      * Add a binding to the query.
      *
      * @param  mixed  $value
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     public function addBinding($value)
     {
@@ -1584,8 +1583,8 @@ class Builder
     /**
      * Merge an array of bindings into our bindings.
      *
-     * @param  \Database\Query\Builder  $query
-     * @return \Database\Query\Builder|static
+     * @param  \Nova\Database\Query\Builder  $query
+     * @return \Nova\Database\Query\Builder|static
      */
     public function mergeBindings(Builder $query)
     {
@@ -1610,7 +1609,7 @@ class Builder
     /**
      * Get the Database Connection instance.
      *
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function getConnection()
     {
@@ -1620,7 +1619,7 @@ class Builder
     /**
      * Get the Model instance being queried.
      *
-     * @return \Database\Model|\Database\ORM\Model
+     * @return \Nova\Database\Model|\Nova\Database\ORM\Model
      */
     public function getModel()
     {
@@ -1630,8 +1629,8 @@ class Builder
     /**
      * Set a Model instance for the Model being queried.
      *
-     * @param  \Database\Model|\Database\ORM\Model|null  $model
-     * @return \Database\Builder
+     * @param  \Nova\Database\Model|\Nova\Database\ORM\Model|null  $model
+     * @return \Nova\Database\Builder
      */
     public function setModel($model)
     {
@@ -1671,7 +1670,7 @@ class Builder
     /**
      * Compile a select query into SQL.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @return string
      */
     public function compileSelect(Builder $query)
@@ -1686,7 +1685,7 @@ class Builder
     /**
      * Compile the components necessary for a select clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @return array
      */
     protected function compileComponents(Builder $query)
@@ -1721,7 +1720,7 @@ class Builder
     /**
      * Compile an aggregated select clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $aggregate
      * @return string
      */
@@ -1739,7 +1738,7 @@ class Builder
     /**
      * Compile the "SELECT *" portion of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $columns
      * @return string
      */
@@ -1757,7 +1756,7 @@ class Builder
     /**
      * Compile the "FROM" portion of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  string  $table
      * @return string
      */
@@ -1769,7 +1768,7 @@ class Builder
     /**
      * Compile the "JOIN" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $joins
      * @return string
      */
@@ -1818,7 +1817,7 @@ class Builder
     /**
      * Compile the "WHERE" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @return string
      */
     protected function compileWheres(Builder $query)
@@ -1973,7 +1972,7 @@ class Builder
     /**
      * Compile a "WHERE DAY" clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
@@ -1985,7 +1984,7 @@ class Builder
     /**
      * Compile a "WHERE MONTH" clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
@@ -1997,7 +1996,7 @@ class Builder
     /**
      * Compile a "WHERE YEAR" clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
@@ -2010,7 +2009,7 @@ class Builder
      * Compile a date based where clause.
      *
      * @param  string  $type
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
@@ -2024,7 +2023,7 @@ class Builder
     /**
      * Compile a raw "WHERE" clause.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
@@ -2047,7 +2046,7 @@ class Builder
     /**
      * Compile the "HAVING" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $havings
      * @return string
      */
@@ -2091,7 +2090,7 @@ class Builder
     /**
      * Compile the "ORDER BY" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  array  $orders
      * @return string
      */
@@ -2109,7 +2108,7 @@ class Builder
     /**
      * Compile the "LIMIT" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  int  $limit
      * @return string
      */
@@ -2121,7 +2120,7 @@ class Builder
     /**
      * Compile the "OFFSET" portions of the query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @param  int  $offset
      * @return string
      */
@@ -2133,7 +2132,7 @@ class Builder
     /**
      * Compile the "UNION" queries attached to the main query.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @return string
      */
     protected function compileUnions(Builder $query)
@@ -2247,7 +2246,7 @@ class Builder
     /**
      * Compile a truncate table statement into SQL.
      *
-     * @param  \Database\Query\Builder  $query
+     * @param  \Nova\Database\Query\Builder  $query
      * @return array
      */
     public function compileTruncate()

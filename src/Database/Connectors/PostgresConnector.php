@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\Connectors;
+namespace Nova\Database\Connectors;
 
-use Database\Connectors\Connector;
-use Database\Connectors\ConnectorInterface;
+use Nova\Database\Connectors\Connector;
+use Nova\Database\Connectors\ConnectorInterface;
 
 use PDO;
 

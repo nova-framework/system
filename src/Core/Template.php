@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
-use Core\BaseView;
-use Support\Facades\Language as Translator;
+use Nova\Core\BaseView;
+use Nova\Support\Facades\Language as Translator;
 
 
 /**

@@ -1,11 +1,11 @@
 <?php
 
-namespace Auth;
+namespace Nova\Auth;
 
-use Auth\Guard;
-use Auth\DatabaseUserProvider;
-use Auth\ExtendedUserProvider;
-use Support\Manager;
+use Nova\AuthGuard;
+use Nova\AuthDatabaseUserProvider;
+use Nova\AuthExtendedUserProvider;
+use Nova\Support\Manager;
 
 
 class AuthManager extends Manager
@@ -48,7 +48,7 @@ class AuthManager extends Manager
     /**
      * Create an instance of the database driver.
      *
-     * @return \Auth\Guard
+     * @return \Nova\AuthGuard
      */
     public function createDatabaseDriver()
     {
@@ -60,7 +60,7 @@ class AuthManager extends Manager
     /**
      * Create an instance of the database user provider.
      *
-     * @return \Auth\DatabaseUserProvider
+     * @return \Nova\AuthDatabaseUserProvider
      */
     protected function createDatabaseProvider()
     {
@@ -74,7 +74,7 @@ class AuthManager extends Manager
     /**
      * Create an instance of the Eloquent driver.
      *
-     * @return \Auth\Guard
+     * @return \Nova\AuthGuard
      */
     public function createExtendedDriver()
     {
@@ -86,7 +86,7 @@ class AuthManager extends Manager
     /**
      * Create an instance of the Eloquent user provider.
      *
-     * @return \Auth\ExtendedUserProvider
+     * @return \Nova\AuthExtendedUserProvider
      */
     protected function createExtendedProvider()
     {

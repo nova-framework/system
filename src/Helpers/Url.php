@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Helpers;
+namespace Nova\Helpers;
 
-use Core\Config;
-use Helpers\Inflector;
+use Nova\Core\Config;
+use Nova\Helpers\Inflector;
 
 
 /**

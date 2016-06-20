@@ -1,8 +1,8 @@
 <?php
 
-namespace Cache;
+namespace Nova\Cache;
 
-use Cache\StoreInterface;
+use Nova\Cache\StoreInterface;
 
 use Carbon\Carbon;
 

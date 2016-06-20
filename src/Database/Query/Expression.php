@@ -5,7 +5,7 @@
  * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
  * @version 3.0
  */
-namespace Database\Query;
+namespace Nova\Database\Query;
 
 
 class Expression

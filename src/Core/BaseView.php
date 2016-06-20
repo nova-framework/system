@@ -7,11 +7,11 @@
  * @version 3.0
  */
 
-namespace Core;
+namespace Nova\Core;
 
 use Response;
 use Core\View;
-use Helpers\Inflector;
+use Nova\Helpers\Inflector;
 
 use ArrayAccess;
 

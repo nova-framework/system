@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Helpers;
+namespace Nova\Helpers;
 
-use Core\Config;
+use Nova\Core\Config;
 
 use DB;
 

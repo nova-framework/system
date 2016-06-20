@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\ORM\Relations;
+namespace Nova\Database\ORM\Relations;
 
-use Database\ORM\Model;
-use Database\ORM\Builder;
-use Database\ORM\Relations\BelongsToMany;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Builder;
+use Nova\Database\ORM\Relations\BelongsToMany;
 
 
 class MorphToMany extends BelongsToMany
@@ -32,12 +32,12 @@ class MorphToMany extends BelongsToMany
      */
     protected $inverse;
 
-    
+
     /**
      * Create a new has many relationship instance.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Model  $parent
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $name
      * @param  string  $table
      * @param  string  $foreignKey
@@ -59,7 +59,7 @@ class MorphToMany extends BelongsToMany
     /**
      * Set the where clause for the relation query.
      *
-     * @return \Database\ORM\Relations\BelongsToMany
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     protected function setWhere()
     {
@@ -73,9 +73,9 @@ class MorphToMany extends BelongsToMany
     /**
      * Add the constraints for a relationship count query.
      *
-     * @param  \Database\ORM\Builder  $query
-     * @param  \Database\ORM\Builder  $parent
-     * @return \Database\ORM\Builder
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Builder  $parent
+     * @return \Nova\Database\ORM\Builder
      */
     public function getRelationCountQuery(Builder $query, Builder $parent)
     {
@@ -114,7 +114,7 @@ class MorphToMany extends BelongsToMany
     /**
      * Create a new query builder for the pivot table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     protected function newPivotQuery()
     {
@@ -128,7 +128,7 @@ class MorphToMany extends BelongsToMany
      *
      * @param  array  $attributes
      * @param  bool   $exists
-     * @return \Database\ORM\Relations\Pivot
+     * @return \Nova\Database\ORM\Relations\Pivot
      */
     public function newPivot(array $attributes = array(), $exists = false)
     {

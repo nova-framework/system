@@ -1,9 +1,9 @@
 <?php
 
-namespace Cookie;
+namespace Nova\Cookie;
 
-use Encryption\Encrypter;
-use Encryption\DecryptException;
+use Nova\Encryption\Encrypter;
+use Nova\Encryption\DecryptException;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +30,7 @@ class Guard implements HttpKernelInterface
      * Create a new CookieGuard instance.
      *
      * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Encryption\Encrypter  $encrypter
+     * @param  \Nova\Encryption\Encrypter  $encrypter
      * @return void
      */
     public function __construct(HttpKernelInterface $app, Encrypter $encrypter)
