@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View;
+namespace Nova\Template;
 
 use Nova\Template\Factory;
 use Nova\Support\ServiceProvider;
