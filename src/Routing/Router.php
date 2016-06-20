@@ -10,8 +10,8 @@ namespace Nova\Routing;
 
 use Nova\Core\Config;
 use Nova\Core\BaseView as View;
-use Nova\Core\Controller;
 use Nova\Events\Dispatcher;
+use Nova\Routing\Controller;
 
 use Nova\Helpers\Inflector;
 use Nova\Http\Request;

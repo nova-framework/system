@@ -6,12 +6,11 @@
  * @version 3.0
  */
 
-namespace Nova\Core;
+namespace Nova\Routing;
 
 use Nova\Core\BaseView;
 use Nova\Core\Template;
 use Nova\Core\View;
-use Nova\Helpers\Hooks;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -184,7 +183,7 @@ abstract class Controller
     /**
      * @param  string $title
      *
-     * @return \Core\Controller
+     * @return \Nova\Routing\Controller
      */
     protected function title($title)
     {
