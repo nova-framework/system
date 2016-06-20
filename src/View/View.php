@@ -16,7 +16,7 @@ use ArrayAccess;
 /**
  * View class to load template and views files.
  */
-abstract class View implements ArrayAccess
+class View implements ArrayAccess
 {
     /**
      * @var array Array of shared data
