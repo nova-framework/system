@@ -2,11 +2,11 @@
 
 namespace Nova\Support\Facades;
 
-use Nova\Core\Template;
-use Nova\Core\View;
 use Nova\Http\JsonResponse;
 use Nova\Http\Response as HttpResponse;
 use Nova\Support\Contracts\ArrayableInterface;
+use Nova\Support\Facades\Template;
+use Nova\Support\Facades\View;
 
 use Str;
 
