@@ -2,15 +2,11 @@
 /**
  * View - load template pages
  *
- * @author David Carr - dave@novaframework.com
  * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
+ * @version 4.0
  */
 
-namespace Nova\Core;
-
-use Nova\Core\View;
-use Nova\Helpers\Inflector;
+namespace Nova\View;
 
 use Response;
 
@@ -20,7 +16,7 @@ use ArrayAccess;
 /**
  * View class to load template and views files.
  */
-abstract class Renderer implements ArrayAccess
+abstract class View implements ArrayAccess
 {
     /**
      * @var array Array of shared data
@@ -42,16 +38,20 @@ abstract class Renderer implements ArrayAccess
      */
     protected $data = array();
 
+    protected $template = false;
+
     /**
      * Constructor
      * @param mixed $path
      * @param array $data
      */
-    protected function __construct($view, $path, array $data = array())
+    public function __construct($view, $path, array $data = array(), $template = false)
     {
         $this->view = $view;
         $this->path = $path;
         $this->data = $data;
+
+        $this->template = $template;
     }
 
     /**
@@ -59,7 +59,7 @@ abstract class Renderer implements ArrayAccess
      *
      * @return string
      */
-    protected function fetch()
+    public function fetch()
     {
         ob_start();
 
@@ -75,7 +75,7 @@ abstract class Renderer implements ArrayAccess
      *
      * @throws \InvalidArgumentException
      */
-    protected function render()
+    public function render()
     {
         if (! is_readable($this->path)) {
             throw new \InvalidArgumentException("Unable to load the view '" .$this->view ."'. File '" .$this->path."' not found.", 1);
@@ -238,6 +238,11 @@ abstract class Renderer implements ArrayAccess
         static::$shared[$key] = $value;
     }
 
+    public function isTemplate()
+    {
+        return $this->template;
+    }
+
     /**
      * Implementation of the ArrayAccess offsetExists method.
      */
@@ -313,22 +318,12 @@ abstract class Renderer implements ArrayAccess
      *
      * @param  string  $method
      * @param  array   $params
-     * @return \Core\Renderer|static|void
+     * @return \Nova\View\View|static|void
      *
      * @throws \BadMethodCallException
      */
     public function __call($method, $params)
     {
-        // The 'fetch' and 'render' Methods are protected; expose them.
-        switch ($method) {
-            case 'fetch':
-            case 'render':
-                return call_user_func_array(array($this, $method), $params);
-
-            default:
-                break;
-        }
-
         // Add the support for the dynamic withX Methods.
         if (str_starts_with($method, 'with')) {
             $name = lcfirst(substr($method, 4));

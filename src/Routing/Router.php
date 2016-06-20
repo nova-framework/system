@@ -9,7 +9,7 @@
 namespace Nova\Routing;
 
 use Nova\Core\Config;
-use Nova\Core\Renderer as View;
+use Nova\View\View;
 use Nova\Events\Dispatcher;
 use Nova\Routing\Controller;
 

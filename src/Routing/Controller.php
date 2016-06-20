@@ -3,21 +3,21 @@
  * Controller - base controller
  *
  * @author David Carr - dave@novaframework.com
- * @version 3.0
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 4.0
  */
 
 namespace Nova\Routing;
 
-use Nova\Core\Renderer;
-use Nova\Core\Template;
-use Nova\Core\View;
+use Nova\View\View as Renderer;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 use App;
 use Event;
 use Response;
-
+use Template;
+use View;
 
 /**
  * Core controller, all other controllers extend this base controller.
@@ -149,7 +149,7 @@ abstract class Controller
             return Response::make($result);
         }
 
-        if ((! $result instanceof Template) && ($this->layout !== false)) {
+        if ((! $result->isTemplate()) && ($this->layout !== false)) {
             // A View instance, having a Layout specified; create a Template instance.
             $result = Template::make($this->layout, $this->template)
                 ->with('content', $result->fetch());

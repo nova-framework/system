@@ -1,43 +1,32 @@
 <?php
-/**
- * Template - a View specialized for handling the Template files.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
-namespace Nova\Core;
+namespace Nova\Template;
 
-use Nova\Core\Renderer;
-use Nova\Support\Facades\Language as Translator;
+use Nova\View\View;
+
+use Language;
 
 
-/**
- * View class to load templates files.
- */
-class Template extends Renderer
+class Factory
 {
     /**
-     * Constructor
-     * @param mixed $path
-     * @param array $data
+     * Create new Template Factory instance.
      *
-     * @throws \UnexpectedValueException
+     * @return void
      */
-    protected function __construct($view, $path, array $data = array())
+    function __construct()
     {
-        parent::__construct($view, $path, $data);
     }
 
     /**
-     * Create a Template instance
+     * Create a View instance
      *
      * @param string $view
      * @param array|string $data
      * @param string $custom
-     * @return Template
+     * @return \Nova\View\View
      */
-    public static function make($view, $data = array(), $template = null)
+    public function make($view, $data = array(), $template = null)
     {
         if (is_string($data)) {
             if (! empty($data) && ($template === null)) {
@@ -48,6 +37,34 @@ class Template extends Renderer
             $data = array();
         }
 
+        // Get the View file path.
+        $path = $this->viewFile($view, $template);
+
+        return new View($view, $path, $data, true);
+    }
+
+    /**
+     * Check if the view file exists.
+     *
+     * @param    string     $view
+     * @return    bool
+     */
+    public function exists($view, $template = null)
+    {
+        // Get the View file path.
+        $path = $this->viewFile($view, $template);
+
+        return file_exists($path);
+    }
+
+    /**
+     * Get the view file.
+     *
+     * @param    string     $view
+     * @return    string
+     */
+    protected function viewFile($view, $template = null)
+    {
         // Adjust the current Template.
         $template = ($template !== null) ? $template : TEMPLATE;
 
@@ -66,6 +83,6 @@ class Template extends Renderer
             $path = $basePath .$rtlFile;
         }
 
-        return new Template($view, $path, $data);
+        return $path;
     }
 }
