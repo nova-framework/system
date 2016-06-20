@@ -9,9 +9,10 @@
 
 namespace Nova\Core;
 
-use Response;
-use Core\View;
+use Nova\Core\View;
 use Nova\Helpers\Inflector;
+
+use Response;
 
 use ArrayAccess;
 
