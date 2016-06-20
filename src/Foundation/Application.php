@@ -551,9 +551,9 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         $sessionReject = $this->bound('session.reject') ? $this['session.reject'] : null;
 
         $client = with(new StackBuilder)
-            ->push('Cookie\Guard', $this['encrypter'])
-            ->push('Cookie\Queue', $this['cookie'])
-            ->push('Session\Middleware', $this['session'], $sessionReject);
+            ->push('Nova\Cookie\Guard', $this['encrypter'])
+            ->push('Nova\Cookie\Queue', $this['cookie'])
+            ->push('Nova\Session\Middleware', $this['session'], $sessionReject);
 
         $this->mergeCustomMiddlewares($client);
 
