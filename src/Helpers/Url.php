@@ -9,8 +9,6 @@
 namespace Helpers;
 
 use Core\Config;
-use Exception\RedirectToException;
-use Helpers\Session;
 use Helpers\Inflector;
 
 
@@ -19,31 +17,6 @@ use Helpers\Inflector;
  */
 class Url
 {
-    /**
-     * Redirect to a chosen url.
-     *
-     * @param string $url      the URL to redirect to
-     * @param bool   $fullPath if true use only url in redirect instead of preparing a local URL
-     * @param int $code the Server Status code for the redirection
-     */
-    public static function redirect($url = null, $fullPath = false, $code = 302)
-    {
-        // Process the URL according with fullPath.
-        $url = ($fullPath === false) ? $url : site_url($url);
-
-        // Throw the special Redirect Exception.
-        throw new RedirectToException($url, $code);
-    }
-
-    /**
-     * Go to the previous url.
-     */
-    public static function previous()
-    {
-        // Throw the special Redirect Exception.
-        throw new RedirectToException();
-    }
-
     /**
      * Detect the true URI.
      *
