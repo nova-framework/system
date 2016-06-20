@@ -8,8 +8,6 @@
 
 namespace Nova\Helpers;
 
-use Nova\Helpers\Database;
-
 /**
  * Collection of useful methods.
  */

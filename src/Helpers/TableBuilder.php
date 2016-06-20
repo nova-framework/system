@@ -8,8 +8,9 @@
 
 namespace Nova\Helpers;
 
+use DB;
+
 use PDO;
-use Nova\Helpers\Database;
 
 /**
  * Table builder class for the Nova Framework.
@@ -23,7 +24,7 @@ use Nova\Helpers\Database;
  * // After namespace: use Helpers\TableBuilder;
  *
  * // Model or Controller method
- * $tableBuilder = new tableBuilder;
+ * $tableBuilder = new TableBuilder();
  *
  * $tableBuilder->addField('name', 'string', false);
  * $tableBuilder->addField('description', 'description', false);
@@ -49,7 +50,7 @@ class TableBuilder
     const CURRENT_TIMESTAMP = 2;
 
     /**
-     * @var Helpers\Database A database instance
+     * @var \PDO A PDO instance
      */
     protected $db;
 
@@ -113,14 +114,14 @@ class TableBuilder
      * By default this class would create an `id` field INT(11) NOT null AUTO_INCREMENT PRIMARY KEY, unless
      * you set the second parameter as false.
      *
-     * @param PDO|null $db - PDO instance (it can be a Helper\Database instance)
+     * @param PDO|null $db - PDO instance
      * @param boolean  $id - A flag to add or not to add an `id` field automatically
      */
     public function __construct(PDO $db = null, $id = true)
     {
         // If the database is not given, create a new database instance.
         // If the database is in the same namespace, we don't need to specify namespace
-        $this->db = !$db ? Database::get() : $db;
+        $this->db = $db ?: DB::connection()->getPdo();
 
         if ($id === true) {
             $this->addField('id', 'INT(11)', false, self::AUTO_INCREMENT);
