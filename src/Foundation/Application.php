@@ -17,8 +17,8 @@ use Nova\Support\Contracts\ResponsePreparerInterface;
 use Nova\Support\Facades\Facade;
 
 use Nova\Events\EventServiceProvider;
-use Exception\ExceptionServiceProvider;
-use Routing\RoutingServiceProvider;
+use Nova\Exception\ExceptionServiceProvider;
+use Nova\Routing\RoutingServiceProvider;
 
 use Illuminate\Container\Container;
 
@@ -932,26 +932,26 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $aliases = array(
             'app'            => 'Nova\Foundation\Application',
-            'auth'           => 'Auth\AuthManager',
-            'cache'          => 'Cache\CacheManager',
-            'cache.store'    => 'Cache\Repository',
-            'auth.reminder.repository' => 'Auth\Reminders\ReminderRepositoryInterface',
-            'config'         => 'Config\Repository',
-            'cookie'         => 'Cookie\CookieJar',
-            'encrypter'      => 'Encryption\Encrypter',
-            'db'             => 'Database\DatabaseManager',
+            'auth'           => 'Nova\Auth\AuthManager',
+            'cache'          => 'Nova\Cache\CacheManager',
+            'cache.store'    => 'Nova\Cache\Repository',
+            'auth.reminder.repository' => 'Nova\Auth\Reminders\ReminderRepositoryInterface',
+            'config'         => 'Nova\Config\Repository',
+            'cookie'         => 'Nova\Cookie\CookieJar',
+            'encrypter'      => 'Nova\Encryption\Encrypter',
+            'db'             => 'Nova\Database\DatabaseManager',
             'events'         => 'Nova\Events\Dispatcher',
-            'hash'           => 'Hashing\HasherInterface',
-            'log'            => 'Log\Writer',
-            'mailer'         => 'Mail\Mailer',
-            'paginator'      => 'Pagination\Environment',
-            'auth.reminder'  => 'Auth\Reminders\PasswordBroker',
-            'redirect'       => 'Routing\Redirector',
+            'hash'           => 'Nova\Hashing\HasherInterface',
+            'log'            => 'Nova\Log\Writer',
+            'mailer'         => 'Nova\Mail\Mailer',
+            'paginator'      => 'Nova\Pagination\Environment',
+            'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
+            'redirect'       => 'Nova\Routing\Redirector',
             'request'        => 'Nova\Http\Request',
-            'router'         => 'Routing\Router',
-            'session'        => 'Session\SessionManager',
-            'session.store'  => 'Session\Store',
-            'validator'      => 'Validation\Factory',
+            'router'         => 'Nova\Routing\Router',
+            'session'        => 'Nova\Session\SessionManager',
+            'session.store'  => 'Nova\Session\Store',
+            'validator'      => 'Nova\Validation\Factory',
         );
 
         foreach ($aliases as $key => $alias) {
