@@ -1,10 +1,9 @@
 <?php
 
-namespace Filesystem;
+namespace Nova\Filesystem;
 
-use Support\ServiceProvider;
-
-use Filesystem\Filesystem;
+use Nova\Filesystem\Filesystem;
+use Nova\Support\ServiceProvider;
 
 
 class FilesystemServiceProvider extends ServiceProvider

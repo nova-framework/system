@@ -6,12 +6,12 @@
  * @version 3.0
  */
 
-namespace Exception;
+namespace Nova\Exception;
 
-use Exception\ExceptionDisplayerInterface;
-use Exception\HttpExceptionInterface;
+use Nova\Exception\ExceptionDisplayerInterface;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 use Exception;
 

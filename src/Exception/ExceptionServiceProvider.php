@@ -6,13 +6,13 @@
  * @version 3.0
  */
 
-namespace Exception;
+namespace Nova\Exception;
 
-use Exception\Handler;
-use Exception\PlainDisplayer;
-use Exception\WhoopsDisplayer;
+use Nova\Exception\Handler;
+use Nova\Exception\PlainDisplayer;
+use Nova\Exception\WhoopsDisplayer;
 
-use Support\ServiceProvider;
+use Nova\Support\ServiceProvider;
 
 use Whoops\Run;
 use Whoops\Handler\PrettyPageHandler;

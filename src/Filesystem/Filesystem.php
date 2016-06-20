@@ -1,9 +1,10 @@
 <?php
 
-namespace Filesystem;
+namespace Nova\Filesystem;
+
+use Symfony\Component\Finder\Finder;
 
 use FilesystemIterator;
-use Symfony\Component\Finder\Finder;
 
 
 class FileNotFoundException extends \Exception {}

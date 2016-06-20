@@ -6,19 +6,17 @@
  * @version 3.0
  */
 
-namespace Exception;
+namespace Nova\Exception;
 
-use Exception\PlainDisplayer;
-use Exception\WhoopsDisplayer;
-use Exception\ExceptionDisplayerInterface;
-use Exception\RedirectToException;
+use Nova\Exception\PlainDisplayer;
+use Nova\Exception\WhoopsDisplayer;
+use Nova\Exception\ExceptionDisplayerInterface;
+use Nova\Exception\RedirectToException;
 use Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Debug\Exception\FatalErrorException as FatalError;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
-
-use Redirect;
 
 use Closure;
 use Exception;
@@ -38,14 +36,14 @@ class Handler
     /**
      * The exception displayer implementation.
      *
-     * @var \Exception\ExceptionDisplayerInterface
+     * @var \Nova\Exception\ExceptionDisplayerInterface
      */
     protected $plainDisplayer;
 
     /**
      * The exception displayer implementation.
      *
-     * @var \Exception\ExceptionDisplayerInterface
+     * @var \Nova\Exception\ExceptionDisplayerInterface
      */
     protected $debugDisplayer;
 
@@ -160,16 +158,7 @@ class Handler
      */
     public function handleException($exception)
     {
-        if ($exception instanceof RedirectToException) {
-            // Manage the Redirect comming from the Helpers\Url.
-            $url = $exception->getUrl();
-
-            if (is_null($url)) {
-                return Redirect::back($exception->getStatusCode());
-            } else {
-                return Redirect::to($url, $exception->getStatusCode());
-            }
-        } else if (! $exception instanceof Exception) {
+        if (! $exception instanceof Exception) {
             $exception = new FatalThrowableError($exception);
         }
 
@@ -338,7 +327,7 @@ class Handler
      * Prepare the given response.
      *
      * @param  mixed  $response
-     * @return \Illuminate\Http\Response
+     * @return \Nova\Http\Response
      */
     protected function prepareResponse($response)
     {

@@ -22,12 +22,12 @@
 
 - - - - - - - - - - - - - - - - - - - - - */
 
-namespace Forensics;
+namespace Nova\Forensics;
 
-use Core\Config;
+use Nova\Core\Config;
 
-use Forensics\Console;
-use Forensics\PdoDebugger;
+use Nova\Forensics\Console;
+use Nova\Forensics\PdoDebugger;
 
 use DB;
 use Request;
