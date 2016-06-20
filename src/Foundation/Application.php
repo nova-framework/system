@@ -6,24 +6,24 @@
  * @version 3.0
  */
 
-namespace Foundation;
+namespace Nova\Foundation;
 
-use Config\LoaderManager;
-use Foundation\EnvironmentDetector;
-use Foundation\ProviderRepository;
-use Http\Request;
-use Http\Response;
-use Support\Contracts\ResponsePreparerInterface;
-use Support\Facades\Facade;
+use Nova\Config\LoaderManager;
+use Nova\Foundation\EnvironmentDetector;
+use Nova\Foundation\ProviderRepository;
+use Nova\Http\Request;
+use Nova\Http\Response;
+use Nova\Support\Contracts\ResponsePreparerInterface;
+use Nova\Support\Facades\Facade;
 
-use Events\EventServiceProvider;
+use Nova\Events\EventServiceProvider;
 use Exception\ExceptionServiceProvider;
 use Routing\RoutingServiceProvider;
 
 use Illuminate\Container\Container;
 
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\Http\Foundation\Request as SymfonyRequest;
+use Symfony\Component\Http\Foundation\Response as SymfonyResponse;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
@@ -114,7 +114,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    protected static $requestClass = 'Http\Request';
+    protected static $requestClass = 'Nova\Http\Request';
 
 
     /**
@@ -134,7 +134,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Create a new Request instance from the Request class.
      *
-     * @return \Http\Request
+     * @return \Nova\Http\Request
      */
     protected function createNewRequest()
     {
@@ -146,7 +146,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Register the basic bindings into the Container.
      *
-     * @param  \Http\Request  $request
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
     protected function registerBaseBindings(Request $request)
@@ -289,10 +289,10 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Register a service provider with the application.
      *
-     * @param  \Support\ServiceProvider|string  $provider
+     * @param  \Nova\Support\ServiceProvider|string  $provider
      * @param  array  $options
      * @param  bool  $force
-     * @return \Support\ServiceProvider
+     * @return \Nova\Support\ServiceProvider
      */
     public function register($provider, $options = array(), $force = false)
     {
@@ -320,8 +320,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Get the registered Service Provider instance if it exists.
      *
-     * @param  \Support\ServiceProvider|string  $provider
-     * @return \Support\ServiceProvider|null
+     * @param  \Nova\Support\ServiceProvider|string  $provider
+     * @return \Nova\Support\ServiceProvider|null
      */
     public function getRegistered($provider)
     {
@@ -339,7 +339,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      * Resolve a Service Provider instance from the class name.
      *
      * @param  string  $provider
-     * @return \Support\ServiceProvider
+     * @return \Nova\Support\ServiceProvider
      */
     public function resolveProviderClass($provider)
     {
@@ -349,7 +349,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Mark the given provider as registered.
      *
-     * @param  \Support\ServiceProvider
+     * @param  \Nova\Support\ServiceProvider
      * @return void
      */
     protected function markAsRegistered($provider)
@@ -522,7 +522,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Run the application and send the response.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \Symfony\Component\Http\Foundation\Request  $request
      * @return void
      */
     public function run(SymfonyRequest $request = null)
@@ -584,7 +584,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     protected function registerBaseMiddlewares()
     {
-        $this->middleware('Http\FrameGuard');
+        $this->middleware('Nova\Http\FrameGuard');
     }
 
     /**
@@ -592,7 +592,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @param  string  $class
      * @param  array  $parameters
-     * @return \Illuminate\Foundation\Application
+     * @return \Illuminate\Nova\Foundation\Application
      */
     public function middleware($class, array $parameters = array())
     {
@@ -623,10 +623,10 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @implements HttpKernelInterface::handle
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \Symfony\Component\Http\Foundation\Request  $request
      * @param  int   $type
      * @param  bool  $catch
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\Http\Foundation\Response
      */
 
     public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
@@ -645,8 +645,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Handle the given request and get the response.
      *
-     * @param  Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  Nova\Http\Request  $request
+     * @return \Symfony\Component\Http\Foundation\Response
      */
     public function dispatch(Request $request)
     {
@@ -658,8 +658,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Terminate the request and send the response to the browser.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  \Symfony\Component\HttpFoundation\Response  $response
+     * @param  \Symfony\Component\Http\Foundation\Request  $request
+     * @param  \Symfony\Component\Http\Foundation\Response  $response
      * @return void
      */
     public function terminate(SymfonyRequest $request, SymfonyResponse $response)
@@ -672,7 +672,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Refresh the bound request instance in the container.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Nova\Http\Request  $request
      * @return void
      */
     protected function refreshRequest(Request $request)
@@ -685,8 +685,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Call the "finish" callbacks assigned to the application.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  \Symfony\Component\HttpFoundation\Response  $response
+     * @param  \Symfony\Component\Http\Foundation\Request  $request
+     * @param  \Symfony\Component\Http\Foundation\Response  $response
      * @return void
      */
     public function callFinishCallbacks(SymfonyRequest $request, SymfonyResponse $response)
@@ -711,8 +711,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Prepare the request by injecting any services.
      *
-     * @param  Http\Request  $request
-     * @return \Http\Request
+     * @param  Nova\Http\Request  $request
+     * @return \Nova\Http\Request
      */
     public function prepareRequest(Request $request)
     {
@@ -729,7 +729,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      * Prepare the given value as a Response object.
      *
      * @param  mixed  $value
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\Http\Foundation\Response
      */
     public function prepareResponse($value)
     {
@@ -931,7 +931,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     public function registerCoreContainerAliases()
     {
         $aliases = array(
-            'app'            => 'Foundation\Application',
+            'app'            => 'Nova\Foundation\Application',
             'auth'           => 'Auth\AuthManager',
             'cache'          => 'Cache\CacheManager',
             'cache.store'    => 'Cache\Repository',
@@ -940,14 +940,14 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'cookie'         => 'Cookie\CookieJar',
             'encrypter'      => 'Encryption\Encrypter',
             'db'             => 'Database\DatabaseManager',
-            'events'         => 'Events\Dispatcher',
+            'events'         => 'Nova\Events\Dispatcher',
             'hash'           => 'Hashing\HasherInterface',
             'log'            => 'Log\Writer',
             'mailer'         => 'Mail\Mailer',
             'paginator'      => 'Pagination\Environment',
             'auth.reminder'  => 'Auth\Reminders\PasswordBroker',
             'redirect'       => 'Routing\Redirector',
-            'request'        => 'Http\Request',
+            'request'        => 'Nova\Http\Request',
             'router'         => 'Routing\Router',
             'session'        => 'Session\SessionManager',
             'session.store'  => 'Session\Store',

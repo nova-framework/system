@@ -1,6 +1,6 @@
 <?php
 
-namespace Foundation;
+namespace Nova\Foundation;
 
 class AliasLoader
 {
@@ -40,7 +40,7 @@ class AliasLoader
      * Get or create the singleton Alias Loader instance.
      *
      * @param  array  $aliases
-     * @return \Core\AliasLoader
+     * @return \Nova\AliasLoader
      */
     public static function getInstance(array $aliases = array())
     {

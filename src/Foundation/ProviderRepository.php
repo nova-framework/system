@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Foundation;
+namespace Nova\Foundation;
 
-use Foundation\Application;
-use Support\ServiceProvider;
+use Nova\Foundation\Application;
+use Nova\Support\ServiceProvider;
 
 
 class ProviderRepository
@@ -57,7 +57,7 @@ class ProviderRepository
     /**
      * Compile the application manifest file.
      *
-     * @param  \Foundation\Application  $app
+     * @param  \Nova\Foundation\Application  $app
      * @param  array  $providers
      * @return array
      */
@@ -83,9 +83,9 @@ class ProviderRepository
     /**
      * Create a new Service Provider instance.
      *
-     * @param  \Foundation\Application  $app
+     * @param  \Nova\Foundation\Application  $app
      * @param  string  $provider
-     * @return \Support\ServiceProvider
+     * @return \Nova\Support\ServiceProvider
      */
     public function createProvider(Application $app, $provider)
     {

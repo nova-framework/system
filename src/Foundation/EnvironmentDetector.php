@@ -6,7 +6,7 @@
  * @version 3.0
  */
 
-namespace Foundation;
+namespace Nova\Foundation;
 
 use Closure;
 
