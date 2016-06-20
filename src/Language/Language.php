@@ -50,7 +50,7 @@ class Language
      * @param string $domain
      * @param string $code
      */
-    protected function __construct($domain, $code)
+    public function __construct($domain, $code)
     {
         $languages = Config::get('languages');
 
