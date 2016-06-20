@@ -2,7 +2,7 @@
 
 namespace Nova\Language;
 
-use Nova\Language\Factory;
+use Nova\Language\LanguageManager;
 use Nova\Support\ServiceProvider;
 
 
