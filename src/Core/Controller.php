@@ -82,9 +82,6 @@ abstract class Controller
     {
         // Adjust to the default Template, if it is not defined.
         $this->template = $this->template ?: TEMPLATE;
-
-        // Initialise the Language object.
-        $this->language = Language::getInstance();
     }
 
     /**
@@ -156,29 +153,7 @@ abstract class Controller
      */
     protected function createResponse($result)
     {
-        if ($result === null) {
-            // Retrieve the legacy View instances.
-            $items = View::getLegacyItems();
-
-            if(empty($items)) {
-                // There are no legacy View instances; quit processing.
-                return Response::make('');
-            }
-
-            // Prepare the Response's Content.
-            $content = '';
-
-            foreach ($items as $item) {
-                // Fetch the current View instance to content.
-                $content .= $item->fetch();
-            }
-
-            // Retrieve also the legacy Headers.
-            $headers = View::getLegacyHeaders();
-
-            // Create a Response instance and return it.
-            return Response::make($content, 200, $headers);
-        } else if (! $result instanceof BaseView) {
+        if (! $result instanceof BaseView) {
             // Create a Response instance and return it.
             return Response::make($result);
         }

@@ -22,8 +22,7 @@ $languages = array(
 );
 
 $workPaths = array(
-    'system',
-    'app'
+    'src' => 'system',
 );
 
 //
@@ -53,26 +52,6 @@ function phpGrep($q, $path) {
     return $ret;
 }
 
-if(is_dir(BASEPATH .'app'.DS.'Modules')) {
-    $path = str_replace('/', DS, BASEPATH .'app/Modules/*');
-
-    $dirs = glob($path , GLOB_ONLYDIR);
-
-    foreach($dirs as $module) {
-        $workPaths[] = str_replace('/', DS, 'app/Modules/'.basename($module));
-    }
-}
-
-if(is_dir(BASEPATH .'app'.DS.'Templates')) {
-    $path = str_replace('/', DS, BASEPATH .'app/Templates/*');
-
-    $dirs = glob($path , GLOB_ONLYDIR);
-
-    foreach($dirs as $template) {
-        $workPaths[] = str_replace('/', DS, 'app/Templates/'.basename($template));
-    }
-}
-
 //
 $options = getopt('', array('path::'));
 
@@ -80,38 +59,20 @@ if(! empty($options['path'])) {
     $worksPaths = array_map('trim', explode(',', $options['path']));
 }
 
-foreach($workPaths as $workPath) {
+foreach($workPaths as $workPath => $workDomain) {
     if(! is_dir(BASEPATH .$workPath)) {
         continue;
     }
 
-    $start = ($workPath == 'app') ? "__('" : "__d('";
+    $start = "__d('";
 
-    $results = phpGrep($start, BASEPATH .$workPath);
+    $results = phpGrep("__d('", BASEPATH .$workPath);
 
     if(empty($results)) {
-        /*
-        foreach($languages as $language) {
-            $langFile = BASEPATH .$workPath.'/Language/'.ucfirst($language).'/messages.php';
-
-            $output = "<?php
-
-return " .var_export(array(), true).";\n";
-
-            file_put_contents($langFile, $output);
-
-            echo 'Written the Language file: "'.str_replace(BASEPATH, '', $langFile).'"'.PHP_EOL;
-        }
-        */
         continue;
     }
 
-    if($workPath == 'app') {
-        $pattern = '#__\(\'(.*)\'(?:,.*)?\)#smU';
-    }
-    else {
-        $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
-    }
+    $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
 
     echo "Using PATERN: '" .$pattern."'\n";
 
@@ -119,14 +80,6 @@ return " .var_export(array(), true).";\n";
 
     foreach($results as $key => $filePath) {
         $file = substr($filePath, strlen(BASEPATH));
-
-        if($workPath == 'app') {
-            $testPath = substr($filePath, strlen(BASEPATH));
-
-            if(str_starts_with($testPath, 'app/Modules') || str_starts_with($testPath, 'app/Templates')) {
-                continue;
-            }
-        }
 
         $content = file_get_contents($filePath);
 
