@@ -2,8 +2,8 @@
 
 namespace Nova\Support\Facades;
 
-use Nova\Core\Template;
 use Nova\Support\Facades\Facade;
+use Nova\Support\Facades\Template;
 use Nova\Support\MessageBag;
 
 
