@@ -17,6 +17,10 @@ use Nova\Database\Query\Expression;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\QueryException;
 
+use Nova\Events\Dispatcher as EventsDispatcher;
+use Nova\Pagination\Paginator;
+use Nova\Cache\CacheManager;
+
 use Closure;
 use PDO;
 use DateTimeInterface;
@@ -48,21 +52,21 @@ class Connection
     /**
      * The event dispatcher instance.
      *
-     * @var \Events\Dispatcher
+     * @var \Nova\Events\Dispatcher
      */
     protected $events;
 
     /**
      * The paginator environment instance.
      *
-     * @var \Pagination\Paginator
+     * @var \Nova\Pagination\Paginator
      */
     protected $paginator;
 
     /**
      * The cache manager instance.
      *
-     * @var \Cache\CacheManager
+     * @var \Nova\Cache\CacheManager
      */
     protected $cache;
 
@@ -636,7 +640,7 @@ class Connection
      * @param  \Events\Dispatcher
      * @return void
      */
-    public function setEventDispatcher(\Events\Dispatcher $events)
+    public function setEventDispatcher(EventsDispatcher $events)
     {
         $this->events = $events;
     }
@@ -644,7 +648,7 @@ class Connection
     /**
      * Get the paginator environment instance.
      *
-     * @return \Illuminate\Pagination\Environment
+     * @return \Nova\Pagination\Factory
      */
     public function getPaginator()
     {
@@ -669,7 +673,7 @@ class Connection
     /**
      * Get the cache manager instance.
      *
-     * @return \Illuminate\Cache\CacheManager
+     * @return \Nova\Cache\CacheManager
      */
     public function getCacheManager()
     {
