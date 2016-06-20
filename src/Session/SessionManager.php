@@ -1,11 +1,11 @@
 <?php
 
-namespace Session;
+namespace Nova\Session;
 
-use Session\CookieSessionHandler;
-use Session\DatabaseSessionHandler;
-use Session\FileSessionHandler;
-use Support\Manager;
+use Nova\Session\CookieSessionHandler;
+use Nova\Session\DatabaseSessionHandler;
+use Nova\Session\FileSessionHandler;
+use Nova\Support\Manager;
 
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;
 
@@ -26,7 +26,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the "array" session driver.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     protected function createArrayDriver()
     {
@@ -36,7 +36,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the "cookie" session driver.
      *
-     * @return \Illuminate\Session\Store
+     * @return \Nova\Session\Store
      */
     protected function createCookieDriver()
     {
@@ -48,7 +48,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the file session driver.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     protected function createFileDriver()
     {
@@ -58,7 +58,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the file session driver.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     protected function createNativeDriver()
     {
@@ -70,7 +70,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the database session driver.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     protected function createDatabaseDriver()
     {
@@ -84,7 +84,7 @@ class SessionManager extends Manager
     /**
      * Get the database connection for the database driver.
      *
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     protected function getDatabaseConnection()
     {
@@ -97,7 +97,7 @@ class SessionManager extends Manager
      * Build the session instance.
      *
      * @param  \SessionHandlerInterface  $handler
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     protected function buildSession($handler)
     {

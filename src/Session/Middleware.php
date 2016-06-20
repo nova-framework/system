@@ -1,6 +1,6 @@
 <?php
 
-namespace Session;
+namespace Nova\Session;
 
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -38,7 +38,7 @@ class Middleware implements HttpKernelInterface
      * Create a new session middleware.
      *
      * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Session\SessionManager  $manager
+     * @param  \Nova\Session\SessionManager  $manager
      * @param  \Closure|null  $reject
      * @return void
      */
@@ -113,7 +113,7 @@ class Middleware implements HttpKernelInterface
     /**
      * Close the session handling for the request.
      *
-     * @param  \Session\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function closeSession(SessionInterface $session)
@@ -139,7 +139,7 @@ class Middleware implements HttpKernelInterface
     /**
      * Remove the garbage from the session if necessary.
      *
-     * @param  \Session\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function collectGarbage(SessionInterface $session)
@@ -236,7 +236,7 @@ class Middleware implements HttpKernelInterface
     /**
      * Get the session implementation from the manager.
      *
-     * @return \Session\SessionInterface
+     * @return \Nova\Session\SessionInterface
      */
     public function getSession(Request $request)
     {

@@ -7,13 +7,14 @@
  * @date April 12th, 2016
  */
 
-use Core\Config;
-use Helpers\Url;
-use Support\Str;
-use Support\Facades\Crypt;
-use Support\Facades\Language;
+use Nova\Helpers\Url;
+use Nova\Support\Facades\Config;
+use Nova\Support\Facades\Crypt;
+use Nova\Support\Facades\Language;
+use Nova\Support\Str;
 
 use Closure as Closure;
+
 
 if (! defined('NOVA_SYSTEM_FUNCTIONS')) {
 

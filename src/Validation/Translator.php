@@ -8,9 +8,9 @@
  * @version 3.0
  */
 
-namespace Validation;
+namespace Nova\Validation;
 
-use Core\Config;
+use Config;
 
 
 class Translator
@@ -29,7 +29,7 @@ class Translator
     {
         $lines = array();
 
-        if (Config::exists('validation')) {
+        if (Config::has('validation')) {
             // The Error Messages are specified in configuration.
             $lines = Config::get('validation');
         } else {

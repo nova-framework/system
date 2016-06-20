@@ -1,8 +1,8 @@
 <?php
 
-namespace Session;
+namespace Nova\Session;
 
-use Database\Connection;
+use Nova\Database\Connection;
 
 use SessionHandlerInterface;
 
@@ -12,7 +12,7 @@ class DatabaseSessionHandler implements SessionHandlerInterface
     /**
      * The Database Connection instance.
      *
-     * @var \Database\Connection
+     * @var \Nova\Database\Connection
      */
     protected $connection;
 
@@ -143,7 +143,7 @@ class DatabaseSessionHandler implements SessionHandlerInterface
     /**
      * Get a fresh QueryBuilder instance for the Table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     protected function getQuery()
     {

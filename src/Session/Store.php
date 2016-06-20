@@ -1,8 +1,8 @@
 <?php
 
-namespace Session;
+namespace Nova\Session;
 
-use Session\SessionInterface;
+use Nova\Session\SessionInterface;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionBagInterface;

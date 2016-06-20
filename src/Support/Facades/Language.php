@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Support\Facades;
+namespace Nova\Support\Facades;
 
-use Core\Language as CoreLanguage;
+use Nova\Core\Language as CoreLanguage;
 
 use ReflectionMethod;
 use ReflectionException;

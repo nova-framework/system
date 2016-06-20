@@ -6,14 +6,14 @@
  * @version 3.0
  */
 
-namespace Validation;
+namespace Nova\Validation;
 
-use Helpers\Inflector;
-use Support\Contracts\MessageProviderInterface;
-use Support\MessageBag;
+use Nova\Helpers\Inflector;
+use Nova\Support\Contracts\MessageProviderInterface;
+use Nova\Support\MessageBag;
 
-use Validation\Translator;
-use Validation\DatabasePresenceVerifier;
+use Nova\Validation\Translator;
+use Nova\Validation\DatabasePresenceVerifier;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -27,14 +27,14 @@ class Validator implements MessageProviderInterface
     /**
      * The Translator instance.
      *
-     * @var \Translation\Translator
+     * @var \Nova\Translation\Translator
      */
     protected $translator;
 
     /**
      * The Database Presence Verifier implementation.
      *
-     * @var \Validation\DatabasePresenceVerifier
+     * @var \Nova\Validation\DatabasePresenceVerifier
      */
     protected $presenceVerifier;
 
@@ -48,7 +48,7 @@ class Validator implements MessageProviderInterface
     /**
      * The message bag instance.
      *
-     * @var \Support\MessageBag
+     * @var \Nova\Support\MessageBag
      */
     protected $messages;
 
@@ -134,7 +134,7 @@ class Validator implements MessageProviderInterface
     /**
      * Create a new Validator instance.
      *
-     * @param  \Translation\Translator  $translator
+     * @param  \Nova\Validation\Translator  $translator
      * @param  array  $data
      * @param  array  $rules
      * @param  array  $messages
@@ -1806,7 +1806,7 @@ class Validator implements MessageProviderInterface
      * Set the validation rules.
      *
      * @param  array  $rules
-     * @return \Validation\Validator
+     * @return \Nova\Validation\Validator
      */
     public function setRules(array $rules)
     {
@@ -1819,7 +1819,7 @@ class Validator implements MessageProviderInterface
      * Set the custom attributes on the validator.
      *
      * @param  array  $attributes
-     * @return \Validation\Validator
+     * @return \Nova\Validation\Validator
      */
     public function setAttributeNames(array $attributes)
     {
@@ -1842,7 +1842,7 @@ class Validator implements MessageProviderInterface
      * Set the files under validation.
      *
      * @param  array  $files
-     * @return \Validation\Validator
+     * @return \Nova\Validation\Validator
      */
     public function setFiles(array $files)
     {
@@ -1854,7 +1854,7 @@ class Validator implements MessageProviderInterface
     /**
      * Get the Database Presence Verifier implementation.
      *
-     * @return \Validation\DatabasePresenceVerifier
+     * @return \Nova\Validation\DatabasePresenceVerifier
      *
      * @throws \RuntimeException
      */
@@ -1870,7 +1870,7 @@ class Validator implements MessageProviderInterface
     /**
      * Set the Database Presence Verifier implementation.
      *
-     * @param  \Validation\DatabasePresenceVerifier  $presenceVerifier
+     * @param  \Nova\Validation\DatabasePresenceVerifier  $presenceVerifier
      * @return void
      */
     public function setPresenceVerifier(DatabasePresenceVerifier $presenceVerifier)
@@ -1891,7 +1891,7 @@ class Validator implements MessageProviderInterface
     /**
      * Set the Translator implementation.
      *
-     * @param  \Translation\Translator  $translator
+     * @param  \Nova\Validation\Translator  $translator
      * @return void
      */
     public function setTranslator(Translator $translator)
@@ -1954,7 +1954,7 @@ class Validator implements MessageProviderInterface
     /**
      * Get the message container for the validator.
      *
-     * @return \Support\MessageBag
+     * @return \Nova\Support\MessageBag
      */
     public function messages()
     {
@@ -1966,7 +1966,7 @@ class Validator implements MessageProviderInterface
     /**
      * An alternative more semantic shortcut to the message container.
      *
-     * @return \Support\MessageBag
+     * @return \Nova\Support\MessageBag
      */
     public function errors()
     {
@@ -1978,7 +1978,7 @@ class Validator implements MessageProviderInterface
     /**
      * Get the messages for the instance.
      *
-     * @return \Support\MessageBag
+     * @return \Nova\Support\MessageBag
      */
     public function getMessageBag()
     {

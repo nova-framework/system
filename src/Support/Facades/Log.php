@@ -1,9 +1,12 @@
 <?php
 
-namespace Support\Facades;
+namespace Nova\Support\Facades;
+
+use Nova\Support\Facades\Facade;
+
 
 /**
- * @see \Log\Writer
+ * @see \Nova\Log\Writer
  */
 class Log extends Facade
 {

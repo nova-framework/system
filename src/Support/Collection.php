@@ -1,6 +1,9 @@
 <?php
 
-namespace Support;
+namespace Nova\Support;
+
+use Nova\Support\Contracts\JsonableInterface;
+use Nova\Support\Contracts\ArrayableInterface;
 
 use Closure;
 use Countable;
@@ -8,8 +11,6 @@ use ArrayAccess;
 use ArrayIterator;
 use CachingIterator;
 use IteratorAggregate;
-use Support\Contracts\JsonableInterface;
-use Support\Contracts\ArrayableInterface;
 
 
 class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate, JsonableInterface
@@ -36,7 +37,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Create a new collection instance if the value isn't one already.
      *
      * @param  mixed  $items
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public static function make($items)
     {
@@ -60,7 +61,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Collapse the collection items into a single array.
      *
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function collapse()
     {
@@ -76,8 +77,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Diff the collection with the given items.
      *
-     * @param  \Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
-     * @return \Support\Collection
+     * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
+     * @return \Nova\Support\Collection
      */
     public function diff($items)
     {
@@ -88,7 +89,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Execute a callback over each item.
      *
      * @param  Closure  $callback
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function each(Closure $callback)
     {
@@ -101,7 +102,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Fetch a nested element of the collection.
      *
      * @param  string  $key
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function fetch($key)
     {
@@ -112,7 +113,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Run a filter over each of the items.
      *
      * @param  Closure  $callback
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function filter(Closure $callback)
     {
@@ -176,7 +177,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Group an associative array by a field or Closure value.
      *
      * @param  callable|string  $groupBy
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function groupBy($groupBy)
     {
@@ -219,8 +220,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Intersect the collection with the given items.
      *
-     * @param  \Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
-     * @return \Support\Collection
+     * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
+     * @return \Nova\Support\Collection
      */
     public function intersect($items)
     {
@@ -263,7 +264,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Run a map over each of the items.
      *
      * @param  Closure  $callback
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function map(Closure $callback)
     {
@@ -273,8 +274,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Merge the collection with the given items.
      *
-     * @param  \Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
-     * @return \Support\Collection
+     * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
+     * @return \Nova\Support\Collection
      */
     public function merge($items)
     {
@@ -365,7 +366,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Reverse items order.
      *
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function reverse()
     {
@@ -388,7 +389,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * @param  int   $offset
      * @param  int   $length
      * @param  bool  $preserveKeys
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function slice($offset, $length = null, $preserveKeys = false)
     {
@@ -400,7 +401,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      *
      * @param  int $size
      * @param  bool  $preserveKeys
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function chunk($size, $preserveKeys = false)
     {
@@ -418,7 +419,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Sort through each item with a callback.
      *
      * @param  Closure  $callback
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function sort(Closure $callback)
     {
@@ -433,7 +434,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * @param  \Closure|string  $callback
      * @param  int              $options
      * @param  bool             $descending
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function sortBy($callback, $options = SORT_REGULAR, $descending = false)
     {
@@ -470,7 +471,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      *
      * @param  \Closure|string  $callback
      * @param  int              $options
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function sortByDesc($callback, $options = SORT_REGULAR)
     {
@@ -483,7 +484,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * @param  int    $offset
      * @param  int    $length
      * @param  mixed  $replacement
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function splice($offset, $length = 0, $replacement = array())
     {
@@ -512,7 +513,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Take the first or last {$limit} items.
      *
      * @param  int  $limit
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function take($limit = null)
     {
@@ -527,7 +528,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      * Transform each item in the collection using a callback.
      *
      * @param  Closure  $callback
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function transform(Closure $callback)
     {
@@ -539,7 +540,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Return only unique items from the collection array.
      *
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function unique()
     {
@@ -549,7 +550,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Reset the keys on the underlying array.
      *
-     * @return \Support\Collection
+     * @return \Nova\Support\Collection
      */
     public function values()
     {
@@ -686,7 +687,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Results array of items from Collection or ArrayableInterface.
      *
-       * @param  \Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
+       * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
      * @return array
      */
     private function getArrayableItems($items)
