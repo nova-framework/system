@@ -31,7 +31,10 @@
     "autoload": {
         "psr-4": {
             "Nova\\" : "src/"
-        }
+        },
+        "files": [
+            "src/functions.php"
+        ]
     },
     "prefer-stable": true,
     "minimum-stability": "dev"
