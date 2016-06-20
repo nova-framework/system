@@ -12,7 +12,7 @@ use Nova\Exception\PlainDisplayer;
 use Nova\Exception\WhoopsDisplayer;
 use Nova\Exception\ExceptionDisplayerInterface;
 use Nova\Exception\RedirectToException;
-use Support\Contracts\ResponsePreparerInterface;
+use Nova\Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Debug\Exception\FatalErrorException as FatalError;
