@@ -100,8 +100,10 @@ class ControllerCommand extends Command
         $data = "<?php
 namespace App\Controllers;
 
-use Nova\Core\View;
 use Nova\Routing\Controller;
+
+use View;
+
 
 class ".ucwords($this->controllerName)." extends Controller
 {

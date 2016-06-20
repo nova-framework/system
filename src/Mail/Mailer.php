@@ -2,8 +2,9 @@
 
 namespace Nova\Mail;
 
-use Nova\Core\View;
 use Nova\Events\Dispatcher;
+
+use View;
 
 use Closure;
 use Swift_Mailer;

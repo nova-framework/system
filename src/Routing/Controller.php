@@ -193,7 +193,7 @@ abstract class Controller
     /**
      * Return a default View instance.
      *
-     * @return \Core\View
+     * @return \Nova\View\View
      */
     protected function getView(array $data = array())
     {
