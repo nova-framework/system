@@ -8,8 +8,9 @@
 
 namespace Nova\Log;
 
+use Nova\Support\ServiceProvider;
+
 use Monolog\Logger;
-use Support\ServiceProvider;
 
 
 class LogServiceProvider extends ServiceProvider
