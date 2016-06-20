@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Routing;
+namespace Nova\Routing;
 
-use Routing\Router;
-use Support\ServiceProvider;
+use Nova\Routing\Router;
+use Nova\Support\ServiceProvider;
 
 
 class RoutingServiceProvider extends ServiceProvider

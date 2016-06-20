@@ -6,18 +6,18 @@
  * @version 3.0
  */
 
-namespace Routing;
+namespace Nova\Routing;
 
-use Core\Config;
-use Core\BaseView as View;
-use Core\Controller;
-use Events\Dispatcher;
+use Nova\Core\Config;
+use Nova\Core\BaseView as View;
+use Nova\Core\Controller;
+use Nova\Events\Dispatcher;
 
-use Helpers\Inflector;
-use Http\Request;
-//use Http\Response;
-use Routing\Route;
-use Support\Facades\Facade;
+use Nova\Helpers\Inflector;
+use Nova\Http\Request;
+//use Nova\Http\Response;
+use Nova\Routing\Route;
+use Nova\Support\Facades\Facade;
 
 use Illuminate\Container\Container;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -632,7 +632,8 @@ class Router
      * Serve a File.
      *
      * @param string $filePath
-     * @return bool
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function serveFile($filePath)
     {

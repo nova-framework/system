@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Routing;
+namespace Nova\Routing;
 
-use Core\Config;
+use Nova\Core\Config;
 
 use Symfony\Component\HttpFoundation\Response;
 
@@ -120,7 +120,7 @@ class Route
      * Add (before) Filters to the Route.
      *
      * @param  string  $filters
-     * @return \Routing\Route
+     * @return \Nova\Routing\Route
      */
     public function before($filters)
     {
@@ -132,7 +132,7 @@ class Route
      *
      * @param  string  $type
      * @param  string  $filters
-     * @return \Routing\Route
+     * @return \Nova\Routing\Route
      */
     protected function addFilters($type, $filters)
     {
@@ -333,7 +333,7 @@ class Route
      * Add a prefix to the route URI.
      *
      * @param  string  $prefix
-     * @return \Routing\Route
+     * @return \Nova\Routing\Route
      */
     public function prefix($prefix)
     {
@@ -466,7 +466,7 @@ class Route
      * Set the Action array for the Route.
      *
      * @param  array  $action
-     * @return \Routing\Route
+     * @return \Nova\Routing\Route
      */
     public function setAction(array $action)
     {

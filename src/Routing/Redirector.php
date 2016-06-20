@@ -1,11 +1,11 @@
 <?php
 
-namespace Routing;
+namespace Nova\Routing;
 
-use Http\Request;
-use Http\RedirectResponse;
-use Session\Store as SessionStore;
-use Support\Str;
+use Nova\Http\Request;
+use Nova\Nova\Http\RedirectResponse;
+use Nova\Session\Store as SessionStore;
+use Nova\Support\Str;
 
 class Redirector
 {
@@ -26,7 +26,7 @@ class Redirector
     /**
      * Create a new Redirector instance.
      *
-     * @param  \Http\Request  $request
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
     public function __construct(Request $request, SessionStore $session = null)
@@ -39,7 +39,7 @@ class Redirector
      * Create a new redirect response to the "home" route.
      *
      * @param  int  $status
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function home($status = 302)
     {
@@ -51,7 +51,7 @@ class Redirector
      *
      * @param  int    $status
      * @param  array  $headers
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function back($status = 302, $headers = array())
     {
@@ -65,7 +65,7 @@ class Redirector
      *
      * @param  int    $status
      * @param  array  $headers
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function refresh($status = 302, $headers = array())
     {
@@ -79,7 +79,7 @@ class Redirector
      * @param  int     $status
      * @param  array   $headers
      * @param  bool    $secure
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function guest($path, $status = 302, $headers = array(), $secure = null)
     {
@@ -95,7 +95,7 @@ class Redirector
      * @param  int     $status
      * @param  array   $headers
      * @param  bool    $secure
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function intended($default = '/', $status = 302, $headers = array(), $secure = null)
     {
@@ -113,7 +113,7 @@ class Redirector
      * @param  int     $status
      * @param  array   $headers
      * @param  bool    $secure
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function to($path, $status = 302, $headers = array(), $secure = null)
     {
@@ -128,7 +128,7 @@ class Redirector
      * @param  string  $path
      * @param  int     $status
      * @param  array   $headers
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function away($path, $status = 302, $headers = array())
     {
@@ -141,7 +141,7 @@ class Redirector
      * @param  string  $path
      * @param  int     $status
      * @param  array   $headers
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function secure($path, $status = 302, $headers = array())
     {
@@ -177,7 +177,7 @@ class Redirector
      * @param  string  $path
      * @param  int     $status
      * @param  array   $headers
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     protected function createRedirect($path, $status, $headers)
     {
