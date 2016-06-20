@@ -22,8 +22,8 @@ use Routing\RoutingServiceProvider;
 
 use Illuminate\Container\Container;
 
-use Symfony\Component\Http\Foundation\Request as SymfonyRequest;
-use Symfony\Component\Http\Foundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
