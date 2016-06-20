@@ -3,7 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
-use Nova\Nova\Http\RedirectResponse;
+use Nova\Http\RedirectResponse;
 use Nova\Session\Store as SessionStore;
 use Nova\Support\Str;
 
