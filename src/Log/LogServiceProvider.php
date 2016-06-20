@@ -6,7 +6,7 @@
  * @version 3.0
  */
 
-namespace Log;
+namespace Nova\Log;
 
 use Monolog\Logger;
 use Support\ServiceProvider;

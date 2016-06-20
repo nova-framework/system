@@ -1,9 +1,9 @@
 <?php
 
-namespace Mail;
+namespace Nova\Mail;
 
-use Core\View;
-use Events\Dispatcher;
+use Nova\Core\View;
+use Nova\Events\Dispatcher;
 
 use Closure;
 use Swift_Mailer;
@@ -50,8 +50,8 @@ class Mailer
     /**
      * Create a new Mailer instance.
      *
-     * @param  \View\Factory  $views
      * @param  \Swift_Mailer            $swift
+     * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
     public function __construct(Swift_Mailer $swift, Dispatcher $events = null)

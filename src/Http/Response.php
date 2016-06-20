@@ -1,14 +1,13 @@
 <?php
 
-namespace Http;
+namespace Nova\Http;
+
+use Nova\Core\BaseView;
+use Nova\Support\Contracts\JsonableInterface;
+use Nova\Support\Contracts\RenderableInterface;
 
 use ArrayObject;
 use Symfony\Component\HttpFoundation\Cookie;
-
-use Core\BaseView;
-
-use Support\Contracts\JsonableInterface;
-use Support\Contracts\RenderableInterface;
 
 
 class Response extends \Symfony\Component\HttpFoundation\Response
@@ -27,7 +26,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      * @param  string  $key
      * @param  string  $value
      * @param  bool    $replace
-     * @return \Http\Response
+     * @return \Nova\Http\Response
      */
     public function header($key, $value, $replace = true)
     {
@@ -40,7 +39,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      * Add a cookie to the response.
      *
      * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
-     * @return \Http\Response
+     * @return \Nova\Http\Response
      */
     public function withCookie(Cookie $cookie)
     {

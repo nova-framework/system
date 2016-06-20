@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Mail;
+namespace Nova\Mail;
 
-use Mail\Mailer;
-use Support\ServiceProvider;
+use Nova\Mail\Mailer;
+use Nova\Support\ServiceProvider;
 
 use Swift_Mailer;
 use Swift_SmtpTransport as SmtpTransport;

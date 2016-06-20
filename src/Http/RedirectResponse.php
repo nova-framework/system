@@ -1,11 +1,13 @@
 <?php
 
-namespace Http;
+namespace Nova\Http;
 
-use Support\MessageBag;
+use Nova\Support\MessageBag;
+use Nova\Session\Store as SessionStore;
+use Nova\Support\Contracts\MessageProviderInterface;
+
 use Symfony\Component\HttpFoundation\Cookie;
-use Session\Store as SessionStore;
-use Support\Contracts\MessageProviderInterface;
+
 
 class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectResponse
 {
@@ -29,7 +31,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * @param  string  $key
      * @param  string  $value
      * @param  bool  $replace
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function header($key, $value, $replace = true)
     {
@@ -43,7 +45,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function with($key, $value = null)
     {
@@ -60,7 +62,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Add a cookie to the response.
      *
      * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function withCookie(Cookie $cookie)
     {
@@ -73,7 +75,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Flash an array of input to the session.
      *
      * @param  array  $input
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function withInput(array $input = null)
     {
@@ -88,7 +90,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Flash an array of input to the session.
      *
      * @param  dynamic  string
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function onlyInput()
     {
@@ -99,7 +101,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Flash an array of input to the session.
      *
      * @param  dynamic  string
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function exceptInput()
     {
@@ -110,7 +112,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Flash a container of errors to the session.
      *
      * @param  \Support\Contracts\MessageProviderInterface|array  $provider
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function withErrors($provider)
     {
@@ -129,7 +131,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * @param string $message
      * @param string $type
      *
-     * @return \Http\RedirectResponse
+     * @return \Nova\Http\RedirectResponse
      */
     public function withStatus($message, $type = 'success')
     {
@@ -143,7 +145,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * Get the Request instance.
      *
-     * @return  \Http\Request
+     * @return  \Nova\Http\Request
      */
     public function getRequest()
     {
@@ -153,7 +155,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * Set the Request instance.
      *
-     * @param  \Http\Request  $request
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
     public function setRequest(Request $request)
@@ -164,7 +166,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * Get the Session Store implementation.
      *
-     * @return \Session\Store
+     * @return \Nova\Session\Store
      */
     public function getSession()
     {

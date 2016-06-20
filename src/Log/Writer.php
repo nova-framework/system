@@ -1,14 +1,16 @@
 <?php
 
-namespace Log;
+namespace Nova\Log;
 
-use Closure;
-use Events\Dispatcher;
+use Nova\Events\Dispatcher;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger as MonologLogger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
+
+use Closure;
+
 
 class Writer
 {
@@ -46,7 +48,7 @@ class Writer
      * Create a new Log Writer instance.
      *
      * @param  \Monolog\Logger  $monolog
-     * @param  \Events\Dispatcher  $dispatcher
+     * @param  \Nova\Events\Dispatcher  $dispatcher
      * @return void
      */
     public function __construct(MonologLogger $monolog, Dispatcher $dispatcher = null)
@@ -179,7 +181,7 @@ class Writer
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Events\Dispatcher
+     * @return \Nova\Events\Dispatcher
      */
     public function getEventDispatcher()
     {
@@ -189,7 +191,7 @@ class Writer
     /**
      * Set the event dispatcher instance.
      *
-     * @param  \Events\Dispatcher
+     * @param  \Nova\Events\Dispatcher
      * @return void
      */
     public function setEventDispatcher(Dispatcher $dispatcher)

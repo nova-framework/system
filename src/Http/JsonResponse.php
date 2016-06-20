@@ -1,6 +1,6 @@
 <?php
 
-namespace Http;
+namespace Nova\Http;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Support\Contracts\JsonableInterface;
