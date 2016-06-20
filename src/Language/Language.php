@@ -6,7 +6,7 @@
  * @version 3.0
  */
 
-namespace Nova\Core;
+namespace Nova\Language;
 
 use Nova\Core\Config;
 use Nova\Core\Error;
@@ -31,13 +31,6 @@ class Language
     private $messages = array();
 
     /**
-     * The Language instances.
-     *
-     * @var array
-     */
-    private static $instances = array();
-
-    /**
      * The current Language Domain.
      */
     private $domain = null;
@@ -50,13 +43,6 @@ class Language
     private $name      = 'English';
     private $locale    = 'en-US';
     private $direction = 'ltr';
-
-    /**
-     * Holds an array with the Legacy Messages.
-     *
-     * @var array
-     */
-    private $legacyMessages = array();
 
 
     /**
@@ -109,44 +95,6 @@ class Language
         // A final consistency check.
         if (is_array($messages) && ! empty($messages)) {
             $this->messages = $messages;
-        }
-    }
-
-    /**
-     * Get instance of language with domain and code (optional).
-     * @param string $domain Optional custom domain
-     * @param string $code Optional custom language code.
-     * @return Language
-     */
-    public static function &getInstance($domain = 'app', $code = LANGUAGE_CODE)
-    {
-        $code = self::getCurrentLanguage($code);
-
-        // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
-        $id = $code .'/' .$domain;
-
-        // Initialize the domain instance, if not already exists.
-        if (! isset(self::$instances[$id])) {
-            self::$instances[$id] = new self($domain, $code);
-        }
-
-        return self::$instances[$id];
-    }
-
-
-    public static function init()
-    {
-        $languages = Config::get('languages');
-
-        if (Session::has('language')) {
-            // The Language was already set; nothing to do.
-            return;
-        } else if(Cookie::has(PREFIX .'language')) {
-            $cookie = Cookie::get(PREFIX .'language');
-
-            if (preg_match ('/[a-z]/', $cookie) && in_array($cookie, array_keys($languages))) {
-                Session::set('language', $cookie);
-            }
         }
     }
 
@@ -240,89 +188,5 @@ class Language
     public function direction()
     {
         return $this->direction;
-    }
-
-    /**
-     * Get current Language
-     * @return string
-     */
-    protected static function getCurrentLanguage($code)
-    {
-        // Check if the end-user do not ask for a custom code.
-        if ($code == LANGUAGE_CODE) {
-            return Session::get('language', $code);
-        }
-
-        return $code;
-    }
-
-    //--------------------------------------------------------------------
-    // Legacy API Methods
-    //--------------------------------------------------------------------
-
-    /**
-     * Load language function.
-     *
-     * @param string $name
-     * @param string $code
-     * @return void
-     */
-    public function load($name, $code = LANGUAGE_CODE)
-    {
-        $code = self::getCurrentLanguage($code);
-
-        // Language file.
-        $file = APPDIR .'Language' .DS .ucfirst($code) .DS .$name .'.php';
-
-        // Check if it is readable.
-        if (! is_readable($file)) {
-            return;
-        }
-
-        // Require the file.
-        $messages = include $file;
-
-        if(isset($this->legacyMessages[$code]) && is_array($this->legacyMessages[$code])) {
-            $this->legacyMessages[$code] = array_merge($this->legacyMessages[$code], $messages);
-        } else {
-            $this->legacyMessages[$code] = $messages;
-        }
-    }
-
-    /**
-     * Retrieve an element from the language array by its key.
-     *
-     * @param  string $value
-     *
-     * @return string
-     */
-    public function get($value, $code = LANGUAGE_CODE)
-    {
-        $code = self::getCurrentLanguage($code);
-
-        if (!empty($this->legacyMessages[$code][$value])) {
-            return $this->legacyMessages[$code][$value];
-        } elseif(!empty($this->legacyMessages[LANGUAGE_CODE][$value])) {
-            return $this->legacyMessages[LANGUAGE_CODE][$value];
-        } else {
-            return $value;
-        }
-    }
-
-    /**
-     * Get the language for the Views.
-     *
-     * @param  string $value this is a "word" value from the language file
-     * @param  string $name  name of the file with the language
-     * @param  string $code  optional, language code
-     *
-     * @return string
-     */
-    public function show($value, $name, $code = LANGUAGE_CODE)
-    {
-        // Load the specified Language file.
-        $this->load($name, $code);
-
-        return $this->get($value, $code);
     }
 }

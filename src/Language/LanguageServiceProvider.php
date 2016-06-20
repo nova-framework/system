@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\View;
+namespace Nova\Language;
 
-use Nova\View\Factory;
+use Nova\Language\Factory;
 use Nova\Support\ServiceProvider;
 
 
-class ViewServiceProvider extends ServiceProvider
+class LanguageServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.
@@ -22,9 +22,9 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('view', function($app)
+        $this->app->bindShared('language', function($app)
         {
-            return new Factory();
+            return new LanguageManger($app);
         });
     }
 
@@ -35,6 +35,6 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('view');
+        return array('language');
     }
 }

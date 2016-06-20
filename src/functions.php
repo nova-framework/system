@@ -108,8 +108,7 @@ function __($message, $args = null)
         $code = LANGUAGE_CODE;
     }
 
-    return Language::getInstance('app', $code)
-        ->translate($message, $params);
+    return Language::instance('app', $code)->translate($message, $params);
 }
 
 /**
@@ -133,8 +132,7 @@ function __d($domain, $message, $args = null)
         $code = LANGUAGE_CODE;
     }
 
-    return Language::getInstance($domain, $code)
-        ->translate($message, $params);
+    return Language::instance($domain, $code)->translate($message, $params);
 }
 
 /**

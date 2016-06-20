@@ -8,40 +8,39 @@
 
 namespace Nova\Support\Facades;
 
-use Nova\Core\Language as CoreLanguage;
+use Nova\Language\Language as CoreLanguage;
+
+use Nova\Support\Facades\Facade;
+use Nova\Support\Facades\Config;
+use Nova\Support\Facades\Cookie;
+use Nova\Support\Facades\Session;
 
 use ReflectionMethod;
 use ReflectionException;
 
 
-class Language
+class Language extends Facade
 {
-    /**
-     * Magic Method for calling the methods on the default Language instance.
-     *
-     * @param $method
-     * @param $params
-     *
-     * @return mixed
-     */
-    public static function __callStatic($method, $params)
+    public static function initialize()
     {
-        // First handle the static Methods from Core\Language.
-        try {
-            $reflection = new ReflectionMethod(CoreLanguage::class, $method);
+        $languages = Config::get('languages');
 
-            if ($reflection->isStatic()) {
-                // The requested Method is static.
-                return call_user_func_array(array(CoreLanguage::class, $method), $params);
+        if (Session::has('language')) {
+            // The Language was already set; nothing to do.
+            return;
+        } else if(Cookie::has(PREFIX .'language')) {
+            $cookie = Cookie::get(PREFIX .'language');
+
+            if (preg_match ('/[a-z]/', $cookie) && in_array($cookie, array_keys($languages))) {
+                Session::set('language', $cookie);
             }
-        } catch ( ReflectionException $e ) {
-            // Nothing to do.
         }
-
-        // Get a Core\Language instance.
-        $instance = CoreLanguage::getInstance();
-
-        // Call the non-static method from the Language instance.
-        return call_user_func_array(array($instance, $method), $params);
     }
+
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor() { return 'language'; }
 }
