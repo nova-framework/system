@@ -24,7 +24,7 @@ class LanguageServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('language', function($app)
         {
-            return new LanguageManger($app);
+            return new LanguageManager($app);
         });
     }
 
