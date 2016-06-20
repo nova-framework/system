@@ -9,7 +9,6 @@
 namespace Nova\Core;
 
 use Nova\Core\BaseView;
-use Nova\Core\Language;
 use Nova\Core\Template;
 use Nova\Core\View;
 use Nova\Helpers\Hooks;
@@ -67,13 +66,6 @@ abstract class Controller
      * @var string
      */
     protected $layout = 'default';
-
-    /**
-     * Language variable to use the languages class.
-     *
-     * @var string
-     */
-    public $language;
 
     /**
      * On the initial run, create an instance of the config class and the view class.
@@ -187,15 +179,6 @@ abstract class Controller
     protected function after($result)
     {
         return true;
-    }
-
-    /**
-     * Return a translated string.
-     * @return string
-     */
-    protected function trans($str, $code = LANGUAGE_CODE)
-    {
-        return $this->language->get($str, $code);
     }
 
     /**
