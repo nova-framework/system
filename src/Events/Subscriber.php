@@ -1,8 +1,8 @@
 <?php
 
-namespace Events;
+namespace Nova\Events;
 
-use Events\Dispatcher;
+use Nova\Events\Dispatcher;
 
 
 abstract class Subscriber

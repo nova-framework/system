@@ -6,9 +6,9 @@
  * @version 3.0
  */
 
-namespace Events;
+namespace Nova\Events;
 
-use Events\Subscriber;
+use Nova\Events\Subscriber;
 
 
 class Dispatcher
@@ -44,7 +44,7 @@ class Dispatcher
     /**
      * Get the active Dispatcher instance.
      *
-     * @return \Events\Dispatcher
+     * @return \Nova\Events\Dispatcher
      */
     public static function getInstance()
     {
@@ -116,7 +116,7 @@ class Dispatcher
      * Resolve the Subscriber instance.
      *
      * @param  mixed  $subscriber
-     * @return \Events\Subscriber
+     * @return \Nova\Events\Subscriber
      *
      * @throw \InvalidArgumentException
      */

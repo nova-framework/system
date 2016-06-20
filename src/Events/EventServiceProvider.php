@@ -6,10 +6,10 @@
  * @version 3.0
  */
 
-namespace Events;
+namespace Nova\Events;
 
-use Support\ServiceProvider;
-use Events\Dispatcher;
+use Nova\Support\ServiceProvider;
+use Nova\Events\Dispatcher;
 
 
 class EventServiceProvider extends ServiceProvider

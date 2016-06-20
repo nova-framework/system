@@ -6,11 +6,11 @@
  * @version 3.0
  */
 
-namespace Encryption;
+namespace Nova\Encryption;
 
-use Support\Str;
-use Encryption\EncryptException;
-use Encryption\DecryptException;
+use Nova\Support\Str;
+use Nova\Nova\Encryption\EncryptException;
+use Nova\Nova\Encryption\DecryptException;
 
 use RuntimeException;
 
@@ -74,7 +74,7 @@ class Encrypter
      * @param  string $value
      * @return string
      *
-     * @throws \Encryption\EncryptException
+     * @throws \Nova\Encryption\EncryptException
      */
     public function encrypt($value)
     {
@@ -97,7 +97,7 @@ class Encrypter
      * @param  string $payload
      * @return string
      *
-     * @throws \Encryption\DecryptException
+     * @throws \Nova\Encryption\DecryptException
      */
     public function decrypt($payload)
     {
@@ -142,7 +142,7 @@ class Encrypter
      * @param  string $payload
      * @return array
      *
-     * @throws \Encryption\DecryptException
+     * @throws \Nova\Encryption\DecryptException
      */
     protected function getJsonPayload($payload)
     {
