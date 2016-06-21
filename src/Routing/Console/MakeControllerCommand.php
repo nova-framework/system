@@ -89,7 +89,7 @@ class MakeControllerCommand extends Command
     protected function getPath()
     {
         if (! is_null($this->input->getOption('path'))) {
-            return $this->laravel['path.base'].'/'.$this->input->getOption('path');
+            return $this->framework['path.base'].'/'.$this->input->getOption('path');
         }
 
         return $this->path;

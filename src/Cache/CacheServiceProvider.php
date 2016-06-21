@@ -27,6 +27,23 @@ class CacheServiceProvider extends ServiceProvider
         {
             return new CacheManager($app);
         });
+
+        $this->registerCommands();
+    }
+
+    /**
+     * Register the Cache related Console commands.
+     *
+     * @return void
+     */
+    public function registerCommands()
+    {
+        $this->app->bindShared('command.cache.clear', function($app)
+        {
+            return new Console\ClearCommand($app['cache'], $app['files']);
+        });
+
+        $this->commands('command.cache.clear');
     }
 
     /**
@@ -36,7 +53,7 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('cache');
+        return array('cache', 'command.cache.clear');
     }
 
 }

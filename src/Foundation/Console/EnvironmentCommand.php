@@ -19,7 +19,7 @@ class EnvironmentCommand extends Command
      *
      * @var string
      */
-    protected $description = "Display the current framework environment";
+    protected $description = "Display the current Framework Environment";
 
     /**
      * Execute the console command.
@@ -28,7 +28,7 @@ class EnvironmentCommand extends Command
      */
     public function fire()
     {
-        $this->line('<info>Current application environment:</info> <comment>'.$this->framework['env'].'</comment>');
+        $this->line('<info>Current Application Environment:</info> <comment>'.$this->framework['env'].'</comment>');
     }
 
 }
