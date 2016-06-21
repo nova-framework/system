@@ -65,11 +65,11 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        require $this->framework['path'].'/start/artisan.php';
+        require $this->framework['path'].'/Boot/Forge.php';
 
         if (isset($this->framework['events'])) {
             $this->framework['events']
-                    ->fire('nova.console.start', array($this));
+                    ->fire('forge.console.start', array($this));
         }
 
         return $this;
