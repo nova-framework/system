@@ -385,7 +385,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $provider = $this->deferredServices[$service];
 
-        if (!isset($this->loadedProviders[$provider])) {
+        if (! isset($this->loadedProviders[$provider])) {
             $this->registerDeferredProvider($provider, $service);
         }
     }
@@ -455,6 +455,20 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         } else {
             $this->shutdownCallbacks[] = $callback;
         }
+    }
+
+    /**
+     * Register a function for determining when to use array sessions.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public function useArraySessions(Closure $callback)
+    {
+        $this->bind('session.reject', function() use ($callback)
+        {
+            return $callback;
+        });
     }
 
     /**
@@ -546,8 +560,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     protected function getStackedClient()
     {
-        $debug = $this['config']['app.debug'];
-
         $sessionReject = $this->bound('session.reject') ? $this['session.reject'] : null;
 
         $client = with(new StackBuilder)
