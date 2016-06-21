@@ -873,6 +873,41 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     }
 
     /**
+     * Set the application's deferred services.
+     *
+     * @param  array  $services
+     * @return void
+     */
+    public function setDeferredServices(array $services)
+    {
+        $this->deferredServices = $services;
+    }
+
+    /**
+     * Determine if the given service is a deferred service.
+     *
+     * @param  string  $service
+     * @return bool
+     */
+    public function isDeferredService($service)
+    {
+        return isset($this->deferredServices[$service]);
+    }
+
+    /**
+     * Get or set the request class for the application.
+     *
+     * @param  string  $class
+     * @return string
+     */
+    public static function requestClass($class = null)
+    {
+        if (! is_null($class)) static::$requestClass = $class;
+
+        return static::$requestClass;
+    }
+
+    /**
      * Set the application request for the console environment.
      *
      * @return void
