@@ -212,6 +212,17 @@ class Handler
     }
 
     /**
+     * Handle a console exception.
+     *
+     * @param  \Exception  $exception
+     * @return void
+     */
+    public function handleConsole($exception)
+    {
+        return $this->callCustomHandlers($exception, true);
+    }
+    
+    /**
      * Display the given exception to the user.
      *
      * @param  \Exception  $exception

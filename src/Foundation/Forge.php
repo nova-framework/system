@@ -3,6 +3,7 @@
 namespace Nova\Foundation;
 
 use Nova\Console\Application as ConsoleApplication;
+use Nova\Foundation\Application;
 
 
 class Forge
