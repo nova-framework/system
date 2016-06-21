@@ -53,7 +53,7 @@ class Application extends \Symfony\Component\Console\Application
                                 ->setExceptionHandler($app['exception'])
                                 ->setAutoExit(false);
 
-        $app->instance('artisan', $console);
+        $app->instance('forge', $console);
 
         return $console;
     }
@@ -61,11 +61,11 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Boot the Console application.
      *
-     * @return \Console\Application
+     * @return \Nova\Console\Application
      */
     public function boot()
     {
-        require $this->framework['path'].'/Boot/Forge.php';
+        require $this->framework['path'] .'/Boot/Forge.php';
 
         if (isset($this->framework['events'])) {
             $this->framework['events']
@@ -192,7 +192,7 @@ class Application extends \Symfony\Component\Console\Application
      * Set the exception handler instance.
      *
      * @param  \Exception\Handler  $handler
-     * @return \Console\Application
+     * @return \Nova\Console\Application
      */
     public function setExceptionHandler($handler)
     {
@@ -204,8 +204,8 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Set the Laravel application instance.
      *
-     * @param  \Foundation\Application  $app
-     * @return \Console\Application
+     * @param  \Nova\Foundation\Application  $app
+     * @return \Nova\Console\Application
      */
     public function serFramework($app)
     {
@@ -218,7 +218,7 @@ class Application extends \Symfony\Component\Console\Application
      * Set whether the Console app should auto-exit when done.
      *
      * @param  bool  $boolean
-     * @return \Console\Application
+     * @return \Nova\Console\Application
      */
     public function setAutoExit($boolean)
     {

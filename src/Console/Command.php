@@ -308,7 +308,7 @@ class Command extends \Symfony\Component\Console\Command\Command
     /**
      * Set the Nova Application instance.
      *
-     * @return \Foundation\Application
+     * @return \Nova\Foundation\Application
      */
     public function getFramework()
     {
@@ -318,7 +318,7 @@ class Command extends \Symfony\Component\Console\Command\Command
     /**
      * Set the Laravel application instance.
      *
-     * @param  \Foundation\Application  $app
+     * @param  \Nova\Foundation\Application  $app
      * @return void
      */
     public function setFramework($app)
