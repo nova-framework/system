@@ -46,6 +46,9 @@ class View implements ArrayAccess, Renderable
      */
     protected $data = array();
 
+    /**
+     * @var bool Falg marking the View as Template.
+     */
     protected $template = false;
 
     /**
@@ -130,6 +133,8 @@ class View implements ArrayAccess, Renderable
                 $data[$key] = $value->fetch();
             }
         }
+
+        return $data;
     }
 
     /**
