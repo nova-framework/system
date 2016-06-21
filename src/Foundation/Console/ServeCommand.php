@@ -21,7 +21,7 @@ class ServeCommand extends Command
      *
      * @var string
      */
-    protected $description = "Serve the application on the PHP development server";
+    protected $description = "Serve the Application on the PHP development server";
 
     /**
      * Execute the console command.
@@ -32,13 +32,13 @@ class ServeCommand extends Command
     {
         $this->checkPhpVersion();
 
-        chdir($this->laravel['path.base']);
+        chdir($this->framework['path.base']);
 
         $host = $this->input->getOption('host');
 
         $port = $this->input->getOption('port');
 
-        $public = $this->laravel['path.public'];
+        $public = $this->framework['path.public'];
 
         $this->info("Laravel development server started on http://{$host}:{$port}");
 
@@ -54,9 +54,8 @@ class ServeCommand extends Command
      */
     protected function checkPhpVersion()
     {
-        if (version_compare(PHP_VERSION, '5.4.0', '<'))
-        {
-            throw new \Exception('This PHP binary is not version 5.4 or greater.');
+        if (version_compare(PHP_VERSION, '5.5.0', '<')) {
+            throw new \Exception('This PHP binary is not version 5.5 or greater.');
         }
     }
 
