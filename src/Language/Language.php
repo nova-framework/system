@@ -8,7 +8,6 @@
 
 namespace Nova\Language;
 
-use Nova\Config\Config;
 use Nova\Helpers\Inflector;
 
 use Cookie;
@@ -49,10 +48,8 @@ class Language
      * @param string $domain
      * @param string $code
      */
-    public function __construct($domain, $code)
+    public function __construct($languages, $domain, $code)
     {
-        $languages = Config::get('languages');
-
         if (isset($languages[$code]) && ! empty($languages[$code])) {
             $info = $languages[$code];
 

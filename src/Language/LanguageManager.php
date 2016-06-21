@@ -2,8 +2,8 @@
 
 namespace Nova\Language;
 
+use Nova\Foundation\Application;
 use Nova\Language\Language;
-use Nova\Support\Facades\Session;
 
 
 class LanguageManager
@@ -28,7 +28,7 @@ class LanguageManager
      * @param  \core\Application  $app
      * @return void
      */
-    function __construct($app)
+    function __construct(Application $app)
     {
         $this->app = $app;
     }
@@ -39,8 +39,10 @@ class LanguageManager
      * @param string $code Optional custom language code.
      * @return Language
      */
-    public function instance($domain = 'app', $code = LANGUAGE_CODE)
+    public function instance($domain = 'app', $code = null)
     {
+        $code = $code ?: $this->app['config']['app.locale'];
+
         $code = $this->getCurrentLanguage($code);
 
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
@@ -48,7 +50,9 @@ class LanguageManager
 
         // Initialize the domain instance, if not already exists.
         if (! isset($this->instances[$id])) {
-            $this->instances[$id] = new Language($domain, $code);
+            $languages = $this->app['config']['languages'];
+
+            $this->instances[$id] = new Language($languages, $domain, $code);
         }
 
         return $this->instances[$id];
@@ -60,9 +64,13 @@ class LanguageManager
      */
     protected function getCurrentLanguage($code)
     {
+        $locale = $this->app['config']['app.locale'];
+
         // Check if the end-user do not ask for a custom code.
-        if (($code == LANGUAGE_CODE) && Session::has('language')) {
-            return Session::get('language', $code);
+        if ($code == $locale) {
+            $session = $this->app['session.store'];
+
+            return $session->get('language', $code);
         }
 
         return $code;
