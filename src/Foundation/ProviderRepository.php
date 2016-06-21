@@ -47,11 +47,37 @@ class ProviderRepository
             $manifest = $this->compileManifest($app, $providers);
         }
 
+        if ($app->runningInConsole()) {
+            $manifest['eager'] = $manifest['providers'];
+        }
+
+        foreach ($manifest['when'] as $provider => $events) {
+            $this->registerLoadEvents($app, $provider, $events);
+        }
+
         foreach ($manifest['eager'] as $provider) {
             $app->register($this->createProvider($app, $provider));
         }
 
         $app->setDeferredServices($manifest['deferred']);
+    }
+
+    /**
+     * Register the load events for the given provider.
+     *
+     * @param  \Nova\Foundation\Application  $app
+     * @param  string  $provider
+     * @param  array  $events
+     * @return void
+     */
+    protected function registerLoadEvents(Application $app, $provider, array $events)
+    {
+        if (count($events) < 1) return;
+
+        $app->make('events')->listen($events, function() use ($app, $provider)
+        {
+            $app->register($provider);
+        });
     }
 
     /**
@@ -72,6 +98,8 @@ class ProviderRepository
                 foreach ($instance->provides() as $service) {
                     $manifest['deferred'][$service] = $provider;
                 }
+
+                $manifest['when'][$provider] = $instance->when();
             } else {
                 $manifest['eager'][] = $provider;
             }
