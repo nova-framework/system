@@ -41,6 +41,23 @@ class LogServiceProvider extends ServiceProvider
         if (isset($this->app['log.setup'])) {
             call_user_func($this->app['log.setup'], $logger);
         }
+
+        $this->registerCommands();
+    }
+
+    /**
+     * Register the Cache related Console commands.
+     *
+     * @return void
+     */
+    public function registerCommands()
+    {
+        $this->app->bindShared('command.log.clear', function($app)
+        {
+            return new Console\ClearCommand($app['files']);
+        });
+
+        $this->commands('command.log.clear');
     }
 
     /**
@@ -50,7 +67,7 @@ class LogServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('log');
+        return array('log', 'command.log.clear');
     }
 
 }
