@@ -182,7 +182,7 @@ class Router
      *
      * <code>
      *      // Register a group of URIs for a Callback
-     *      Router::share(array(array('GET', '/'), array('POST', '/home')), 'App\Controllers\Home@index');
+     *      Route::share(array(array('GET', '/'), array('POST', '/home')), 'App\Controllers\Home@index');
      * </code>
      *
      * @param  array  $routes

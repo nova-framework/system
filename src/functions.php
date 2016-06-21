@@ -38,7 +38,7 @@ function site_url($path = '/', $language = null)
     } else if (is_string($language) && array_key_exists($language, $languages)) {
         $siteUrl .= $language .'/';
     } else {
-        $siteUrl .= Router::getLanguage() .'/';
+        $siteUrl .= Route::getLanguage() .'/';
     }
 
     return $siteUrl .ltrim($path, '/');
@@ -103,7 +103,7 @@ function __($message, $args = null)
     $params = (func_num_args() === 2) ? (array)$args : array_slice(func_get_args(), 1);
 
     if(Config::get('app.multilingual', false)) {
-        $code = Router::getLanguage();
+        $code = Route::getLanguage();
     } else {
         $code = LANGUAGE_CODE;
     }
@@ -127,7 +127,7 @@ function __d($domain, $message, $args = null)
     $params = (func_num_args() === 3) ? (array)$args : array_slice(func_get_args(), 2);
 
     if(Config::get('app.multilingual', false)) {
-        $code = Router::getLanguage();
+        $code = Route::getLanguage();
     } else {
         $code = LANGUAGE_CODE;
     }
