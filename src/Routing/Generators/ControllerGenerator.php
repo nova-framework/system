@@ -134,9 +134,9 @@ class ControllerGenerator
         if (count($segments) > 1) {
             $namespace = implode('\\', array_slice($segments, 0, -1));
 
-            return str_replace('{{namespace}}', 'namespace '.$namespace.';', $stub);
+            return str_replace('{{namespace}}', 'namespace ' .$namespace .';', $stub);
         } else {
-            return str_replace('{{namespace}}', 'namespace App\Controllers', $stub);
+            return str_replace('{{namespace}}', 'namespace App\Controllers;', $stub);
         }
     }
 
