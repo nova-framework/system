@@ -2,9 +2,8 @@
 
 namespace Nova\Http;
 
-use Nova\View\View;
-use Nova\Support\Contracts\JsonableInterface;
-use Nova\Support\Contracts\RenderableInterface;
+use Nova\Support\Contracts\JsonableInterface as Jsonable;
+use Nova\Support\Contracts\RenderableInterface as Renderable;
 
 use ArrayObject;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -62,9 +61,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             $this->headers->set('Content-Type', 'application/json');
 
             $content = $this->morphToJson($content);
-        } else if ($content instanceof RenderableInterface) {
-            $content = $content->render();
-        } else if ($content instanceof View) {
+        } else if ($content instanceof Renderable) {
             $content = $content->fetch();
         }
 
@@ -79,7 +76,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function morphToJson($content)
     {
-        if ($content instanceof JsonableInterface) {
+        if ($content instanceof Jsonable) {
             return $content->toJson();
         }
 
