@@ -1,6 +1,6 @@
 <?php
 
-namespace Console;
+namespace Nova\Console;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;

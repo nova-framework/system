@@ -1,6 +1,6 @@
 <?php
 
-namespace Console;
+namespace Nova\Console;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
@@ -76,7 +76,7 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
-     * Run an Artisan console command by name.
+     * Run an Forge console command by name.
      *
      * @param  string  $command
      * @param  array   $parameters
