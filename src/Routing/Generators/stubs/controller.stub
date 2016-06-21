@@ -2,7 +2,7 @@
 
 {{namespace}}
 
-use Routing\Controller as BaseController;
+use Nova\Routing\Controller as BaseController;
 
 
 class {{class}} extends BaseController {
