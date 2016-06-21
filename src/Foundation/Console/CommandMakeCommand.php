@@ -102,7 +102,7 @@ class CommandMakeCommand extends Command
         if ( ! is_null($namespace = $this->input->getOption('namespace'))) {
             return str_replace('{{namespace}}', ' namespace '.$namespace.';', $stub);
         } else {
-            return str_replace('{{namespace}}', '', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Commands;', $stub);
         }
     }
 
