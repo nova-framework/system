@@ -28,7 +28,7 @@ class EnvironmentCommand extends Command
      */
     public function fire()
     {
-        $this->line('<info>Current application environment:</info> <comment>'.$this->laravel['env'].'</comment>');
+        $this->line('<info>Current application environment:</info> <comment>'.$this->framework['env'].'</comment>');
     }
 
 }
