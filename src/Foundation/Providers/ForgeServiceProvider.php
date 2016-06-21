@@ -24,6 +24,7 @@ class ForgeServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bindShared('forge', function($app)
+        {
            return new Forge($app);
         });
 
