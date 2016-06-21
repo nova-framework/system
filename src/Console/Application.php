@@ -23,7 +23,7 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * The Nova Application instance.
      *
-     * @var \Foundation\Application
+     * @var \Nova\Foundation\Application
      */
     protected $framework;
 
@@ -49,7 +49,7 @@ class Application extends \Symfony\Component\Console\Application
         $app->boot();
 
         $console = with($console = new static('Nova Framework', $app::VERSION))
-                                ->serFramework($app)
+                                ->setFramework($app)
                                 ->setExceptionHandler($app['exception'])
                                 ->setAutoExit(false);
 
@@ -68,8 +68,9 @@ class Application extends \Symfony\Component\Console\Application
         require $this->framework['path'] .'/Boot/Forge.php';
 
         if (isset($this->framework['events'])) {
-            $this->framework['events']
-                    ->fire('forge.start', array($this));
+            $events = $this->framework['events'];
+
+            $events->fire('forge.start', array($this));
         }
 
         return $this;
@@ -207,7 +208,7 @@ class Application extends \Symfony\Component\Console\Application
      * @param  \Nova\Foundation\Application  $app
      * @return \Nova\Console\Application
      */
-    public function serFramework($app)
+    public function setFramework($app)
     {
         $this->framework = $app;
 
