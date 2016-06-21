@@ -1,0 +1,12 @@
+<?php
+
+{{namespace}}
+
+use Routing\Controller as BaseController;
+
+
+class {{class}} extends BaseController {
+
+{{methods}}
+
+}

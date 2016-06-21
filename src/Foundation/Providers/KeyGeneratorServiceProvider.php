@@ -8,14 +8,14 @@ use Nova\Foundation\Console\KeyGenerateCommand;
 class KeyGeneratorServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
+     * Indicates if loading of the Provider is deferred.
      *
      * @var bool
      */
     protected $defer = true;
 
     /**
-     * Register the service provider.
+     * Register the Service Provider.
      *
      * @return void
      */
@@ -30,7 +30,7 @@ class KeyGeneratorServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the services provided by the provider.
+     * Get the Services provided by the Provider.
      *
      * @return array
      */

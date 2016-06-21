@@ -37,7 +37,7 @@ class ForgeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the services provided by the provider.
+     * Get the Services provided by the Provider.
      *
      * @return array
      */
