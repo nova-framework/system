@@ -2,6 +2,7 @@
 
 namespace Nova\Template;
 
+use Nova\Foundation\Application;
 use Nova\View\View;
 
 use Language;
