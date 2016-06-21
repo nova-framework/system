@@ -10,12 +10,20 @@ use Language;
 class Factory
 {
     /**
+     * The Application instance.
+     *
+     * @var \Foundation\Application
+     */
+    protected $app;
+
+    /**
      * Create new Template Factory instance.
      *
      * @return void
      */
-    function __construct()
+    function __construct(Application $app)
     {
+        $this->app = $app;
     }
 
     /**
@@ -37,10 +45,26 @@ class Factory
             $data = array();
         }
 
+        // Get the View Factory instance.
+        $factory = $this->app['view'];
+
         // Get the View file path.
         $path = $this->viewFile($view, $template);
 
-        return new View($view, $path, $data, true);
+        $data = $this->parseData($data);
+
+        return new View($factory, $view, $path, $data, true);
+    }
+
+    /**
+     * Parse the given data into a raw array.
+     *
+     * @param  mixed  $data
+     * @return array
+     */
+    protected function parseData($data)
+    {
+        return ($data instanceof Arrayable) ? $data->toArray() : $data;
     }
 
     /**

@@ -24,7 +24,7 @@ class TemplateServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('template', function($app)
         {
-            return new Factory();
+            return new Factory($app);
         });
     }
 

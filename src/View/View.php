@@ -8,7 +8,11 @@
 
 namespace Nova\View;
 
+use Nova\Support\Contracts\ArrayableInterface as Arrayable;
+use Nova\Support\Contracts\RenderableInterface as Renderable;
 use Nova\Support\Facades\View as Facade;
+use Nova\Support\MessageBag;
+use Nova\View\Factory;
 
 use Response;
 
@@ -18,12 +22,14 @@ use ArrayAccess;
 /**
  * View class to load template and views files.
  */
-class View implements ArrayAccess
+class View implements ArrayAccess, Renderable
 {
     /**
-     * @var array Array of shared data
+     * The View Factory instance.
+     *
+     * @var \Nova\View\Factory
      */
-    protected static $shared = array();
+    protected $factory;
 
     /**
      * @var string The given View name.
@@ -47,11 +53,14 @@ class View implements ArrayAccess
      * @param mixed $path
      * @param array $data
      */
-    public function __construct($view, $path, array $data = array(), $template = false)
+    public function __construct(Factory $factory, $view, $path, $data = array(), $template = false)
     {
+        $this->factory = $factory;
+
         $this->view = $view;
         $this->path = $path;
-        $this->data = $data;
+
+        $this->data = ($data instanceof Arrayable) ? $data->toArray() : (array) $data;
 
         $this->template = $template;
     }
@@ -84,7 +93,7 @@ class View implements ArrayAccess
         }
 
         // Get a local copy of the prepared data.
-        $data = $this->data();
+        $data = $this->gatherData();
 
         // Extract the rendering variables from the local data copy.
         foreach ($data as $variable => $value) {
@@ -107,31 +116,11 @@ class View implements ArrayAccess
     }
 
     /**
-     * Return all variables stored on local data.
-     *
-     * @return array
-     */
-    public function localData()
-    {
-        return $this->data;
-    }
-
-    /**
-     * Return all variables stored on shared data.
-     *
-     * @return array
-     */
-    public static function sharedData()
-    {
-        return static::$shared;
-    }
-
-    /**
      * Return all variables stored on local and shared data.
      *
      * @return array
      */
-    public function data()
+    public function gatherData()
     {
         // Get a local array of Data.
         $data =& $this->data;
@@ -139,28 +128,14 @@ class View implements ArrayAccess
         // Get a local copy of the shared Data.
         $shared = static::$shared;
 
+        $data = array_merge($this->factory->getShared(), $this->data);
+
         // All nested Views are evaluated before the main View.
         foreach ($data as $key => $value) {
-            if ($value instanceof View) {
+            if ($value instanceof Renderable) {
                 $data[$key] = $value->fetch();
             }
         }
-
-        // Merge the local and shared data using two steps.
-        foreach (array('afterBody', 'css', 'js') as $key) {
-            $value = isset($data[$key]) ? $data[$key] : '';
-
-            if (isset($shared[$key])) {
-                $value .= $shared[$key];
-            }
-
-            $data[$key] = $value;
-
-            // Remove that key from shared data.
-            unset($shared[$key]);
-        }
-
-        return empty($shared) ? $data : array_merge($data, $shared);
     }
 
     /**
@@ -187,7 +162,7 @@ class View implements ArrayAccess
             $data = $this->data;
         }
 
-        return $this->with($key, Facade::make($view, $data, $module));
+        return $this->with($key, $this->factory->make($view, $data, $module));
     }
 
     /**
@@ -211,6 +186,23 @@ class View implements ArrayAccess
     }
 
     /**
+     * Add validation errors to the view.
+     *
+     * @param  \Nova\Support\Contracts\MessageProviderInterface|array  $provider
+     * @return \Nova\View\View
+     */
+    public function withErrors($provider)
+    {
+        if ($provider instanceof MessageProviderInterface) {
+            $this->with('errors', $provider->getMessageBag());
+        } else {
+            $this->with('errors', new MessageBag((array) $provider));
+        }
+
+        return $this;
+    }
+
+    /**
      * Add a key / value pair to the shared view data.
      *
      * Shared view data is accessible to every view created by the application.
@@ -221,28 +213,70 @@ class View implements ArrayAccess
      */
     public function shares($key, $value)
     {
-        static::share($key, $value);
+        $this->factory->share($key, $value);
 
         return $this;
     }
 
     /**
-     * Add a key / value pair to the shared View data.
+     * Get the View Factory instance.
      *
-     * Shared View data is accessible to every View created by the application.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
+     * @return \Nova\View\Factory
      */
-    public static function share($key, $value)
+    public function getFactory()
     {
-        static::$shared[$key] = $value;
+        return $this->factory;
     }
 
+    /**
+     * Return true if the current View instance is a Template.
+     *
+     * @return bool
+     */
     public function isTemplate()
     {
         return $this->template;
+    }
+
+    /**
+     * Get the name of the view.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->view;
+    }
+
+    /**
+     * Get the array of view data.
+     *
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Get the path to the view file.
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Set the path to the view.
+     *
+     * @param  string  $path
+     * @return void
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
     }
 
     /**

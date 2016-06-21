@@ -24,7 +24,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('view', function($app)
         {
-            return new Factory();
+            return new Factory($app);
         });
     }
 
