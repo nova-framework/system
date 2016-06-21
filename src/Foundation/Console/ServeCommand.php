@@ -40,7 +40,7 @@ class ServeCommand extends Command
 
         $public = $this->framework['path.public'];
 
-        $this->info("Laravel development server started on http://{$host}:{$port}");
+        $this->info("Nova Framework Development Server started on http://{$host}:{$port}");
 
         passthru('"'.PHP_BINARY.'"'." -S {$host}:{$port} -t \"{$public}\" server.php");
     }
