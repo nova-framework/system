@@ -42,7 +42,7 @@ class ForgeServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('artisan', 'command.environment');
+        return array('forge', 'command.environment');
     }
 
 }
