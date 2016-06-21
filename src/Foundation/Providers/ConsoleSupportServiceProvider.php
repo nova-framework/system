@@ -15,6 +15,7 @@ class ConsoleSupportServiceProvider extends ServiceProvider
     protected $providers = array(
         'Nova\Foundation\Providers\CommandCreatorServiceProvider',
         'Nova\Foundation\Providers\ServerServiceProvider',
+        'Nova\Foundation\Providers\KeyGeneratorServiceProvider',
     );
 
     /**
