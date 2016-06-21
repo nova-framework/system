@@ -104,7 +104,7 @@ class Application extends \Symfony\Component\Console\Application
     public function add(SymfonyCommand $command)
     {
         if ($command instanceof Command) {
-            $command->serFramework($this->framework);
+            $command->setFramework($this->framework);
         }
 
         return $this->addToParent($command);
