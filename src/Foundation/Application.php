@@ -932,6 +932,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $aliases = array(
             'app'            => 'Nova\Foundation\Application',
+            'forge'          => 'Nova\Console\Application',
             'auth'           => 'Nova\Auth\AuthManager',
             'cache'          => 'Nova\Cache\CacheManager',
             'cache.store'    => 'Nova\Cache\Repository',
@@ -941,8 +942,10 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'encrypter'      => 'Nova\Encryption\Encrypter',
             'db'             => 'Nova\Database\DatabaseManager',
             'events'         => 'Nova\Events\Dispatcher',
+            'files'          => 'Nova\Filesystem\Filesystem',
             'hash'           => 'Nova\Hashing\HasherInterface',
             'log'            => 'Nova\Log\Writer',
+            'language'       => 'Nova\Language\LanguageManager',
             'mailer'         => 'Nova\Mail\Mailer',
             'paginator'      => 'Nova\Pagination\Environment',
             'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
@@ -952,6 +955,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'session'        => 'Nova\Session\SessionManager',
             'session.store'  => 'Nova\Session\Store',
             'validator'      => 'Nova\Validation\Factory',
+            'template'       => 'Nova\Template\Factory',
+            'view'           => 'Nova\View\Factory',
         );
 
         foreach ($aliases as $key => $alias) {
