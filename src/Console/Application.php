@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+use Exception;
+
 
 class Application extends \Symfony\Component\Console\Application
 {
@@ -177,7 +179,7 @@ class Application extends \Symfony\Component\Console\Application
      * @param  \Symfony\Component\Console\Output\OutputInterface  $output
      * @return void
      */
-    public function renderException($e, $output)
+    public function renderException(Exception $e, OutputInterface $output)
     {
         if (isset($this->exceptionHandler)) {
             $this->exceptionHandler->handleConsole($e);
