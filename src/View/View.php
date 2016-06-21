@@ -122,12 +122,6 @@ class View implements ArrayAccess, Renderable
      */
     public function gatherData()
     {
-        // Get a local array of Data.
-        $data =& $this->data;
-
-        // Get a local copy of the shared Data.
-        $shared = static::$shared;
-
         $data = array_merge($this->factory->getShared(), $this->data);
 
         // All nested Views are evaluated before the main View.
