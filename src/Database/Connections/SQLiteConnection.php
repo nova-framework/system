@@ -5,6 +5,7 @@ namespace Nova\Database\Connections;
 use Nova\Database\Connection;
 use Nova\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
 use Nova\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
+use Nova\Database\Query\Processors\SQLiteProcessor;
 
 use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
 

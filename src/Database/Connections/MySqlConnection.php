@@ -6,6 +6,7 @@ use Nova\Database\Connection;
 use Nova\Database\Schema\MySqlBuilder;
 use Nova\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
 use Nova\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
+use Nova\Database\Query\Processors\MySqlProcessor;
 
 use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
 
