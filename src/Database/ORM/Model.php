@@ -2,10 +2,7 @@
 
 namespace Nova\Database\ORM;
 
-use DateTime;
-use ArrayAccess;
-use Carbon\Carbon;
-use LogicException;
+use Nova\Helpers\Inflector;
 use Nova\Events\Dispatcher;
 use Nova\Database\ORM\Relations\Pivot;
 use Nova\Database\ORM\Relations\HasOne;
@@ -22,6 +19,13 @@ use Nova\Database\ORM\Relations\MorphToMany;
 use Nova\Database\ORM\Relations\BelongsToMany;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\ConnectionResolverInterface as Resolver;
+
+use Carbon\Carbon;
+
+use DateTime;
+use ArrayAccess;
+use LogicException;
+
 
 abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterface
 {
@@ -294,7 +298,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         {
             if (preg_match('/^get(.+)Attribute$/', $method, $matches))
             {
-                if (static::$snakeAttributes) $matches[1] = snake_case($matches[1]);
+                if (static::$snakeAttributes) $matches[1] = Inflector::tableize($matches[1]);
 
                 static::$mutatorCache[$class][] = lcfirst($matches[1]);
             }
@@ -707,7 +711,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // when combined with an "_id" should conventionally match the columns.
         if (is_null($foreignKey))
         {
-            $foreignKey = snake_case($relation).'_id';
+            $foreignKey = Inflector::tableize($relation).'_id';
         }
 
         $instance = new $related;
@@ -739,7 +743,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         {
             list(, $caller) = debug_backtrace(false);
 
-            $name = snake_case($caller['function']);
+            $name = Inflector::tableize($caller['function']);
         }
 
         list($type, $id) = $this->getMorphs($name, $type, $id);
@@ -966,9 +970,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // The joining table name, by convention, is simply the snake cased models
         // sorted alphabetically and concatenated with an underscore, so we can
         // just sort the models and join them together to get the table name.
-        $base = snake_case(class_basename($this));
+        $base = Inflector::tableize(class_basename($this));
 
-        $related = snake_case(class_basename($related));
+        $related = Inflector::tableize(class_basename($related));
 
         $models = array($related, $base);
 
@@ -1831,7 +1835,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         if (isset($this->table)) return $this->table;
 
-        return str_replace('\\', '', snake_case(str_plural(class_basename($this))));
+        return str_replace('\\', '', Inflector::tableize(str_plural(class_basename($this))));
     }
 
     /**
@@ -1961,7 +1965,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getForeignKey()
     {
-        return snake_case(class_basename($this)).'_id';
+        return Inflector::tableize(class_basename($this)).'_id';
     }
 
     /**
@@ -2279,7 +2283,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
             // array to the developers, making this consistent with attributes.
             if (static::$snakeAttributes)
             {
-                $key = snake_case($key);
+                $key = Inflector::tableize($key);
             }
 
             // If the relation value has been set, we will set it on this attributes
@@ -2430,7 +2434,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function hasGetMutator($key)
     {
-        return method_exists($this, 'get'.studly_case($key).'Attribute');
+        return method_exists($this, 'get'.Inflector::classify($key).'Attribute');
     }
 
     /**
@@ -2442,7 +2446,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function mutateAttribute($key, $value)
     {
-        return $this->{'get'.studly_case($key).'Attribute'}($value);
+        return $this->{'get'.Inflector::classify($key).'Attribute'}($value);
     }
 
     /**
@@ -2473,7 +2477,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // the model, such as "json_encoding" an listing of data for storage.
         if ($this->hasSetMutator($key))
         {
-            $method = 'set'.studly_case($key).'Attribute';
+            $method = 'set'.Inflector::classify($key).'Attribute';
 
             return $this->{$method}($value);
         }
@@ -2500,7 +2504,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function hasSetMutator($key)
     {
-        return method_exists($this, 'set'.studly_case($key).'Attribute');
+        return method_exists($this, 'set'.Inflector::classify($key).'Attribute');
     }
 
     /**
