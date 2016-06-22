@@ -7,19 +7,28 @@ use Nova\Console\Command;
 class BaseCommand extends Command
 {
     /**
-     * Get the path to the migration directory.
+     * Get the Path to the migration directory.
      *
      * @return string
      */
     protected function getMigrationPath()
     {
+        // A Requested Path.
         $path = $this->input->getOption('path');
 
         if ( ! is_null($path)) {
-            return $this->framework['path.base'] .'/' .$path;
+            return $this->framework['path.base'] .DS .$path;
         }
 
-        return $this->framework['path'] .'/Database/Migrations';
+        // Vendor Package Path.
+        $package = $this->input->getOption('package');
+
+        if ( ! is_null($package)) {
+            return $this->packagePath .DS .$package .DS .'src' .DS .'Migrations';
+        }
+
+        // Default Migrations Path.
+        return $this->framework['path'] .DS .'Database' .DS .'Migrations';
     }
 
 }
