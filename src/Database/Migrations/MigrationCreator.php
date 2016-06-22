@@ -2,8 +2,11 @@
 
 namespace Nova\Database\Migrations;
 
-use Closure;
+use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
+
+use Closure;
+
 
 class MigrationCreator
 {
@@ -67,7 +70,7 @@ class MigrationCreator
         } else {
             $stub = $create ? 'create.stub' : 'update.stub';
 
-            return $this->files->get($this->getStubPath()."/{$stub}");
+            return $this->files->get($this->getStubPath() .DS .$stub);
         }
     }
 
@@ -81,7 +84,7 @@ class MigrationCreator
      */
     protected function populateStub($name, $stub, $table)
     {
-        $stub = str_replace('{{class}}', studly_case($name), $stub);
+        $stub = str_replace('{{class}}', Inflector::tableize($name), $stub);
 
         if ( ! is_null($table)) {
             $stub = str_replace('{{table}}', $table, $stub);
@@ -123,7 +126,7 @@ class MigrationCreator
      */
     protected function getPath($name, $path)
     {
-        return $path .DS .$this->getDatePrefix().'_'.$name.'.php';
+        return $path .DS .$this->getDatePrefix() .'_' .$name .'.php';
     }
 
     /**
@@ -143,7 +146,7 @@ class MigrationCreator
      */
     public function getStubPath()
     {
-        return __DIR__ .'/stubs';
+        return __DIR__ .DS .'stubs';
     }
 
     /**

@@ -256,9 +256,9 @@ class Migrator
     {
         $file = implode('_', array_slice(explode('_', $file), 4));
 
-        $class = studly_case($file);
+        $className = Inflector::tableize($file);
 
-        return new $class;
+        return new $className();
     }
 
     /**
