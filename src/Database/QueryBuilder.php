@@ -3,12 +3,12 @@
 namespace Nova\Database;
 
 use Nova\Database\Query\Expression;
-use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Database\Query\Builder;
 
 use Closure;
 
 
-class ModelQuery
+class QueryBuilder
 {
     /**
      * The base Query Builder instance.

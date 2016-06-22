@@ -10,7 +10,7 @@ namespace Nova\Database;
 
 use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
-use Nova\Database\ModelQuery as QueryBuilder;
+use Nova\Database\QueryBuilder;
 use Nova\Helpers\Inflector;
 
 use DB;
