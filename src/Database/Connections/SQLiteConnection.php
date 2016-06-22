@@ -2,9 +2,11 @@
 
 namespace Nova\Database\Connections;
 
-use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
+use Nova\Database\Connection;
 use Nova\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
 use Nova\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
+
+use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
 
 
 class SQLiteConnection extends Connection

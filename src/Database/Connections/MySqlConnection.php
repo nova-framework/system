@@ -2,10 +2,12 @@
 
 namespace Nova\Database\Connections;
 
+use Nova\Database\Connection;
 use Nova\Database\Schema\MySqlBuilder;
-use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
 use Nova\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
 use Nova\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
+
+use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
 
 
 class MySqlConnection extends Connection
