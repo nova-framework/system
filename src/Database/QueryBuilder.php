@@ -71,6 +71,17 @@ class QueryBuilder
     }
 
     /**
+     * Execute the query and get the first result.
+     *
+     * @param  array  $columns
+     * @return mixed|static|null
+     */
+    public function first($columns = array('*'))
+    {
+        return $this->take(1)->get($columns)->first();
+    }
+
+    /**
      * Execute the query as a "select" statement.
      *
      * @param  array  $columns
