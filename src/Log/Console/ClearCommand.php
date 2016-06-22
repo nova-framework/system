@@ -53,7 +53,7 @@ class ClearCommand extends Command
 
         $this->files->put($path, "\n");
 
-        $this->info('Application log cleared!');
+        $this->info('The Application log was cleared!');
     }
 
 }
