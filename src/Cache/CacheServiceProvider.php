@@ -2,22 +2,19 @@
 
 namespace Nova\Cache;
 
-use Nova\Cache\CacheManager;
 use Nova\Support\ServiceProvider;
-
 
 class CacheServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the Provider is deferred.
+     * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
     protected $defer = true;
 
-
     /**
-     * Register the Service Provider.
+     * Register the service provider.
      *
      * @return void
      */
@@ -28,11 +25,21 @@ class CacheServiceProvider extends ServiceProvider
             return new CacheManager($app);
         });
 
+        $this->app->bindShared('cache.store', function($app)
+        {
+            return $app['cache']->driver();
+        });
+
+        $this->app->bindShared('memcached.connector', function()
+        {
+            return new MemcachedConnector;
+        });
+
         $this->registerCommands();
     }
 
     /**
-     * Register the Cache related Console commands.
+     * Register the cache related console commands.
      *
      * @return void
      */
@@ -53,7 +60,7 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('cache', 'command.cache.clear');
+        return array('cache', 'cache.store', 'memcached.connector', 'command.cache.clear');
     }
 
 }

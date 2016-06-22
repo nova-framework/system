@@ -2,15 +2,37 @@
 
 namespace Nova\Cache;
 
+use Memcached;
 
-class ArrayStore extends TaggableStore implements StoreInterface
+
+class MemcachedStore extends TaggableStore implements StoreInterface
 {
     /**
-     * The array of stored values.
+     * The Memcached instance.
      *
-     * @var array
+     * @var \Memcached
      */
-    protected $storage = array();
+    protected $memcached;
+
+    /**
+     * A string that should be prepended to keys.
+     *
+     * @var string
+     */
+    protected $prefix;
+
+    /**
+     * Create a new Memcached store.
+     *
+     * @param  \Memcached  $memcached
+     * @param  string     $prefix
+     * @return void
+     */
+    public function __construct(Memcached $memcached, $prefix = '')
+    {
+        $this->memcached = $memcached;
+        $this->prefix = strlen($prefix) > 0 ? $prefix.':' : '';
+    }
 
     /**
      * Retrieve an item from the cache by key.
@@ -20,9 +42,10 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function get($key)
     {
-        if (array_key_exists($key, $this->storage))
-        {
-            return $this->storage[$key];
+        $value = $this->memcached->get($this->prefix.$key);
+
+        if ($this->memcached->getResultCode() == 0) {
+            return $value;
         }
     }
 
@@ -36,7 +59,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function put($key, $value, $minutes)
     {
-        $this->storage[$key] = $value;
+        $this->memcached->set($this->prefix.$key, $value, $minutes * 60);
     }
 
     /**
@@ -48,13 +71,11 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function increment($key, $value = 1)
     {
-        $this->storage[$key] = $this->storage[$key] + $value;
-
-        return $this->storage[$key];
+        return $this->memcached->increment($this->prefix.$key, $value);
     }
 
     /**
-     * Increment the value of an item in the cache.
+     * Decrement the value of an item in the cache.
      *
      * @param  string  $key
      * @param  mixed   $value
@@ -62,9 +83,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function decrement($key, $value = 1)
     {
-        $this->storage[$key] = $this->storage[$key] - $value;
-
-        return $this->storage[$key];
+        return $this->memcached->decrement($this->prefix.$key, $value);
     }
 
     /**
@@ -87,7 +106,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function forget($key)
     {
-        unset($this->storage[$key]);
+        $this->memcached->delete($this->prefix.$key);
     }
 
     /**
@@ -97,7 +116,17 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function flush()
     {
-        $this->storage = array();
+        $this->memcached->flush();
+    }
+
+    /**
+     * Get the underlying Memcached connection.
+     *
+     * @return \Memcached
+     */
+    public function getMemcached()
+    {
+        return $this->memcached;
     }
 
     /**
@@ -107,7 +136,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function getPrefix()
     {
-        return '';
+        return $this->prefix;
     }
 
 }

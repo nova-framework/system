@@ -21,12 +21,12 @@
         "stack/builder": "^1.0",
         "doctrine/inflector": "1.0.*",
         "illuminate/container": "4.1.*",
-        "phpfastcache/phpfastcache": "4.0.*",
         "patchwork/utf8": "~1.2",
         "nesbot/carbon": "^1.21",
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
-        "filp/whoops": "^2.1"        
+        "filp/whoops": "^2.1",
+        "predis/predis": "0.8.*"
     },
     "autoload": {
         "psr-4": {

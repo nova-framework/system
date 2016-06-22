@@ -1,41 +1,26 @@
 <?php
-/**
- * ArrayStore - A simple in-memory simulation of a phpFastCache driver.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Cache;
 
-use Nova\Config\Config;
-use Nova\Cache\StoreInterface;
 
-use phpFastCache\CacheManager as FastCacheManager;
-
-
-class FastCacheStore implements StoreInterface
+class XCacheStore extends TaggableStore implements StoreInterface
 {
     /**
-     * The phpFastCache instance.
+     * A string that should be prepended to keys.
      *
-     * @var array
+     * @var string
      */
-    protected $cache;
-
+    protected $prefix;
 
     /**
-     * Create a new Cache Repository instance.
+     * Create a new WinCache store.
      *
-     * @param  string $storage
+     * @param  string     $prefix
+     * @return void
      */
-    public function __construct($storage)
+    public function __construct($prefix = '')
     {
-        $config = Config::get('cache');
-
-        $config['storage'] = $storage;
-
-        $this->cache = FastCacheManager::getInstance($storage, $config);
+        $this->prefix = $prefix;
     }
 
     /**
@@ -46,7 +31,11 @@ class FastCacheStore implements StoreInterface
      */
     public function get($key)
     {
-        return $this->cache->get($key);
+        $value = xcache_get($this->prefix.$key);
+
+        if (isset($value)) {
+            return $value;
+        }
     }
 
     /**
@@ -59,7 +48,7 @@ class FastCacheStore implements StoreInterface
      */
     public function put($key, $value, $minutes)
     {
-        return $this->cache->set($key, $value, $minutes);
+        xcache_set($this->prefix.$key, $value, $minutes * 60);
     }
 
     /**
@@ -71,7 +60,7 @@ class FastCacheStore implements StoreInterface
      */
     public function increment($key, $value = 1)
     {
-        return $this->cache->increment($key, $value);
+        return xcache_inc($this->prefix.$key, $value);
     }
 
     /**
@@ -83,7 +72,7 @@ class FastCacheStore implements StoreInterface
      */
     public function decrement($key, $value = 1)
     {
-        return $this->cache->decrement($key, $value);
+        return xcache_dec($this->prefix.$key, $value);
     }
 
     /**
@@ -106,7 +95,7 @@ class FastCacheStore implements StoreInterface
      */
     public function forget($key)
     {
-        $this->cache->delete($key);
+        xcache_unset($this->prefix.$key);
     }
 
     /**
@@ -116,7 +105,7 @@ class FastCacheStore implements StoreInterface
      */
     public function flush()
     {
-        $this->cache->clean();
+        xcache_clear_cache(XC_TYPE_VAR);
     }
 
     /**
@@ -126,6 +115,7 @@ class FastCacheStore implements StoreInterface
      */
     public function getPrefix()
     {
-        return '';
+        return $this->prefix;
     }
+
 }

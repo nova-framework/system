@@ -2,7 +2,6 @@
 
 namespace Nova\Cache;
 
-
 interface StoreInterface
 {
     /**
@@ -71,4 +70,5 @@ interface StoreInterface
      * @return string
      */
     public function getPrefix();
+
 }
