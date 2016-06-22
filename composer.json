@@ -36,6 +36,9 @@
             "scripts/functions.php"
         ]
     },
+    "suggest": {
+        "doctrine/dbal": "Allow renaming columns and dropping SQLite columns."
+    },
     "prefer-stable": true,
     "minimum-stability": "dev"
 }
