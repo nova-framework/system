@@ -118,8 +118,6 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function addCommands(array $commands)
     {
-        $commands = is_array($commands) ? $commands : func_get_args();
-
         foreach ($commands as $command) {
             if(is_string($command)) {
                 $command = '\\' .ltrim($command, '\\');
