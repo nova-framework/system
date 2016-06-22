@@ -3,7 +3,7 @@
 namespace Nova\Database;
 
 use Nova\Console\Command;
-use Nova\Container\Container;
+use Illuminate\Container\Container;
 
 
 class Seeder
@@ -11,7 +11,7 @@ class Seeder
     /**
      * The container instance.
      *
-     * @var \Nova\Container\Container
+     * @var \Illuminate\Container\Container
      */
     protected $container;
 
@@ -70,7 +70,7 @@ class Seeder
     /**
      * Set the IoC Container instance.
      *
-     * @param  \Nova\Container\Container  $container
+     * @param  \Illuminate\Container\Container  $container
      * @return \Nova\Database\Seeder
      */
     public function setContainer(Container $container)

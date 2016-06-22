@@ -1,17 +1,11 @@
 <?php
-/**
- * Connector - A PDO based Database Connector.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Database\Connectors;
 
 use PDO;
 
 
-abstract class Connector
+class Connector
 {
     /**
      * The default PDO connection options.
@@ -19,24 +13,12 @@ abstract class Connector
      * @var array
      */
     protected $options = array(
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
-        PDO::ATTR_STRINGIFY_FETCHES => false,
-        PDO::ATTR_EMULATE_PREPARES  => false,
+            PDO::ATTR_CASE => PDO::CASE_NATURAL,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+            PDO::ATTR_STRINGIFY_FETCHES => false,
+            PDO::ATTR_EMULATE_PREPARES => false,
     );
-
-    /**
-     * The keyword identifier wrapper format.
-     *
-     * @var string
-     */
-    protected $wrapper = '`%s`';
-
-
-    public function __construct()
-    {
-    }
 
     /**
      * Get the PDO options based on the configuration.
@@ -87,26 +69,6 @@ abstract class Connector
     public function setDefaultOptions(array $options)
     {
         $this->options = $options;
-    }
-
-    /**
-     * Get the keyword identifier wrapper format.
-     *
-     * @return string
-     */
-    public function getWrapper()
-    {
-        return $this->wrapper;
-    }
-
-    /**
-     * Get the format for database stored dates.
-     *
-     * @return string
-     */
-    public function getDateFormat()
-    {
-        return 'Y-m-d H:i:s';
     }
 
 }

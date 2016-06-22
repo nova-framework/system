@@ -2,6 +2,7 @@
 
 namespace Nova\Database;
 
+
 interface ConnectionResolverInterface
 {
     /**

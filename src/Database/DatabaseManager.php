@@ -2,39 +2,55 @@
 
 namespace Nova\Database;
 
-use Nova\Database\Connection;
+use Nova\Database\Connectors\ConnectionFactory;
 
 
 class DatabaseManager implements ConnectionResolverInterface
 {
     /**
-     * The Application instance.
+     * The application instance.
      *
-     * @var \Foundation\Application
+     * @var \Nova\Foundation\Application
      */
     protected $app;
 
     /**
-     * The active Connection instances.
+     * The database connection factory instance.
+     *
+     * @var \Nova\Database\Connectors\ConnectionFactory
+     */
+    protected $factory;
+
+    /**
+     * The active connection instances.
      *
      * @var array
      */
     protected $connections = array();
 
+    /**
+     * The custom connection resolvers.
+     *
+     * @var array
+     */
+    protected $extensions = array();
 
     /**
-     * Create a new Database Manager instance.
+     * Create a new database manager instance.
      *
-     * @param  \core\Application  $app
+     * @param  \Nova\Foundation\Application  $app
+     * @param  \Nova\Database\Connectors\ConnectionFactory  $factory
      * @return void
      */
-    public function __construct($app)
+    public function __construct($app, ConnectionFactory $factory)
     {
         $this->app = $app;
+
+        $this->factory = $factory;
     }
 
     /**
-     * Get a database Connection instance.
+     * Get a database connection instance.
      *
      * @param  string  $name
      * @return \Nova\Database\Connection
@@ -43,7 +59,10 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $name = $name ?: $this->getDefaultConnection();
 
-        if (! isset($this->connections[$name])) {
+        // If we haven't created this connection, we'll create it based on the config
+        // provided in the application. Once we've created the connections we will
+        // set the "fetch mode" for PDO which determines the query return types.
+        if ( ! isset($this->connections[$name])) {
             $connection = $this->makeConnection($name);
 
             $this->connections[$name] = $this->prepare($connection);
@@ -90,7 +109,23 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $config = $this->getConfig($name);
 
-        return new Connection($config);
+        // First we will check by the connection name to see if an extension has been
+        // registered specifically for that connection. If it has we will call the
+        // Closure and pass it the config allowing it to resolve the connection.
+        if (isset($this->extensions[$name])) {
+            return call_user_func($this->extensions[$name], $config, $name);
+        }
+
+        $driver = $config['driver'];
+
+        // Next we will check to see if an extension has been registered for a driver
+        // and will call the Closure if so, which allows us to have a more generic
+        // resolver for the drivers themselves which applies to all connections.
+        if (isset($this->extensions[$driver])) {
+            return call_user_func($this->extensions[$driver], $config, $name);
+        }
+
+        return $this->factory->make($config, $name);
     }
 
     /**
@@ -107,16 +142,19 @@ class DatabaseManager implements ConnectionResolverInterface
             $connection->setEventDispatcher($this->app['events']);
         }
 
+        // The database connection can also utilize a cache manager instance when cache
+        // functionality is used on queries, which provides an expressive interface
+        // to caching both fluent queries and Eloquent queries that are executed.
         $app = $this->app;
 
-        // Setup the Cache.
         $connection->setCacheManager(function() use ($app)
         {
             return $app['cache'];
         });
 
-
-        // Setup the Paginator.
+        // We will setup a Closure to resolve the paginator instance on the connection
+        // since the Paginator isn't used on every request and needs quite a few of
+        // our dependencies. It'll be more efficient to lazily resolve instances.
         $connection->setPaginator(function() use ($app)
         {
             return $app['paginator'];
@@ -126,7 +164,7 @@ class DatabaseManager implements ConnectionResolverInterface
     }
 
     /**
-     * Get the configuration for a Connection.
+     * Get the configuration for a connection.
      *
      * @param  string  $name
      * @return array
@@ -137,6 +175,9 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $name = $name ?: $this->getDefaultConnection();
 
+        // To get the database connection configuration, we will just pull each of the
+        // connection configurations and get the configurations for the given name.
+        // If the configuration doesn't exist, we'll throw an exception and bail.
         $connections = $this->app['config']['database.connections'];
 
         if (is_null($config = array_get($connections, $name))) {

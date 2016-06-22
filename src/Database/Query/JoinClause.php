@@ -1,120 +1,111 @@
 <?php
-/**
- * JoinCause - A Joining Clause helper class for the QueryBuilder.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Database\Query;
-
-use Nova\Database\Query\Builder as QueryBuilder;
 
 
 class JoinClause
 {
     /**
-    * The QueryBuilder instance.
-    *
-    * @var \Database\Query\Builder
-    */
+     * The query builder instance.
+     *
+     * @var \Nova\Database\Query\Builder
+     */
     public $query;
 
     /**
-    * The type of join being performed.
-    *
-    * @var string
-    */
+     * The type of join being performed.
+     *
+     * @var string
+     */
     public $type;
 
     /**
-    * The table the join clause is joining to.
-    *
-    * @var string
-    */
+     * The table the join clause is joining to.
+     *
+     * @var string
+     */
     public $table;
 
     /**
-    * The "on" clauses for the join.
-    *
-    * @var array
-    */
+     * The "on" clauses for the join.
+     *
+     * @var array
+     */
     public $clauses = array();
 
     /**
-    * Create a new join clause instance.
-    *
-    * @param  \Nova\Database\Query  $query
-    * @param  string  $type
-    * @param  string  $table
-    * @return void
-    */
-    public function __construct(QueryBuilder $query, $type, $table)
+     * Create a new join clause instance.
+     *
+     * @param  \Nova\Database\Query\Builder  $query
+     * @param  string  $type
+     * @param  string  $table
+     * @return void
+     */
+    public function __construct(Builder $query, $type, $table)
     {
-        $this->type  = $type;
+        $this->type = $type;
         $this->query = $query;
         $this->table = $table;
     }
 
     /**
-    * Add an "ON" clause to the join.
-    *
-    * @param  string  $first
-    * @param  string  $operator
-    * @param  string  $second
-    * @param  string  $boolean
-    * @param  bool  $where
-    * @return \Database\JoinClause
-    */
+     * Add an "on" clause to the join.
+     *
+     * @param  string  $first
+     * @param  string  $operator
+     * @param  string  $second
+     * @param  string  $boolean
+     * @param  bool  $where
+     * @return \Nova\Database\Query\JoinClause
+     */
     public function on($first, $operator, $second, $boolean = 'and', $where = false)
     {
         $this->clauses[] = compact('first', 'operator', 'second', 'boolean', 'where');
 
-        if ($where) {
-            $this->query->addBinding($second);
-        }
+        if ($where) $this->query->addBinding($second);
 
         return $this;
     }
 
     /**
-    * Add an "OR ON" clause to the join.
-    *
-    * @param  string  $first
-    * @param  string  $operator
-    * @param  string  $second
-    * @return \Database\JoinClause
-    */
+     * Add an "or on" clause to the join.
+     *
+     * @param  string  $first
+     * @param  string  $operator
+     * @param  string  $second
+     * @return \Nova\Database\Query\JoinClause
+     */
     public function orOn($first, $operator, $second)
     {
         return $this->on($first, $operator, $second, 'or');
     }
 
     /**
-    * Add an "ON WHERE" clause to the join.
-    *
-    * @param  string  $first
-    * @param  string  $operator
-    * @param  string  $second
-    * @param  string  $boolean
-    * @return \Database\JoinClause
-    */
+     * Add an "on where" clause to the join.
+     *
+     * @param  string  $first
+     * @param  string  $operator
+     * @param  string  $second
+     * @param  string  $boolean
+     * @return \Nova\Database\Query\JoinClause
+     */
     public function where($first, $operator, $second, $boolean = 'and')
     {
         return $this->on($first, $operator, $second, $boolean, true);
     }
 
     /**
-    * Add an "OR ON WHERE" clause to the join.
-    *
-    * @param  string  $first
-    * @param  string  $operator
-    * @param  string  $second
-    * @param  string  $boolean
-    * @return \Database\JoinClause
-    */
+     * Add an "or on where" clause to the join.
+     *
+     * @param  string  $first
+     * @param  string  $operator
+     * @param  string  $second
+     * @param  string  $boolean
+     * @return \Nova\Database\Query\JoinClause
+     */
     public function orWhere($first, $operator, $second)
     {
         return $this->on($first, $operator, $second, 'or', true);
     }
+
 }

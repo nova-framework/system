@@ -1,37 +1,36 @@
 <?php
-/**
- * Query - A simple Database QueryBuilder.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Database\Query;
 
-use Nova\Helpers\Inflector;
-use Nova\Database\Connection;
-use Nova\Database\Query\Expression;
-use Nova\Database\Query\JoinClause;
-
-use PDO;
 use Closure;
+use Nova\Support\Collection;
+use Nova\Database\ConnectionInterface;
+use Nova\Database\Query\Grammars\Grammar;
+use Nova\Database\Query\Processors\Processor;
 
 
 class Builder
 {
     /**
-     * The Database Connection instance.
+     * The database connection instance.
      *
      * @var \Nova\Database\Connection
      */
     protected $connection;
 
     /**
-     * The Model being queried.
+     * The database query grammar instance.
      *
-     * @var \Nova\Database\Model|Nova\Database\ORM\Model
+     * @var \Nova\Database\Query\Grammars\Grammar
      */
-    protected $model = null;
+    protected $grammar;
+
+    /**
+     * The database query post processor instance.
+     *
+     * @var \Nova\Database\Query\Processors\Processor
+     */
+    protected $processor;
 
     /**
      * The current query value bindings.
@@ -76,21 +75,21 @@ class Builder
     public $joins;
 
     /**
-     * The WHERE constraints for the query.
+     * The where constraints for the query.
      *
      * @var array
      */
     public $wheres;
 
     /**
-     * The GROUP BY clauses.
+     * The groupings for the query.
      *
      * @var array
      */
     public $groups;
 
     /**
-     * The HAVING constraints for the query.
+     * The having constraints for the query.
      *
      * @var array
      */
@@ -118,11 +117,53 @@ class Builder
     public $offset;
 
     /**
-     * The query UNION statements.
+     * The query union statements.
      *
      * @var array
      */
     public $unions;
+
+    /**
+     * Indicates whether row locking is being used.
+     *
+     * @var string|bool
+     */
+    public $lock;
+
+    /**
+     * The backups of fields while doing a pagination count.
+     *
+     * @var array
+     */
+    protected $backups = array();
+
+    /**
+     * The key that should be used when caching the query.
+     *
+     * @var string
+     */
+    protected $cacheKey;
+
+    /**
+     * The number of minutes to cache the query.
+     *
+     * @var int
+     */
+    protected $cacheMinutes;
+
+    /**
+     * The tags for the query cache.
+     *
+     * @var array
+     */
+    protected $cacheTags;
+
+    /**
+     * The cache driver to be used.
+     *
+     * @var string
+     */
+    protected $cacheDriver;
 
     /**
      * All of the available clause operators.
@@ -136,12 +177,19 @@ class Builder
     );
 
     /**
-     * Create a new Query instance.
+     * Create a new query builder instance.
      *
+     * @param  \Nova\Database\ConnectionInterface  $connection
+     * @param  \Nova\Database\Query\Grammars\Grammar  $grammar
+     * @param  \Nova\Database\Query\Processors\Processor  $processor
      * @return void
      */
-    public function __construct(Connection $connection)
+    public function __construct(ConnectionInterface $connection,
+                                Grammar $grammar,
+                                Processor $processor)
     {
+        $this->grammar = $grammar;
+        $this->processor = $processor;
         $this->connection = $connection;
     }
 
@@ -210,7 +258,7 @@ class Builder
     }
 
     /**
-     * Add a "JOIN" clause to the query.
+     * Add a join clause to the query.
      *
      * @param  string  $table
      * @param  string  $first
@@ -222,21 +270,31 @@ class Builder
      */
     public function join($table, $one, $operator = null, $two = null, $type = 'inner', $where = false)
     {
+        // If the first "column" of the join is really a Closure instance the developer
+        // is trying to build a join with a complex "on" clause containing more than
+        // one condition, so we'll add the join and call a Closure with the query.
         if ($one instanceof Closure) {
             $this->joins[] = new JoinClause($this, $type, $table);
 
             call_user_func($one, end($this->joins));
-        } else {
+        }
+
+        // If the column is simply a string, we can assume the join simply has a basic
+        // "on" clause with a single condition. So we will just build the join with
+        // this simple join clauses attached to it. There is not a join callback.
+        else {
             $join = new JoinClause($this, $type, $table);
 
-            $this->joins[] = $join->on($one, $operator, $two, 'and', $where);
+            $this->joins[] = $join->on(
+                $one, $operator, $two, 'and', $where
+            );
         }
 
         return $this;
     }
 
     /**
-     * Add a "JOIN WHERE" clause to the query.
+     * Add a "join where" clause to the query.
      *
      * @param  string  $table
      * @param  string  $first
@@ -251,7 +309,7 @@ class Builder
     }
 
     /**
-     * Add a "LEFT JOIN" to the query.
+     * Add a left join to the query.
      *
      * @param  string  $table
      * @param  string  $first
@@ -265,7 +323,7 @@ class Builder
     }
 
     /**
-     * Add a "LEFT JOIN WHERE" clause to the query.
+     * Add a "join where" clause to the query.
      *
      * @param  string  $table
      * @param  string  $first
@@ -279,38 +337,7 @@ class Builder
     }
 
     /**
-     * Add a raw "WHERE" condition to the query.
-     *
-     * @param  string  $where
-     * @param  array   $bindings
-     * @param  string  $boolean
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function whereRaw($where, $bindings = array(), $boolean = 'and')
-    {
-        $type = 'Raw';
-
-        $this->wheres[] = compact('type', 'sql', 'boolean');
-
-        $this->bindings = array_merge($this->bindings, $bindings);
-
-        return $this;
-    }
-
-    /**
-     * Add a raw "OR WHERE" condition to the query.
-     *
-     * @param  string  $where
-     * @param  array   $bindings
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function orWhereRaw($where, $bindings = array())
-    {
-        return $this->whereRaw($where, $bindings, 'or');
-    }
-
-    /**
-     * Add a basic "WHERE" clause to the query.
+     * Add a basic where clause to the query.
      *
      * @param  string  $column
      * @param  string  $operator
@@ -325,36 +352,53 @@ class Builder
         if (func_num_args() == 2) {
             list($value, $operator) = array($operator, '=');
         } else if ($this->invalidOperatorAndValue($operator, $value)) {
-            throw new \InvalidArgumentException("A value must be provided.");
+            throw new \InvalidArgumentException("Value must be provided.");
         }
 
+        // If the columns is actually a Closure instance, we will assume the developer
+        // wants to begin a nested where statement which is wrapped in parenthesis.
+        // We'll add that Closure to the query then return back out immediately.
         if ($column instanceof Closure) {
             return $this->whereNested($column, $boolean);
         }
 
-        if (! in_array(strtolower($operator), $this->operators, true)) {
+        // If the given operator is not found in the list of valid operators we will
+        // assume that the developer is just short-cutting the '=' operators and
+        // we will set the operators to '=' and set the values appropriately.
+        if ( ! in_array(strtolower($operator), $this->operators, true)) {
             list($value, $operator) = array($operator, '=');
         }
 
+        // If the value is a Closure, it means the developer is performing an entire
+        // sub-select within the query and we will need to compile the sub-select
+        // within the where clause to get the appropriate query record results.
         if ($value instanceof Closure) {
             return $this->whereSub($column, $operator, $value, $boolean);
         }
 
+        // If the value is "null", we will just assume the developer wants to add a
+        // where null clause to the query. So, we will allow a short-cut here to
+        // that method for convenience so the developer doesn't have to check.
         if (is_null($value)) {
-            return $this->whereNull($column, $boolean, ($operator != '='));
+            return $this->whereNull($column, $boolean, $operator != '=');
         }
 
+        // Now that we are working with just a simple query we can put the elements
+        // in our array and add the query binding to our array of bindings that
+        // will be bound to each SQL statements when it is finally executed.
         $type = 'Basic';
 
         $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
 
-        $this->bindings[] = $value;
+        if ( ! $value instanceof Expression) {
+            $this->bindings[] = $value;
+        }
 
         return $this;
     }
 
     /**
-     * Add an "OR WHERE" clause to the query.
+     * Add an "or where" clause to the query.
      *
      * @param  string  $column
      * @param  string  $operator
@@ -377,11 +421,42 @@ class Builder
     {
         $isOperator = in_array($operator, $this->operators);
 
-        return ($isOperator && ($operator != '=') && is_null($value));
+        return ($isOperator && $operator != '=' && is_null($value));
     }
 
     /**
-     * Add a "WHERE BETWEEN" statement to the query.
+     * Add a raw where clause to the query.
+     *
+     * @param  string  $sql
+     * @param  array   $bindings
+     * @param  string  $boolean
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function whereRaw($sql, array $bindings = array(), $boolean = 'and')
+    {
+        $type = 'raw';
+
+        $this->wheres[] = compact('type', 'sql', 'boolean');
+
+        $this->bindings = array_merge($this->bindings, $bindings);
+
+        return $this;
+    }
+
+    /**
+     * Add a raw or where clause to the query.
+     *
+     * @param  string  $sql
+     * @param  array   $bindings
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function orWhereRaw($sql, array $bindings = array())
+    {
+        return $this->whereRaw($sql, $bindings, 'or');
+    }
+
+    /**
+     * Add a where between statement to the query.
      *
      * @param  string  $column
      * @param  array   $values
@@ -391,7 +466,7 @@ class Builder
      */
     public function whereBetween($column, array $values, $boolean = 'and', $not = false)
     {
-        $type = 'Between';
+        $type = 'between';
 
         $this->wheres[] = compact('column', 'type', 'boolean', 'not');
 
@@ -401,7 +476,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE BETWEEN" statement to the query.
+     * Add an or where between statement to the query.
      *
      * @param  string  $column
      * @param  array   $values
@@ -413,7 +488,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE NOT BETWEEN" statement to the query.
+     * Add a where not between statement to the query.
      *
      * @param  string  $column
      * @param  array   $values
@@ -426,7 +501,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE NOT BETWEEN" statement to the query.
+     * Add an or where not between statement to the query.
      *
      * @param  string  $column
      * @param  array   $values
@@ -446,6 +521,9 @@ class Builder
      */
     public function whereNested(Closure $callback, $boolean = 'and')
     {
+        // To handle nested queries we'll actually create a brand new query instance
+        // and pass it off to the Closure that we have. The Closure can simply do
+        // do whatever it wants to a query then we will store it for compiling.
         $query = $this->newQuery();
 
         $query->from($this->from);
@@ -458,7 +536,7 @@ class Builder
     /**
      * Add another query builder as a nested where to the query builder.
      *
-     * @param  \Nova\Database\Query\Builder $query
+     * @param  \Nova\Database\Query\Builder|static $query
      * @param  string  $boolean
      * @return \Nova\Database\Query\Builder|static
      */
@@ -490,6 +568,9 @@ class Builder
 
         $query = $this->newQuery();
 
+        // Once we have the query instance we can simply execute it so it can add all
+        // of the sub-select's conditions to itself, and then we can cache it off
+        // in the array of where clauses for the "main" parent query instance.
         call_user_func($callback, $query);
 
         $this->wheres[] = compact('type', 'column', 'operator', 'query', 'boolean');
@@ -561,7 +642,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE IN" clause to the query.
+     * Add a "where in" clause to the query.
      *
      * @param  string  $column
      * @param  mixed   $values
@@ -573,6 +654,9 @@ class Builder
     {
         $type = $not ? 'NotIn' : 'In';
 
+        // If the value of the where in clause is actually a Closure, we will assume that
+        // the developer is using a full sub-select for this "in" statement, and will
+        // execute those Closures, then we can re-construct the entire sub-selects.
         if ($values instanceof Closure) {
             return $this->whereInSub($column, $values, $boolean, $not);
         }
@@ -585,7 +669,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE IN" clause to the query.
+     * Add an "or where in" clause to the query.
      *
      * @param  string  $column
      * @param  mixed   $values
@@ -597,7 +681,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE NOT IN" clause to the query.
+     * Add a "where not in" clause to the query.
      *
      * @param  string  $column
      * @param  mixed   $values
@@ -610,7 +694,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE NOT IN" clause to the query.
+     * Add an "or where not in" clause to the query.
      *
      * @param  string  $column
      * @param  mixed   $values
@@ -634,6 +718,9 @@ class Builder
     {
         $type = $not ? 'NotInSub' : 'InSub';
 
+        // To create the exists sub-select, we will actually create a query and call the
+        // provided callback with the query so the developer may set any of the query
+        // conditions they want for the in clause, then we'll put it in this array.
         call_user_func($callback, $query = $this->newQuery());
 
         $this->wheres[] = compact('type', 'column', 'query', 'boolean');
@@ -644,7 +731,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE NULL" clause to the query.
+     * Add a "where null" clause to the query.
      *
      * @param  string  $column
      * @param  string  $boolean
@@ -661,7 +748,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE NULL" clause to the query.
+     * Add an "or where null" clause to the query.
      *
      * @param  string  $column
      * @return \Nova\Database\Query\Builder|static
@@ -672,7 +759,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE NOT NULL" clause to the query.
+     * Add a "where not null" clause to the query.
      *
      * @param  string  $column
      * @param  string  $boolean
@@ -684,7 +771,7 @@ class Builder
     }
 
     /**
-     * Add an "OR WHERE NOT NULL" clause to the query.
+     * Add an "or where not null" clause to the query.
      *
      * @param  string  $column
      * @return \Nova\Database\Query\Builder|static
@@ -695,7 +782,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE DAY" statement to the query.
+     * Add a "where day" statement to the query.
      *
      * @param  string  $column
      * @param  string   $operator
@@ -709,7 +796,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE MONTH" statement to the query.
+     * Add a "where month" statement to the query.
      *
      * @param  string  $column
      * @param  string   $operator
@@ -723,7 +810,7 @@ class Builder
     }
 
     /**
-     * Add a "WHERE YEAR" statement to the query.
+     * Add a "where year" statement to the query.
      *
      * @param  string  $column
      * @param  string   $operator
@@ -756,7 +843,7 @@ class Builder
     }
 
     /**
-     * Handles dynamic "WHERE" clauses to the query.
+     * Handles dynamic "where" clauses to the query.
      *
      * @param  string  $method
      * @param  string  $parameters
@@ -768,51 +855,77 @@ class Builder
 
         $segments = preg_split('/(And|Or)(?=[A-Z])/', $finder, -1, PREG_SPLIT_DELIM_CAPTURE);
 
+        // The connector variable will determine which connector will be used for the
+        // query condition. We will change it as we come across new boolean values
+        // in the dynamic method strings, which could contain a number of these.
         $connector = 'and';
 
         $index = 0;
 
         foreach ($segments as $segment) {
-            if (($segment != 'And') && ($segment != 'Or')) {
+            // If the segment is not a boolean connector, we can assume it is a column's name
+            // and we will add it to the query as a new constraint as a where clause, then
+            // we can keep iterating through the dynamic method string's segments again.
+            if ($segment != 'And' && $segment != 'Or') {
                 $this->addDynamic($segment, $connector, $parameters, $index);
 
                 $index++;
-            } else {
+            }
+
+            // Otherwise, we will store the connector so we know how the next where clause we
+            // find in the query should be connected to the previous ones, meaning we will
+            // have the proper boolean connector to connect the next where clause found.
+            else {
                 $connector = $segment;
             }
         }
 
         return $this;
-   }
-
-   /**
-    * Add a single dynamic "WHERE" clause statement to the query.
-    *
-    * @param  string  $segment
-    * @param  string  $connector
-    * @param  array   $parameters
-    * @param  int     $index
-    * @return void
-    */
-    protected function addDynamic($segment, $connector, $parameters, $index)
-    {
-        $boolean = strtolower($connector);
-
-        $this->where(Inflector::tableize($segment), '=', $parameters[$index], $boolean);
     }
 
+    /**
+     * Add a single dynamic where clause statement to the query.
+     *
+     * @param  string  $segment
+     * @param  string  $connector
+     * @param  array   $parameters
+     * @param  int     $index
+     * @return void
+     */
+    protected function addDynamic($segment, $connector, $parameters, $index)
+    {
+        // Once we have parsed out the columns and formatted the boolean operators we
+        // are ready to add it to this query as a where clause just like any other
+        // clause on the query. Then we'll increment the parameter index values.
+        $bool = strtolower($connector);
+
+        $this->where(snake_case($segment), '=', $parameters[$index], $bool);
+    }
 
     /**
-     * Add a "HAVING" to the query.
+     * Add a "group by" clause to the query.
+     *
+     * @param  dynamic  $columns
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function groupBy()
+    {
+        $this->groups = array_merge((array) $this->groups, func_get_args());
+
+        return $this;
+    }
+
+    /**
+     * Add a "having" clause to the query.
      *
      * @param  string  $column
      * @param  string  $operator
-     * @param  mixed   $value
+     * @param  string  $value
      * @return \Nova\Database\Query\Builder|static
      */
     public function having($column, $operator = null, $value = null)
     {
-        $type = 'Basic';
+        $type = 'basic';
 
         $this->havings[] = compact('type', 'column', 'operator', 'value');
 
@@ -822,7 +935,7 @@ class Builder
     }
 
     /**
-     * Add a raw "HAVING" clause to the query.
+     * Add a raw having clause to the query.
      *
      * @param  string  $sql
      * @param  array   $bindings
@@ -831,7 +944,7 @@ class Builder
      */
     public function havingRaw($sql, array $bindings = array(), $boolean = 'and')
     {
-        $type = 'Raw';
+        $type = 'raw';
 
         $this->havings[] = compact('type', 'sql', 'boolean');
 
@@ -841,7 +954,7 @@ class Builder
     }
 
     /**
-     * Add a raw "OR HAVING" clause to the query.
+     * Add a raw or having clause to the query.
      *
      * @param  string  $sql
      * @param  array   $bindings
@@ -853,20 +966,7 @@ class Builder
     }
 
     /**
-     * Add a grouping to the query.
-     *
-     * @param  string  $column
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function groupBy($column)
-    {
-        $this->groups = array_merge((array) $this->groups, func_get_args());
-
-        return $this;
-    }
-
-    /**
-     * Add an "ORDER BY" clause to the query.
+     * Add an "order by" clause to the query.
      *
      * @param  string  $column
      * @param  string  $direction
@@ -874,7 +974,7 @@ class Builder
      */
     public function orderBy($column, $direction = 'asc')
     {
-        $direction = (strtolower($direction) == 'asc') ? 'ASC' : 'DESC';
+        $direction = strtolower($direction) == 'asc' ? 'asc' : 'desc';
 
         $this->orders[] = compact('column', 'direction');
 
@@ -882,25 +982,7 @@ class Builder
     }
 
     /**
-     * Add a raw "ORDER BY" clause to the query.
-     *
-     * @param  string  $sql
-     * @param  array  $bindings
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function orderByRaw($sql, $bindings = array())
-    {
-        $type = 'Raw';
-
-        $this->orders[] = compact('type', 'sql');
-
-        $this->bindings = array_merge($this->bindings, $bindings);
-
-        return $this;
-    }
-
-    /**
-     * Add an "ORDER BY" clause for a timestamp to the query.
+     * Add an "order by" clause for a timestamp to the query.
      *
      * @param  string  $column
      * @return \Nova\Database\Query\Builder|static
@@ -911,7 +993,7 @@ class Builder
     }
 
     /**
-     * Add an "ORDER BY" clause for a timestamp to the query.
+     * Add an "order by" clause for a timestamp to the query.
      *
      * @param  string  $column
      * @return \Nova\Database\Query\Builder|static
@@ -922,7 +1004,25 @@ class Builder
     }
 
     /**
-     * Set the "OFFSET" value of the query.
+     * Add a raw "order by" clause to the query.
+     *
+     * @param  string  $sql
+     * @param  array  $bindings
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function orderByRaw($sql, $bindings = array())
+    {
+        $type = 'raw';
+
+        $this->orders[] = compact('type', 'sql');
+
+        $this->bindings = array_merge($this->bindings, $bindings);
+
+        return $this;
+    }
+
+    /**
+     * Set the "offset" value of the query.
      *
      * @param  int  $value
      * @return \Nova\Database\Query\Builder|static
@@ -935,7 +1035,7 @@ class Builder
     }
 
     /**
-     * Alias to set the "OFFSET" value of the query.
+     * Alias to set the "offset" value of the query.
      *
      * @param  int  $value
      * @return \Nova\Database\Query\Builder|static
@@ -946,22 +1046,20 @@ class Builder
     }
 
     /**
-     * Set the "LIMIT" value of the query.
+     * Set the "limit" value of the query.
      *
      * @param  int  $value
      * @return \Nova\Database\Query\Builder|static
      */
     public function limit($value)
     {
-        if ($value > 0) {
-            $this->limit = $value;
-        }
+        if ($value > 0) $this->limit = $value;
 
         return $this;
     }
 
     /**
-     * Alias to set the "LIMIT" value of the query.
+     * Alias to set the "limit" value of the query.
      *
      * @param  int  $value
      * @return \Nova\Database\Query\Builder|static
@@ -972,10 +1070,10 @@ class Builder
     }
 
     /**
-     * Set the query limit and offset for a given page.
+     * Set the limit and offset for a given page.
      *
-     * @param  int    $page
-     * @param  int    $perPage
+     * @param  int  $page
+     * @param  int  $perPage
      * @return \Nova\Database\Query\Builder|static
      */
     public function forPage($page, $perPage = 15)
@@ -1013,7 +1111,101 @@ class Builder
     }
 
     /**
-     * Execute a query for a single Record by ID.
+     * Lock the selected rows in the table.
+     *
+     * @param  bool  $update
+     * @return \Nova\Database\Query\Builder
+     */
+    public function lock($value = true)
+    {
+        $this->lock = $value;
+
+        return $this;
+    }
+
+    /**
+     * Lock the selected rows in the table for updating.
+     *
+     * @return \Nova\Database\Query\Builder
+     */
+    public function lockForUpdate()
+    {
+        return $this->lock(true);
+    }
+
+    /**
+     * Share lock the selected rows in the table.
+     *
+     * @return \Nova\Database\Query\Builder
+     */
+    public function sharedLock()
+    {
+        return $this->lock(false);
+    }
+
+    /**
+     * Get the SQL representation of the query.
+     *
+     * @return string
+     */
+    public function toSql()
+    {
+        return $this->grammar->compileSelect($this);
+    }
+
+    /**
+     * Indicate that the query results should be cached.
+     *
+     * @param  \DateTime|int  $minutes
+     * @param  string  $key
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function remember($minutes, $key = null)
+    {
+        list($this->cacheMinutes, $this->cacheKey) = array($minutes, $key);
+
+        return $this;
+    }
+
+    /**
+     * Indicate that the query results should be cached forever.
+     *
+     * @param  string  $key
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function rememberForever($key = null)
+    {
+        return $this->remember(-1, $key);
+    }
+
+    /**
+     * Indicate that the results, if cached, should use the given cache tags.
+     *
+     * @param  array|dynamic  $cacheTags
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function cacheTags($cacheTags)
+    {
+        $this->cacheTags = $cacheTags;
+
+        return $this;
+    }
+
+    /**
+     * Indicate that the results, if cached, should use the given cache driver.
+     *
+     * @param  string  $cacheDriver
+     * @return \Nova\Database\Query\Builder|static
+     */
+    public function cacheDriver($cacheDriver)
+    {
+        $this->cacheDriver = $cacheDriver;
+
+        return $this;
+    }
+
+    /**
+     * Execute a query for a single record by ID.
      *
      * @param  int    $id
      * @param  array  $columns
@@ -1021,9 +1213,7 @@ class Builder
      */
     public function find($id, $columns = array('*'))
     {
-        $keyName = isset($this->model) ? $this->model->getKeyName() : 'id';
-
-        return $this->where($keyName, '=', $id)->first($columns);
+        return $this->where('id', '=', $id)->first($columns);
     }
 
     /**
@@ -1034,26 +1224,144 @@ class Builder
      */
     public function pluck($column)
     {
-        $result = $this->first(array($column));
+        $result = (array) $this->first(array($column));
 
-        if (! is_null($result)) {
-            $result = (array) $result;
-        }
-
-        return (count($result) > 0) ? reset($result) : null;
+        return count($result) > 0 ? reset($result) : null;
     }
 
     /**
      * Execute the query and get the first result.
      *
      * @param  array   $columns
-     * @return mixed
+     * @return mixed|static
      */
     public function first($columns = array('*'))
     {
         $results = $this->take(1)->get($columns);
 
-        return (count($results) > 0) ? reset($results) : null;
+        return count($results) > 0 ? reset($results) : null;
+    }
+
+    /**
+     * Execute the query as a "select" statement.
+     *
+     * @param  array  $columns
+     * @return array|static[]
+     */
+    public function get($columns = array('*'))
+    {
+        if ( ! is_null($this->cacheMinutes)) return $this->getCached($columns);
+
+        return $this->getFresh($columns);
+    }
+
+    /**
+     * Execute the query as a fresh "select" statement.
+     *
+     * @param  array  $columns
+     * @return array|static[]
+     */
+    public function getFresh($columns = array('*'))
+    {
+        if (is_null($this->columns)) $this->columns = $columns;
+
+        return $this->processor->processSelect($this, $this->runSelect());
+    }
+
+    /**
+     * Run the query as a "select" statement against the connection.
+     *
+     * @return array
+     */
+    protected function runSelect()
+    {
+        return $this->connection->select($this->toSql(), $this->bindings);
+    }
+
+    /**
+     * Execute the query as a cached "select" statement.
+     *
+     * @param  array  $columns
+     * @return array
+     */
+    public function getCached($columns = array('*'))
+    {
+        if (is_null($this->columns)) $this->columns = $columns;
+
+        // If the query is requested to be cached, we will cache it using a unique key
+        // for this database connection and query statement, including the bindings
+        // that are used on this query, providing great convenience when caching.
+        list($key, $minutes) = $this->getCacheInfo();
+
+        $cache = $this->getCache();
+
+        $callback = $this->getCacheCallback($columns);
+
+        // If the "minutes" value is less than zero, we will use that as the indicator
+        // that the value should be remembered values should be stored indefinitely
+        // and if we have minutes we will use the typical remember function here.
+        if ($minutes < 0) {
+            return $cache->rememberForever($key, $callback);
+        } else {
+            return $cache->remember($key, $minutes, $callback);
+        }
+    }
+
+    /**
+     * Get the cache object with tags assigned, if applicable.
+     *
+     * @return \Nova\Cache\CacheManager
+     */
+    protected function getCache()
+    {
+        $cache = $this->connection->getCacheManager()->driver($this->cacheDriver);
+
+        return $this->cacheTags ? $cache->tags($this->cacheTags) : $cache;
+    }
+
+    /**
+     * Get the cache key and cache minutes as an array.
+     *
+     * @return array
+     */
+    protected function getCacheInfo()
+    {
+        return array($this->getCacheKey(), $this->cacheMinutes);
+    }
+
+    /**
+     * Get a unique cache key for the complete query.
+     *
+     * @return string
+     */
+    public function getCacheKey()
+    {
+        return $this->cacheKey ?: $this->generateCacheKey();
+    }
+
+    /**
+     * Generate the unique cache key for the query.
+     *
+     * @return string
+     */
+    public function generateCacheKey()
+    {
+        $name = $this->connection->getName();
+
+        return md5($name.$this->toSql().serialize($this->bindings));
+    }
+
+    /**
+     * Get the Closure callback used when caching queries.
+     *
+     * @param  array  $columns
+     * @return \Closure
+     */
+    protected function getCacheCallback($columns)
+    {
+        $me = $this;
+
+        return function() use ($me, $columns) { return $me->getFresh($columns); };
     }
 
     /**
@@ -1068,6 +1376,9 @@ class Builder
         $results = $this->forPage($page = 1, $count)->get();
 
         while (count($results) > 0) {
+            // On each chunk result set, we will pass them to the callback and then let the
+            // developer take care of everything within the callback, which allows us to
+            // keep the memory low for spinning through large result sets for working.
             call_user_func($callback, $results);
 
             $page++;
@@ -1077,7 +1388,7 @@ class Builder
     }
 
     /**
-     * Get an array with the values of a given Column.
+     * Get an array with the values of a given column.
      *
      * @param  string  $column
      * @param  string  $key
@@ -1085,25 +1396,50 @@ class Builder
      */
     public function lists($column, $key = null)
     {
-        $columns = is_null($key) ? array($column) : array($column, $key);
+        $columns = $this->getListSelect($column, $key);
 
-        $results = $this->get($columns);
+        // First we will just get all of the column values for the record result set
+        // then we can associate those values with the column if it was specified
+        // otherwise we can just give these values back without a specific key.
+        $results = new Collection($this->get($columns));
 
-        $values = array_map(function($row) use ($column) {
-            return $row->{$column};
-        }, $results);
+        $values = $results->fetch($columns[0])->all();
 
-        if (! is_null($key) && (count($results) > 0)) {
-            return array_combine(array_map(function($row) use ($key) {
-                return $row->{$key};
-            }, $results), $values);
+        // If a key was specified and we have results, we will go ahead and combine
+        // the values with the keys of all of the records so that the values can
+        // be accessed by the key of the rows instead of simply being numeric.
+        if ( ! is_null($key) && count($results) > 0) {
+            $keys = $results->fetch($key)->all();
+
+            return array_combine($keys, $values);
         }
 
         return $values;
     }
 
     /**
-     * Concatenate values of a given Column as a string.
+     * Get the columns that should be used in a list array.
+     *
+     * @param  string  $column
+     * @param  string  $key
+     * @return array
+     */
+    protected function getListSelect($column, $key)
+    {
+        $select = is_null($key) ? array($column) : array($column, $key);
+
+        // If the selected column contains a "dot", we will remove it so that the list
+        // operation can run normally. Specifying the table is not needed, since we
+        // really want the names of the columns as it is in this resulting array.
+        if (($dot = strpos($select[0], '.')) !== false) {
+            $select[0] = substr($select[0], $dot + 1);
+        }
+
+        return $select;
+    }
+
+    /**
+     * Concatenate values of a given column as a string.
      *
      * @param  string  $column
      * @param  string  $glue
@@ -1111,29 +1447,21 @@ class Builder
      */
     public function implode($column, $glue = null)
     {
-        if (is_null($glue)) {
-            return implode($this->lists($column));
-        }
+        if (is_null($glue)) return implode($this->lists($column));
 
         return implode($glue, $this->lists($column));
     }
 
     /**
-     * Get a paginator for the "SELECT" statement.
+     * Get a paginator for the "select" statement.
      *
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
-    public function paginate($perPage = null, $columns = array('*'))
+    public function paginate($perPage = 15, $columns = array('*'))
     {
-        // Get the Pagination Factory instance.
         $paginator = $this->connection->getPaginator();
-
-        if(is_null($perPage)) {
-            // Get the perPage value, according on the Model instance.
-            $perPage = isset($this->model) ? $this->model->getPerPage() : 15;
-        }
 
         if (isset($this->groups)) {
             return $this->groupedPaginate($paginator, $perPage, $columns);
@@ -1143,11 +1471,12 @@ class Builder
     }
 
     /**
-     * Create a Paginator for a grouped pagination statement.
+     * Create a paginator for a grouped pagination statement.
      *
+     * @param  \Nova\Pagination\Environment  $paginator
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     protected function groupedPaginate($paginator, $perPage, $columns)
     {
@@ -1159,10 +1488,10 @@ class Builder
     /**
      * Build a paginator instance from a raw result array.
      *
-     * @param  \Illuminate\Pagination\Factory  $paginator
+     * @param  \Nova\Pagination\Environment  $paginator
      * @param  array  $results
      * @param  int    $perPage
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     public function buildRawPaginator($paginator, $results, $perPage)
     {
@@ -1179,10 +1508,10 @@ class Builder
     /**
      * Create a paginator for an un-grouped pagination statement.
      *
-     * @param  \Pagination\Environment  $paginator
+     * @param  \Nova\Pagination\Environment  $paginator
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     protected function ungroupedPaginate($paginator, $perPage, $columns)
     {
@@ -1191,37 +1520,11 @@ class Builder
         // Once we have the total number of records to be paginated, we can grab the
         // current page and the result array. Then we are ready to create a brand
         // new Paginator instances for the results which will create the links.
-        $page = $paginator->getCurrentPage($total, $perPage);
+        $page = $paginator->getCurrentPage($total);
 
         $results = $this->forPage($page, $perPage)->get($columns);
 
         return $paginator->make($results, $total, $perPage);
-    }
-
-    /**
-     * Get a paginator only supporting simple next and previous links.
-     *
-     * This is more efficient on larger data-sets, etc.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Pagination\Paginator
-     */
-    public function simplePaginate($perPage = null, $columns = array('*'))
-    {
-        // Get the Pagination Factory instance.
-        $paginator = Paginator::instance();
-
-        if(is_null($perPage)) {
-            // Get the perPage value, according on the Model instance.
-            $perPage = isset($this->model) ? $this->model->getPerPage() : 15;
-        }
-
-        $page = $paginator->getCurrentPage();
-
-        $this->skip(($page - 1) * $perPage)->take($perPage + 1);
-
-        return $paginator->make($this->get($columns), $perPage);
     }
 
     /**
@@ -1233,6 +1536,9 @@ class Builder
     {
         $this->backupFieldsForCount();
 
+        // Because some database engines may throw errors if we leave the ordering
+        // statements on the query, we will "back them up" and remove them from
+        // the query. Once we have the count we will put them back onto this.
         $total = $this->count();
 
         $this->restoreFieldsForCount();
@@ -1252,6 +1558,7 @@ class Builder
 
             $this->{$field} = null;
         }
+
     }
 
     /**
@@ -1261,46 +1568,11 @@ class Builder
      */
     protected function restoreFieldsForCount()
     {
-        foreach (array('orders', 'limit', 'offset') as $field) {
+        foreach (array('orders', 'limit', 'offset') as $field)  {
             $this->{$field} = $this->backups[$field];
         }
 
         $this->backups = array();
-    }
-
-    /**
-     * Execute the query as a "SELECT" statement.
-     *
-     * @param  array  $columns
-     * @return array
-     */
-    public function get($columns = array('*'))
-    {
-        if (is_null($this->columns)) {
-            $this->columns = $columns;
-        }
-
-        return $this->runSelect();
-    }
-
-    /**
-     * Run the query as a "SELECT" statement against the Connection.
-     *
-     * @return array
-     */
-    protected function runSelect()
-    {
-        return $this->connection->select($this->toSql(), $this->bindings);
-    }
-
-    /**
-     * Get the SQL representation of the query.
-     *
-     * @return string
-     */
-    public function toSql()
-    {
-        return $this->compileSelect($this);
     }
 
     /**
@@ -1310,18 +1582,22 @@ class Builder
      */
     public function exists()
     {
-        return ($this->count() > 0);
+        return $this->count() > 0;
     }
 
     /**
-     * Retrieve the "COUNT" result of the query.
+     * Retrieve the "count" result of the query.
      *
-     * @param  string  $column
+     * @param  string  $columns
      * @return int
      */
-    public function count($column = '*')
+    public function count($columns = '*')
     {
-        return (int) $this->aggregate(__FUNCTION__, array($column));
+        if ( ! is_array($columns)) {
+            $columns = array($columns);
+        }
+
+        return (int) $this->aggregate(__FUNCTION__, $columns);
     }
 
     /**
@@ -1354,7 +1630,9 @@ class Builder
      */
     public function sum($column)
     {
-        return $this->aggregate(__FUNCTION__, array($column));
+        $result = $this->aggregate(__FUNCTION__, array($column));
+
+        return $result ?: 0;
     }
 
     /**
@@ -1383,7 +1661,9 @@ class Builder
 
         $results = $this->get($columns);
 
-        // Once we have executed the query, we will reset the aggregate property.
+        // Once we have executed the query, we will reset the aggregate property so
+        // that more select queries can be executed against the database without
+        // the aggregate value getting in the way when the grammar builds it.
         $this->aggregate = null;
 
         $this->columns = $previousColumns;
@@ -1403,50 +1683,59 @@ class Builder
      */
     public function insert(array $values)
     {
-        if (! is_array(reset($values))) {
+        // Since every insert gets treated like a batch insert, we will make sure the
+        // bindings are structured in a way that is convenient for building these
+        // inserts statements by verifying the elements are actually an array.
+        if ( ! is_array(reset($values))) {
             $values = array($values);
-        } else {
-            foreach ($values as $key => $value) {
-                ksort($value);
+        }
 
-                $values[$key] = $value;
+        // Since every insert gets treated like a batch insert, we will make sure the
+        // bindings are structured in a way that is convenient for building these
+        // inserts statements by verifying the elements are actually an array.
+        else {
+            foreach ($values as $key => $value) {
+                ksort($value); $values[$key] = $value;
             }
         }
 
+        // We'll treat every insert like a batch insert so we can easily insert each
+        // of the records into the database consistently. This will make it much
+        // easier on the grammars to just handle one type of record insertion.
         $bindings = array();
 
         foreach ($values as $record) {
             $bindings = array_merge($bindings, array_values($record));
         }
 
-        $sql = $this->compileInsert($values);
+        $sql = $this->grammar->compileInsert($this, $values);
 
+        // Once we have compiled the insert statement's SQL we can execute it on the
+        // connection and return a result as a boolean success indicator as that
+        // is the same type of result returned by the raw connection instance.
         $bindings = $this->cleanBindings($bindings);
 
         return $this->connection->insert($sql, $bindings);
     }
 
     /**
-     * Insert a new Record and get the value of the primary key.
+     * Insert a new record and get the value of the primary key.
      *
      * @param  array   $values
+     * @param  string  $sequence
      * @return int
      */
-    public function insertGetId(array $values)
+    public function insertGetId(array $values, $sequence = null)
     {
-        $sql = $this->compileInsert($values);
+        $sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
         $values = $this->cleanBindings($values);
 
-        $this->connection->insert($sql, $values);
-
-        $id = $this->connection->getPdo()->lastInsertId();
-
-        return is_numeric($id) ? (int) $id : $id;
+        return $this->processor->processInsertGetId($this, $sql, $values, $sequence);
     }
 
     /**
-     * Update a Record in the database.
+     * Update a record in the database.
      *
      * @param  array  $values
      * @return int
@@ -1455,14 +1744,13 @@ class Builder
     {
         $bindings = array_values(array_merge($values, $this->bindings));
 
-        $sql = $this->compileUpdate($values);
+        $sql = $this->grammar->compileUpdate($this, $values);
 
         return $this->connection->update($sql, $this->cleanBindings($bindings));
     }
 
-
     /**
-     * Increment a Column's value by a given amount.
+     * Increment a column's value by a given amount.
      *
      * @param  string  $column
      * @param  int     $amount
@@ -1471,7 +1759,7 @@ class Builder
      */
     public function increment($column, $amount = 1, array $extra = array())
     {
-        $wrapped = $this->wrap($column);
+        $wrapped = $this->grammar->wrap($column);
 
         $columns = array_merge(array($column => $this->raw("$wrapped + $amount")), $extra);
 
@@ -1479,7 +1767,7 @@ class Builder
     }
 
     /**
-     * Decrement a Column's value by a given amount.
+     * Decrement a column's value by a given amount.
      *
      * @param  string  $column
      * @param  int     $amount
@@ -1488,7 +1776,7 @@ class Builder
      */
     public function decrement($column, $amount = 1, array $extra = array())
     {
-        $wrapped = $this->wrap($column);
+        $wrapped = $this->grammar->wrap($column);
 
         $columns = array_merge(array($column => $this->raw("$wrapped - $amount")), $extra);
 
@@ -1496,45 +1784,76 @@ class Builder
     }
 
     /**
-     * Delete a Record from the database.
+     * Delete a record from the database.
      *
+     * @param  mixed  $id
      * @return int
      */
     public function delete($id = null)
     {
-        if (! is_null($id)) {
-            $this->where('id', '=', $id);
-        }
+        // If an ID is passed to the method, we will set the where clause to check
+        // the ID to allow developers to simply and quickly remove a single row
+        // from their database without manually specifying the where clauses.
+        if ( ! is_null($id)) $this->where('id', '=', $id);
 
-        $sql = $this->compileDelete();
+        $sql = $this->grammar->compileDelete($this);
 
         return $this->connection->delete($sql, $this->bindings);
     }
 
     /**
-     * Run a TRUNCATE statement on the table.
+     * Run a truncate statement on the table.
      *
      * @return void
      */
     public function truncate()
     {
-        foreach ($this->compileTruncate() as $sql => $bindings) {
+        foreach ($this->grammar->compileTruncate($this) as $sql => $bindings)
+        {
             $this->connection->statement($sql, $bindings);
         }
     }
 
     /**
-     * Get a new instance of the QueryBuilder.
+     * Get a new instance of the query builder.
      *
-     * @return \Nova\Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder
      */
     public function newQuery()
     {
-        return new Builder($this->connection);
+        return new Builder($this->connection, $this->grammar, $this->processor);
     }
 
     /**
-     * Create a raw Database Expression.
+     * Merge an array of where clauses and bindings.
+     *
+     * @param  array  $wheres
+     * @param  array  $bindings
+     * @return void
+     */
+    public function mergeWheres($wheres, $bindings)
+    {
+        $this->wheres = array_merge((array) $this->wheres, (array) $wheres);
+
+        $this->bindings = array_values(array_merge($this->bindings, (array) $bindings));
+    }
+
+    /**
+     * Remove all of the expressions from a list of bindings.
+     *
+     * @param  array  $bindings
+     * @return array
+     */
+    protected function cleanBindings(array $bindings)
+    {
+        return array_values(array_filter($bindings, function($binding)
+        {
+            return (! $binding instanceof Expression);
+        }));
+    }
+
+    /**
+     * Create a raw database expression.
      *
      * @param  mixed  $value
      * @return \Nova\Database\Query\Expression
@@ -1584,7 +1903,7 @@ class Builder
      * Merge an array of bindings into our bindings.
      *
      * @param  \Nova\Database\Query\Builder  $query
-     * @return \Nova\Database\Query\Builder|static
+     * @return \Nova\Database\Query\Builder
      */
     public function mergeBindings(Builder $query)
     {
@@ -1594,22 +1913,9 @@ class Builder
     }
 
     /**
-     * Remove all of the expressions from a list of bindings.
+     * Get the database connection instance.
      *
-     * @param  array  $bindings
-     * @return array
-     */
-    protected function cleanBindings(array $bindings)
-    {
-        return array_values(array_filter($bindings, function($binding) {
-            return (! $binding instanceof Expression);
-        }));
-    }
-
-    /**
-     * Get the Database Connection instance.
-     *
-     * @return \Nova\Database\Connection
+     * @return \Nova\Database\ConnectionInterface
      */
     public function getConnection()
     {
@@ -1617,45 +1923,38 @@ class Builder
     }
 
     /**
-     * Get the Model instance being queried.
+     * Get the database query processor instance.
      *
-     * @return \Nova\Database\Model|\Nova\Database\ORM\Model
+     * @return \Nova\Database\Query\Processors\Processor
      */
-    public function getModel()
+    public function getProcessor()
     {
-        return $this->model;
+        return $this->processor;
     }
 
     /**
-     * Set a Model instance for the Model being queried.
+     * Get the query grammar instance.
      *
-     * @param  \Nova\Database\Model|\Nova\Database\ORM\Model|null  $model
-     * @return \Nova\Database\Builder
+     * @return \Nova\Database\Grammar
      */
-    public function setModel($model)
+    public function getGrammar()
     {
-        $this->model = $model;
-
-        return $this;
+        return $this->grammar;
     }
-
-    //--------------------------------------------------------------------
-    // Magic Methods
-    //--------------------------------------------------------------------
 
     /**
      * Handle dynamic method calls into the method.
      *
      * @param  string  $method
-     * @param  array   $params
+     * @param  array   $parameters
      * @return mixed
      *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $params)
+    public function __call($method, $parameters)
     {
         if (str_starts_with($method, 'where')) {
-            return $this->dynamicWhere($method, $params);
+            return $this->dynamicWhere($method, $parameters);
         }
 
         $className = get_class($this);
@@ -1663,732 +1962,4 @@ class Builder
         throw new \BadMethodCallException("Call to undefined method {$className}::{$method}()");
     }
 
-    //--------------------------------------------------------------------
-    // Clauses Compilation and Statements generation
-    //--------------------------------------------------------------------
-
-    /**
-     * Compile a select query into SQL.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return string
-     */
-    public function compileSelect(Builder $query)
-    {
-        if (is_null($query->columns)) {
-            $query->columns = array('*');
-        }
-
-        return trim($this->concatenate($this->compileComponents($query)));
-    }
-
-    /**
-     * Compile the components necessary for a select clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return array
-     */
-    protected function compileComponents(Builder $query)
-    {
-        $sql = array();
-
-        $selectComponents = array(
-            'aggregate',
-            'columns',
-            'from',
-            'joins',
-            'wheres',
-            'groups',
-            'havings',
-            'orders',
-            'limit',
-            'unions',
-            'offset'
-        );
-
-        foreach ($selectComponents as $component) {
-            if (! is_null($query->{$component})) {
-                $method = 'compile' .ucfirst($component);
-
-                $sql[$component] = call_user_func(array($this, $method), $query, $query->{$component});
-            }
-        }
-
-        return $sql;
-    }
-
-    /**
-     * Compile an aggregated select clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $aggregate
-     * @return string
-     */
-    protected function compileAggregate(Builder $query, $aggregate)
-    {
-        $column = $this->columnize($aggregate['columns']);
-
-        if ($query->distinct && ($column !== '*')) {
-            $column = 'DISTINCT ' .$column;
-        }
-
-        return 'SELECT ' .$aggregate['function'] .'(' .$column .') AS aggregate';
-    }
-
-    /**
-     * Compile the "SELECT *" portion of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $columns
-     * @return string
-     */
-    protected function compileColumns(Builder $query, $columns)
-    {
-        if (is_null($query->aggregate)) {
-            $select = $query->distinct ? 'SELECT DISTINCT ' : 'SELECT ';
-
-            return $select .$this->columnize($columns);
-        }
-
-        return '';
-    }
-
-    /**
-     * Compile the "FROM" portion of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  string  $table
-     * @return string
-     */
-    protected function compileFrom(Builder $query, $table)
-    {
-        return 'FROM ' .$this->wrapTable($table);
-    }
-
-    /**
-     * Compile the "JOIN" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $joins
-     * @return string
-     */
-    protected function compileJoins(Builder $query, $joins)
-    {
-        $sql = array();
-
-        foreach ($joins as $join) {
-            $table = $this->wrapTable($join->table);
-
-            $clauses = array();
-
-            foreach ($join->clauses as $clause) {
-                $clauses[] = $this->compileJoinConstraint($clause);
-            }
-
-            $clauses[0] = $this->removeLeadingBoolean($clauses[0]);
-
-            $clauses = implode(' ', $clauses);
-
-            $type = $join->type;
-
-            $sql[] = "$type JOIN $table ON $clauses";
-        }
-
-        return implode(' ', $sql);
-    }
-
-    /**
-     * Create a join clause constraint segment.
-     *
-     * @param  array   $clause
-     * @return string
-     */
-    protected function compileJoinConstraint(array $clause)
-    {
-        $first = $this->wrap($clause['first']);
-
-        $second = $clause['where'] ? '?' : $this->wrap($clause['second']);
-
-        $boolean = strtoupper($clause['boolean']);
-
-        return "$boolean $first {$clause['operator']} $second";
-    }
-
-    /**
-     * Compile the "WHERE" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return string
-     */
-    protected function compileWheres(Builder $query)
-    {
-        $sql = array();
-
-        if (is_null($query->wheres)) {
-            return '';
-        }
-
-        foreach ($query->wheres as $where) {
-            $method = "compileWhere{$where['type']}";
-
-            $sql[] = strtoupper($where['boolean']) .' ' .call_user_func(array($this, $method), $where);
-        }
-
-        if (count($sql) > 0) {
-            $sql = implode(' ', $sql);
-
-            return 'WHERE ' .preg_replace('/AND |OR /', '', $sql, 1);
-        }
-
-        return '';
-    }
-
-    /**
-     * Compile a nested where clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereNested($where)
-    {
-        $nested = $where['query'];
-
-        return '(' .substr($this->compileWheres($nested), 6) .')';
-    }
-
-    /**
-     * Compile a where condition with a sub-select.
-     *
-     * @param  array   $where
-     * @return string
-     */
-    protected function compileWhereSub($where)
-    {
-        $select = $this->compileSelect($where['query']);
-
-        return $this->wrap($where['column']) .' ' .$where['operator'] ." ($select)";
-    }
-
-    /**
-     * Compile a basic where clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereBasic($where)
-    {
-        $value = $this->parameter($where['value']);
-
-        return $this->wrap($where['column']) .' ' .$where['operator'] .' ' .$value;
-    }
-
-    /**
-     * Compile a "BETWEEN" where clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereBetween($where)
-    {
-        $between = $where['not'] ? 'NOT BETWEEN' : 'BETWEEN';
-
-        return $this->wrap($where['column']) .' ' .$between .' ? AND ?';
-    }
-
-    /**
-     * Compile a "WHERE IN" clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereIn($where)
-    {
-        $values = $this->parameterize($where['values']);
-
-        return $this->wrap($where['column']) .' IN (' .$values .')';
-    }
-
-    /**
-     * Compile a "WHERE NOT IN" clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereNotIn($where)
-    {
-        $values = $this->parameterize($where['values']);
-
-        return $this->wrap($where['column']) .' NOT IN (' .$values .')';
-    }
-
-    /**
-     * Compile a where in sub-select clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereInSub($where)
-    {
-        $select = $this->compileSelect($where['query']);
-
-        return $this->wrap($where['column']) .' IN (' .$select .')';
-    }
-
-    /**
-     * Compile a where not in sub-select clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereNotInSub($where)
-    {
-        $select = $this->compileSelect($where['query']);
-
-        return $this->wrap($where['column']) .' NOT IN (' .$select .')';
-    }
-
-    /**
-     * Compile a "WHERE NULL" clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereNull($where)
-    {
-        return $this->wrap($where['column']) .' IS NULL';
-    }
-
-    /**
-     * Compile a "WHERE NOT NULL" clause.
-     *
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereNotNull($where)
-    {
-        return $this->wrap($where['column']) .' IS NOT NULL';
-    }
-
-    /**
-     * Compile a "WHERE DAY" clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereDay(Builder $query, $where)
-    {
-        return $this->dateBasedWhere('day', $query, $where);
-    }
-
-    /**
-     * Compile a "WHERE MONTH" clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereMonth(Builder $query, $where)
-    {
-        return $this->dateBasedWhere('month', $query, $where);
-    }
-
-    /**
-     * Compile a "WHERE YEAR" clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereYear(Builder $query, $where)
-    {
-        return $this->dateBasedWhere('year', $query, $where);
-    }
-
-    /**
-     * Compile a date based where clause.
-     *
-     * @param  string  $type
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function dateBasedWhere($type, $where)
-    {
-        $value = $this->parameter($where['value']);
-
-        return $type .'(' .$this->wrap($where['column']) .') ' .$where['operator'] .' ' .$value;
-    }
-
-    /**
-     * Compile a raw "WHERE" clause.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function compileWhereRaw($where)
-    {
-        return $where['sql'];
-    }
-
-    /**
-     * Compile the GROUP BY clause for a query.
-     *
-     * @param  Query   $query
-     * @return string
-     */
-    protected function compileGroups(Builder $query, $groups)
-    {
-        return 'GROUP BY '.$this->columnize($groups);
-    }
-
-    /**
-     * Compile the "HAVING" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $havings
-     * @return string
-     */
-    protected function compileHavings(Builder $query, $havings)
-    {
-        $sql = implode(' ', array_map(array($this, 'compileHaving'), $havings));
-
-        return 'HAVING ' .preg_replace('/AND /', '', $sql, 1);
-    }
-
-    /**
-     * Compile a single having clause.
-     *
-     * @param  array   $having
-     * @return string
-     */
-    protected function compileHaving(array $having)
-    {
-        if ($having['type'] === 'Raw') {
-            return $having['boolean'].' '.$having['sql'];
-        }
-
-        return $this->compileBasicHaving($having);
-    }
-
-    /**
-     * Compile a basic having clause.
-     *
-     * @param  array   $having
-     * @return string
-     */
-    protected function compileBasicHaving($having)
-    {
-        $column = $this->wrap($having['column']);
-
-        $parameter = $this->parameter($having['value']);
-
-        return 'AND ' .$column .' ' .$having['operator'] .' ' .$parameter;
-    }
-
-    /**
-     * Compile the "ORDER BY" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  array  $orders
-     * @return string
-     */
-    protected function compileOrders(Builder $query, $orders)
-    {
-        $me = $this;
-
-        return 'ORDER BY ' .implode(', ', array_map(function($order) use ($me) {
-            if (isset($order['sql'])) return $order['sql'];
-
-            return $me->wrap($order['column']).' '.$order['direction'];
-        }, $orders));
-    }
-
-    /**
-     * Compile the "LIMIT" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  int  $limit
-     * @return string
-     */
-    protected function compileLimit(Builder $query, $limit)
-    {
-        return 'LIMIT ' .(int) $limit;
-    }
-
-    /**
-     * Compile the "OFFSET" portions of the query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @param  int  $offset
-     * @return string
-     */
-    protected function compileOffset(Builder $query, $offset)
-    {
-        return 'OFFSET ' .(int) $offset;
-    }
-
-    /**
-     * Compile the "UNION" queries attached to the main query.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return string
-     */
-    protected function compileUnions(Builder $query)
-    {
-        $sql = '';
-
-        foreach ($query->unions as $union) {
-            $sql .= $this->compileUnion($union);
-        }
-
-        return ltrim($sql);
-    }
-
-    /**
-     * Compile a single "UNION" statement.
-     *
-     * @param  array  $union
-     * @return string
-     */
-    protected function compileUnion(array $union)
-    {
-        $joiner = isset($union['all']) ? ' UNION ALL ' : ' UNION ';
-
-        return $joiner .$union['query']->toSql();
-    }
-
-    /**
-     * Compile an insert statement into SQL.
-     *
-     * @param  array  $values
-     * @return string
-     */
-    public function compileInsert(array $values)
-    {
-        $table = $this->wrapTable($this->from);
-
-        if (! is_array(reset($values))) {
-            $values = array($values);
-        }
-
-        $columns = $this->columnize(array_keys(reset($values)));
-
-        $parameters = $this->parameterize(reset($values));
-
-        $value = array_fill(0, count($values), "($parameters)");
-
-        $parameters = implode(', ', $value);
-
-        return "INSERT INTO $table ($columns) VALUES $parameters";
-    }
-
-    /**
-     * Compile an update statement into SQL.
-     *
-     * @param  array  $values
-     * @return string
-     */
-    public function compileUpdate($values)
-    {
-        $table = $this->wrapTable($this->from);
-
-        $columns = array();
-
-        foreach ($values as $key => $value) {
-            $columns[] = $this->wrap($key) .' = ' .$this->parameter($value);
-        }
-
-        $columns = implode(', ', $columns);
-
-        if (isset($this->joins)) {
-            $joins = ' ' .$this->compileJoins($this, $this->joins);
-        } else {
-            $joins = '';
-        }
-
-        $where = $this->compileWheres($this);
-
-        $sql = trim("UPDATE {$table}{$joins} SET $columns $where");
-
-        if (isset($this->orders)) {
-            $sql .= ' ' .$this->compileOrders($this, $this->orders);
-        }
-
-        if (isset($this->limit)) {
-            $sql .= ' ' .$this->compileLimit($this, $this->limit);
-        }
-
-        return rtrim($sql);
-    }
-
-    /**
-     * Compile a delete statement into SQL.
-     *
-     * @return string
-     */
-    public function compileDelete()
-    {
-        $table = $this->wrapTable($this->from);
-
-        $where = is_array($this->wheres) ? $this->compileWheres($this) : '';
-
-        $sql = trim("DELETE FROM $table " .$where);
-
-        if (isset($this->limit)) {
-            $sql .= ' ' .$this->compileLimit($this, $this->limit);
-        }
-
-        return rtrim($sql);
-    }
-
-    /**
-     * Compile a truncate table statement into SQL.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return array
-     */
-    public function compileTruncate()
-    {
-        $driver = $this->connection->getDriver();
-
-        if ($driver == 'mysql') {
-            return array('TRUNCATE ' .$this->wrapTable($this->from) => array());
-        } else if ($driver == 'pgsql') {
-            return array('TRUNCATE '.$this->wrapTable($this->from).' RESTART identity' => array());
-        } else if ($driver == 'sqlite') {
-            $sql = array(
-                'DELETE FROM sqlite_sequence WHERE name = ?'  => array($query->from),
-                'DELETE FROM ' .$this->wrapTable($this->from) => array()
-            );
-
-            return $sql;
-        }
-    }
-
-    //--------------------------------------------------------------------
-    // Utility Methods
-    //--------------------------------------------------------------------
-
-    /**
-     * Wrap a table in keyword identifiers.
-     *
-     * @param  string  $table
-     * @return string
-     */
-    public function wrapTable($table)
-    {
-        return $this->wrap($this->connection->getTablePrefix() .$table);
-    }
-
-    /**
-     * Wrap a value in keyword identifiers.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    public function wrap($value)
-    {
-        if (strpos(strtolower($value), ' as ') !== false) {
-            $segments = explode(' ', $value);
-
-            return $this->wrap($segments[0]) .' AS ' .$this->wrap($segments[2]);
-        }
-
-        $wrapped = array();
-
-        $segments = explode('.', $value);
-
-        foreach ($segments as $key => $segment) {
-            if (($key == 0) && (count($segments) > 1)) {
-                $wrapped[] = $this->wrapTable($segment);
-            } else {
-                $wrapped[] = $this->wrapValue($segment);
-            }
-        }
-
-        return implode('.', $wrapped);
-    }
-
-    /**
-     * Wrap an array of values.
-     *
-     * @param  array  $values
-     * @return array
-     */
-    public function wrapArray(array $values)
-    {
-        return array_map(array($this, 'wrap'), $values);
-    }
-
-    /**
-     * Wrap a single string in keyword identifiers.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    protected function wrapValue($value)
-    {
-        $wrapper = $this->connection->getWrapper();
-
-        return ($value !== '*') ? sprintf($wrapper, $value) : $value;
-    }
-
-    /**
-     * Concatenate an array of segments, removing empties.
-     *
-     * @param  array   $segments
-     * @return string
-     */
-    protected function concatenate($segments)
-    {
-        return implode(' ', array_filter($segments, function($value) {
-            return (string) ($value !== '');
-        }));
-    }
-
-    /**
-     * Remove the leading boolean from a statement.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    protected function removeLeadingBoolean($value)
-    {
-        return preg_replace('/AND |OR /', '', $value, 1);
-    }
-
-    /**
-     * Create query parameter place-holders for an array.
-     *
-     * @param  array   $values
-     * @return string
-     */
-    public function parameterize(array $values)
-    {
-        return implode(', ', array_map(array($this, 'parameter'), $values));
-    }
-
-    /**
-     * Get the appropriate query parameter place-holder for a value.
-     *
-     * @param  mixed   $value
-     * @return string
-     */
-    public function parameter($value)
-    {
-        return ($value instanceof Expression) ? $value->get() : '?';
-    }
-
-    /**
-     * Convert an array of column names into a delimited string.
-     *
-     * @param  array   $columns
-     * @return string
-     */
-    public function columnize(array $columns)
-    {
-        return implode(', ', array_map(array($this, 'wrap'), $columns));
-    }
 }
