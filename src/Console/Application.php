@@ -111,6 +111,27 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
+     * Add an array of commands through the Application.
+     *
+     * @param  array|dynamic  $commands
+     * @return void
+     */
+    public function addCommands(array $commands)
+    {
+        $commands = is_array($commands) ? $commands : func_get_args();
+
+        foreach ($commands as $command) {
+            if(is_string($command)) {
+                $command = '\\' .ltrim($command, '\\');
+
+                $command = new $command();
+            }
+
+            $this->add($command);
+        }
+    }
+
+    /**
      * Add the command to the parent instance.
      *
      * @param  \Symfony\Component\Console\Command\Command  $command
@@ -144,25 +165,6 @@ class Application extends \Symfony\Component\Console\Application
 
         foreach ($commands as $command) {
             $this->resolve($command);
-        }
-    }
-
-    /**
-     * Add an array of commands through the Application.
-     *
-     * @param  array|dynamic  $commands
-     * @return void
-     */
-    public function addCommands($commands)
-    {
-        $commands = is_array($commands) ? $commands : func_get_args();
-
-        foreach ($commands as $className) {
-            $className = '\\' .ltrim($className, '\\');
-
-            $command = new $className();
-
-            $this->add($command);
         }
     }
 
