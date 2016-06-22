@@ -148,6 +148,25 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
+     * Add an array of commands through the Application.
+     *
+     * @param  array|dynamic  $commands
+     * @return void
+     */
+    public function addCommands($commands)
+    {
+        $commands = is_array($commands) ? $commands : func_get_args();
+
+        foreach ($commands as $className) {
+            $className = '\\' .ltrim($className, '\\');
+
+            $command = new $className();
+
+            $this->add($command);
+        }
+    }
+
+    /**
      * Get the default input definitions for the applications.
      *
      * @return \Symfony\Component\Console\Input\InputDefinition

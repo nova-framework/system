@@ -833,7 +833,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Get the configuration loader instance.
      *
-     * @return \Config\LoaderInterface
+     * @return \Nova\Config\LoaderInterface
      */
     public function getConfigLoader()
     {
