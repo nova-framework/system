@@ -24,11 +24,11 @@ class BaseCommand extends Command
         $package = $this->input->getOption('package');
 
         if ( ! is_null($package)) {
-            return $this->packagePath .DS .$package .DS .'src' .DS .'Migrations';
+            return $this->packagePath .DS .$package .DS .'migrations';
         }
 
         // Default Migrations Path.
-        return $this->framework['path'] .DS .'Database' .DS .'Migrations';
+        return $this->framework['path.base'] .DS .'database' .DS .'migrations';
     }
 
 }
