@@ -10,7 +10,7 @@ namespace Nova\Database;
 
 use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
-use Nova\Database\Query\Builder;
+use Nova\Database\ModelQuery as QueryBuilder;
 use Nova\Helpers\Inflector;
 
 use DB;
@@ -283,7 +283,9 @@ class Model
      */
     public function newQuery()
     {
-        return $this->db->table($this->table);
+        $query = $this->db->table($this->table);
+
+        return with(new QueryBuilder($query))->setModel($this);
     }
 
     /**
