@@ -71,7 +71,7 @@ class MigrateMakeCommand extends BaseCommand
         //
         $this->writeMigration($name, $table, $create);
 
-        $this->call('dump-autoload');
+        //$this->call('dump-autoload');
     }
 
     /**
