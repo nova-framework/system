@@ -1679,7 +1679,7 @@ class Validator implements MessageProviderInterface
     public function addExtensions(array $extensions)
     {
         if ($extensions) {
-            $keys = array_map(array('\Helpers\Inflector', 'tableize'), array_keys($extensions));
+            $keys = array_map(array('\Nova\Helpers\Inflector', 'tableize'), array_keys($extensions));
 
             $extensions = array_combine($keys, array_values($extensions));
         }
@@ -1749,7 +1749,7 @@ class Validator implements MessageProviderInterface
     public function addReplacers(array $replacers)
     {
         if ($replacers) {
-            $keys = array_map(array('\Helpers\Inflector', 'tableize'), array_keys($replacers));
+            $keys = array_map(array('\Nova\Helpers\Inflector', 'tableize'), array_keys($replacers));
 
             $replacers = array_combine($keys, array_values($replacers));
         }
