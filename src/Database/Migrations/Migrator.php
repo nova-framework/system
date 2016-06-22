@@ -256,7 +256,7 @@ class Migrator
     {
         $file = implode('_', array_slice(explode('_', $file), 4));
 
-        $className = '\App\Database\Migrations\\' .Inflector::tableize($file);
+        $className = Inflector::tableize($file);
 
         return new $className();
     }

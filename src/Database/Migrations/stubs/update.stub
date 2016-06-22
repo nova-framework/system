@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Database\Migrations;
-
 use Nova\Database\Schema\Blueprint;
 use Nova\Database\Migrations\Migration;
 
