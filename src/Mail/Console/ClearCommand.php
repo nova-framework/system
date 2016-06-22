@@ -13,7 +13,7 @@ class ClearCommand extends Command
      *
      * @var string
      */
-    protected $name = 'log:clear';
+    protected $name = 'mailer:clear';
 
     /**
      * The console command description.
