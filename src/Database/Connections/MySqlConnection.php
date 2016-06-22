@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Connections;
 
 use Nova\Database\Schema\MySqlBuilder;
 use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;

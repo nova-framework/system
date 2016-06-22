@@ -2,10 +2,10 @@
 
 namespace Nova\Database\Connectors;
 
-use Nova\Database\MySqlConnection;
-use Nova\Database\SQLiteConnection;
-use Nova\Database\PostgresConnection;
-use Nova\Database\SqlServerConnection;
+use Nova\Database\Connections\MySqlConnection;
+use Nova\Database\Connections\SQLiteConnection;
+use Nova\Database\Connections\PostgresConnection;
+use Nova\Database\Connections\SqlServerConnection;
 
 use Illuminate\Container\Container;
 
@@ -176,16 +176,16 @@ class ConnectionFactory
         switch ($config['driver'])
         {
             case 'mysql':
-                return new MySqlConnector;
+                return new MySqlConnector();
 
             case 'pgsql':
-                return new PostgresConnector;
+                return new PostgresConnector();
 
             case 'sqlite':
-                return new SQLiteConnector;
+                return new SQLiteConnector();
 
             case 'sqlsrv':
-                return new SqlServerConnector;
+                return new SqlServerConnector();
         }
 
         throw new \InvalidArgumentException("Unsupported driver [{$config['driver']}]");

@@ -32,9 +32,6 @@ class MigrationServiceProvider extends ServiceProvider
     {
         $this->registerRepository();
 
-        // Once we have registered the migrator instance we will go ahead and register
-        // all of the migration related commands that are used by the "Artisan" CLI
-        // so that they may be easily accessed for registering with the consoles.
         $this->registerMigrator();
 
         $this->registerCommands();
@@ -62,9 +59,6 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerMigrator()
     {
-        // The migrator is responsible for actually running and rollback the migration
-        // files in the application. We'll pass in our database connection resolver
-        // so the migrator can resolve any of these connections when it needs to.
         $this->app->bindShared('migrator', function($app)
         {
             $repository = $app['migration.repository'];
@@ -82,16 +76,10 @@ class MigrationServiceProvider extends ServiceProvider
     {
         $commands = array('Migrate', 'Rollback', 'Reset', 'Refresh', 'Install', 'Make');
 
-        // We'll simply spin through the list of commands that are migration related
-        // and register each one of them with an application container. They will
-        // be resolved in the Artisan start file and registered on the console.
         foreach ($commands as $command) {
-            $this->{'register'.$command.'Command'}();
+            $this->{'register' .$command .'Command'}();
         }
 
-        // Once the commands are registered in the application IoC container we will
-        // register them with the Artisan start event so that these are available
-        // when the Artisan application actually starts up and is getting used.
         $this->commands(
             'command.migrate', 'command.migrate.make',
             'command.migrate.install', 'command.migrate.rollback',
@@ -108,7 +96,7 @@ class MigrationServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.migrate', function($app)
         {
-            $packagePath = $app['path.base'].'/vendor';
+            $packagePath = $app['path.base'] .DS .'Vendor';
 
             return new MigrateCommand($app['migrator'], $packagePath);
         });
@@ -180,12 +168,9 @@ class MigrationServiceProvider extends ServiceProvider
 
         $this->app->bindShared('command.migrate.make', function($app)
         {
-            // Once we have the migration creator registered, we will create the command
-            // and inject the creator. The creator is responsible for the actual file
-            // creation of the migrations, and may be extended by these developers.
             $creator = $app['migration.creator'];
 
-            $packagePath = $app['path.base'].'/vendor';
+            $packagePath = $app['path.base'] .DS .'Vendor';
 
             return new MigrateMakeCommand($creator, $packagePath);
         });

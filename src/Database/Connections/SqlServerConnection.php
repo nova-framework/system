@@ -1,12 +1,13 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Connections;
 
-use Closure;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver as DoctrineDriver;
 use Nova\Database\Query\Processors\SqlServerProcessor;
 use Nova\Database\Query\Grammars\SqlServerGrammar as QueryGrammar;
 use Nova\Database\Schema\Grammars\SqlServerGrammar as SchemaGrammar;
+
+use Closure;
 
 
 class SqlServerConnection extends Connection

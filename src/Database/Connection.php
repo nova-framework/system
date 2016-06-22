@@ -137,18 +137,14 @@ class Connection implements ConnectionInterface
     {
         $this->pdo = $pdo;
 
-        // First we will setup the default properties. We keep track of the DB
-        // name we are connected to since it is needed when some reflective
-        // type commands are run such as checking whether a table exists.
+        //
         $this->database = $database;
 
         $this->tablePrefix = $tablePrefix;
 
         $this->config = $config;
 
-        // We need to initialize a query grammar and the query post processors
-        // which are both very important parts of the database abstractions
-        // so we initialize these to their default values while starting.
+        //
         $this->useDefaultQueryGrammar();
 
         $this->useDefaultPostProcessor();
@@ -276,9 +272,6 @@ class Connection implements ConnectionInterface
         {
             if ($me->pretending()) return array();
 
-            // For select statements, we'll simply execute the query and return an array
-            // of the database result set. Each element in the array will be a single
-            // row from the database table, and will either be an array or objects.
             $statement = $me->getReadPdo()->prepare($query);
 
             $statement->execute($me->prepareBindings($bindings));
@@ -355,9 +348,6 @@ class Connection implements ConnectionInterface
         {
             if ($me->pretending()) return 0;
 
-            // For update or delete statements, we want to get the number of rows affected
-            // by the statement and return that back to the developer. We'll first need
-            // to execute the statement and then we'll use PDO to fetch the affected.
             $statement = $me->getPdo()->prepare($query);
 
             $statement->execute($me->prepareBindings($bindings));
@@ -394,15 +384,9 @@ class Connection implements ConnectionInterface
 
         foreach ($bindings as $key => $value)
         {
-            // We need to transform all instances of the DateTime class into an actual
-            // date string. Each query grammar maintains its own date string format
-            // so we'll just ask the grammar for the format to get from the date.
-            if ($value instanceof DateTime)
-            {
+            if ($value instanceof DateTime) {
                 $bindings[$key] = $value->format($grammar->getDateFormat());
-            }
-            elseif ($value === false)
-            {
+            } else if ($value === false) {
                 $bindings[$key] = 0;
             }
         }
@@ -422,21 +406,12 @@ class Connection implements ConnectionInterface
     {
         $this->beginTransaction();
 
-        // We'll simply execute the given callback within a try / catch block
-        // and if we catch any exception we can rollback the transaction
-        // so that none of the changes are persisted to the database.
         try
         {
             $result = $callback($this);
 
             $this->commit();
-        }
-
-        // If we catch an exception, we will roll back so nothing gets messed
-        // up in the database. Then we'll re-throw the exception so it can
-        // be handled how the developer sees fit for their applications.
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $this->rollBack();
 
             throw $e;
@@ -519,9 +494,6 @@ class Connection implements ConnectionInterface
 
         $this->queryLog = array();
 
-        // Basically to make the database connection "pretend", we will just return
-        // the default values for all the query methods, then we will return an
-        // array of queries that were "executed" within the Closure callback.
         $callback($this);
 
         $this->pretending = false;
@@ -543,25 +515,13 @@ class Connection implements ConnectionInterface
     {
         $start = microtime(true);
 
-        // To execute the statement, we'll simply call the callback, which will actually
-        // run the SQL against the PDO connection. Then we can calculate the time it
-        // took to execute and log the query SQL, bindings and time in our memory.
         try
         {
             $result = $callback($this, $query, $bindings);
-        }
-
-        // If an exception occurs when attempting to run a query, we'll format the error
-        // message to include the bindings with SQL, which will make this exception a
-        // lot more helpful to the developer instead of just the database's errors.
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             throw new QueryException($query, $this->prepareBindings($bindings), $e);
         }
 
-        // Once we have run the query we will calculate the time that it took to run and
-        // then log the query, bindings, and execution time so we will report them on
-        // the event that the developer needs them. We'll log time in milliseconds.
         $time = $this->getElapsedTime($start);
 
         $this->logQuery($query, $bindings, $time);
@@ -579,9 +539,8 @@ class Connection implements ConnectionInterface
      */
     public function logQuery($query, $bindings, $time = null)
     {
-        if (isset($this->events))
-        {
-            $this->events->fire('illuminate.query', array($query, $bindings, $time, $this->getName()));
+        if (isset($this->events)) {
+            $this->events->fire('nova.query', array($query, $bindings, $time, $this->getName()));
         }
 
         if ( ! $this->loggingQueries) return;
@@ -599,7 +558,7 @@ class Connection implements ConnectionInterface
     {
         if (isset($this->events))
         {
-            $this->events->listen('illuminate.query', $callback);
+            $this->events->listen('nova.query', $callback);
         }
     }
 
@@ -836,8 +795,7 @@ class Connection implements ConnectionInterface
      */
     public function getPaginator()
     {
-        if ($this->paginator instanceof Closure)
-        {
+        if ($this->paginator instanceof Closure) {
             $this->paginator = call_user_func($this->paginator);
         }
 
@@ -862,8 +820,7 @@ class Connection implements ConnectionInterface
      */
     public function getCacheManager()
     {
-        if ($this->cache instanceof Closure)
-        {
+        if ($this->cache instanceof Closure) {
             $this->cache = call_user_func($this->cache);
         }
 

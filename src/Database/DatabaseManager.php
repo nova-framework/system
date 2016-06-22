@@ -2,7 +2,7 @@
 
 namespace Nova\Database;
 
-use Nova\Database\Connectors\ConnectionFactory;
+use Nova\Database\Connections\ConnectionFactory;
 
 
 class DatabaseManager implements ConnectionResolverInterface
@@ -17,7 +17,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * The database connection factory instance.
      *
-     * @var \Nova\Database\Connectors\ConnectionFactory
+     * @var \Nova\Database\Connections\ConnectionFactory
      */
     protected $factory;
 
@@ -39,7 +39,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Create a new database manager instance.
      *
      * @param  \Nova\Foundation\Application  $app
-     * @param  \Nova\Database\Connectors\ConnectionFactory  $factory
+     * @param  \Nova\Database\Connections\ConnectionFactory  $factory
      * @return void
      */
     public function __construct($app, ConnectionFactory $factory)
@@ -59,9 +59,6 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $name = $name ?: $this->getDefaultConnection();
 
-        // If we haven't created this connection, we'll create it based on the config
-        // provided in the application. Once we've created the connections we will
-        // set the "fetch mode" for PDO which determines the query return types.
         if ( ! isset($this->connections[$name])) {
             $connection = $this->makeConnection($name);
 
@@ -109,18 +106,12 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $config = $this->getConfig($name);
 
-        // First we will check by the connection name to see if an extension has been
-        // registered specifically for that connection. If it has we will call the
-        // Closure and pass it the config allowing it to resolve the connection.
         if (isset($this->extensions[$name])) {
             return call_user_func($this->extensions[$name], $config, $name);
         }
 
         $driver = $config['driver'];
 
-        // Next we will check to see if an extension has been registered for a driver
-        // and will call the Closure if so, which allows us to have a more generic
-        // resolver for the drivers themselves which applies to all connections.
         if (isset($this->extensions[$driver])) {
             return call_user_func($this->extensions[$driver], $config, $name);
         }
@@ -142,9 +133,6 @@ class DatabaseManager implements ConnectionResolverInterface
             $connection->setEventDispatcher($this->app['events']);
         }
 
-        // The database connection can also utilize a cache manager instance when cache
-        // functionality is used on queries, which provides an expressive interface
-        // to caching both fluent queries and Eloquent queries that are executed.
         $app = $this->app;
 
         $connection->setCacheManager(function() use ($app)
@@ -152,9 +140,6 @@ class DatabaseManager implements ConnectionResolverInterface
             return $app['cache'];
         });
 
-        // We will setup a Closure to resolve the paginator instance on the connection
-        // since the Paginator isn't used on every request and needs quite a few of
-        // our dependencies. It'll be more efficient to lazily resolve instances.
         $connection->setPaginator(function() use ($app)
         {
             return $app['paginator'];
@@ -175,9 +160,6 @@ class DatabaseManager implements ConnectionResolverInterface
     {
         $name = $name ?: $this->getDefaultConnection();
 
-        // To get the database connection configuration, we will just pull each of the
-        // connection configurations and get the configurations for the given name.
-        // If the configuration doesn't exist, we'll throw an exception and bail.
         $connections = $this->app['config']['database.connections'];
 
         if (is_null($config = array_get($connections, $name))) {
