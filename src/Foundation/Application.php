@@ -843,13 +843,13 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     /**
      * Get the Service Provider Repository instance.
      *
-     * @return \Core\Providers
+     * @return \Nova\Foundation\ProviderRepository
      */
     public function getProviderRepository()
     {
-        $path = APPDIR .'Storage';
+        $manifest = $this['config']['app.manifest'];
 
-        return new ProviderRepository($path);
+        return new ProviderRepository($manifest);
     }
 
     /**
