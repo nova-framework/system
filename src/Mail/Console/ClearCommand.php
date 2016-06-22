@@ -13,14 +13,14 @@ class ClearCommand extends Command
      *
      * @var string
      */
-    protected $name = 'mailer:clear';
+    protected $name = 'messages:clear';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Flush the Mailer log";
+    protected $description = "Flush the Mailer's messages log";
 
     /**
      * The File System instance.
