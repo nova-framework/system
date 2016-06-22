@@ -33,7 +33,7 @@
             "Nova\\" : "src/"
         },
         "files": [
-            "src/functions.php"
+            "scripts/functions.php"
         ]
     },
     "prefer-stable": true,
