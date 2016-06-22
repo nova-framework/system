@@ -1475,7 +1475,10 @@ class Builder
 
         $this->skip(($page - 1) * $perPage)->take($perPage + 1);
 
-        return $paginator->make($this->get($columns), $perPage);
+        // Retrieve the results from database.
+        $results = $this->get($columns);
+
+        return $paginator->make($results, $perPage);
     }
 
     /**
