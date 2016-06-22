@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connectors;
+namespace Nova\Database\Connections;
 
 use Nova\Database\Connections\MySqlConnection;
 use Nova\Database\Connections\SQLiteConnection;
