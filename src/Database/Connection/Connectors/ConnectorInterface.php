@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connections\Connectors;
+namespace Nova\Database\Connection\Connectors;
 
 
 interface ConnectorInterface

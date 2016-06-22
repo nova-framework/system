@@ -5,7 +5,7 @@ namespace Nova\Database;
 use Nova\Database\Model as SimpleModel;
 use Nova\Database\ORM\Model;
 use Nova\Support\ServiceProvider;
-use Nova\Database\Connections\ConnectionFactory;
+use Nova\Database\Connection\ConnectionFactory;
 
 
 class DatabaseServiceProvider extends ServiceProvider

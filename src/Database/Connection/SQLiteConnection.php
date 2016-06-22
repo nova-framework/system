@@ -1,22 +1,21 @@
 <?php
 
-namespace Nova\Database\Connections;
+namespace Nova\Database\Connection;
 
 use Nova\Database\Connection;
-use Nova\Database\Query\Processors\PostgresProcessor;
-use Nova\Database\Query\Grammars\PostgresGrammar as QueryGrammar;
-use Nova\Database\Schema\Grammars\PostgresGrammar as SchemaGrammar;
-use Nova\Database\Query\Processors\PostgresProcessor;
+use Nova\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
+use Nova\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
+use Nova\Database\Query\Processors\SQLiteProcessor;
 
-use Doctrine\DBAL\Driver\PDOPgSql\Driver as DoctrineDriver;
+use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
 
 
-class PostgresConnection extends Connection
+class SQLiteConnection extends Connection
 {
     /**
      * Get the default query grammar instance.
      *
-     * @return \Nova\Database\Query\Grammars\PostgresGrammar
+     * @return \Nova\Database\Query\Grammars\SQLiteGrammar
      */
     protected function getDefaultQueryGrammar()
     {
@@ -26,7 +25,7 @@ class PostgresConnection extends Connection
     /**
      * Get the default schema grammar instance.
      *
-     * @return \Nova\Database\Schema\Grammars\PostgresGrammar
+     * @return \Nova\Database\Schema\Grammars\SQLiteGrammar
      */
     protected function getDefaultSchemaGrammar()
     {
@@ -36,17 +35,17 @@ class PostgresConnection extends Connection
     /**
      * Get the default post processor instance.
      *
-     * @return \Nova\Database\Query\Processors\PostgresProcessor
+     * @return \Nova\Database\Query\Processors\Processor
      */
     protected function getDefaultPostProcessor()
     {
-        return new PostgresProcessor;
+        return new SQLiteProcessor;
     }
 
     /**
      * Get the Doctrine DBAL driver.
      *
-     * @return \Doctrine\DBAL\Driver\PDOPgSql\Driver
+     * @return \Doctrine\DBAL\Driver\PDOSqlite\Driver
      */
     protected function getDoctrineDriver()
     {

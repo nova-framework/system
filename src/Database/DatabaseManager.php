@@ -2,7 +2,7 @@
 
 namespace Nova\Database;
 
-use Nova\Database\Connections\ConnectionFactory;
+use Nova\Database\Connection\ConnectionFactory;
 
 
 class DatabaseManager implements ConnectionResolverInterface
@@ -17,7 +17,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * The database connection factory instance.
      *
-     * @var \Nova\Database\Connections\ConnectionFactory
+     * @var \Nova\Database\Connection\ConnectionFactory
      */
     protected $factory;
 
@@ -39,7 +39,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Create a new database manager instance.
      *
      * @param  \Nova\Foundation\Application  $app
-     * @param  \Nova\Database\Connections\ConnectionFactory  $factory
+     * @param  \Nova\Database\Connection\ConnectionFactory  $factory
      * @return void
      */
     public function __construct($app, ConnectionFactory $factory)

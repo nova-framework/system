@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connections;
+namespace Nova\Database\Connection;
 
 use Nova\Database\Connection;
 use Nova\Database\Query\Processors\SqlServerProcessor;
