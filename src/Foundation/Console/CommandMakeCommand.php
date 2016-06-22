@@ -100,9 +100,9 @@ class CommandMakeCommand extends Command
     protected function addNamespace($stub)
     {
         if ( ! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Commands\\'.$namespace.';', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console\\'.$namespace.';', $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Commands;', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console;', $stub);
         }
     }
 
@@ -116,7 +116,7 @@ class CommandMakeCommand extends Command
         $path = $this->input->getOption('path');
 
         if (is_null($path)) {
-            return $this->framework['path'] .'/Commands';
+            return $this->framework['path'] .'/Console';
         } else {
             return $this->framework['path.base'] .DS .$path;
         }
