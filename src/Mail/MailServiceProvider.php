@@ -49,6 +49,23 @@ class MailServiceProvider extends ServiceProvider
 
             return $mailer;
         });
+
+        $this->registerCommands();
+    }
+
+    /**
+     * Register the Mailer related Console commands.
+     *
+     * @return void
+     */
+    public function registerCommands()
+    {
+        $this->app->bindShared('command.mailer.clear', function($app)
+        {
+            return new Console\ClearCommand($app['files']);
+        });
+
+        $this->commands('command.mailer.clear');
     }
 
     /**
