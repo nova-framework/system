@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connectors;
+namespace Nova\Database\Connections\Connectors;
 
 
 class MySqlConnector extends Connector implements ConnectorInterface

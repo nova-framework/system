@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connectors;
+namespace Nova\Database\Connections\Connectors;
 
 
 class SQLiteConnector extends Connector implements ConnectorInterface
