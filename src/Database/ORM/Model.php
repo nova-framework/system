@@ -1,67 +1,53 @@
 <?php
-/**
- * Model - Implements a Object Relational Model class.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Database\ORM;
 
+use DateTime;
+use ArrayAccess;
+use Carbon\Carbon;
+use LogicException;
 use Nova\Events\Dispatcher;
-use Nova\Helpers\Inflector;
-use Nova\Database\Connection;
-use Nova\Database\ConnectionResolverInterface as Resolver;
-use Nova\Database\Query\Builder as QueryBuilder;
-use Nova\Database\ORM\Builder;
-use Nova\Database\ORM\ModelNotFoundException;
-use Nova\Database\ORM\Relations\BelongsTo;
-use Nova\Database\ORM\Relations\BelongsToMany;
+use Nova\Database\ORM\Relations\Pivot;
 use Nova\Database\ORM\Relations\HasOne;
 use Nova\Database\ORM\Relations\HasMany;
-use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\ORM\Relations\MorphTo;
-use Nova\Database\ORM\Relations\MorphToMany;
+use Nova\Support\Contracts\JsonableInterface;
+use Nova\Support\Contracts\ArrayableInterface;
+use Nova\Database\ORM\Relations\Relation;
 use Nova\Database\ORM\Relations\MorphOne;
 use Nova\Database\ORM\Relations\MorphMany;
-use Nova\Database\ORM\Relations\Pivot;
-use Nova\Database\ORM\Relations\Relation;
-use Nova\Support\Contracts\ArrayableInterface;
-use Nova\Support\Contracts\JsonableInterface;
-use Carbon\Carbon;
+use Nova\Database\ORM\Relations\BelongsTo;
+use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Database\ORM\Relations\MorphToMany;
+use Nova\Database\ORM\Relations\BelongsToMany;
+use Nova\Database\ORM\Relations\HasManyThrough;
+use Nova\Database\ConnectionResolverInterface as Resolver;
 
-use ArrayAccess;
-use DateTime;
-use DateTimeInterface;
-use LogicException;
-use PDO;
-
-
-class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
+abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterface
 {
     /**
-     * The Database Connection name.
+     * The connection name for the model.
      *
      * @var string
      */
-    protected $connection = null;
+    protected $connection;
 
     /**
-     * The table associated with the Model.
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table;
 
     /**
-     * The primary key for the Model.
+     * The primary key for the model.
      *
      * @var string
      */
     protected $primaryKey = 'id';
 
     /**
-     * The number of Models to return for pagination.
+     * The number of models to return for pagination.
      *
      * @var int
      */
@@ -79,17 +65,17 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
-     * The Model's attributes.
+     * The model's attributes.
      *
      * @var array
      */
     protected $attributes = array();
 
     /**
-     * The Model attribute's original state.
+     * The model attribute's original state.
      *
      * @var array
      */
@@ -121,7 +107,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      *
      * @var array
      */
-     protected $appends = array();
+    protected $appends = array();
 
     /**
      * The attributes that are mass assignable.
@@ -173,7 +159,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     protected $morphClass;
 
     /**
-     * Indicates if the Model exists.
+     * Indicates if the model exists.
      *
      * @var bool
      */
@@ -219,7 +205,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      *
      * @var bool
      */
-    protected static $unguarded = true;
+    protected static $unguarded = false;
 
     /**
      * The cache of the mutated attributes for each class.
@@ -256,9 +242,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     const DELETED_AT = 'deleted_at';
 
-
     /**
-     * Create a new Model instance.
+     * Create a new ORM model instance.
      *
      * @param  array  $attributes
      * @return void
@@ -273,13 +258,14 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Check if the Model needs to be booted and if so, do it.
+     * Check if the model needs to be booted and if so, do it.
      *
      * @return void
      */
     protected function bootIfNotBooted()
     {
-        if (! isset(static::$booted[get_class($this)])) {
+        if ( ! isset(static::$booted[get_class($this)]))
+        {
             static::$booted[get_class($this)] = true;
 
             $this->fireModelEvent('booting', false);
@@ -291,7 +277,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * The "booting" method of the Model.
+     * The "booting" method of the model.
      *
      * @return void
      */
@@ -301,11 +287,14 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         static::$mutatorCache[$class] = array();
 
-        foreach (get_class_methods($class) as $method) {
-            if (preg_match('/^get(.+)Attribute$/', $method, $matches)) {
-                if (static::$snakeAttributes) {
-                    $matches[1] = Inflector::tableize($matches[1]);
-                }
+        // Here we will extract all of the mutated attributes so that we can quickly
+        // spin through them after we export models to their array form, which we
+        // need to be fast. This will let us always know the attributes mutate.
+        foreach (get_class_methods($class) as $method)
+        {
+            if (preg_match('/^get(.+)Attribute$/', $method, $matches))
+            {
+                if (static::$snakeAttributes) $matches[1] = snake_case($matches[1]);
 
                 static::$mutatorCache[$class][] = lcfirst($matches[1]);
             }
@@ -313,19 +302,54 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Fill the Model with an array of attributes.
+     * Register an observer with the Model.
+     *
+     * @param  object  $class
+     * @return void
+     */
+    public static function observe($class)
+    {
+        $instance = new static;
+
+        $className = get_class($class);
+
+        // When registering a model observer, we will spin through the possible events
+        // and determine if this observer has that method. If it does, we will hook
+        // it into the model's event system, making it convenient to watch these.
+        foreach ($instance->getObservableEvents() as $event)
+        {
+            if (method_exists($class, $event))
+            {
+                static::registerModelEvent($event, $className.'@'.$event);
+            }
+        }
+    }
+
+    /**
+     * Fill the model with an array of attributes.
      *
      * @param  array  $attributes
-     * @return Model
+     * @return \Nova\Database\ORM\Model|static
+     *
+     * @throws MassAssignmentException
      */
     public function fill(array $attributes)
     {
         $totallyGuarded = $this->totallyGuarded();
 
-        foreach ($this->fillableFromArray($attributes) as $key => $value) {
-            if ($this->isFillable($key)) {
+        foreach ($this->fillableFromArray($attributes) as $key => $value)
+        {
+            $key = $this->removeTableFromKey($key);
+
+            // The developers may choose to place some attributes in the "fillable"
+            // array, which means only those attributes may be set through mass
+            // assignment to the model, and all others will just be ignored.
+            if ($this->isFillable($key))
+            {
                 $this->setAttribute($key, $value);
-            } else if ($totallyGuarded) {
+            }
+            elseif ($totallyGuarded)
+            {
                 throw new MassAssignmentException($key);
             }
         }
@@ -341,7 +365,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function fillableFromArray(array $attributes)
     {
-        if ((count($this->fillable) > 0) && ! static::$unguarded) {
+        if (count($this->fillable) > 0 && ! static::$unguarded)
+        {
             return array_intersect_key($attributes, array_flip($this->fillable));
         }
 
@@ -349,14 +374,17 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Create a new instance of the given Model.
+     * Create a new instance of the given model.
      *
      * @param  array  $attributes
      * @param  bool   $exists
-     * @return Model
+     * @return \Nova\Database\ORM\Model|static
      */
     public function newInstance($attributes = array(), $exists = false)
     {
+        // This method just provides a convenient way for us to generate fresh model
+        // instances of this current model. It is particularly useful during the
+        // hydration of new objects via the ORM query builder instances.
         $model = new static((array) $attributes);
 
         $model->exists = $exists;
@@ -365,7 +393,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Create a new Model instance that is existing.
+     * Create a new model instance that is existing.
      *
      * @param  array  $attributes
      * @return \Nova\Database\ORM\Model|static
@@ -390,10 +418,12 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $collection = with($instance = new static)->newCollection();
 
-        foreach ($items as $item) {
+        foreach ($items as $item)
+        {
             $model = $instance->newFromBuilder($item);
 
-            if (! is_null($connection)) {
+            if ( ! is_null($connection))
+            {
                 $model->setConnection($connection);
             }
 
@@ -404,7 +434,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Create a collection of Models from a raw query.
+     * Create a collection of models from a raw query.
      *
      * @param  string  $query
      * @param  array  $bindings
@@ -413,9 +443,10 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function hydrateRaw($query, $bindings = array(), $connection = null)
     {
-        $instance = new static();
+        $instance = new static;
 
-        if (! is_null($connection)) {
+        if ( ! is_null($connection))
+        {
             $instance->setConnection($connection);
         }
 
@@ -425,12 +456,12 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Create a new Model instance, save it, then return the instance.
+     * Save a new model and return the instance.
      *
      * @param  array  $attributes
-     * @return static
+     * @return \Nova\Database\ORM\Model|static
      */
-    public static function create(array $attributes = array())
+    public static function create(array $attributes)
     {
         $model = new static($attributes);
 
@@ -447,7 +478,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function firstOrCreate(array $attributes)
     {
-        if (! is_null($instance = static::firstByAttributes($attributes))) {
+        if ( ! is_null($instance = static::firstByAttributes($attributes)))
+        {
             return $instance;
         }
 
@@ -462,7 +494,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function firstOrNew(array $attributes)
     {
-        if (! is_null($instance = static::firstByAttributes($attributes))) {
+        if ( ! is_null($instance = static::firstByAttributes($attributes)))
+        {
             return $instance;
         }
 
@@ -479,7 +512,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $query = static::query();
 
-        foreach ($attributes as $key => $value) {
+        foreach ($attributes as $key => $value)
+        {
             $query->where($key, $value);
         }
 
@@ -487,26 +521,27 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Begin querying the Model.
+     * Begin querying the model.
      *
      * @return \Nova\Database\ORM\Builder|static
      */
     public static function query()
     {
-        $instance = new static();
-
-        return $instance->newQuery();
+        return with(new static)->newQuery();
     }
 
     /**
-     * Begin querying the Model on a given connection.
+     * Begin querying the model on a given connection.
      *
      * @param  string  $connection
      * @return \Nova\Database\ORM\Builder|static
      */
     public static function on($connection = null)
     {
-        $instance = new static();
+        // First we will just create a fresh instance of this model, and then we can
+        // set the connection on the model so that it is be used for the queries
+        // we execute, as well as being set on each relationship we retrieve.
+        $instance = new static;
 
         $instance->setConnection($connection);
 
@@ -521,13 +556,13 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function all($columns = array('*'))
     {
-        $instance = new static();
+        $instance = new static;
 
         return $instance->newQuery()->get($columns);
     }
 
     /**
-     * Find a Model by its primary key.
+     * Find a model by its primary key.
      *
      * @param  mixed  $id
      * @param  array  $columns
@@ -535,13 +570,15 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function find($id, $columns = array('*'))
     {
-        $instance = new static();
+        if (is_array($id) && empty($id)) return new Collection;
+
+        $instance = new static;
 
         return $instance->newQuery()->find($id, $columns);
     }
 
     /**
-     * Find a Model by its primary key or return new static.
+     * Find a model by its primary key or return new static.
      *
      * @param  mixed  $id
      * @param  array  $columns
@@ -549,29 +586,29 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function findOrNew($id, $columns = array('*'))
     {
-        if (! is_null($model = static::find($id, $columns))) return $model;
+        if ( ! is_null($model = static::find($id, $columns))) return $model;
 
         return new static($columns);
     }
 
     /**
-     * Find a Model by its primary key or throw an exception.
+     * Find a model by its primary key or throw an exception.
      *
      * @param  mixed  $id
      * @param  array  $columns
      * @return \Nova\Database\ORM\Model|Collection|static
      *
-     * @throws \Exception
+     * @throws ModelNotFoundException
      */
     public static function findOrFail($id, $columns = array('*'))
     {
-        if (! is_null($model = static::find($id, $columns))) return $model;
+        if ( ! is_null($model = static::find($id, $columns))) return $model;
 
         throw with(new ModelNotFoundException)->setModel(get_called_class());
     }
 
     /**
-     * Eager load relations on the Model.
+     * Eager load relations on the model.
      *
      * @param  array|string  $relations
      * @return \Nova\Database\ORM\Model
@@ -588,7 +625,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Being querying a Model with eager loading.
+     * Being querying a model with eager loading.
      *
      * @param  array|string  $relations
      * @return \Nova\Database\ORM\Builder|static
@@ -597,7 +634,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         if (is_string($relations)) $relations = func_get_args();
 
-        $instance = new static();
+        $instance = new static;
 
         return $instance->newQuery()->with($relations);
     }
@@ -618,7 +655,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         $localKey = $localKey ?: $this->getKeyName();
 
-        return new HasOne($instance->newQuery(), $this, $instance->getTable() .'.' .$foreignKey, $localKey);
+        return new HasOne($instance->newQuery(), $this, $instance->getTable().'.'.$foreignKey, $localKey);
     }
 
     /**
@@ -641,7 +678,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         $localKey = $localKey ?: $this->getKeyName();
 
-        return new MorphOne($instance->newQuery(), $this, $table .'.'.$type, $table .'.' .$id, $localKey);
+        return new MorphOne($instance->newQuery(), $this, $table.'.'.$type, $table.'.'.$id, $localKey);
     }
 
     /**
@@ -655,18 +692,29 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function belongsTo($related, $foreignKey = null, $otherKey = null, $relation = null)
     {
-        if (is_null($relation)) {
-            list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        // If no relation name was given, we will use this debug backtrace to extract
+        // the calling method's name and use that as the relationship name as most
+        // of the time this will be what we desire to use for the relationships.
+        if (is_null($relation))
+        {
+            list(, $caller) = debug_backtrace(false);
 
             $relation = $caller['function'];
         }
 
-        if (is_null($foreignKey)) {
-            $foreignKey = Inflector::tableize($relation).'_id';
+        // If no foreign key was supplied, we can use a backtrace to guess the proper
+        // foreign key name by using the name of the relationship function, which
+        // when combined with an "_id" should conventionally match the columns.
+        if (is_null($foreignKey))
+        {
+            $foreignKey = snake_case($relation).'_id';
         }
 
         $instance = new $related;
 
+        // Once we have the foreign key names, we'll just create a new ORM query
+        // for the related models and returns the relationship instance which will
+        // actually be responsible for retrieving and hydrating every relations.
         $query = $instance->newQuery();
 
         $otherKey = $otherKey ?: $instance->getKeyName();
@@ -684,20 +732,38 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function morphTo($name = null, $type = null, $id = null)
     {
-        if (is_null($name)) {
-            list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        // If no name is provided, we will use the backtrace to get the function name
+        // since that is most likely the name of the polymorphic interface. We can
+        // use that to get both the class and foreign key that will be utilized.
+        if (is_null($name))
+        {
+            list(, $caller) = debug_backtrace(false);
 
-            $name = Inflector::tableize($caller['function']);
+            $name = snake_case($caller['function']);
         }
 
         list($type, $id) = $this->getMorphs($name, $type, $id);
 
-        if (is_null($class = $this->$type)) {
-            return new MorphTo($this->newQuery(), $this, $id, null, $type, $name);
-        } else {
+        // If the type value is null it is probably safe to assume we're eager loading
+        // the relationship. When that is the case we will pass in a dummy query as
+        // there are multiple types in the morph and we can't use single queries.
+        if (is_null($class = $this->$type))
+        {
+            return new MorphTo(
+                $this->newQuery(), $this, $id, null, $type, $name
+            );
+        }
+
+        // If we are not eager loading the relationship we will essentially treat this
+        // as a belongs-to style relationship since morph-to extends that class and
+        // we will pass in the appropriate values so that it behaves as expected.
+        else
+        {
             $instance = new $class;
 
-            return new MorphTo(with($instance)->newQuery(), $this, $id, $instance->getKeyName(), $type, $name);
+            return new MorphTo(
+                with($instance)->newQuery(), $this, $id, $instance->getKeyName(), $type, $name
+            );
         }
     }
 
@@ -717,30 +783,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         $localKey = $localKey ?: $this->getKeyName();
 
-        return new HasMany($instance->newQuery(), $this, $instance->getTable() .'.' .$foreignKey, $localKey);
-    }
-
-    /**
-     * Define a polymorphic one-to-many relationship.
-     *
-     * @param  string  $related
-     * @param  string  $name
-     * @param  string  $type
-     * @param  string  $id
-     * @param  string  $localKey
-     * @return \Nova\Database\ORM\Relations\MorphMany
-     */
-    public function morphMany($related, $name, $type = null, $id = null, $localKey = null)
-    {
-        $instance = new $related;
-
-        list($type, $id) = $this->getMorphs($name, $type, $id);
-
-        $table = $instance->getTable();
-
-        $localKey = $localKey ?: $this->getKeyName();
-
-        return new MorphMany($instance->newQuery(), $this, $table .'.' .$type, $table .'.' .$id, $localKey);
+        return new HasMany($instance->newQuery(), $this, $instance->getTable().'.'.$foreignKey, $localKey);
     }
 
     /**
@@ -764,6 +807,32 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
+     * Define a polymorphic one-to-many relationship.
+     *
+     * @param  string  $related
+     * @param  string  $name
+     * @param  string  $type
+     * @param  string  $id
+     * @param  string  $localKey
+     * @return \Nova\Database\ORM\Relations\MorphMany
+     */
+    public function morphMany($related, $name, $type = null, $id = null, $localKey = null)
+    {
+        $instance = new $related;
+
+        // Here we will gather up the morph type and ID for the relationship so that we
+        // can properly query the intermediate table of a relation. Finally, we will
+        // get the table and create the relationship instances for the developers.
+        list($type, $id) = $this->getMorphs($name, $type, $id);
+
+        $table = $instance->getTable();
+
+        $localKey = $localKey ?: $this->getKeyName();
+
+        return new MorphMany($instance->newQuery(), $this, $table.'.'.$type, $table.'.'.$id, $localKey);
+    }
+
+    /**
      * Define a many-to-many relationship.
      *
      * @param  string  $related
@@ -775,20 +844,34 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function belongsToMany($related, $table = null, $foreignKey = null, $otherKey = null, $relation = null)
     {
-        if (is_null($relation)) {
+        // If no relationship name was passed, we will pull backtraces to get the
+        // name of the calling function. We will use that function name as the
+        // title of this relation since that is a great convention to apply.
+        if (is_null($relation))
+        {
             $relation = $this->getBelongsToManyCaller();
         }
 
+        // First, we'll need to determine the foreign key and "other key" for the
+        // relationship. Once we have determined the keys we'll make the query
+        // instances as well as the relationship instances we need for this.
         $foreignKey = $foreignKey ?: $this->getForeignKey();
 
         $instance = new $related;
 
         $otherKey = $otherKey ?: $instance->getForeignKey();
 
-        if (is_null($table)) {
+        // If no table name was provided, we can guess it by concatenating the two
+        // models using underscores in alphabetical order. The two model names
+        // are transformed to snake case from their default CamelCase also.
+        if (is_null($table))
+        {
             $table = $this->joiningTable($related);
         }
 
+        // Now we're ready to create a new query builder for the related model and
+        // the relationship instances for the relation. The relations will set
+        // appropriate query constraint and entirely manages the hydrations.
         $query = $instance->newQuery();
 
         return new BelongsToMany($query, $this, $table, $foreignKey, $otherKey, $relation);
@@ -809,17 +892,26 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $caller = $this->getBelongsToManyCaller();
 
+        // First, we will need to determine the foreign key and "other key" for the
+        // relationship. Once we have determined the keys we will make the query
+        // instances, as well as the relationship instances we need for these.
         $foreignKey = $foreignKey ?: $name.'_id';
 
         $instance = new $related;
 
         $otherKey = $otherKey ?: $instance->getForeignKey();
 
+        // Now we're ready to create a new query builder for this related model and
+        // the relationship instances for this relation. This relations will set
+        // appropriate query constraints then entirely manages the hydrations.
         $query = $instance->newQuery();
 
-        $table = $table ?: Inflector::pluralize($name);
+        $table = $table ?: str_plural($name);
 
-        return new MorphToMany($query, $this, $name, $table, $foreignKey, $otherKey, $caller, $inverse);
+        return new MorphToMany(
+            $query, $this, $name, $table, $foreignKey,
+            $otherKey, $caller, $inverse
+        );
     }
 
     /**
@@ -836,6 +928,9 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $foreignKey = $foreignKey ?: $this->getForeignKey();
 
+        // For the inverse of the polymorphic many-to-many relations, we will change
+        // the way we determine the foreign and other keys, as it is the opposite
+        // of the morph-to-many method since we're figuring out these inverses.
         $otherKey = $otherKey ?: $name.'_id';
 
         return $this->morphToMany($related, $name, $table, $foreignKey, $otherKey, true);
@@ -850,11 +945,11 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $self = __FUNCTION__;
 
-        $caller = array_first(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), function($key, $trace) use ($self)
+        $caller = array_first(debug_backtrace(false), function($key, $trace) use ($self)
         {
             $caller = $trace['function'];
 
-            return (! in_array($caller, Model::$manyMethods) && ($caller != $self));
+            return ( ! in_array($caller, Model::$manyMethods) && $caller != $self);
         });
 
         return ! is_null($caller) ? $caller['function'] : null;
@@ -868,34 +963,47 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function joiningTable($related)
     {
-        $base = Inflector::tableize(class_basename($this));
+        // The joining table name, by convention, is simply the snake cased models
+        // sorted alphabetically and concatenated with an underscore, so we can
+        // just sort the models and join them together to get the table name.
+        $base = snake_case(class_basename($this));
 
-        $related = Inflector::tableize(class_basename($related));
+        $related = snake_case(class_basename($related));
 
         $models = array($related, $base);
 
+        // Now that we have the model names in an array we can just sort them and
+        // use the implode function to join them together with an underscores,
+        // which is typically used by convention within the database system.
         sort($models);
 
         return strtolower(implode('_', $models));
     }
 
     /**
-     * Destroy the Models for the given IDs.
+     * Destroy the models for the given IDs.
      *
      * @param  array|int  $ids
      * @return int
      */
     public static function destroy($ids)
     {
+        // We'll initialize a count here so we will return the total number of deletes
+        // for the operation. The developers can then check this number as a boolean
+        // type value or get this total count of records deleted for logging, etc.
         $count = 0;
 
         $ids = is_array($ids) ? $ids : func_get_args();
 
         $instance = new static;
 
+        // We will actually pull the models from the database table and call delete on
+        // each of them individually so that their events get fired properly with a
+        // correct set of attributes in case the developers wants to check these.
         $key = $instance->getKeyName();
 
-        foreach ($instance->whereIn($key, $ids)->get() as $model) {
+        foreach ($instance->whereIn($key, $ids)->get() as $model)
+        {
             if ($model->delete()) $count++;
         }
 
@@ -903,25 +1011,33 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Delete the Model from the database.
+     * Delete the model from the database.
      *
      * @return bool|null
      */
     public function delete()
     {
-        if (is_null($this->primaryKey)) {
-            throw new \Exception("No primary key defined on Model.");
+        if (is_null($this->primaryKey))
+        {
+            throw new \Exception("No primary key defined on model.");
         }
 
-        if ($this->exists) {
+        if ($this->exists)
+        {
             if ($this->fireModelEvent('deleting') === false) return false;
 
+            // Here, we'll touch the owning models, verifying these timestamps get updated
+            // for the models. This will allow any caching to get broken on the parents
+            // by the timestamp. Then we will go ahead and delete the model instance.
             $this->touchOwners();
 
             $this->performDeleteOnModel();
 
             $this->exists = false;
 
+            // Once the model has been deleted, we will fire off the deleted event so that
+            // the developers may hook into post-delete operations. We will then return
+            // a boolean true as the delete is presumably successful on the database.
             $this->fireModelEvent('deleted', false);
 
             return true;
@@ -937,7 +1053,9 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $softDelete = $this->softDelete;
 
-        //
+        // We will temporarily disable false delete to allow us to perform the real
+        // delete operation against the model. We will then restore the deleting
+        // state to what this was prior to this given hard deleting operation.
         $this->softDelete = false;
 
         $this->delete();
@@ -946,7 +1064,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Perform the actual delete query on this Model instance.
+     * Perform the actual delete query on this model instance.
      *
      * @return void
      */
@@ -954,11 +1072,14 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $query = $this->newQuery()->where($this->getKeyName(), $this->getKey());
 
-        if ($this->softDelete) {
+        if ($this->softDelete)
+        {
             $this->{static::DELETED_AT} = $time = $this->freshTimestamp();
 
             $query->update(array(static::DELETED_AT => $this->fromDateTime($time)));
-        } else {
+        }
+        else
+        {
             $query->delete();
         }
     }
@@ -970,13 +1091,21 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function restore()
     {
-        if ($this->softDelete) {
-            if ($this->fireModelEvent('restoring') === false) {
+        if ($this->softDelete)
+        {
+            // If the restoring event does not return false, we will proceed with this
+            // restore operation. Otherwise, we bail out so the developer will stop
+            // the restore totally. We will clear the deleted timestamp and save.
+            if ($this->fireModelEvent('restoring') === false)
+            {
                 return false;
             }
 
             $this->{static::DELETED_AT} = null;
 
+            // Once we have saved the model, we will fire the "restored" event so this
+            // developer will do anything they need to after a restore operation is
+            // totally finished. Then we will return the result of the save call.
             $result = $this->save();
 
             $this->fireModelEvent('restored', false);
@@ -1106,7 +1235,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         $instance = new static;
 
-        foreach ($instance->getObservableEvents() as $event) {
+        foreach ($instance->getObservableEvents() as $event)
+        {
             static::$dispatcher->forget("eloquent.{$event}: ".get_called_class());
         }
     }
@@ -1120,10 +1250,11 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected static function registerModelEvent($event, $callback)
     {
-        if (isset(static::$dispatcher)) {
+        if (isset(static::$dispatcher))
+        {
             $name = get_called_class();
 
-            static::$dispatcher->listen("orm.{$event}: {$name}", $callback);
+            static::$dispatcher->listen("eloquent.{$event}: {$name}", $callback);
         }
     }
 
@@ -1145,7 +1276,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Increment a Column's value by a given amount.
+     * Increment a column's value by a given amount.
      *
      * @param  string  $column
      * @param  int     $amount
@@ -1157,7 +1288,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Decrement a Column's value by a given amount.
+     * Decrement a column's value by a given amount.
      *
      * @param  string  $column
      * @param  int     $amount
@@ -1169,7 +1300,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Run the increment or decrement method on the Model.
+     * Run the increment or decrement method on the model.
      *
      * @param  string  $column
      * @param  int     $amount
@@ -1180,7 +1311,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $query = $this->newQuery();
 
-        if ( ! $this->exists) {
+        if ( ! $this->exists)
+        {
             return $query->{$method}($column, $amount);
         }
 
@@ -1188,14 +1320,15 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Update the Model in the database.
+     * Update the model in the database.
      *
      * @param  array  $attributes
      * @return mixed
      */
     public function update(array $attributes = array())
     {
-        if (! $this->exists) {
+        if ( ! $this->exists)
+        {
             return $this->newQuery()->update($attributes);
         }
 
@@ -1209,10 +1342,15 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function push()
     {
-        if (! $this->save()) return false;
+        if ( ! $this->save()) return false;
 
-        foreach ($this->relations as $models) {
-            foreach (Collection::make($models) as $model) {
+        // To sync all of the relationships to the database, we will simply spin through
+        // the relationships and save each model via this "push" method, which allows
+        // us to recurs into all of these nested relations for this model instance.
+        foreach ($this->relations as $models)
+        {
+            foreach (Collection::make($models) as $model)
+            {
                 if ( ! $model->push()) return false;
             }
         }
@@ -1221,7 +1359,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Save the Model to the database.
+     * Save the model to the database.
      *
      * @param  array  $options
      * @return bool
@@ -1230,13 +1368,27 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $query = $this->newQueryWithDeleted();
 
-        if ($this->fireModelEvent('saving') === false) {
+        // If the "saving" event returns false we'll bail out of the save and return
+        // false, indicating that the save failed. This gives an opportunities to
+        // listeners to cancel save operations if validations fail or whatever.
+        if ($this->fireModelEvent('saving') === false)
+        {
             return false;
         }
 
-        if ($this->exists) {
+        // If the model already exists in the database we can just update our record
+        // that is already in this database using the current IDs in this "where"
+        // clause to only update this model. Otherwise, we'll just insert them.
+        if ($this->exists)
+        {
             $saved = $this->performUpdate($query);
-        } else {
+        }
+
+        // If the model is brand new, we'll insert it into our database and set the
+        // ID attribute on the model to the value of the newly inserted row's ID
+        // which is typically an auto-increment value managed by the database.
+        else
+        {
             $saved = $this->performInsert($query);
         }
 
@@ -1261,27 +1413,40 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Perform a Model update operation.
+     * Perform a model update operation.
      *
      * @param  \Nova\Database\ORM\Builder  $query
-     * @return bool
+     * @return bool|null
      */
     protected function performUpdate(Builder $query)
     {
         $dirty = $this->getDirty();
 
-        if (count($dirty) > 0) {
-            if ($this->fireModelEvent('updating') === false) {
+        if (count($dirty) > 0)
+        {
+            // If the updating event returns false, we will cancel the update operation so
+            // developers can hook Validation systems into their models and cancel this
+            // operation if the model does not pass validation. Otherwise, we update.
+            if ($this->fireModelEvent('updating') === false)
+            {
                 return false;
             }
 
-            if ($this->timestamps) {
+            // First we need to create a fresh query instance and touch the creation and
+            // update timestamp on the model which are maintained by us for developer
+            // convenience. Then we will just continue saving the model instances.
+            if ($this->timestamps)
+            {
                 $this->updateTimestamps();
             }
 
+            // Once we have run the update operation, we will fire the "updated" event for
+            // this model instance. This will allow developers to hook into these after
+            // models are updated, giving them a chance to do any special processing.
             $dirty = $this->getDirty();
 
-            if (count($dirty) > 0) {
+            if (count($dirty) > 0)
+            {
                 $this->setKeysForSaveQuery($query)->update($dirty);
 
                 $this->fireModelEvent('updated', false);
@@ -1301,18 +1466,35 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         if ($this->fireModelEvent('creating') === false) return false;
 
-        if ($this->timestamps) {
+        // First we'll need to create a fresh query instance and touch the creation and
+        // update timestamps on this model, which are maintained by us for developer
+        // convenience. After, we will just continue saving these model instances.
+        if ($this->timestamps)
+        {
             $this->updateTimestamps();
         }
 
+        // If the model has an incrementing key, we can use the "insertGetId" method on
+        // the query builder, which will give us back the final inserted ID for this
+        // table from the database. Not all tables have to be incrementing though.
         $attributes = $this->attributes;
 
-        if ($this->incrementing) {
+        if ($this->incrementing)
+        {
             $this->insertAndSetId($query, $attributes);
-        } else {
+        }
+
+        // If the table is not incrementing we'll simply insert this attributes as they
+        // are, as this attributes arrays must contain an "id" column already placed
+        // there by the developer as the manually determined key for these models.
+        else
+        {
             $query->insert($attributes);
         }
 
+        // We will go ahead and set the exists property to true, so that it is set when
+        // the created event is fired, just in case the developer tries to update it
+        // during the event. This will allow them to do so and run an update here.
         $this->exists = true;
 
         $this->fireModelEvent('created', false);
@@ -1321,7 +1503,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Insert the given attributes and set the ID on the Model.
+     * Insert the given attributes and set the ID on the model.
      *
      * @param  \Nova\Database\ORM\Builder  $query
      * @param  array  $attributes
@@ -1335,13 +1517,14 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Touch the owning relations of the Model.
+     * Touch the owning relations of the model.
      *
      * @return void
      */
     public function touchOwners()
     {
-        foreach ($this->touches as $relation) {
+        foreach ($this->touches as $relation)
+        {
             $this->$relation()->touch();
         }
     }
@@ -1368,7 +1551,10 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         if ( ! isset(static::$dispatcher)) return true;
 
-        $event = "orm.{$event}: ".get_class($this);
+        // We will append the names of the class to the event to distinguish it from
+        // other model events that are fired, allowing us to listen on each model
+        // event set individually instead of catching event for all the models.
+        $event = "eloquent.{$event}: ".get_class($this);
 
         $method = $halt ? 'until' : 'fire';
 
@@ -1383,7 +1569,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function setKeysForSaveQuery(Builder $query)
     {
-        $query->where($this->getKeyName(), $this->getKeyForSaveQuery());
+        $query->where($this->getKeyName(), '=', $this->getKeyForSaveQuery());
 
         return $query;
     }
@@ -1395,11 +1581,14 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function getKeyForSaveQuery()
     {
-        if (isset($this->original[$this->getKeyName()])) {
+        if (isset($this->original[$this->getKeyName()]))
+        {
             return $this->original[$this->getKeyName()];
         }
-
-        return $this->getAttribute($this->getKeyName());
+        else
+        {
+            return $this->getAttribute($this->getKeyName());
+        }
     }
 
     /**
@@ -1423,11 +1612,13 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $time = $this->freshTimestamp();
 
-        if ( ! $this->isDirty(static::UPDATED_AT)) {
+        if ( ! $this->isDirty(static::UPDATED_AT))
+        {
             $this->setUpdatedAt($time);
         }
 
-        if ( ! $this->exists && ! $this->isDirty(static::CREATED_AT)) {
+        if ( ! $this->exists && ! $this->isDirty(static::CREATED_AT))
+        {
             $this->setCreatedAt($time);
         }
     }
@@ -1501,7 +1692,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function freshTimestamp()
     {
-        return new Carbon();
+        return new Carbon;
     }
 
     /**
@@ -1515,17 +1706,22 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Get a new Query for the Model's table.
+     * Get a new query builder for the model's table.
      *
-     * @return \Nova\Database\ORM\Builder
+     * @param  bool  $excludeDeleted
+     * @return \Nova\Database\ORM\Builder|static
      */
     public function newQuery($excludeDeleted = true)
     {
-        $builder = $this->newBuilder($this->newBaseQueryBuilder());
+        $builder = $this->newORMBuilder($this->newBaseQueryBuilder());
 
+        // Once we have the query builders, we will set the model instances so the
+        // builder can easily access any information it may need from the model
+        // while it is constructing and executing various queries against it.
         $builder->setModel($this)->with($this->with);
 
-        if ($excludeDeleted && $this->softDelete) {
+        if ($excludeDeleted && $this->softDelete)
+        {
             $builder->whereNull($this->getQualifiedDeletedAtColumn());
         }
 
@@ -1543,12 +1739,12 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Create a new ORM query builder for the Model.
+     * Create a new ORM query builder for the model.
      *
      * @param  \Nova\Database\Query\Builder $query
      * @return \Nova\Database\ORM\Builder|static
      */
-    public function newBuilder($query)
+    public function newORMBuilder($query)
     {
         return new Builder($query);
     }
@@ -1560,7 +1756,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function trashed()
     {
-        return ($this->softDelete && ! is_null($this->{static::DELETED_AT}));
+        return $this->softDelete && ! is_null($this->{static::DELETED_AT});
     }
 
     /**
@@ -1570,7 +1766,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public static function withTrashed()
     {
-        return with(new static())->newQueryWithDeleted();
+        return with(new static)->newQueryWithDeleted();
     }
 
     /**
@@ -1588,15 +1784,17 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Get a new QueryBuilder instance for the Connection.
+     * Get a new query builder instance for the connection.
      *
      * @return \Nova\Database\Query\Builder
      */
     protected function newBaseQueryBuilder()
     {
-        $connection = $this->getConnection();
+        $conn = $this->getConnection();
 
-        return new QueryBuilder($connection);
+        $grammar = $conn->getQueryGrammar();
+
+        return new QueryBuilder($conn, $grammar, $conn->getPostProcessor());
     }
 
     /**
@@ -1627,27 +1825,13 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     /**
      * Get the table associated with the model.
      *
-     * @return void
-     */
-    public static function getTableName()
-    {
-        $model = new static();
-
-        return $model->getTable();
-    }
-
-    /**
-     * Get the table associated with the model.
-     *
-     * @return void
+     * @return string
      */
     public function getTable()
     {
-       if (isset($this->table)) return $this->table;
+        if (isset($this->table)) return $this->table;
 
-       $baseName = Inflector::pluralize(class_basename($this));
-
-       return str_replace('\\', '', Inflector::tableize($baseName));
+        return str_replace('\\', '', snake_case(str_plural(class_basename($this))));
     }
 
     /**
@@ -1688,7 +1872,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function getQualifiedKeyName()
     {
-        return $this->getTable() .'.' .$this->getKeyName();
+        return $this->getTable().'.'.$this->getKeyName();
     }
 
     /**
@@ -1760,7 +1944,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Set the number of Models to return per page.
+     * Set the number of models to return per page.
      *
      * @param  int   $perPage
      * @return void
@@ -1771,13 +1955,13 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Get the default foreign key name for the Model.
+     * Get the default foreign key name for the model.
      *
      * @return string
      */
     public function getForeignKey()
     {
-        return Inflector::tableize(class_basename($this)).'_id';
+        return snake_case(class_basename($this)).'_id';
     }
 
     /**
@@ -1847,7 +2031,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Set the guarded attributes for the Model.
+     * Set the guarded attributes for the model.
      *
      * @param  array  $guarded
      * @return \Nova\Database\ORM\Model
@@ -1898,13 +2082,16 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function isFillable($key)
     {
-        if (static::$unguarded)  return true;
+        if (static::$unguarded) return true;
 
+        // If the key is in the "fillable" array, we can of course assume that it's
+        // a fillable attribute. Otherwise, we will check the guarded array when
+        // we need to determine if the attribute is black-listed on the model.
         if (in_array($key, $this->fillable)) return true;
 
         if ($this->isGuarded($key)) return false;
 
-        return (empty($this->fillable) && ! str_starts_with($key, '_'));
+        return empty($this->fillable) && ! starts_with($key, '_');
     }
 
     /**
@@ -1915,17 +2102,17 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function isGuarded($key)
     {
-        return (in_array($key, $this->guarded) || ($this->guarded == array('*')));
+        return in_array($key, $this->guarded) || $this->guarded == array('*');
     }
 
     /**
-     * Determine if the Model is totally guarded.
+     * Determine if the model is totally guarded.
      *
      * @return bool
      */
     public function totallyGuarded()
     {
-        return ((count($this->fillable) == 0) && ($this->guarded == array('*')));
+        return count($this->fillable) == 0 && $this->guarded == array('*');
     }
 
     /**
@@ -1936,7 +2123,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function removeTableFromKey($key)
     {
-        if (! str_contains($key, '.')) return $key;
+        if ( ! str_contains($key, '.')) return $key;
 
         return last(explode('.', $key));
     }
@@ -1984,7 +2171,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Convert the Model instance to JSON.
+     * Convert the model instance to JSON.
      *
      * @param  int  $options
      * @return string
@@ -2015,21 +2202,33 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $attributes = $this->getArrayableAttributes();
 
-        foreach ($this->getDates() as $key) {
-            if (! isset($attributes[$key])) continue;
+        // If an attribute is a date, we will cast it to a string after converting it
+        // to a DateTime / Carbon instance. This is so we will get some consistent
+        // formatting while accessing attributes vs. arraying / JSONing a model.
+        foreach ($this->getDates() as $key)
+        {
+            if ( ! isset($attributes[$key])) continue;
 
             $attributes[$key] = (string) $this->asDateTime($attributes[$key]);
         }
 
-        foreach ($this->getMutatedAttributes() as $key) {
-            if (! array_key_exists($key, $attributes)) continue;
+        // We want to spin through all the mutated attributes for this model and call
+        // the mutator for the attribute. We cache off every mutated attributes so
+        // we don't have to constantly check on attributes that actually change.
+        foreach ($this->getMutatedAttributes() as $key)
+        {
+            if ( ! array_key_exists($key, $attributes)) continue;
 
             $attributes[$key] = $this->mutateAttributeForArray(
                 $key, $attributes[$key]
             );
         }
 
-        foreach ($this->appends as $key) {
+        // Here we will grab all of the appended, calculated attributes to this model
+        // as these attributes are not really in the attributes array, but are run
+        // when we need to array or JSON the model for convenience to the coder.
+        foreach ($this->appends as $key)
+        {
             $attributes[$key] = $this->mutateAttributeForArray($key, null);
         }
 
@@ -2055,20 +2254,39 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $attributes = array();
 
-        foreach ($this->getArrayableRelations() as $key => $value) {
+        foreach ($this->getArrayableRelations() as $key => $value)
+        {
             if (in_array($key, $this->hidden)) continue;
 
-            if ($value instanceof ArrayableInterface) {
+            // If the values implements the Arrayable interface we can just call this
+            // toArray method on the instances which will convert both models and
+            // collections to their proper array form and we'll set the values.
+            if ($value instanceof ArrayableInterface)
+            {
                 $relation = $value->toArray();
-            } else if (is_null($value)) {
+            }
+
+            // If the value is null, we'll still go ahead and set it in this list of
+            // attributes since null is used to represent empty relationships if
+            // if it a has one or belongs to type relationships on the models.
+            elseif (is_null($value))
+            {
                 $relation = $value;
             }
 
-            if (static::$snakeAttributes) {
-                $key = Inflector::tableize($key);
+            // If the relationships snake-casing is enabled, we will snake case this
+            // key so that the relation attribute is snake cased in this returned
+            // array to the developers, making this consistent with attributes.
+            if (static::$snakeAttributes)
+            {
+                $key = snake_case($key);
             }
 
-            if (isset($relation) || is_null($value)) {
+            // If the relation value has been set, we will set it on this attributes
+            // list for returning. If it was not arrayable or null, we'll not set
+            // the value on the array because it is some type of invalid value.
+            if (isset($relation) || is_null($value))
+            {
                 $attributes[$key] = $relation;
             }
         }
@@ -2094,7 +2312,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function getArrayableItems(array $values)
     {
-        if (count($this->visible) > 0) {
+        if (count($this->visible) > 0)
+        {
             return array_intersect_key($values, array_flip($this->visible));
         }
 
@@ -2102,7 +2321,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Get an attribute from the Model.
+     * Get an attribute from the model.
      *
      * @param  string  $key
      * @return mixed
@@ -2111,26 +2330,35 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $inAttributes = array_key_exists($key, $this->attributes);
 
-        if ($inAttributes || $this->hasGetMutator($key)) {
+        // If the key references an attribute, we can just go ahead and return the
+        // plain attribute value from the model. This allows every attribute to
+        // be dynamically accessed through the _get method without accessors.
+        if ($inAttributes || $this->hasGetMutator($key))
+        {
             return $this->getAttributeValue($key);
         }
 
-        if (array_key_exists($key, $this->relations)) {
+        // If the key already exists in the relationships array, it just means the
+        // relationship has already been loaded, so we'll just return it out of
+        // here because there is no need to query within the relations twice.
+        if (array_key_exists($key, $this->relations))
+        {
             return $this->relations[$key];
         }
 
         // If the "attribute" exists as a method on the model, we will just assume
         // it is a relationship and will load and return results from the query
         // and hydrate the relationship's value on the "relationships" array.
-        $camelKey = Inflector::camelize($key);
+        $camelKey = camel_case($key);
 
-        if (method_exists($this, $camelKey)) {
+        if (method_exists($this, $camelKey))
+        {
             return $this->getRelationshipFromMethod($key, $camelKey);
         }
     }
 
     /**
-     * Get a plain attribute.
+     * Get a plain attribute (not a relationship).
      *
      * @param  string  $key
      * @return mixed
@@ -2139,9 +2367,19 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $value = $this->getAttributeFromArray($key);
 
-        if ($this->hasGetMutator($key)) {
+        // If the attribute has a get mutator, we will call that then return what
+        // it returns as the value, which is useful for transforming values on
+        // retrieval from the model to a form that is more useful for usage.
+        if ($this->hasGetMutator($key))
+        {
             return $this->mutateAttribute($key, $value);
-        } else if (in_array($key, $this->getDates())) {
+        }
+
+        // If the attribute is listed as a date, we will convert it to a DateTime
+        // instance on retrieval, which makes it quite convenient to work with
+        // date fields without having to create a mutator for each property.
+        elseif (in_array($key, $this->getDates()))
+        {
             if ($value) return $this->asDateTime($value);
         }
 
@@ -2156,7 +2394,8 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function getAttributeFromArray($key)
     {
-        if (array_key_exists($key, $this->attributes)) {
+        if (array_key_exists($key, $this->attributes))
+        {
             return $this->attributes[$key];
         }
     }
@@ -2174,8 +2413,10 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $relations = $this->$camelKey();
 
-        if (! $relations instanceof Relation) {
-            throw new LogicException('Relationship method must return an object of type Nova\Database\ORM\Relations\Relation');
+        if ( ! $relations instanceof Relation)
+        {
+            throw new LogicException('Relationship method must return an object of type '
+                . 'Nova\Database\ORM\Relations\Relation');
         }
 
         return $this->relations[$key] = $relations->getResults();
@@ -2189,9 +2430,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function hasGetMutator($key)
     {
-        $method = 'get' .Inflector::classify($key) .'Attribute';
-
-        return method_exists($this, $method);
+        return method_exists($this, 'get'.studly_case($key).'Attribute');
     }
 
     /**
@@ -2203,9 +2442,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function mutateAttribute($key, $value)
     {
-        $method = 'get' .Inflector::classify($key) .'Attribute';
-
-        return call_user_func(array($this, $method), $value);
+        return $this->{'get'.studly_case($key).'Attribute'}($value);
     }
 
     /**
@@ -2219,11 +2456,11 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $value = $this->mutateAttribute($key, $value);
 
-        return ($value instanceof ArrayableInterface) ? $value->toArray() : $value;
+        return $value instanceof ArrayableInterface ? $value->toArray() : $value;
     }
 
     /**
-     * Set a given attribute on the Model.
+     * Set a given attribute on the model.
      *
      * @param  string  $key
      * @param  mixed   $value
@@ -2231,12 +2468,23 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function setAttribute($key, $value)
     {
-        if ($this->hasSetMutator($key)) {
-            $method = 'set' .Inflector::classify($key) .'Attribute';
+        // First we will check for the presence of a mutator for the set operation
+        // which simply lets the developers tweak the attribute as it is set on
+        // the model, such as "json_encoding" an listing of data for storage.
+        if ($this->hasSetMutator($key))
+        {
+            $method = 'set'.studly_case($key).'Attribute';
 
-            return call_user_func(array($this, $method), $value);
-        } else if (in_array($key, $this->getDates())) {
-            if ($value) {
+            return $this->{$method}($value);
+        }
+
+        // If an attribute is listed as a "date", we'll convert it from a DateTime
+        // instance into a form proper for storage on the database tables using
+        // the connection grammar's date format. We will auto set the values.
+        elseif (in_array($key, $this->getDates()))
+        {
+            if ($value)
+            {
                 $value = $this->fromDateTime($value);
             }
         }
@@ -2252,9 +2500,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     public function hasSetMutator($key)
     {
-        $method = 'set' .Inflector::classify($key) .'Attribute';
-
-        return method_exists($this, $method);
+        return method_exists($this, 'set'.studly_case($key).'Attribute');
     }
 
     /**
@@ -2272,20 +2518,42 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     /**
      * Convert a DateTime to a storable string.
      *
-     * @param  \DateTimeInterface|int  $value
+     * @param  \DateTime|int  $value
      * @return string
      */
     public function fromDateTime($value)
     {
         $format = $this->getDateFormat();
 
-        if ($value instanceof DateTimeInterface) {
+        // If the value is already a DateTime instance, we will just skip the rest of
+        // these checks since they will be a waste of time, and hinder performance
+        // when checking the field. We will just return the DateTime right away.
+        if ($value instanceof DateTime)
+        {
             //
-        } else if (is_numeric($value)) {
+        }
+
+        // If the value is totally numeric, we will assume it is a UNIX timestamp and
+        // format the date as such. Once we have the date in DateTime form we will
+        // format it according to the proper format for the database connection.
+        elseif (is_numeric($value))
+        {
             $value = Carbon::createFromTimestamp($value);
-        } else if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value)) {
+        }
+
+        // If the value is in simple year, month, day format, we will format it using
+        // that setup. This is for simple "date" fields which do not have hours on
+        // the field. This conveniently picks up those dates and format correct.
+        elseif (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value))
+        {
             $value = Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
-        } else if (! $value instanceof DateTimeInterface) {
+        }
+
+        // If this value is some other type of string, we'll create the DateTime with
+        // the format used by the database connection. Once we get the instance we
+        // can return back the finally formatted DateTime instances to the devs.
+        elseif ( ! $value instanceof DateTime)
+        {
             $value = Carbon::createFromFormat($format, $value);
         }
 
@@ -2300,11 +2568,27 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function asDateTime($value)
     {
-        if (is_numeric($value)) {
+        // If this value is an integer, we will assume it is a UNIX timestamp's value
+        // and format a Carbon object from this timestamp. This allows flexibility
+        // when defining your date fields as they might be UNIX timestamps here.
+        if (is_numeric($value))
+        {
             return Carbon::createFromTimestamp($value);
-        } else if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value)) {
+        }
+
+        // If the value is in simply year, month, day format, we will instantiate the
+        // Carbon instances from that format. Again, this provides for simple date
+        // fields on the database, while still supporting Carbonized conversion.
+        elseif (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value))
+        {
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
-        } else if (! $value instanceof DateTimeInterface) {
+        }
+
+        // Finally, we will just assume this date is in the format used by default on
+        // the database connection and use that format to create the Carbon object
+        // that is returned back out to the developers after we convert it here.
+        elseif ( ! $value instanceof DateTime)
+        {
             $format = $this->getDateFormat();
 
             return Carbon::createFromFormat($format, $value);
@@ -2320,7 +2604,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      */
     protected function getDateFormat()
     {
-        return $this->getConnection()->getDateFormat();
+        return $this->getConnection()->getQueryGrammar()->getDateFormat();
     }
 
     /**
@@ -2376,7 +2660,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     /**
      * Sync the original attributes with the current.
      *
-     * @return Model
+     * @return \Nova\Database\ORM\Model
      */
     public function syncOriginal()
     {
@@ -2405,10 +2689,15 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $dirty = array();
 
-        foreach ($this->attributes as $key => $value) {
-            if ( ! array_key_exists($key, $this->original)) {
+        foreach ($this->attributes as $key => $value)
+        {
+            if ( ! array_key_exists($key, $this->original))
+            {
                 $dirty[$key] = $value;
-            } else if (($value !== $this->original[$key]) && ! $this->originalIsNumericallyEquivalent($key)) {
+            }
+            elseif ($value !== $this->original[$key] &&
+                                 ! $this->originalIsNumericallyEquivalent($key))
+            {
                 $dirty[$key] = $value;
             }
         }
@@ -2428,7 +2717,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
 
         $original = $this->original[$key];
 
-        return (is_numeric($current) && is_numeric($original) && (strcmp((string) $current, (string) $original) === 0));
+        return is_numeric($current) && is_numeric($original) && strcmp((string) $current, (string) $original) === 0;
     }
 
     /**
@@ -2457,7 +2746,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      *
      * @param  string  $relation
      * @param  mixed   $value
-     * @return Nova\Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function setRelation($relation, $value)
     {
@@ -2470,7 +2759,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
      * Set the entire relations array on the model.
      *
      * @param  array  $relations
-     * @return Nova\Database\ORM\Model
+     * @return \Nova\Database\ORM\Model
      */
     public function setRelations(array $relations)
     {
@@ -2480,17 +2769,17 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Get the database Connection instance.
+     * Get the database connection for the model.
      *
      * @return \Nova\Database\Connection
      */
     public function getConnection()
     {
-        return $this->resolveConnection($this->connection);
+        return static::resolveConnection($this->connection);
     }
 
     /**
-     * Get the current Connection name for the Model.
+     * Get the current connection name for the model.
      *
      * @return string
      */
@@ -2500,7 +2789,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Set the Connection associated with the Model.
+     * Set the connection associated with the model.
      *
      * @param  string  $name
      * @return \Nova\Database\ORM\Model
@@ -2594,11 +2883,35 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $class = get_class($this);
 
-        if (isset(static::$mutatorCache[$class])) {
+        if (isset(static::$mutatorCache[$class]))
+        {
             return static::$mutatorCache[get_class($this)];
         }
 
         return array();
+    }
+
+    /**
+     * Dynamically retrieve attributes on the model.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        return $this->getAttribute($key);
+    }
+
+    /**
+     * Dynamically set attributes on the model.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+    public function __set($key, $value)
+    {
+        $this->setAttribute($key, $value);
     }
 
     /**
@@ -2647,38 +2960,15 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Dynamically retrieve attributes on the model.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        return $this->getAttribute($key);
-    }
-
-    /**
-     * Dynamically set attributes on the model.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
-     */
-    public function __set($key, $value)
-    {
-        $this->setAttribute($key, $value);
-    }
-
-    /**
      * Determine if an attribute exists on the model.
      *
      * @param  string  $key
-     * @return void
+     * @return bool
      */
     public function __isset($key)
     {
-        return (isset($this->attributes[$key]) || isset($this->relations[$key]) ||
-            ($this->hasGetMutator($key) && ! is_null($this->getAttributeValue($key))));
+        return ((isset($this->attributes[$key]) || isset($this->relations[$key])) ||
+                ($this->hasGetMutator($key) && ! is_null($this->getAttributeValue($key))));
     }
 
     /**
@@ -2695,35 +2985,36 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * Handle dynamic method calls into the Method.
+     * Handle dynamic method calls into the method.
      *
      * @param  string  $method
-     * @param  array   $params
+     * @param  array   $parameters
      * @return mixed
      */
-    public function __call($method, $params)
+    public function __call($method, $parameters)
     {
-        if (in_array($method, array('increment', 'decrement'))) {
-            return call_user_func_array(array($this, $method), $params);
+        if (in_array($method, array('increment', 'decrement')))
+        {
+            return call_user_func_array(array($this, $method), $parameters);
         }
 
         $query = $this->newQuery();
 
-        return call_user_func_array(array($query, $method), $params);
+        return call_user_func_array(array($query, $method), $parameters);
     }
 
     /**
-     * Handle dynamic static method calls into the Method.
+     * Handle dynamic static method calls into the method.
      *
      * @param  string  $method
-     * @param  array   $params
+     * @param  array   $parameters
      * @return mixed
      */
-    public static function __callStatic($method, $params)
+    public static function __callStatic($method, $parameters)
     {
-        $instance = new static();
+        $instance = new static;
 
-        return call_user_func_array(array($instance, $method), $params);
+        return call_user_func_array(array($instance, $method), $parameters);
     }
 
     /**
@@ -2737,7 +3028,7 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     }
 
     /**
-     * When a Model is being unserialized, check if it needs to be booted.
+     * When a model is being unserialized, check if it needs to be booted.
      *
      * @return void
      */
@@ -2745,4 +3036,5 @@ class Model implements ArrayableInterface, JsonableInterface, ArrayAccess
     {
         $this->bootIfNotBooted();
     }
+
 }
