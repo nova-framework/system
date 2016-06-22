@@ -31,7 +31,7 @@ class QueryBuilder
      * @param  \Nova\Database\Query\Builder  $query
      * @return void
      */
-    public function __construct(QueryBuilder $query)
+    public function __construct(Builder $query)
     {
         $this->query = $query;
     }
