@@ -19,7 +19,7 @@ use Nova\Http\Request;
 use Nova\Routing\Route;
 use Nova\Support\Facades\Facade;
 
-use Illuminate\Container\Container;
+use Nova\Container\Container;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
@@ -65,7 +65,7 @@ class Router
     /**
      * The IoC container instance.
      *
-     * @var \Illuminate\Container\Container
+     * @var \Nova\Container\Container
      */
     protected $container;
 

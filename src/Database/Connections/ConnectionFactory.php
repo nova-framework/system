@@ -12,7 +12,7 @@ use Nova\Database\Connections\Connectors\PostgresConnector;
 use Nova\Database\Connections\Connectors\SqlServerConnector;
 
 
-use Illuminate\Container\Container;
+use Nova\Container\Container;
 
 use PDO;
 
@@ -22,14 +22,14 @@ class ConnectionFactory
     /**
      * The IoC container instance.
      *
-     * @var \Illuminate\Container\Container
+     * @var \Nova\Container\Container
      */
     protected $container;
 
     /**
      * Create a new connection factory instance.
      *
-     * @param  \Illuminate\Container\Container  $container
+     * @param  \Nova\Container\Container  $container
      * @return void
      */
     public function __construct(Container $container)

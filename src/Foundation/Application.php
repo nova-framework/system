@@ -20,7 +20,7 @@ use Nova\Events\EventServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
 use Nova\Routing\RoutingServiceProvider;
 
-use Illuminate\Container\Container;
+use Nova\Container\Container;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -153,7 +153,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $this->instance('request', $request);
 
-        $this->instance('Illuminate\Container\Container', $this);
+        $this->instance('Nova\Container\Container', $this);
     }
 
     /**
