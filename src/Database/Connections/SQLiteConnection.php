@@ -39,7 +39,7 @@ class SQLiteConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new Query\Processors\SQLiteProcessor;
+        return new SQLiteProcessor;
     }
 
     /**

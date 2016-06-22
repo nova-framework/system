@@ -52,7 +52,7 @@ class MySqlConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new Query\Processors\MySqlProcessor;
+        return new MySqlProcessor;
     }
 
     /**
