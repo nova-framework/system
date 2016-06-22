@@ -2,6 +2,7 @@
 
 namespace Nova\Database\Migrations;
 
+use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\ConnectionResolverInterface as Resolver;
 
