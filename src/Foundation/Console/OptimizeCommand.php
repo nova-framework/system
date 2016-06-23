@@ -5,8 +5,10 @@ namespace Nova\Foundation\Console;
 use Nova\Console\Command;
 use Nova\Foundation\Composer;
 
-use ClassPreloader\Command\PreCompileCommand;
 use Symfony\Component\Console\Input\InputOption;
+
+use ClassPreloader\Factory;
+use ClassPreloader\Exceptions\VisitorExceptionInterface;
 
 
 class OptimizeCommand extends Command
@@ -76,15 +78,22 @@ class OptimizeCommand extends Command
      */
     protected function compileClasses()
     {
-        $this->registerClassPreloaderCommand();
-
         $outputPath = $this->framework['path.base'] .Ds .'Boot' .DS .'Compiled.php';
 
-        $this->callSilent('compile', array(
-            '--config' => implode(',', $this->getClassFiles()),
-            '--output' => $outputPath,
-            '--strip_comments' => 1,
-        ));
+        //
+        $preloader = (new Factory)->create(['skip' => true]);
+
+        $handle = $preloader->prepareOutput($outputPath);
+
+        foreach ($this->getClassFiles() as $file) {
+            try {
+                fwrite($handle, $preloader->getCode($file, false)."\n");
+            } catch (VisitorExceptionInterface $e) {
+                //
+            }
+        }
+
+        fclose($handle);
     }
 
     /**
@@ -99,16 +108,6 @@ class OptimizeCommand extends Command
         $core = require __DIR__.DS .'Optimize'.DS.'config.php';
 
         return array_merge($core, $this->framework['config']['compile']);
-    }
-
-    /**
-     * Register the pre-compiler command instance with Artisan.
-     *
-     * @return void
-     */
-    protected function registerClassPreloaderCommand()
-    {
-        $this->getApplication()->add(new PreCompileCommand);
     }
 
     /**
