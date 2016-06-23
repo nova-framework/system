@@ -2,7 +2,7 @@
 
 $basePath = $app['path.base'];
 
-return array_map('realpath', array(
+return array(
     $basePath .'/vendor/nova-framework/system/src/Container/Container.php',
     $basePath .'/vendor/symfony/http-kernel/Symfony/Component/HttpKernel/HttpKernelInterface.php',
     $basePath .'/vendor/symfony/http-kernel/Symfony/Component/HttpKernel/TerminableInterface.php',
@@ -100,4 +100,4 @@ return array_map('realpath', array(
     $basePath .'/vendor/filp/whoops/src/Whoops/Handler/JsonResponseHandler.php',
     $basePath .'/vendor/stack/builder/src/Stack/Builder.php',
     $basePath .'/vendor/stack/builder/src/Stack/StackedHttpKernel.php',
-));
+);
