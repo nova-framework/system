@@ -78,7 +78,7 @@ class OptimizeCommand extends Command
      */
     protected function compileClasses()
     {
-        $outputPath = $this->framework['path.base'] .Ds .'Boot' .DS .'Compiled.php';
+        $outputPath = $this->framework['path.base'] .DS .'Boot' .DS .'Compiled.php';
 
         //
         $preloader = (new Factory)->create(['skip' => true]);
@@ -105,7 +105,7 @@ class OptimizeCommand extends Command
     {
         $app = $this->framework;
 
-        $core = require __DIR__.DS .'Optimize'.DS.'config.php';
+        $core = require __DIR__.DS .'Optimize' .DS .'config.php';
 
         return array_merge($core, $this->framework['config']['compile']);
     }
