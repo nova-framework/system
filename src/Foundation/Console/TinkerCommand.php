@@ -4,7 +4,7 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 
-use Symfony\Component\Console\Quersion\Question;
+use Symfony\Component\Console\Question\Question;
 
 
 class TinkerCommand extends Command
