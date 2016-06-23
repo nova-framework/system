@@ -258,6 +258,32 @@ class Builder
     }
 
     /**
+     * Get a Paginator only supporting simple next and previous links.
+     *
+     * This is more efficient on larger data-sets, etc.
+     *
+     * @param  int    $perPage
+     * @param  array  $columns
+     * @return \Pagination\Paginator
+     */
+    public function simplePaginate($perPage = null, $columns = array('*'))
+    {
+        // Get the Pagination Factory instance.
+        $paginator = $this->connection->getPaginator();
+
+        $perPage = $perPage ?: $this->model->getPerPage();
+
+        $page = $paginator->getCurrentPage();
+
+        $this->skip(($page - 1) * $perPage)->take($perPage + 1);
+
+        // Retrieve the results from database.
+        $results = $this->get($columns);
+
+        return $paginator->make($results, $perPage);
+    }
+
+    /**
      * Update a record in the database.
      *
      * @param  array  $values

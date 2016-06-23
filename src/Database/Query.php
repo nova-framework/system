@@ -49,9 +49,9 @@ class Query
             return $this->findMany($id, $columns);
         }
 
-        $this->query->where($this->model->getKeyName(), '=', $id);
+        $query = $this->query->where($this->model->getKeyName(), '=', $id);
 
-        return $this->first($columns);
+        return $query->first($columns);
     }
 
     /**
@@ -68,30 +68,6 @@ class Query
         $query = $this->query->whereIn($this->model->getKeyName(), $ids);
 
         return $query->get($columns);
-    }
-
-    /**
-     * Execute the query and get the first result.
-     *
-     * @param  array  $columns
-     * @return mixed|static|null
-     */
-    public function first($columns = array('*'))
-    {
-        $results = $this->query->take(1)->get($columns);
-
-        return (count($results) > 0) ? reset($results) : null;
-    }
-
-    /**
-     * Execute the query as a "select" statement.
-     *
-     * @param  array  $columns
-     * @return array|static[]
-     */
-    public function get($columns = array('*'))
-    {
-        return $this->query->get($columns);
     }
 
     /**
@@ -144,9 +120,38 @@ class Query
 
         $page = $paginator->getCurrentPage($total);
 
-        $this->query->forPage($page, $perPage);
+        $query = $this->query->forPage($page, $perPage);
 
-        return $paginator->make($this->get($columns)->all(), $total, $perPage);
+        // Retrieve the results from database.
+        $results = $query->get($columns)->all();
+
+        return $paginator->make($results, $total, $perPage);
+    }
+
+    /**
+     * Get a Paginator only supporting simple next and previous links.
+     *
+     * This is more efficient on larger data-sets, etc.
+     *
+     * @param  int    $perPage
+     * @param  array  $columns
+     * @return \Pagination\Paginator
+     */
+    public function simplePaginate($perPage = null, $columns = array('*'))
+    {
+        // Get the Pagination Factory instance.
+        $paginator = $this->connection->getPaginator();
+
+        $perPage = $perPage ?: $this->model->getPerPage();
+
+        $page = $paginator->getCurrentPage();
+
+        $query = $this->skip(($page - 1) * $perPage)->take($perPage + 1);
+
+        // Retrieve the results from database.
+        $results = $query->get($columns);
+
+        return $paginator->make($results, $perPage);
     }
 
     /**
