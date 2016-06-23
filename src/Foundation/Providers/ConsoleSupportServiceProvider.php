@@ -18,6 +18,7 @@ class ConsoleSupportServiceProvider extends ServiceProvider
         'Nova\Foundation\Providers\KeyGeneratorServiceProvider',
         'Nova\Foundation\Providers\OptimizeServiceProvider',
         'Nova\Foundation\Providers\ServerServiceProvider',
+        'Nova\Foundation\Providers\TinkerServiceProvider',
     );
 
     /**
