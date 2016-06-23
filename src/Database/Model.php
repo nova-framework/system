@@ -82,7 +82,7 @@ class Model
         }
 
         // Setup the Connection instance.
-        $this->db = $this->resolveConnection($this->connection);
+        $this->db = $this->getConnection();
     }
 
     /**
