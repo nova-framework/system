@@ -28,7 +28,7 @@ class ClearCompiledCommand extends Command
      */
     public function fire()
     {
-        if (file_exists($path = $this->framework['path.base'] .DS .'Boot' .DS .'Compiled.php')) {
+        if (file_exists($path = $this->framework['path'] .DS .'Boot' .DS .'Compiled.php')) {
             @unlink($path);
         }
 
