@@ -105,7 +105,7 @@ class OptimizeCommand extends Command
     {
         $app = $this->framework;
 
-        $core = require __DIR__.DS .'Optimize' .DS .'config.php';
+        $core = require __DIR__ .DS .'Optimize' .DS .'config.php';
 
         return array_merge($core, $this->framework['config']['compile']);
     }

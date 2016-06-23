@@ -50,8 +50,6 @@ return array_map('realpath', array(
     $basePath .'/vendor/nova-framework/system/src/View/ViewServiceProvider.php',
     $basePath .'/vendor/nova-framework/system/src/Routing/Router.php',
     $basePath .'/vendor/nova-framework/system/src/Routing/Route.php',
-    $basePath .'/vendor/nova-framework/system/src/Routing/Matching/UriValidator.php',
-    $basePath .'/vendor/nova-framework/system/src/Workbench/WorkbenchServiceProvider.php',
     $basePath .'/vendor/nova-framework/system/src/Events/Dispatcher.php',
     $basePath .'/vendor/nova-framework/system/src/Database/ORM/Model.php',
     $basePath .'/vendor/nova-framework/system/src/Support/Contracts/ArrayableInterface.php',
