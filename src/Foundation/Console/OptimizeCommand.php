@@ -78,7 +78,7 @@ class OptimizeCommand extends Command
     {
         $this->registerClassPreloaderCommand();
 
-        $outputPath = $this->laravel['path.base'].'/bootstrap/compiled.php';
+        $outputPath = $this->framework['path.base'] .Ds .'Boot' .DS .'Compiled.php';
 
         $this->callSilent('compile', array(
             '--config' => implode(',', $this->getClassFiles()),
@@ -94,7 +94,7 @@ class OptimizeCommand extends Command
      */
     protected function getClassFiles()
     {
-        $app = $this->laravel;
+        $app = $this->framework;
 
         $core = require __DIR__.DS .'Optimize'.DS.'config.php';
 
