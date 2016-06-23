@@ -100,7 +100,7 @@ class TinkerCommand extends Command
 
         $question = new Question("<info>></info>", null);
 
-        return $helper->ask($this->input, $this->output, "<info>></info>");
+        return $helper->ask($this->input, $this->output, $question);
     }
 
     /**
