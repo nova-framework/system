@@ -77,7 +77,7 @@ class Model
         }
 
         // Setup the Connection name.
-        if(! is_null($connection) {
+        if(! is_null($connection)) {
             $this->connection = $connection;
         }
 
