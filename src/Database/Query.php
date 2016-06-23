@@ -3,12 +3,12 @@
 namespace Nova\Database;
 
 use Nova\Database\Query\Expression;
-use Nova\Database\Query\Builder;
+use Nova\Database\Query\Builder as QueryBuilder;
 
 use Closure;
 
 
-class QueryBuilder
+class Query
 {
     /**
      * The base Query Builder instance.
@@ -31,7 +31,7 @@ class QueryBuilder
      * @param  \Nova\Database\Query\Builder  $query
      * @return void
      */
-    public function __construct(Builder $query)
+    public function __construct(QueryBuilder $query)
     {
         $this->query = $query;
     }
