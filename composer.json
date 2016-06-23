@@ -26,7 +26,8 @@
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
         "filp/whoops": "^2.1",
-        "predis/predis": "0.8.*"
+        "predis/predis": "0.8.*",
+        "classpreloader/classpreloader": "^3.0"
     },
     "autoload": {
         "psr-4": {

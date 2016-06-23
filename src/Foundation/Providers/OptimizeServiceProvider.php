@@ -25,7 +25,9 @@ class OptimizeServiceProvider extends ServiceProvider
     {
         $this->registerOptimizeCommand();
 
-        $this->commands('command.optimize');
+        $this->registerClearCompiledCommand();
+
+        $this->commands('command.optimize', 'command.clear-compiled');
     }
 
     /**
@@ -42,13 +44,26 @@ class OptimizeServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the compiled file remover command.
+     *
+     * @return void
+     */
+    protected function registerClearCompiledCommand()
+    {
+        $this->app->bindShared('command.clear-compiled', function()
+        {
+            return new ClearCompiledCommand();
+        });
+    }
+
+    /**
      * Get the services provided by the provider.
      *
      * @return array
      */
     public function provides()
     {
-        return array('command.optimize');
+        return array('command.optimize', 'command.clear-compiled');
     }
 
 }
