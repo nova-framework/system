@@ -4,6 +4,9 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 
+use Symfony\Component\Console\Quersion\Question;
+
+
 class TinkerCommand extends Command
 {
     /**
@@ -93,9 +96,11 @@ class TinkerCommand extends Command
      */
     protected function prompt()
     {
-        $question = $this->getHelperSet()->get('question');
+        $helper = $this->getHelperSet()->get('question');
 
-        return $question->ask($this->input, $this->output, "<info>></info>");
+        $question = new Question("<info>></info>", null);
+
+        return $helper->ask($this->input, $this->output, "<info>></info>");
     }
 
     /**
