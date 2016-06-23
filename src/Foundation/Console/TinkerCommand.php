@@ -93,7 +93,7 @@ class TinkerCommand extends Command
      */
     protected function prompt()
     {
-        $dialog = $this->getHelperSet()->get('dialog');
+        $dialog = $this->getHelperSet()->get('question');
 
         return $dialog->ask($this->output, "<info>></info>", null);
     }
