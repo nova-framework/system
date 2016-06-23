@@ -104,9 +104,7 @@ class Model
      */
     public function find($id, $columns = array('*'))
     {
-        return $this->newQuery()
-            ->where($this->getKeyName(), $id)
-            ->first($columns);
+        return $this->newQuery()->find($id, $columns);
     }
 
     /**
