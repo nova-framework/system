@@ -47,7 +47,6 @@ return array(
     $basePath .'/vendor/nova-framework/system/src/Session/SessionServiceProvider.php',
     $basePath .'/vendor/nova-framework/system/src/Template/TemplateServiceProvider.php',
     $basePath .'/vendor/nova-framework/system/src/View/ViewServiceProvider.php',
-    $basePath .'/vendor/nova-framework/system/src/Template/TemplateServiceProvider.php',
     $basePath .'/vendor/nova-framework/system/src/Routing/Router.php',
     $basePath .'/vendor/nova-framework/system/src/Routing/Route.php',
     $basePath .'/vendor/nova-framework/system/src/Events/Dispatcher.php',
