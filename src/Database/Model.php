@@ -76,12 +76,13 @@ class Model
             $this->table = Inflector::tableize($className);
         }
 
-        if ($connection !== false) {
+        // Setup the Connection name.
+        if(! is_null($connection) {
             $this->connection = $connection;
-
-            // Setup the Connection instance.
-            $this->db = $this->resolveConnection($this->connection);
         }
+
+        // Setup the Connection instance.
+        $this->db = $this->resolveConnection($this->connection);
     }
 
     /**
@@ -154,18 +155,6 @@ class Model
     public function getTable()
     {
         return $this->table;
-    }
-
-    /**
-     * Get the Table for the Model.
-     *
-     * @return string
-     */
-    public static function getTableName()
-    {
-        $model = new static(false);
-
-        return $model->getTable();
     }
 
     /**
