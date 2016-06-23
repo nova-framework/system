@@ -61,13 +61,13 @@ class Query
      * @param  array  $columns
      * @return array|null|static
      */
-    public function findMany($id, $columns = array('*'))
+    public function findMany($ids, $columns = array('*'))
     {
-        if (empty($id)) return null;
+        if (empty($ids)) return null;
 
-        $this->query->whereIn($this->model->getKeyName(), $id);
+        $query = $this->query->whereIn($this->model->getKeyName(), $ids);
 
-        return $this->get($columns);
+        return $query->get($columns);
     }
 
     /**
@@ -78,7 +78,9 @@ class Query
      */
     public function first($columns = array('*'))
     {
-        return $this->take(1)->get($columns)->first();
+        $results = $this->query->take(1)->get($columns);
+
+        return (count($results) > 0) ? reset($results) : null;
     }
 
     /**
