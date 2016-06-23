@@ -33,7 +33,7 @@ class TinkerCommand extends Command
      *
      * @var string
      */
-    protected $description = "Interact with your application";
+    protected $description = "Interact with your Application";
 
     /**
      * Execute the console command.
@@ -51,6 +51,7 @@ class TinkerCommand extends Command
         );
 
         $shell = new Shell($config);
+
         $shell->addCommands($this->getCommands());
         $shell->setIncludes($this->argument('include'));
 
