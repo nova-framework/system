@@ -69,7 +69,7 @@ return array(
     $basePath .'/vendor/nova-framework/system/src/Support/Contracts/JsonableInterface.php',
     $basePath .'/vendor/nova-framework/system/src/Database/DatabaseManager.php',
     $basePath .'/vendor/nova-framework/system/src/Database/ConnectionResolverInterface.php',
-    $basePath .'/vendor/nova-framework/system/src/Database/Connectors/ConnectionFactory.php',
+    $basePath .'/vendor/nova-framework/system/src/Database/Connection/ConnectionFactory.php',
     $basePath .'/vendor/nova-framework/system/src/Session/Middleware.php',
     $basePath .'/vendor/nova-framework/system/src/Session/Store.php',
     $basePath .'/vendor/nova-framework/system/src/Session/SessionManager.php',
