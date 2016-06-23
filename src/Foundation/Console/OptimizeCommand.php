@@ -81,16 +81,22 @@ class OptimizeCommand extends Command
         $outputPath = $this->framework['path'] .DS .'Boot' .DS .'Compiled.php';
 
         //
-        $preloader = (new Factory)->create(['skip' => true]);
+        $config = array('skip' => true);
+
+        $preloader = with(new Factory)->create($config);
 
         $handle = $preloader->prepareOutput($outputPath);
 
         foreach ($this->getClassFiles() as $file) {
+            /*
             try {
                 fwrite($handle, $preloader->getCode($file, false)."\n");
             } catch (VisitorExceptionInterface $e) {
                 //
             }
+            */
+
+            fwrite($handle, $preloader->getCode($file, false)."\n");
         }
 
         fclose($handle);
