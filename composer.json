@@ -15,7 +15,7 @@
     "require": {
         "php": ">=5.5.0",
         "classpreloader/classpreloader": "^3.0",
-        "d11wtq/boris": "1.0.*",
+        "psy/psysh": "0.7.*",
         "symfony/console": "^3.1",
         "symfony/process": "^3.1",
         "symfony/finder": "^3.1",

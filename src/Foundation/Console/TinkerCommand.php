@@ -4,11 +4,23 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 
-use Symfony\Component\Console\Question\Question;
+use Psy\Shell;
+use Psy\Configuration;
+
+use Symfony\Component\Console\Input\InputArgument;
 
 
 class TinkerCommand extends Command
 {
+    /**
+     * Forge commands to include in the tinker shell.
+     *
+     * @var array
+     */
+    protected $commandWhitelist = [
+        'clear-compiled', 'env', 'migrate', 'optimize',
+    ];
+
     /**
      * The console command name.
      *
@@ -30,87 +42,63 @@ class TinkerCommand extends Command
      */
     public function fire()
     {
-        if ($this->supportsBoris()) {
-            $this->runBorisShell();
-        } else {
-            $this->comment('Full REPL not supported. Falling back to simple shell.');
+        $this->getApplication()->setCatchExceptions(false);
 
-            $this->runPlainShell();
-        }
+        $config = new Configuration();
+
+        $config->getPresenter()->addCasters(
+            $this->getCasters()
+        );
+
+        $shell = new Shell($config);
+        $shell->addCommands($this->getCommands());
+        $shell->setIncludes($this->argument('include'));
+
+        $shell->run();
     }
 
     /**
-     * Run the Boris REPL with the current context.
+     * Get artisan commands to pass through to PsySH.
      *
-     * @return void
+     * @return array
      */
-    protected function runBorisShell()
+    protected function getCommands()
     {
-        $this->setupBorisErrorHandling();
+        $commands = [];
 
-        with(new \Boris\Boris('> '))->start();
-    }
-
-    /**
-     * Setup the Boris exception handling.
-     *
-     * @return void
-     */
-    protected function setupBorisErrorHandling()
-    {
-        restore_error_handler(); restore_exception_handler();
-
-        $this->laravel->make('artisan')->setCatchExceptions(false);
-
-        $this->laravel->error(function() { return ''; });
-    }
-
-    /**
-     * Run the plain Artisan tinker shell.
-     *
-     * @return void
-     */
-    protected function runPlainShell()
-    {
-        $input = $this->prompt();
-
-        while ($input != 'quit') {
-            try {
-                if (str_starts_with($input, 'dump ')) {
-                    $input = 'var_dump('.substr($input, 5).');';
-                }
-
-                eval($input);
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
+        foreach ($this->getApplication()->all() as $name => $command) {
+            if (in_array($name, $this->commandWhitelist)) {
+                $commands[] = $command;
             }
-
-            $input = $this->prompt();
         }
+
+        return $commands;
     }
 
     /**
-     * Prompt the developer for a command.
+     * Get an array of Nova tailored casters.
      *
-     * @return string
+     * @return array
      */
-    protected function prompt()
+    protected function getCasters()
     {
-        $helper = $this->getHelperSet()->get('question');
-
-        $question = new Question("<info>></info>", null);
-
-        return $helper->ask($this->input, $this->output, $question);
+        return array(
+            //'Nova\Foundation\Application' => 'Nova\Foundation\Console\IlluminateCaster::castApplication',
+            //'Nova\Support\Collection' => 'Nova\Foundation\Console\IlluminateCaster::castCollection',
+            //'Nova\Database\Eloquent\Model' => 'Nova\Foundation\Console\IlluminateCaster::castModel',
+        );
     }
 
     /**
-     * Determine if the current environment supports Boris.
+     * Get the console command arguments.
      *
-     * @return bool
+     * @return array
      */
-    protected function supportsBoris()
+    protected function getArguments()
     {
-        return extension_loaded('readline') && extension_loaded('posix') && extension_loaded('pcntl');
+        return array(
+            array('include', InputArgument::IS_ARRAY, 'Include file(s) before starting tinker'),
+        );
     }
 
 }
