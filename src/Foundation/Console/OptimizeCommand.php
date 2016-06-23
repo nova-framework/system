@@ -78,7 +78,7 @@ class OptimizeCommand extends Command
      */
     protected function compileClasses()
     {
-        $outputPath = $this->framework['path.base'] .DS .'Boot' .DS .'Compiled.php';
+        $outputPath = $this->framework['path'] .DS .'Boot' .DS .'Compiled.php';
 
         //
         $preloader = (new Factory)->create(['skip' => true]);
