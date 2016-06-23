@@ -76,7 +76,7 @@ class TinkerCommand extends Command
 
         while ($input != 'quit') {
             try {
-                if (starts_with($input, 'dump ')) {
+                if (str_starts_with($input, 'dump ')) {
                     $input = 'var_dump('.substr($input, 5).');';
                 }
 
