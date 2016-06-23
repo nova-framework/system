@@ -8,7 +8,9 @@
 
 namespace Nova\Foundation;
 
+use Nova\Config\FileEnvironmentVariablesLoader;
 use Nova\Config\LoaderManager;
+use Nova\Filesystem\Filesystem;
 use Nova\Foundation\EnvironmentDetector;
 use Nova\Foundation\ProviderRepository;
 use Nova\Http\Request;
@@ -838,6 +840,16 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     public function getConfigLoader()
     {
         return new LoaderManager();
+    }
+
+    /**
+     * Get the environment variables loader instance.
+     *
+     * @return \Illuminate\Config\EnvironmentVariablesLoaderInterface
+     */
+    public function getEnvironmentVariablesLoader()
+    {
+        return new FileEnvironmentVariablesLoader(new Filesystem, $this['path.base']);
     }
 
     /**
