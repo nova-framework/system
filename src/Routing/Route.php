@@ -138,11 +138,11 @@ class Route
         $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
 
         if (strpos($uri, ':') !== false) {
-            $uri = str_replace(
-                array(':any', ':num', ':all'),
-                array('[^/]+', '[0-9]+', '.*'),
-                $uri
-            );
+            $uri = str_replace(array(':any', ':num', ':all'), array('[^/]+', '[0-9]+', '.*'), $uri);
+        }
+
+        if (strpos($regex, '(/') !== false) {
+            $regex = str_replace(array('(/', ')'), array('(?:/', ')?'), $regex);
         }
 
         $this->compiled = with(
