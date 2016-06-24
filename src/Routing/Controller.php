@@ -276,10 +276,10 @@ abstract class Controller
      * Execute an action on the controller.
      *
      * @param string  $method
-     * @param array   $parameters
+     * @param array   $params
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function callAction($method, $parameters)
+    public function callAction($method, $params)
     {
 
         // Initialise the Controller's variables.
