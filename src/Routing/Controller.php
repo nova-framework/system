@@ -2,7 +2,7 @@
 
 namespace Nova\Routing;
 
-use Nova\View\View as Renderer;
+use Nova\View\View;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -10,7 +10,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Event;
 use Response;
 use Template;
-use View;
 
 use Closure;
 
@@ -50,7 +49,7 @@ abstract class Controller
      *
      * @var string
      */
-    protected $template = null;
+    protected $template;
 
     /**
      * The currently used Layout.
@@ -86,7 +85,11 @@ abstract class Controller
     public function __construct()
     {
         // Adjust to the default Template, if it is not defined.
-        $this->template = $this->template ?: TEMPLATE;
+        if(! isset($this->template)) {
+            $config = app('config');
+
+            $this->template = $config['app.template'];
+        }
     }
 
     /**
@@ -323,14 +326,14 @@ abstract class Controller
         }
 
         // After the Action execution stage.
-        $retval = $this->after($result);
+        $this->after($result);
 
         if($retval !== false) {
             // Create the Response and send it.
             return $this->createResponse($result);
         }
 
-        return Response::make('');
+        return Response::make($result);
     }
 
     /**
@@ -341,7 +344,7 @@ abstract class Controller
      */
     protected function createResponse($result)
     {
-        if (! $result instanceof Renderer) {
+        if (! $result instanceof View) {
             // Create a Response instance and return it.
             return Response::make($result);
         }
@@ -384,7 +387,7 @@ abstract class Controller
      */
     protected function title($title)
     {
-        View::share('title', $title);
+        app('view')->share('title', $title);
     }
 
     /**
@@ -394,7 +397,7 @@ abstract class Controller
      */
     protected function getView(array $data = array())
     {
-        return View::make($this->defaultView, $data, $this->module);
+        return app('view')->make($this->defaultView, $data, $this->module);
     }
 
     /**
