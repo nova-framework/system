@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\View\View as Renderer;
 
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Event;
