@@ -2,6 +2,9 @@
 
 namespace Nova\Support\Facades;
 
+use Nova\Support\Facades\Facade;
+
+
 /**
  * @see \Nova\Routing\UrlGenerator
  */
