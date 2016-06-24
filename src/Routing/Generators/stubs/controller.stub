@@ -8,11 +8,32 @@ use Nova\Routing\Controller;
 class {{class}} extends Controller
 {
     /**
-     * Call the parent construct.
+     * Create a new {{class}} instance.
      */
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /**
+     * Middleware - method executed before any Action.
+     *
+     * @return bool
+     */
+    protected function before()
+    {
+        return parent::before();
+    }
+
+    /**
+     * Middleware - method executed after any Action.
+     *
+     * @param mixed
+     * @return mixed
+     */
+    protected function after($result)
+    {
+        return parent::after($result);
     }
 
 {{methods}}
