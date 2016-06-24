@@ -1,21 +1,14 @@
 <?php
-/**
- * RoutingServiceProvider - Implements a Service Provider for Routing.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Routing;
 
-use Nova\Routing\Router;
 use Nova\Support\ServiceProvider;
 
 
 class RoutingServiceProvider extends ServiceProvider
 {
     /**
-     * Register the Service Provider.
+     * Register the service provider.
      *
      * @return void
      */
@@ -23,11 +16,13 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->registerRouter();
 
+        $this->registerUrlGenerator();
+
         $this->registerRedirector();
     }
 
     /**
-     * Register the Router instance.
+     * Register the router instance.
      *
      * @return void
      */
@@ -35,7 +30,37 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app['router'] = $this->app->share(function($app)
         {
-            return new Router($app['events'], $app);
+            $router = new Router($app['events'], $app);
+
+            // If the current application environment is "testing", we will disable the
+            // routing filters, since they can be tested independently of the routes
+            // and just get in the way of our typical controller testing concerns.
+            if ($app['env'] == 'testing') {
+                $router->disableFilters();
+            }
+
+            return $router;
+        });
+    }
+
+    /**
+     * Register the URL generator service.
+     *
+     * @return void
+     */
+    protected function registerUrlGenerator()
+    {
+        $this->app['url'] = $this->app->share(function($app)
+        {
+            // The URL generator needs the route collection that exists on the router.
+            // Keep in mind this is an object, so we're passing by references here
+            // and all the registered routes will be available to the generator.
+            $routes = $app['router']->getRoutes();
+
+            return new UrlGenerator($routes, $app->rebinding('request', function($app, $request)
+            {
+                $app['url']->setRequest($request);
+            }));
         });
     }
 
@@ -48,8 +73,11 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app['redirect'] = $this->app->share(function($app)
         {
-            $redirector = new Redirector($app['request']);
+            $redirector = new Redirector($app['url']);
 
+            // If the session is set on the application instance, we'll inject it into
+            // the redirector instance. This allows the redirect responses to allow
+            // for the quite convenient "with" methods that flash to the session.
             if (isset($app['session.store'])) {
                 $redirector->setSession($app['session.store']);
             }

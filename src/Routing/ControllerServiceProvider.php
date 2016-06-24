@@ -2,22 +2,21 @@
 
 namespace Nova\Routing;
 
+use Nova\Support\ServiceProvider;
 use Nova\Routing\Console\MakeControllerCommand;
 use Nova\Routing\Generators\ControllerGenerator;
-use Nova\Support\ServiceProvider;
-
 
 class ControllerServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the Provider is deferred.
+     * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
     protected $defer = true;
 
     /**
-     * Register the Service Provider.
+     * Register the service provider.
      *
      * @return void
      */
@@ -37,7 +36,10 @@ class ControllerServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.controller.make', function($app)
         {
-            $path = $app['path'] .DS .'Controllers';
+            // The controller generator is responsible for building resourceful controllers
+            // quickly and easily for the developers via the Artisan CLI. We'll go ahead
+            // and register this command instances in this container for registration.
+            $path = $app['path'] .'/controllers';
 
             $generator = new ControllerGenerator($app['files']);
 
@@ -46,7 +48,7 @@ class ControllerServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the Services provided by the Provider.
+     * Get the services provided by the provider.
      *
      * @return array
      */

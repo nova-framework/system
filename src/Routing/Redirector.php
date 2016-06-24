@@ -2,37 +2,34 @@
 
 namespace Nova\Routing;
 
-use Nova\Http\Request;
 use Nova\Http\RedirectResponse;
 use Nova\Session\Store as SessionStore;
-use Nova\Support\Str;
 
 class Redirector
 {
     /**
-     * The Request instance.
+     * The URL generator instance.
      *
-     * @var \Http\Request
+     * @var \Nova\Routing\UrlGenerator
      */
-    protected $request;
+    protected $generator;
 
     /**
-     * The Session Store instance.
+     * The session store instance.
      *
-     * @var \Session\Store
+     * @var \Nova\Session\Store
      */
     protected $session;
 
     /**
      * Create a new Redirector instance.
      *
-     * @param  \Nova\Http\Request  $request
+     * @param  \Nova\Routing\UrlGenerator  $generator
      * @return void
      */
-    public function __construct(Request $request, SessionStore $session = null)
+    public function __construct(UrlGenerator $generator)
     {
-        $this->request = $request;
-        $this->session = $session;
+        $this->generator = $generator;
     }
 
     /**
@@ -43,7 +40,7 @@ class Redirector
      */
     public function home($status = 302)
     {
-        return $this->to('/', $status);
+        return $this->to($this->generator->route('home'), $status);
     }
 
     /**
@@ -55,7 +52,7 @@ class Redirector
      */
     public function back($status = 302, $headers = array())
     {
-        $back = $this->request->headers->get('referer');
+        $back = $this->generator->getRequest()->headers->get('referer');
 
         return $this->createRedirect($back, $status, $headers);
     }
@@ -69,7 +66,7 @@ class Redirector
      */
     public function refresh($status = 302, $headers = array())
     {
-        return $this->to($this->request->path(), $status, $headers);
+        return $this->to($this->generator->getRequest()->path(), $status, $headers);
     }
 
     /**
@@ -83,7 +80,7 @@ class Redirector
      */
     public function guest($path, $status = 302, $headers = array(), $secure = null)
     {
-        $this->session->put('url.intended', $this->request->fullUrl());
+        $this->session->put('url.intended', $this->generator->full());
 
         return $this->to($path, $status, $headers, $secure);
     }
@@ -117,7 +114,7 @@ class Redirector
      */
     public function to($path, $status = 302, $headers = array(), $secure = null)
     {
-        $path = $this->createUrl($path, array(), $secure);
+        $path = $this->generator->to($path, array(), $secure);
 
         return $this->createRedirect($path, $status, $headers);
     }
@@ -149,26 +146,35 @@ class Redirector
     }
 
     /**
-     * Generate a absolute URL to the given path.
+     * Create a new redirect response to a named route.
      *
-     * @param  string  $path
-     * @param  mixed  $extra
-     * @param  bool  $secure
-     * @return string
+     * @param  string  $route
+     * @param  array   $parameters
+     * @param  int     $status
+     * @param  array   $headers
+     * @return \Nova\Http\RedirectResponse
      */
-    protected function createUrl($path, $extra = array(), $secure = null)
+    public function route($route, $parameters = array(), $status = 302, $headers = array())
     {
-        if ($this->isValidUrl($path)) return $path;
+        $path = $this->generator->route($route, $parameters);
 
-        $scheme = $this->getScheme($secure);
+        return $this->to($path, $status, $headers);
+    }
 
-        $tail = implode('/', array_map(
-            'rawurlencode', (array) $extra)
-        );
+    /**
+     * Create a new redirect response to a controller action.
+     *
+     * @param  string  $action
+     * @param  array   $parameters
+     * @param  int     $status
+     * @param  array   $headers
+     * @return \Nova\Http\RedirectResponse
+     */
+    public function action($action, $parameters = array(), $status = 302, $headers = array())
+    {
+        $path = $this->generator->action($action, $parameters);
 
-        $root = $this->getRootUrl($scheme);
-
-        return $this->trimUrl($root, $path, $tail);
+        return $this->to($path, $status, $headers);
     }
 
     /**
@@ -187,25 +193,25 @@ class Redirector
             $redirect->setSession($this->session);
         }
 
-        $redirect->setRequest($this->request);
+        $redirect->setRequest($this->generator->getRequest());
 
         return $redirect;
     }
 
     /**
-     * Get the Request instance.
+     * Get the URL generator instance.
      *
-     * @return  \Http\Request
+     * @return  \Nova\Routing\UrlGenerator
      */
-    public function getRequest()
+    public function getUrlGenerator()
     {
-        return $this->request;
+        return $this->generator;
     }
 
     /**
      * Set the active session store.
      *
-     * @param  \Illuminate\Session\Store  $session
+     * @param  \Nova\Session\Store  $session
      * @return void
      */
     public function setSession(SessionStore $session)
@@ -213,60 +219,4 @@ class Redirector
         $this->session = $session;
     }
 
-    /**
-     * Get the base URL for the request.
-     *
-     * @param  string  $scheme
-     * @param  string  $root
-     * @return string
-     */
-    protected function getRootUrl($scheme, $root = null)
-    {
-        $root = $root ?: $this->request->root();
-
-        $start = Str::startsWith($root, 'http://') ? 'http://' : 'https://';
-
-        return preg_replace('~'.$start.'~', $scheme, $root, 1);
-    }
-
-    /**
-     * Determine if the given path is a valid URL.
-     *
-     * @param  string  $path
-     * @return bool
-     */
-    protected function isValidUrl($path)
-    {
-        if (Str::startsWith($path, array('#', '//', 'mailto:', 'tel:'))) return true;
-
-        return (filter_var($path, FILTER_VALIDATE_URL) !== false);
-    }
-
-    /**
-     * Format the given URL segments into a single URL.
-     *
-     * @param  string  $root
-     * @param  string  $path
-     * @param  string  $tail
-     * @return string
-     */
-    protected function trimUrl($root, $path, $tail = '')
-    {
-        return trim($root.'/'.trim($path.'/'.$tail, '/'), '/');
-    }
-
-    /**
-     * Get the scheme for a raw URL.
-     *
-     * @param  bool    $secure
-     * @return string
-     */
-    protected function getScheme($secure)
-    {
-        if (is_null($secure)) {
-            return $this->request->getScheme() .'://';
-        } else {
-            return $secure ? 'https://' : 'http://';
-        }
-    }
 }

@@ -434,6 +434,28 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     }
 
     /**
+     * Register a "before" application filter.
+     *
+     * @param  Closure|string  $callback
+     * @return void
+     */
+    public function before($callback)
+    {
+        return $this['router']->before($callback);
+    }
+
+    /**
+     * Register an "after" application filter.
+     *
+     * @param  Closure|string  $callback
+     * @return void
+     */
+    public function after($callback)
+    {
+        return $this['router']->after($callback);
+    }
+
+    /**
      * Register a "finish" application filter.
      *
      * @param  Closure|string  $callback
@@ -981,6 +1003,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'router'         => 'Nova\Routing\Router',
             'session'        => 'Nova\Session\SessionManager',
             'session.store'  => 'Nova\Session\Store',
+            'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
             'template'       => 'Nova\Template\Factory',
             'view'           => 'Nova\View\Factory',
