@@ -153,13 +153,7 @@ function __($message, $args = null)
     //
     $params = (func_num_args() === 2) ? (array)$args : array_slice(func_get_args(), 1);
 
-    if(Config::get('app.multilingual', false)) {
-        $code = Route::getLanguage();
-    } else {
-        $code = LANGUAGE_CODE;
-    }
-
-    return app('language')->instance('app', $code)->translate($message, $params);
+    return app('language')->instance('app')->translate($message, $params);
 }
 
 /**
@@ -177,13 +171,7 @@ function __d($domain, $message, $args = null)
     //
     $params = (func_num_args() === 3) ? (array)$args : array_slice(func_get_args(), 2);
 
-    if(Config::get('app.multilingual', false)) {
-        $code = Route::getLanguage();
-    } else {
-        $code = LANGUAGE_CODE;
-    }
-
-    return app('language')->instance($domain, $code)->translate($message, $params);
+    return app('language')->instance($domain)->translate($message, $params);
 }
 
 /**
