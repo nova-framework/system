@@ -7,6 +7,7 @@ use Nova\Routing\Route;
 use Nova\Routing\Router;
 use Nova\Console\Command;
 
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
 
 
@@ -77,10 +78,9 @@ class RoutesCommand extends Command
     */
     public function fire()
     {
-        $this->table = $this->getHelperSet()->get('table');
+        $this->table = new Table($this->output);
 
-        if (count($this->routes) == 0)
-        {
+        if (count($this->routes) == 0) {
             return $this->error("Your application doesn't have any routes.");
         }
 
@@ -96,8 +96,7 @@ class RoutesCommand extends Command
     {
         $results = array();
 
-        foreach($this->routes as $route)
-        {
+        foreach($this->routes as $route) {
             $results[] = $this->getRouteInformation($route);
         }
 
