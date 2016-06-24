@@ -185,6 +185,30 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
+     * Sets the redirect target of this response.
+     *
+     * @param string $url The URL to redirect to
+     *
+     * @return RedirectResponse The current response.
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function setTargetUrl($url)
+    {
+        if (empty($url)) {
+            throw new \InvalidArgumentException('Cannot redirect to an empty URL.');
+        }
+
+        $this->targetUrl = $url;
+
+        $this->setContent('');
+
+        $this->headers->set('Location', $url);
+
+        return $this;
+    }
+
+    /**
      * Dynamically bind flash data in the Session.
      *
      * @param  string  $method
