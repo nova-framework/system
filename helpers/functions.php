@@ -146,7 +146,7 @@ function template_url($path, $template = TEMPLATE, $folder = '/assets/')
  */
 function storage_path($path = null)
 {
-    return app('path.storage') .($path ? '/'.$path : $path);
+    return app('path.storage') .($path ? DS .$path : $path);
 }
 
 //
