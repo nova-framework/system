@@ -48,18 +48,18 @@ class LanguageManager
      * @param string $code Optional custom language code.
      * @return Language
      */
-    public function instance($domain = 'app', $code = null)
+    public function instance($domain = 'app', $locale = null)
     {
-        $code = $code ?: $this->locale;
+        $locale = $locale ?: $this->locale;
 
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
-        $id = $code .'/' .$domain;
+        $id = $locale .'/' .$domain;
 
         // Initialize the domain instance, if not already exists.
         if (! isset($this->instances[$id])) {
             $languages = $this->app['config']['languages'];
 
-            $this->instances[$id] = new Language($languages, $domain, $code);
+            $this->instances[$id] = new Language($languages, $domain, $locale);
         }
 
         return $this->instances[$id];
