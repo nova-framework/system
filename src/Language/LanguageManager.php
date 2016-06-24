@@ -52,8 +52,6 @@ class LanguageManager
     {
         $code = $code ?: $this->locale;
 
-        $code = $this->getCurrentLanguage($code);
-
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
         $id = $code .'/' .$domain;
 
@@ -65,24 +63,6 @@ class LanguageManager
         }
 
         return $this->instances[$id];
-    }
-
-    /**
-     * Get current Language
-     * @return string
-     */
-    protected function getCurrentLanguage($code)
-    {
-        $locale = $this->app['config']['app.locale'];
-
-        // Check if the end-user do not ask for a custom code.
-        if ($code == $locale) {
-            $session = $this->app['session.store'];
-
-            return $session->get('language', $code);
-        }
-
-        return $code;
     }
 
     /**

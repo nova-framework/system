@@ -23,18 +23,17 @@ class Language extends Facade
 {
     public static function initialize()
     {
-        $languages = Config::get('languages');
+        $language = Config::get['config']['app.locale'];
 
         if (Session::has('language')) {
-            // The Language was already set; nothing to do.
-            return;
+            $language = Session::get('language', $language);
         } else if(Cookie::has(PREFIX .'language')) {
-            $cookie = Cookie::get(PREFIX .'language');
+            $language = Cookie::get(PREFIX .'language', $language);
 
-            if (preg_match ('/[a-z]/', $cookie) && in_array($cookie, array_keys($languages))) {
-                Session::set('language', $cookie);
-            }
+            Session::set('language', $language);
         }
+
+        static::$app['language']->setLocale($language);
     }
 
     /**
