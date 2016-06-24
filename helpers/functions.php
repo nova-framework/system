@@ -53,7 +53,8 @@ function app($make = null)
  */
 function app_path($path = '')
 {
-    return app('path').($path ? DS .$path : $path);
+    //return app('path') .($path ? DS .$path : $path);
+    return APPDIR .($path ? DS .$path : $path);
 }
 
 /**
