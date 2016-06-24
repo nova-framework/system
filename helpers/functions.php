@@ -99,12 +99,9 @@ function route($route, $parameters = array())
  * @param null|string $language
  * @return string
  */
-function site_url($path = '/', $language = null)
+function site_url($path = '/')
 {
-    // The base URL.
-    $siteUrl = Config::get('app.url');
-
-    return $siteUrl .ltrim($path, '/');
+    return app('url')->to($path);
 }
 
 /**
