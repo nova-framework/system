@@ -145,9 +145,9 @@ function template_url($path, $template = TEMPLATE, $folder = '/assets/')
  * Storage Path helper
  * @return string
  */
-function storage_path()
+function storage_path($path = null)
 {
-    return app('path.storage').($path ? '/'.$path : $path);
+    return app('path.storage') .($path ? '/'.$path : $path);
 }
 
 //
