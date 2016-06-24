@@ -52,6 +52,8 @@ class LanguageManager
     {
         $locale = $locale ?: $this->locale;
 
+        echo '<pre>'.var_export($locale, true).'<pre>';
+
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
         $id = $locale .'/' .$domain;
 
