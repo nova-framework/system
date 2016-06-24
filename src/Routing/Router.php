@@ -18,7 +18,6 @@ use Carbon\Carbon;
 
 use Console;
 use Language;
-use Response;
 
 use Closure;
 
@@ -1736,9 +1735,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function serveFile($filePath)
     {
         if (! file_exists($filePath)) {
-            return  Response::make('', 404);
+            return new Response('', 404);
         } else if (! is_readable($filePath)) {
-            return  Response::make('', 403);
+            return new Response('', 403);
         }
 
         // Collect the current file information.
@@ -1760,7 +1759,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         }
 
         // Create a BinaryFileResponse instance.
-        $response = Response::download($filePath, null, array(), 'inline');
+        $response = new BinaryFileResponse($filePath, 200, array(), true, 'inline');
 
         // Set the Content type.
         $response->headers->set('Content-Type', $contentType);
