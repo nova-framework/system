@@ -101,18 +101,8 @@ function route($route, $parameters = array())
  */
 function site_url($path = '/', $language = null)
 {
-    $languages = Config::get('languages');
-
     // The base URL.
     $siteUrl = Config::get('app.url');
-
-    if (($language === false) || ! Config::get('app.multilingual', false)) {
-        // Nothing to do.
-    } else if (is_string($language) && array_key_exists($language, $languages)) {
-        $siteUrl .= $language .'/';
-    } else {
-        $siteUrl .= Route::getLanguage() .'/';
-    }
 
     return $siteUrl .ltrim($path, '/');
 }
