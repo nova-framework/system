@@ -11,7 +11,6 @@ namespace Nova\Support\Facades;
 use Nova\Language\Language as CoreLanguage;
 
 use Nova\Support\Facades\Facade;
-use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Cookie;
 use Nova\Support\Facades\Session;
 
@@ -23,7 +22,7 @@ class Language extends Facade
 {
     public static function initialize()
     {
-        $language = Config::get['config']['app.locale'];
+        $language = static::$app['config']['app.locale'];
 
         if (Session::has('language')) {
             $language = Session::get('language', $language);
