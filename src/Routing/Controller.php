@@ -313,9 +313,6 @@ abstract class Controller
             return $result;
         }
 
-        // Notify the interested Listeners about the iminent Controller's execution.
-        Event::fire('framework.controller.executing', array($this, $method, $params));
-
         // Execute the requested Method with the given arguments.
         $result = call_user_func_array(array($this, $method), $params);
 
