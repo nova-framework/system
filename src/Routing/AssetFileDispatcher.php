@@ -48,7 +48,7 @@ class AssetFileDispatcher
      * Dispatch/Serve a file
      * @return bool
      */
-    protected function dispatch(Request $request)
+    public function dispatch(Request $request)
     {
         // For proper Assets serving, the file URI should be either of the following:
         //
