@@ -18,34 +18,6 @@ use Nova\Helpers\Inflector;
 class Url
 {
     /**
-     * Detect the true URI.
-     *
-     * * @return string parsed URI
-     */
-    public static function detectUri()
-    {
-        $requestUri = $_SERVER['REQUEST_URI'];
-        $scriptName = $_SERVER['SCRIPT_NAME'];
-
-        $pathName = dirname($scriptName);
-
-        if (strpos($requestUri, $scriptName) === 0) {
-            $requestUri = substr($requestUri, strlen($scriptName));
-        } else if (strpos($requestUri, $pathName) === 0) {
-            $requestUri = substr($requestUri, strlen($pathName));
-        }
-
-        $uri = parse_url(ltrim($requestUri, '/'), PHP_URL_PATH);
-
-        if (! empty($uri)) {
-            return str_replace(array('//', '../'), '/', $uri);
-        }
-
-        // Empty URI of homepage; internally encoded as '/'
-        return '/';
-    }
-
-    /**
      * Create the absolute address to the assets folder.
      *
      * @param  string|null $module
@@ -138,50 +110,4 @@ class Url
         return strtolower(trim($slug, '-'));
     }
 
-    /**
-     * Retrieve all url parts based on a / seperator.
-     *
-     * @return array of segments
-     */
-    public static function segments()
-    {
-        return explode('/', $_SERVER['REQUEST_URI']);
-    }
-
-    /**
-     * Retrieve an item in an array.
-     *
-     * @param  array $segments array
-     * @param  int $id array index
-     *
-     * @return string - returns array index
-     */
-    public static function getSegment($segments, $id)
-    {
-        if (array_key_exists($id, $segments)) {
-            return $segments[$id];
-        }
-    }
-
-    /**
-     * Retrieve the last item in an array.
-     *
-     * @param  array $segments
-     * @return string - last array segment
-     */
-    public static function lastSegment($segments)
-    {
-        return end($segments);
-    }
-
-    /**
-     * Retrieve the first item in an array
-     *
-     * @param  array segments
-     * @return int - returns first first array index
-     */
-    public static function firstSegment($segments)
-    {
-        return $segments[0];
-    }
 }
