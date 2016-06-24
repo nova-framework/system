@@ -7,10 +7,7 @@
  * @date April 12th, 2016
  */
 
-use Nova\Helpers\Url;
-use Nova\Support\Facades\Config;
-use Nova\Support\Facades\Crypt;
-use Nova\Support\Facades\Language;
+use Nova\Helpers\Url as UrlHelper;
 use Nova\Support\Str;
 
 use Closure as Closure;
@@ -19,6 +16,82 @@ use Closure as Closure;
 if (! defined('NOVA_SYSTEM_FUNCTIONS')) {
 
 define('NOVA_SYSTEM_FUNCTIONS', 1);
+
+
+/**
+ * Generate a URL to a controller action.
+ *
+ * @param  string  $name
+ * @param  array   $parameters
+ * @return string
+ */
+function action($name, $parameters = array())
+{
+    return app('url')->action($name, $parameters);
+}
+
+/**
+ * Get the root Facade application instance.
+ *
+ * @param  string  $make
+ * @return mixed
+ */
+function app($make = null)
+{
+    if ( ! is_null($make)) {
+        return app()->make($make);
+    }
+
+    return Nova\Support\Facades\Facade::getFacadeApplication();
+}
+
+/**
+ * Get the path to the application folder.
+ *
+ * @param   string  $path
+ * @return  string
+ */
+function app_path($path = '')
+{
+    return app('path').($path ? DS .$path : $path);
+}
+
+/**
+ * Generate a url for the application.
+ *
+ * @param  string  $path
+ * @param  mixed   $parameters
+ * @param  bool    $secure
+ * @return string
+ */
+function url($path = null, $parameters = array(), $secure = null)
+{
+    return app('url')->to($path, $parameters, $secure);
+}
+
+/**
+ * Generate a HTTPS url for the application.
+ *
+ * @param  string  $path
+ * @param  mixed   $parameters
+ * @return string
+ */
+function secure_url($path, $parameters = array())
+{
+    return url($path, $parameters, true);
+}
+
+/**
+ * Generate a URL to a named route.
+ *
+ * @param  string  $route
+ * @param  array   $parameters
+ * @return string
+ */
+function route($route, $parameters = array())
+{
+    return app('url')->route($route, $parameters);
+}
 
 /**
  * Site URL helper
@@ -52,7 +125,7 @@ function site_url($path = '/', $language = null)
  */
 function resource_url($path, $module = null)
 {
-    return Url::resourcePath($module) .ltrim($path, '/');
+    return UrlHelper::resourcePath($module) .ltrim($path, '/');
 }
 
 /**
@@ -64,16 +137,7 @@ function resource_url($path, $module = null)
  */
 function template_url($path, $template = TEMPLATE, $folder = '/assets/')
 {
-    return Url::templatePath($template, $folder) .ltrim($path, '/');
-}
-
-/**
- * Application Path helper
- * @return string
- */
-function app_path()
-{
-    return APPDIR;
+    return UrlHelper::templatePath($template, $folder) .ltrim($path, '/');
 }
 
 /**
@@ -82,7 +146,7 @@ function app_path()
  */
 function storage_path()
 {
-    return STORAGE_PATH;
+    return app('path.storage').($path ? '/'.$path : $path);
 }
 
 //
@@ -108,7 +172,7 @@ function __($message, $args = null)
         $code = LANGUAGE_CODE;
     }
 
-    return Language::instance('app', $code)->translate($message, $params);
+    return app('language')->instance('app', $code)->translate($message, $params);
 }
 
 /**
@@ -132,7 +196,7 @@ function __d($domain, $message, $args = null)
         $code = LANGUAGE_CODE;
     }
 
-    return Language::instance($domain, $code)->translate($message, $params);
+    return app('language')->instance($domain, $code)->translate($message, $params);
 }
 
 /**
