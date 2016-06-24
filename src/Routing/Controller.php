@@ -326,7 +326,7 @@ abstract class Controller
         }
 
         // After the Action execution stage.
-        $this->after($result);
+        $retval = $this->after($result);
 
         if($retval !== false) {
             // Create the Response and send it.
