@@ -16,6 +16,13 @@ class LanguageManager
     protected $app;
 
     /**
+     * The default locale being used by the translator.
+     *
+     * @var string
+     */
+    protected $locale;
+
+    /**
      * The active Language instances.
      *
      * @var array
@@ -28,9 +35,11 @@ class LanguageManager
      * @param  \core\Application  $app
      * @return void
      */
-    function __construct(Application $app)
+    function __construct(Application $app, $locale)
     {
         $this->app = $app;
+
+        $this->locale = $locale;
     }
 
     /**
@@ -41,7 +50,7 @@ class LanguageManager
      */
     public function instance($domain = 'app', $code = null)
     {
-        $code = $code ?: $this->app['config']['app.locale'];
+        $code = $code ?: $this->locale;
 
         $code = $this->getCurrentLanguage($code);
 
@@ -74,6 +83,37 @@ class LanguageManager
         }
 
         return $code;
+    }
+
+    /**
+     * Get the default locale being used.
+     *
+     * @return string
+     */
+    public function locale()
+    {
+        return $this->getLocale();
+    }
+
+    /**
+     * Get the default locale being used.
+     *
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
+    /**
+     * Set the default locale.
+     *
+     * @param  string  $locale
+     * @return void
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
     }
 
     /**
