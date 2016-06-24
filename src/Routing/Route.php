@@ -137,14 +137,6 @@ class Route
 
         $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
 
-        if (strpos($uri, ':') !== false) {
-            $uri = str_replace(array(':any', ':num', ':all'), array('[^/]+', '[0-9]+', '.*'), $uri);
-        }
-
-        if (strpos($uri, '(/') !== false) {
-            $uri = str_replace(array('(/', ')'), array('(?:/', ')?'), $uri);
-        }
-
         $this->compiled = with(
             new SymfonyRoute($uri, $optionals, $this->wheres, array(), $this->domain() ?: '')
         )->compile();
