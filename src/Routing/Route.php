@@ -141,8 +141,8 @@ class Route
             $uri = str_replace(array(':any', ':num', ':all'), array('[^/]+', '[0-9]+', '.*'), $uri);
         }
 
-        if (strpos($regex, '(/') !== false) {
-            $regex = str_replace(array('(/', ')'), array('(?:/', ')?'), $regex);
+        if (strpos($uri, '(/') !== false) {
+            $uri = str_replace(array('(/', ')'), array('(?:/', ')?'), $uri);
         }
 
         $this->compiled = with(
