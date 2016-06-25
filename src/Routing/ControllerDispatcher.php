@@ -50,12 +50,18 @@ class ControllerDispatcher
     {
         $instance = $this->makeController($controller);
 
+        // Intialize the Controller instance.
+        $parameters = $route->parametersWithoutNulls();
+
+        $instance->initialize($method, $parameters);
+
+        // Call the Controller Action and retrieve its response.
         $this->assignAfter($instance, $route, $request, $method);
 
         $response = $this->before($instance, $route, $request, $method);
 
         if (is_null($response)) {
-            $response = $this->call($instance, $route, $method);
+            $response = $instance->callAction($method, $parameters);
         }
 
         return $response;
@@ -72,21 +78,6 @@ class ControllerDispatcher
         Controller::setFilterer($this->filterer);
 
         return $this->container->make($controller);
-    }
-
-    /**
-     * Call the given controller instance method.
-     *
-     * @param  \Nova\Routing\Controller  $instance
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function call($instance, $route, $method)
-    {
-        $parameters = $route->parametersWithoutNulls();
-
-        return $instance->callAction($method, $parameters);
     }
 
     /**

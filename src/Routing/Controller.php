@@ -7,7 +7,6 @@ use Nova\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Event;
 use Response;
 use Template;
 
@@ -265,19 +264,6 @@ abstract class Controller
     }
 
     /**
-     * Handle calls to missing methods on the controller.
-     *
-     * @param  array   $parameters
-     * @return mixed
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-     */
-    public function missingMethod($parameters = array())
-    {
-        throw new NotFoundHttpException("Controller method not found.");
-    }
-
-    /**
      * Execute an action on the controller.
      *
      * @param string  $method
@@ -286,7 +272,24 @@ abstract class Controller
      */
     public function callAction($method, $params)
     {
+        // Before the Action execution stage.
+        $response = $this->before();
 
+        // Process the stage result.
+        if (! $response instanceof SymfonyResponse) {
+            // Execute the requested Method with the given arguments.
+            $response = call_user_func_array(array($this, $method), $params);
+        }
+
+        // After the Action execution stage.
+        $this->after($response);
+
+        // Create a proper Response and return it.
+        return $this->createResponse($response);
+    }
+
+    public function initialize($method, $params)
+    {
         // Initialise the Controller's variables.
         $this->method = $method;
         $this->params = $params;
@@ -309,25 +312,6 @@ abstract class Controller
         } else {
             throw new \Exception('Failed to calculate the view and module, for the Class: ' .$className);
         }
-
-        // Before the Action execution stage.
-        $response = $this->before();
-
-        // Process the stage result.
-        if (! $response instanceof SymfonyResponse) {
-            // Execute the requested Method with the given arguments.
-            $response = call_user_func_array(array($this, $method), $params);
-        }
-
-        // After the Action execution stage.
-        $this->after($response);
-
-        // The Method returned a Response instance; send it and stop the processing.
-        if (! $response instanceof SymfonyResponse) {
-            $response = $this->createResponse($response);
-        }
-
-        return $response;
     }
 
     /**
@@ -338,7 +322,9 @@ abstract class Controller
      */
     protected function createResponse($response)
     {
-        if (! $response instanceof View) {
+        if ($response instanceof SymfonyResponse) {
+            return $response;
+        } else if (! $response instanceof View) {
             // Create a Response instance and return it.
             return Response::make($response);
         }
@@ -439,6 +425,19 @@ abstract class Controller
     protected function getParams()
     {
         return $this->params;
+    }
+
+    /**
+     * Handle calls to missing methods on the controller.
+     *
+     * @param  array   $parameters
+     * @return mixed
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function missingMethod($parameters = array())
+    {
+        throw new NotFoundHttpException("Controller method not found.");
     }
 
     /**
