@@ -377,6 +377,8 @@ abstract class Controller
      */
     protected function getView(array $data = array())
     {
+        $this->setupDefaultView();
+
         return ViewFacade::make($this->getViewName(), $data, $this->getModule());
     }
 
