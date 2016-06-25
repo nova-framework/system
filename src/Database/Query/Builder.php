@@ -1509,7 +1509,6 @@ class Builder
 
             $this->{$field} = null;
         }
-
     }
 
     /**
@@ -1533,7 +1532,7 @@ class Builder
      */
     public function exists()
     {
-        return $this->count() > 0;
+        return ($this->count() > 0);
     }
 
     /**
