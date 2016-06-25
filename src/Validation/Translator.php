@@ -2,15 +2,13 @@
 /**
  * Translator - Class to handle a Laravel-esque style Translations.
  *
- * NOTE: The real strings translation is made via the new Language API.
+ * NOTE: The real translation are made via the new Language API.
  *
  * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
  * @version 3.0
  */
 
 namespace Nova\Validation;
-
-use Config;
 
 
 class Translator
@@ -27,15 +25,7 @@ class Translator
      */
     public function __construct()
     {
-        $lines = array();
-
-        if (Config::has('validation')) {
-            // The Error Messages are specified in configuration.
-            $lines = Config::get('validation');
-        } else {
-            // Fallback to the default Error Messages.
-            $lines = require __DIR__ .DS .'messages.php';
-        }
+        $lines = require __DIR__ .DS .'messages.php';
 
         $this->messages = array('validation' => $lines);
     }
