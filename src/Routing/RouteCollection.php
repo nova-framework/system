@@ -82,18 +82,12 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function addLookups($route)
     {
-        // If the route has a name, we will add it to the name look-up table so that we
-        // will quickly be able to find any route associate with a name and not have
-        // to iterate through every route every time we need to perform a look-up.
         $action = $route->getAction();
 
         if (isset($action['as'])) {
             $this->nameList[$action['as']] = $route;
         }
 
-        // When the route is routing to a controller we will also store the action that
-        // is used by the route. This will let us reverse route to controllers while
-        // processing a request and easily generate URLs to the given controllers.
         if (isset($action['controller'])) {
             $this->addToActionList($action, $route);
         }
@@ -125,18 +119,12 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         $routes = $this->get($request->getMethod());
 
-        // First, we will see if we can find a matching route for this current request
-        // method. If we can, great, we can just return it so that it can be called
-        // by the consumer. Otherwise we will check for routes with another verb.
         $route = $this->check($routes, $request);
 
         if ( ! is_null($route)) {
             return $route->bind($request);
         }
 
-        // If no route was found, we will check if a matching is route is specified on
-        // another HTTP verb. If it is we will need to throw a MethodNotAllowed and
-        // inform the user agent of which HTTP verb it should use for this route.
         $others = $this->checkForAlternateVerbs($request);
 
         if (count($others) > 0) {
@@ -156,9 +144,6 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         $methods = array_diff(Router::$verbs, array($request->getMethod()));
 
-        // Here we will spin through all verbs except for the current request verb and
-        // check to see if any routes respond to them. If they do, we will return a
-        // proper error response with the correct headers on the response string.
         $others = array();
 
         foreach ($methods as $method) {

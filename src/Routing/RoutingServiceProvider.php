@@ -52,9 +52,6 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app['url'] = $this->app->share(function($app)
         {
-            // The URL generator needs the route collection that exists on the router.
-            // Keep in mind this is an object, so we're passing by references here
-            // and all the registered routes will be available to the generator.
             $routes = $app['router']->getRoutes();
 
             return new UrlGenerator($routes, $app->rebinding('request', function($app, $request)
@@ -75,9 +72,6 @@ class RoutingServiceProvider extends ServiceProvider
         {
             $redirector = new Redirector($app['url']);
 
-            // If the session is set on the application instance, we'll inject it into
-            // the redirector instance. This allows the redirect responses to allow
-            // for the quite convenient "with" methods that flash to the session.
             if (isset($app['session.store'])) {
                 $redirector->setSession($app['session.store']);
             }

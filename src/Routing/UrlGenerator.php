@@ -95,9 +95,6 @@ class UrlGenerator
      */
     public function to($path, $extra = array(), $secure = null)
     {
-        // First we will check if the URL is already a valid URL. If it is we will not
-        // try to generate a new one but will simply return the URL as is, which is
-        // convenient since developers do not always have to check if it's valid.
         if ($this->isValidUrl($path)) return $path;
 
         $scheme = $this->getScheme($secure);
@@ -106,9 +103,6 @@ class UrlGenerator
             'rawurlencode', (array) $extra)
         );
 
-        // Once we have the scheme we will compile the "tail" by collapsing the values
-        // into a single string delimited by slashes. This just makes it convenient
-        // for passing the array of parameters to this URL as a list of segments.
         $root = $this->getRootUrl($scheme);
 
         return $this->trimUrl($root, $path, $tail);
@@ -137,9 +131,6 @@ class UrlGenerator
     {
         if ($this->isValidUrl($path)) return $path;
 
-        // Once we get the root URL, we will check to see if it contains an index.php
-        // file in the paths. If it does, we will remove it since it is not needed
-        // for asset paths, but only for routes to endpoints in the application.
         $root = $this->getRootUrl($this->getScheme($secure));
 
         return $this->removeIndex($root).'/'.trim($path, '/');
@@ -283,18 +274,12 @@ class UrlGenerator
      */
     protected function getRouteQueryString(array $parameters)
     {
-        // First we will get all of the string parameters that are remaining after we
-        // have replaced the route wildcards. We'll then build a query string from
-        // these string parameters then use it as a starting point for the rest.
         if (count($parameters) == 0) return '';
 
         $query = http_build_query(
             $keyed = $this->getStringParameters($parameters)
         );
 
-        // Lastly, if there are still parameters remaining, we will fetch the numeric
-        // parameters that are in the array and add them to the query string or we
-        // will make the initial query string if it wasn't started with strings.
         if (count($keyed) < count($parameters)) {
             $query .= '&'.implode(
                 '&', $this->getNumericParameters($parameters)

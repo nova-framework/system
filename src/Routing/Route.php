@@ -382,16 +382,10 @@ class Route
      */
     public function bindParameters(Request $request)
     {
-        // If the route has a regular expression for the host part of the URI, we will
-        // compile that and get the parameter matches for this domain. We will then
-        // merge them into this parameters array so that this array is completed.
         $params = $this->matchToKeys(
             array_slice($this->bindPathParameters($request), 1)
         );
 
-        // If the route has a regular expression for the host part of the URI, we will
-        // compile that and get the parameter matches for this domain. We will then
-        // merge them into this parameters array so that this array is completed.
         if ( ! is_null($this->compiled->getHostRegex())) {
             $params = $this->bindHostParameters($request, $params);
         }
@@ -466,17 +460,9 @@ class Route
      */
     protected function parseAction($action)
     {
-        // If the action is already a Closure instance, we will just set that instance
-        // as the "uses" property, because there is nothing else we need to do when
-        // it is available. Otherwise we will need to find it in the action list.
         if (is_callable($action)) {
             return array('uses' => $action);
-        }
-
-        // If no "uses" property has been set, we will dig through the array to find a
-        // Closure instance within this list. We will set the first Closure we come
-        // across into the "uses" property that will get fired off by this route.
-        elseif ( ! isset($action['uses'])) {
+        } else if ( ! isset($action['uses'])) {
             $action['uses'] = $this->findClosure($action);
         }
 
@@ -506,9 +492,6 @@ class Route
     {
         if (isset(static::$validators)) return static::$validators;
 
-        // To match the route, we will use a chain of responsibility pattern with the
-        // validator implementations. We will spin through each one making sure it
-        // passes and then we will know if the route as a whole matches request.
         return static::$validators = array(
             new MethodValidator,
             new SchemeValidator,
