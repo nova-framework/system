@@ -299,15 +299,10 @@ abstract class Controller
     {
         if ($response instanceof SymfonyResponse) {
             return $response;
-        } else if (! $response instanceof View) {
-            // Create a Response instance and return it.
-            return Response::make($response);
         }
 
-        if ((! $response->isTemplate()) && ($this->layout !== false)) {
-            // A View instance, having a Layout specified; create a Template instance.
-            $response = Template::make($this->layout, $this->template)
-                ->with('content', $response);
+        if (($this->layout !== false) && ($response instanceof View) && ! $response->isTemplate()) {
+            $response = Template::make($this->layout, $this->template)->with('content', $response);
         }
 
         // Create a Response instance and return it.
