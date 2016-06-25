@@ -282,7 +282,7 @@ abstract class Controller
         // Process the stage result.
         if (! $response instanceof SymfonyResponse) {
             // Execute the requested Method with the given arguments.
-            $response = call_user_func_array(array($this, $method), $params);
+            $response = call_user_func_array(array($this, $method), $parameters);
         }
 
         // Create a proper Response and return it.
