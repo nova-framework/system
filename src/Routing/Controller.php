@@ -311,30 +311,23 @@ abstract class Controller
         }
 
         // Before the Action execution stage.
-        $result = $this->before();
+        $response = $this->before();
 
         // Process the stage result.
-        if ($result instanceof SymfonyResponse) {
-            return $result;
-        }
-
-        // Execute the requested Method with the given arguments.
-        $result = call_user_func_array(array($this, $method), $params);
-
-        // The Method returned a Response instance; send it and stop the processing.
-        if ($result instanceof SymfonyResponse) {
-            return $result;
+        if (! $result instanceof SymfonyResponse) {
+            // Execute the requested Method with the given arguments.
+            $response = call_user_func_array(array($this, $method), $params);
         }
 
         // After the Action execution stage.
-        $retval = $this->after($result);
+        $this->after($response);
 
-        if($retval !== false) {
-            // Create the Response and send it.
-            return $this->createResponse($result);
+        // The Method returned a Response instance; send it and stop the processing.
+        if (! $response instanceof SymfonyResponse) {
+            $response = $this->createResponse($response);
         }
 
-        return Response::make($result);
+        return $response;
     }
 
     /**
@@ -343,21 +336,21 @@ abstract class Controller
      * @param mixed  $result
      * @return bool
      */
-    protected function createResponse($result)
+    protected function createResponse($response)
     {
-        if (! $result instanceof View) {
+        if (! $response instanceof View) {
             // Create a Response instance and return it.
-            return Response::make($result);
+            return Response::make($response);
         }
 
-        if ((! $result->isTemplate()) && ($this->layout !== false)) {
+        if ((! $response->isTemplate()) && ($this->layout !== false)) {
             // A View instance, having a Layout specified; create a Template instance.
-            $result = Template::make($this->layout, $this->template)
-                ->with('content', $result->fetch());
+            $response = Template::make($this->layout, $this->template)
+                ->with('content', $response->fetch());
         }
 
         // Create a Response instance and return it.
-        return Response::make($result);
+        return Response::make($response);
     }
 
     /**
