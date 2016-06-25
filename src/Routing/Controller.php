@@ -338,13 +338,13 @@ abstract class Controller
 
         // First, check on the App path.
         if (preg_match('#^App/Controllers/(.*)$#i', $path, $matches)) {
-            $this->defaultView = $matches[1] .DS .ucfirst($method);
+            $this->defaultView = $matches[1] .DS .ucfirst($this->method);
             // Secondly, check on the Modules path.
         } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
             $this->module = $matches[1];
 
             // The View is in Module sub-directories.
-            $this->defaultView = $matches[2] .DS .ucfirst($method);
+            $this->defaultView = $matches[2] .DS .ucfirst($this->method);
         } else {
             throw new BadMethodCallException('Invalid Controller: ' .static::class);
         }
