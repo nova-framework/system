@@ -310,13 +310,12 @@ abstract class Controller
     }
 
     /**
-     * Method automatically invoked before the current Action, stopping the flight
-     * when it returns false. This Method is supposed to be overriden for using it.
+     * Method automatically invoked before the requested Action.
+     *
+     * @return mixed|void
      */
     protected function before()
     {
-        // Return true to continue the processing.
-        return true;
     }
 
     /**
