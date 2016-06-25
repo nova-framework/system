@@ -314,7 +314,7 @@ abstract class Controller
         $response = $this->before();
 
         // Process the stage result.
-        if (! $result instanceof SymfonyResponse) {
+        if (! $response instanceof SymfonyResponse) {
             // Execute the requested Method with the given arguments.
             $response = call_user_func_array(array($this, $method), $params);
         }
@@ -346,7 +346,7 @@ abstract class Controller
         if ((! $response->isTemplate()) && ($this->layout !== false)) {
             // A View instance, having a Layout specified; create a Template instance.
             $response = Template::make($this->layout, $this->template)
-                ->with('content', $response->fetch());
+                ->with('content', $response);
         }
 
         // Create a Response instance and return it.
