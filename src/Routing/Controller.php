@@ -379,7 +379,7 @@ abstract class Controller
     {
         $this->setupDefaultView();
 
-        return ViewFacade::make($this->getViewName(), $data, $this->getModule());
+        return ViewFacade::make($this->defaultView, $data, $this->module);
     }
 
     /**
