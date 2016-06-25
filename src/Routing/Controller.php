@@ -29,7 +29,7 @@ abstract class Controller
      *
      * @var array
      */
-    private $params = array();
+    private $parameters = array();
 
     /**
      * The Module name.
@@ -271,10 +271,10 @@ abstract class Controller
      * @param array   $params
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function callAction($method, $params)
+    public function callAction($method, $parameters)
     {
         $this->method = $method;
-        $this->params = $params;
+        $this->parameters = $parameters;
 
         // Before the Action execution stage.
         $response = $this->before();
@@ -295,7 +295,7 @@ abstract class Controller
      * @param mixed  $result
      * @return bool
      */
-    protected function prepareResponse($response)
+    private function prepareResponse($response)
     {
         if ($response instanceof SymfonyResponse) {
             return $response;
@@ -327,7 +327,7 @@ abstract class Controller
     /**
      * @return void
      */
-    protected function setupDefaultView()
+    private function setupDefaultView()
     {
         if (isset($this->defaultView)) {
             return;
@@ -427,9 +427,9 @@ abstract class Controller
     /**
      * @return array
      */
-    protected function getParams()
+    protected function getParameters()
     {
-        return $this->params;
+        return $this->parameters;
     }
 
     /**
