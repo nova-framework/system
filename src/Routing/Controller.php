@@ -371,7 +371,6 @@ abstract class Controller
      */
     protected function after($result)
     {
-        return true;
     }
 
     /**
