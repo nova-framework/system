@@ -53,7 +53,7 @@ class ControllerDispatcher
         // Intialize the Controller instance.
         $parameters = $route->parametersWithoutNulls();
 
-        $instance->initialize($method, $parameters);
+        $instance->initialize($controller, $method, $parameters);
 
         // Call the Controller Action and retrieve its response.
         $this->assignAfter($instance, $route, $request, $method);

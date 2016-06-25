@@ -288,29 +288,26 @@ abstract class Controller
         return $this->createResponse($response);
     }
 
-    public function initialize($method, $params)
+    public function initialize($controller, $method, $params)
     {
         // Initialise the Controller's variables.
         $this->method = $method;
         $this->params = $params;
 
-        // Setup the Controller's properties.
-        $className = get_class($this);
-
         // Prepare the View Path using the Controller's full Name including its namespace.
-        $classPath = str_replace('\\', '/', ltrim($className, '\\'));
+        $path = str_replace('\\', '/', ltrim($controller, '\\'));
 
         // First, check on the App path.
-        if (preg_match('#^App/Controllers/(.*)$#i', $classPath, $matches)) {
+        if (preg_match('#^App/Controllers/(.*)$#i', $controller, $matches)) {
             $this->defaultView = $matches[1] .DS .ucfirst($method);
             // Secondly, check on the Modules path.
-        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $classPath, $matches)) {
+        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
             $this->module = $matches[1];
 
             // The View is in Module sub-directories.
             $this->defaultView = $matches[2] .DS .ucfirst($method);
         } else {
-            throw new \Exception('Failed to calculate the view and module, for the Class: ' .$className);
+            throw new \Exception('Invalid Controller: ' .$controller);
         }
     }
 
