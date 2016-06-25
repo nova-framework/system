@@ -273,6 +273,9 @@ abstract class Controller
      */
     public function callAction($method, $params)
     {
+        $this->method = $method;
+        $this->params = $params;
+
         // Before the Action execution stage.
         $response = $this->before();
 
@@ -284,38 +287,6 @@ abstract class Controller
 
         // Create a proper Response and return it.
         return $this->prepareResponse($response);
-    }
-
-    /**
-     * Initialize the Controller instance.
-     *
-     * @param string  $controller The called Class
-     * @param string  $method     The called Action
-     * @param array   $params     The given parameters
-     * @return void
-     * @throw  \BadMethodCallException
-     */
-    public function initialize($controller, $method, $params)
-    {
-        // Initialise the Controller's variables.
-        $this->method = $method;
-        $this->params = $params;
-
-        // Prepare the View Path using the Controller's full Name including its namespace.
-        $path = str_replace('\\', '/', ltrim($controller, '\\'));
-
-        // First, check on the App path.
-        if (preg_match('#^App/Controllers/(.*)$#i', $path, $matches)) {
-            $this->defaultView = $matches[1] .DS .ucfirst($method);
-            // Secondly, check on the Modules path.
-        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
-            $this->module = $matches[1];
-
-            // The View is in Module sub-directories.
-            $this->defaultView = $matches[2] .DS .ucfirst($method);
-        } else {
-            throw new BadMethodCallException('Invalid Controller: ' .$controller);
-        }
     }
 
     /**
@@ -354,6 +325,32 @@ abstract class Controller
     }
 
     /**
+     * @return void
+     */
+    protected function setupDefaultView()
+    {
+        if (isset($this->defaultView)) {
+            return;
+        }
+
+        // Prepare the View Path using the Controller's full Name including its namespace.
+        $path = str_replace('\\', '/', ltrim(static::class, '\\'));
+
+        // First, check on the App path.
+        if (preg_match('#^App/Controllers/(.*)$#i', $path, $matches)) {
+            $this->defaultView = $matches[1] .DS .ucfirst($method);
+            // Secondly, check on the Modules path.
+        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
+            $this->module = $matches[1];
+
+            // The View is in Module sub-directories.
+            $this->defaultView = $matches[2] .DS .ucfirst($method);
+        } else {
+            throw new BadMethodCallException('Invalid Controller: ' .static::class);
+        }
+    }
+
+    /**
      * This method automatically invokes after the current Action, when it does not return a
      * null or boolean value. This Method is supposed to be overriden for using it.
      *
@@ -380,7 +377,7 @@ abstract class Controller
      */
     protected function getView(array $data = array())
     {
-        return ViewFacade::make($this->defaultView, $data, $this->module);
+        return ViewFacade::make($this->getViewName(), $data, $this->getModule());
     }
 
     /**
@@ -388,6 +385,8 @@ abstract class Controller
      */
     protected function getViewName()
     {
+        $this->setupDefaultView();
+
         return $this->defaultView;
     }
 
@@ -396,6 +395,8 @@ abstract class Controller
      */
     protected function getModule()
     {
+        $this->setupDefaultView();
+
         return $this->module;
     }
 
