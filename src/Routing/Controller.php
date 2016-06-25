@@ -281,9 +281,6 @@ abstract class Controller
             $response = call_user_func_array(array($this, $method), $params);
         }
 
-        // After the Action execution stage.
-        $this->after($response);
-
         // Create a proper Response and return it.
         return $this->createResponse($response);
     }
