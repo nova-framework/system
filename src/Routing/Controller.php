@@ -346,16 +346,6 @@ abstract class Controller
     }
 
     /**
-     * This method automatically invokes after the current Action, when it does not return a
-     * null or boolean value. This Method is supposed to be overriden for using it.
-     *
-     * Note that the Action's returned value is passed to this Method as parameter.
-     */
-    protected function after($result)
-    {
-    }
-
-    /**
      * @param  string $title
      *
      * @return \Nova\Routing\Controller
