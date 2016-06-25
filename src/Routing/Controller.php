@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Response;
 use Template;
+use View as ViewFacade;
 
 use BadMethodCallException;
 use Closure;
@@ -282,7 +283,7 @@ abstract class Controller
         }
 
         // Create a proper Response and return it.
-        return $this->createResponse($response);
+        return $this->prepareResponse($response);
     }
 
     /**
@@ -323,7 +324,7 @@ abstract class Controller
      * @param mixed  $result
      * @return bool
      */
-    protected function createResponse($response)
+    protected function prepareResponse($response)
     {
         if ($response instanceof SymfonyResponse) {
             return $response;
@@ -369,7 +370,7 @@ abstract class Controller
      */
     protected function title($title)
     {
-        app('view')->share('title', $title);
+        ViewFacade::share('title', $title);
     }
 
     /**
@@ -379,7 +380,7 @@ abstract class Controller
      */
     protected function getView(array $data = array())
     {
-        return app('view')->make($this->defaultView, $data, $this->module);
+        return ViewFacade::make($this->defaultView, $data, $this->module);
     }
 
     /**
