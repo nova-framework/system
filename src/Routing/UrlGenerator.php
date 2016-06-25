@@ -99,9 +99,7 @@ class UrlGenerator
 
         $scheme = $this->getScheme($secure);
 
-        $tail = implode('/', array_map(
-            'rawurlencode', (array) $extra)
-        );
+        $tail = implode('/', array_map('rawurlencode', (array) $extra));
 
         $root = $this->getRootUrl($scheme);
 
@@ -213,8 +211,9 @@ class UrlGenerator
 
         $uri = strtr(rawurlencode($this->trimUrl(
             $root = $this->replaceRoot($route, $domain, $parameters),
+
             $this->replaceRouteParameters($route->uri(), $parameters)
-        )), $this->dontEncode).$this->getRouteQueryString($parameters);
+        )), $this->dontEncode) .$this->getRouteQueryString($parameters);
 
         return $absolute ? $uri : '/'.ltrim(str_replace($root, '', $uri), '/');
     }
