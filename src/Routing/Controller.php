@@ -288,6 +288,15 @@ abstract class Controller
         return $this->createResponse($response);
     }
 
+    /**
+     * Initialize the Controller instance.
+     *
+     * @param string  $controller The called Class
+     * @param string  $method     The called Action
+     * @param array   $params     The given parameters
+     * @return void
+     * @throw  \BadMethodCallException
+     */
     public function initialize($controller, $method, $params)
     {
         // Initialise the Controller's variables.
@@ -298,7 +307,7 @@ abstract class Controller
         $path = str_replace('\\', '/', ltrim($controller, '\\'));
 
         // First, check on the App path.
-        if (preg_match('#^App/Controllers/(.*)$#i', $controller, $matches)) {
+        if (preg_match('#^App/Controllers/(.*)$#i', $path, $matches)) {
             $this->defaultView = $matches[1] .DS .ucfirst($method);
             // Secondly, check on the Modules path.
         } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
@@ -307,7 +316,7 @@ abstract class Controller
             // The View is in Module sub-directories.
             $this->defaultView = $matches[2] .DS .ucfirst($method);
         } else {
-            throw new \Exception('Invalid Controller: ' .$controller);
+            throw new BadMethodCallException('Invalid Controller: ' .$controller);
         }
     }
 
