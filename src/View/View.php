@@ -10,7 +10,6 @@ namespace Nova\View;
 
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
-use Nova\Support\Facades\View as Facade;
 use Nova\Support\MessageBag;
 use Nova\View\Factory;
 
