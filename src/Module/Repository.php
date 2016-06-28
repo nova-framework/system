@@ -114,7 +114,7 @@ class Repository
             foreach ($paths as $path => $directories) {
                 if (! empty($directories)) {
                     foreach ($directories as $directory) {
-                        // Check if dir contains a module definition file
+                        // Check if the directory contains a Module definition file.
                         if ($files->exists($directory .DS .'module.json') {
                             $name = pathinfo($directory, PATHINFO_BASENAME);
 
