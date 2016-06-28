@@ -26,8 +26,9 @@ class Manifest
     protected $app;
 
     /**
-     * Initialize the manifest
-     * @param Application $app [description]
+     * Initialize the Manifest instance.
+     *
+     * @param \Nova\Foundation\Application $app
      */
     public function __construct(Application $app)
     {
@@ -37,15 +38,13 @@ class Manifest
         $this->path = storage_path('modules.json');
 
         // Try to read the file
-        $files = $this->app['files'];
-
-        if ($files->exists($this->path)) {
-            $this->data = @json_decode($files->get($this->path), true);
+        if (file_exists($this->path)) {
+            $this->data = json_decode(file_get_contents($this->path), true);
         }
     }
 
     /**
-     * Save the manifest data
+     * Save the Manifest data
      * @return void
      */
     public function save($modules)
@@ -57,10 +56,8 @@ class Manifest
             $this->data[$key] = $module->get();
         }
 
-        // Cache the data.
-        $data = json_encode($this->data, JSON_PRETTY_PRINT);
-
-        $this->app['files']->put($this->path, $data);
+        // Cache the Manifest data.
+        file_put_contents($path, json_encode($this->data));
 
         return $this->data;
     }

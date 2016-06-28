@@ -25,16 +25,11 @@ class ModuleServiceProvider extends ServiceProvider
 
         $modules = $this->app['modules'];
 
-        try
-        {
-            // Autoscan the Modules, if that was specified.
-            $modules->start();
+        // Autoscan for the Modules, if that was specified.
+        $modules->start();
 
-            // Register all know Modules.
-            $modules->register();
-        } catch (\Exception $e) {
-            $modules->logError("There was an error when starting modules: [" .$e->getMessage() ."]");
-        }
+        // Register all Modules.
+        $modules->register();
     }
 
     /**

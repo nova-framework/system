@@ -225,51 +225,6 @@ class Repository
     }
 
     /**
-     * Log a debug message
-     * @param  string $message
-     * @return void
-     */
-    public function logDebug($message)
-    {
-        $this->log($message);
-    }
-
-    /**
-     * Log an error message
-     * @param  string $message
-     * @return void
-     */
-    public function logError($message)
-    {
-        $this->log($message, 'error');
-    }
-
-    /**
-     * Log a message
-     * @param  string $type
-     * @param  string $message
-     * @return void
-     */
-    public function log($message, $type = 'debug')
-    {
-        $config = $this->app['config'];
-
-        if ($config->get('modules.debug')) {
-            $log = $this->app['log'];
-
-            $namespace = 'MODULES';
-
-            $message = "[$namespace] $message";
-
-            if ($type == 'error') {
-                $log->error($message);
-            } else {
-                $log->debug($message);
-            }
-        }
-    }
-
-    /**
      * Prettify a JSON Encode
      * @param  mixed $values
      * @return string
