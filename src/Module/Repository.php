@@ -24,8 +24,6 @@ class Repository
      */
     protected $manifest;
 
-    protected $manifestPath;
-
     /**
      * The Application instance
      *
@@ -37,15 +35,13 @@ class Repository
      * Initialize the finder
      * @param Application $app
      */
-    public function __construct(Application $app, $manifestPath)
+    public function __construct(Application $app)
     {
         $this->app = $app;
 
         $this->modules = new Collection($app);
 
         $this->manifest = new Manifest($app);
-
-        $this->manifestPath = $manifestPath;
     }
 
     /**
