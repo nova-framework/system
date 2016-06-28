@@ -51,9 +51,29 @@ function app($make = null)
  * @param   string  $path
  * @return  string
  */
-function app_path($path = '')
+function app_path($path = null)
 {
     return app('path') .($path ? DS .$path : $path);
+}
+
+/**
+ * Get the path to the root folder.
+ *
+ * @param   string  $path
+ * @return  string
+ */
+function base_path($path = null)
+{
+    return app('path.base') .($path ? DS .$path : $path);
+}
+
+/**
+ * Storage Path helper
+ * @return string
+ */
+function storage_path($path = null)
+{
+    return app('path.storage') .($path ? DS .$path : $path);
 }
 
 /**
@@ -125,15 +145,6 @@ function resource_url($path, $module = null)
 function template_url($path, $template = TEMPLATE, $folder = '/assets/')
 {
     return UrlHelper::templatePath($template, $folder) .ltrim($path, '/');
-}
-
-/**
- * Storage Path helper
- * @return string
- */
-function storage_path($path = null)
-{
-    return app('path.storage') .($path ? DS .$path : $path);
 }
 
 //

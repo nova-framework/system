@@ -84,9 +84,9 @@ class TinkerCommand extends Command
     protected function getCasters()
     {
         return array(
-            'Nova\Foundation\Application'  => 'Nova\Foundation\Console\FrameworkCaster::castApplication',
-            'Nova\Support\Collection'      => 'Nova\Foundation\Console\FrameworkCaster::castCollection',
-            'Nova\Database\ORM\Model'      => 'Nova\Foundation\Console\FrameworkCaster::castModel',
+            'Nova\Foundation\Application' => 'Nova\Foundation\Console\FrameworkCaster::castApplication',
+            'Nova\Support\Collection'     => 'Nova\Foundation\Console\FrameworkCaster::castCollection',
+            'Nova\Database\ORM\Model'     => 'Nova\Foundation\Console\FrameworkCaster::castModel',
         );
     }
 

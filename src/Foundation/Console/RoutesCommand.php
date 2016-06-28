@@ -68,6 +68,7 @@ class RoutesCommand extends Command
         parent::__construct();
 
         $this->router = $router;
+        
         $this->routes = $router->getRoutes();
     }
 

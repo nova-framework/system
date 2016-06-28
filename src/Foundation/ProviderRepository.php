@@ -139,7 +139,7 @@ class ProviderRepository
      */
     public function loadManifest()
     {
-        $path = $this->manifestPath .'/services.json';
+        $path = $this->manifestPath .DS .'services.json';
 
         if (file_exists($path)) {
             $manifest = json_decode(file_get_contents($path), true);
@@ -156,7 +156,7 @@ class ProviderRepository
      */
     public function writeManifest($manifest)
     {
-        $path = $this->manifestPath .'/services.json';
+        $path = $this->manifestPath .DS .'services.json';
 
         file_put_contents($path, json_encode($manifest));
 
