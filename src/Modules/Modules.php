@@ -77,14 +77,19 @@ class Modules implements RepositoryInterface
      */
     protected function autoloadFiles($properties)
     {
-        if (isset($properties['autoload'])) {
-            $namespace = $this->resolveNamespace($properties);
+        if (! isset($properties['autoload'])) {
+            $files = array('Config.php', 'Events.php', 'Filters.php', 'Routes.php');
+        } else {
+            $files = $properties['autoload'];
+        }
 
-            $path = $this->repository->getPath() .DS .$namespace .DS;
+        $namespace = $this->resolveNamespace($properties);
 
-            foreach ($properties['autoload'] as $file) {
-                include $path .$file;
-            }
+        //
+        $path = $this->repository->getPath() .DS .$namespace .DS;
+
+        foreach ($files as $file) {
+            include $path .$file;
         }
     }
 
