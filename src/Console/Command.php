@@ -4,6 +4,7 @@ namespace Nova\Console;
 
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
