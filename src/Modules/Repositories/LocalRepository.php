@@ -18,7 +18,7 @@ class LocalRepository extends Repository
 
         $modules = collect();
 
-        $basenames->each(function ($module, $key) use ($modules, $cache) {
+        $basenames->each(function ($module) use ($modules, $cache) {
             $temp = collect($cache->get($module));
 
             $manifest = collect($this->getManifest($module));
