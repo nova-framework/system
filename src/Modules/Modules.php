@@ -61,7 +61,7 @@ class Modules implements RepositoryInterface
     {
         $namespace = $this->resolveNamespace($properties);
 
-        $file = $this->repository->getPath() .DS .$namespace .DS 'Providers' .DS .$namespace .'ServiceProvider.php';
+        $file = $this->repository->getPath() .DS .$namespace .DS .'Providers' .DS .$namespace .'ServiceProvider.php';
 
         $serviceProvider = $this->repository->getNamespace() .'\\' .$namespace ."\\Providers\\{$namespace}ServiceProvider";
 
