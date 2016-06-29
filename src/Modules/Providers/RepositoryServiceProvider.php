@@ -22,12 +22,12 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
-        $driver = ucfirst($config['modules.driver']);
+        $driver = $this->app['config']['modules.driver'];
 
-        if ($driver == 'Custom') {
+        if ($driver == 'custom') {
             $className = $config['modules.custom_driver'];
         } else {
-            $className = 'Nova\Modules\Repositories\\' .$driver .'Repository';
+            $className = 'Nova\Modules\Repositories\\' .ucfirst($driver) .'Repository';
         }
 
         $this->app->bind('Nova\Modules\RepositoryInterface', $className);
