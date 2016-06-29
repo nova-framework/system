@@ -2,7 +2,7 @@
 
 namespace Nova\Modules;
 
-use Helpers\Inflector;
+use Nova\Helpers\Inflector;
 use Nova\Modules\RepositoryInterface;
 use Nova\Foundation\Application;
 
