@@ -14,7 +14,7 @@ class ModulesServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
-     * Boot the service provider.
+     * Boot the Service Provider.
      */
     public function boot()
     {
@@ -24,7 +24,7 @@ class ModulesServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
+     * Register the Service Provider.
      */
     public function register()
     {

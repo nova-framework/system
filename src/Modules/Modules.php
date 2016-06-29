@@ -86,10 +86,12 @@ class Modules implements RepositoryInterface
         $namespace = $this->resolveNamespace($properties);
 
         //
-        $path = $this->repository->getPath() .DS .$namespace .DS;
+        $basePath = $this->repository->getPath() .DS .$namespace .DS;
 
         foreach ($files as $file) {
-            include $path .$file;
+            $path = $basePath .$file;
+
+            if (is_readable($path)) require $path;
         }
     }
 
