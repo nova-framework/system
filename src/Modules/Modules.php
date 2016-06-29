@@ -63,7 +63,7 @@ class Modules implements RepositoryInterface
 
         $file = $this->repository->getPath() .DS .$namespace .DS .'Providers' .DS .$namespace .'ServiceProvider.php';
 
-        $serviceProvider = $this->repository->getNamespace() .'\\' .$namespace ."\\Providers\\{$namespace}ServiceProvider";
+        $serviceProvider = $this->repository->getNamespace() ."\\{$namespace}\\Providers\\{$namespace}ServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
