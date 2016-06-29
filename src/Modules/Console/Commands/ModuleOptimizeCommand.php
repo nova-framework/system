@@ -2,7 +2,8 @@
 
 namespace Caffeinated\Modules\Console\Commands;
 
-use Illuminate\Console\Command;
+use Nova\Console\Command;
+
 
 class ModuleOptimizeCommand extends Command
 {

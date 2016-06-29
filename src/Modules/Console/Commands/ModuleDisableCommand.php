@@ -2,7 +2,7 @@
 
 namespace Nova\Modules\Console\Commands;
 
-use Illuminate\Console\Command;
+use Nova\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 
 
