@@ -28,7 +28,7 @@ class LocalRepository extends Repository
 
         $modules->each(function ($module) {
             if (! $module->has('enabled')) {
-                $module->put('enabled', config('modules.enabled', true));
+                $module->put('enabled', $this->config->get('modules.enabled', true));
             }
 
             if (! $module->has('order')) {
