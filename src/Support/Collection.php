@@ -596,7 +596,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     public function toArray()
     {
         return array_map(function($value) {
-            return $value instanceof ArrayableInterface ? $value->toArray() : $value;
+            return ($value instanceof ArrayableInterface) ? $value->toArray() : $value;
         }, $this->items);
     }
 
@@ -608,7 +608,17 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     public function toJson($options = 0)
     {
-        return json_encode($this->toArray(), $options);
+        $items = array_map(function ($value) {
+            if ($value instanceof JsonableInterface) {
+                return json_decode($value->toJson(), true);
+            } elseif ($value instanceof ArrayableInterface) {
+                return $value->toArray();
+            } else {
+                return $value;
+            }
+        }, $this->items);
+
+        return json_encode($items, $options);
     }
 
     /**

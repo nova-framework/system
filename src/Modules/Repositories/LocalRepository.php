@@ -38,7 +38,7 @@ class LocalRepository extends Repository
             return $module;
         });
 
-        $content = json_encode($modules->all(), JSON_PRETTY_PRINT);
+        $content = $modules->toJson(JSON_PRETTY_PRINT);
 
         return $this->files->put($cachePath, $content);
     }
@@ -179,9 +179,9 @@ class LocalRepository extends Repository
 
         $module = collect(array($moduleKey => $values));
 
-        $merged  = $cache->merge($module);
+        $merged = $cache->merge($module);
 
-        $content = json_encode($merged->all(), JSON_PRETTY_PRINT);
+        $content = $merged->toJson(JSON_PRETTY_PRINT);
 
         return $this->files->put($cachePath, $content);
     }
