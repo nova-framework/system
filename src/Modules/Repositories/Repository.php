@@ -119,7 +119,7 @@ abstract class Repository implements RepositoryInterface
     {
         $module = Inflector::classify($slug);
 
-        return $this->getPath()."/{$module}/";
+        return $this->getPath() .DS .$module .DS;
     }
 
     /**
