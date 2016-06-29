@@ -472,8 +472,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
         // Once we have sorted all of the keys in the array, we will loop through them
         // and grab the corresponding model so we can set the underlying items list
         // to the sorted version. Then we'll just return the collection instance.
-        foreach (array_keys($results) as $key)
-        {
+        foreach (array_keys($results) as $key) {
             $results[$key] = $this->items[$key];
         }
 
@@ -564,6 +563,16 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     }
 
     /**
+     * Get the keys of the collection items.
+     *
+     * @return static
+     */
+    public function keys()
+    {
+        return new static(array_keys($this->items));
+    }
+
+    /**
      * Reset the keys on the underlying array.
      *
      * @return \Nova\Support\Collection
@@ -583,7 +592,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     protected function valueRetriever($value)
     {
-        return function($item) use ($value) {
+        return function($item) use ($value)
+        {
             return data_get($item, $value);
         };
     }
@@ -595,7 +605,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     public function toArray()
     {
-        return array_map(function($value) {
+        return array_map(function($value)
+        {
             return ($value instanceof ArrayableInterface) ? $value->toArray() : $value;
         }, $this->items);
     }
@@ -608,7 +619,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     public function toJson($options = 0)
     {
-        $items = array_map(function ($value) {
+        $items = array_map(function ($value)
+        {
             if ($value instanceof JsonableInterface) {
                 return json_decode($value->toJson(), true);
             } elseif ($value instanceof ArrayableInterface) {
