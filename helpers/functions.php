@@ -194,7 +194,7 @@ function __d($domain, $message, $args = null)
  */
 function collect($value = null)
 {
-    return new Collection::make($value);
+    return Collection::make($value);
 }
 
 /**
