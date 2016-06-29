@@ -30,7 +30,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     public function __construct(array $items = array())
     {
-        $this->items = $items;
+        $this->items = $this->getArrayableItems($items);
     }
 
     /**
@@ -692,13 +692,15 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
      */
     private function getArrayableItems($items)
     {
-        if ($items instanceof Collection) {
-            $items = $items->all();
+        if (is_array($items)) {
+            return $items;
+        } else if ($items instanceof Collection) {
+            return $items->all();
         } else if ($items instanceof ArrayableInterface) {
-            $items = $items->toArray();
+            return $items->toArray();
         }
 
-        return $items;
+        return (array) $items;
     }
 
 }
