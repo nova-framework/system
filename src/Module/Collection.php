@@ -45,7 +45,7 @@ class Collection extends BaseCollection
             return ($a->order < $b->order) ? -1 : 1;
         });
 
-        // Register every know Module.
+        // Register every Module.
         foreach ($this->items as $module) {
             $module->register();
         }

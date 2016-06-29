@@ -2,10 +2,14 @@
 
 namespace Nova\Console;
 
+use Nova\Support\Contracts\ArrayableInterface as Arrayable;
+
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 
 
 class Command extends \Symfony\Component\Console\Command\Command
@@ -170,9 +174,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function confirm($question, $default = true)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
-
-        return $dialog->askConfirmation($this->output, "<question>$question</question>", $default);
+        return $this->output->confirm($question, $default);
     }
 
     /**
@@ -184,9 +186,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function ask($question, $default = null)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
-
-        return $dialog->ask($this->output, "<question>$question</question>", $default);
+        return $this->output->ask($question, $default);
     }
 
 
@@ -199,9 +199,11 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function secret($question, $fallback = true)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
+        $question = new Question($question);
 
-        return $dialog->askHiddenResponse($this->output, "<question>$question</question>", $fallback);
+        $question->setHidden(true)->setHiddenFallback($fallback);
+
+        return $this->output->askQuestion($question);
     }
 
     /**
@@ -215,9 +217,30 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function choice($question, array $choices, $default = null, $attempts = false)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
+        $question = new ChoiceQuestion($question, $choices, $default);
 
-        return $dialog->select($this->output, "<question>$question</question>", $choices, $default, $attempts);
+        $question->setMaxAttempts($attempts)->setMultiselect($multiple);
+
+        return $this->output->askQuestion($question);
+    }
+
+    /**
+     * Format input to textual table.
+     *
+     * @param  array   $headers
+     * @param  \Nova\Support\Contracts\ArrayableInterface|array  $rows
+     * @param  string  $style
+     * @return void
+     */
+    public function table(array $headers, $rows, $style = 'default')
+    {
+        $table = new Table($this->output);
+
+        if ($rows instanceof Arrayable) {
+            $rows = $rows->toArray();
+        }
+
+        $table->setHeaders($headers)->setRows($rows)->setStyle($style)->render();
     }
 
     /**

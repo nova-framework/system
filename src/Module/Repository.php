@@ -32,7 +32,8 @@ class Repository
     protected $app;
 
     /**
-     * Initialize the finder
+     * Initialize the Repository instance
+     *
      * @param Application $app
      */
     public function __construct(Application $app)
@@ -45,7 +46,8 @@ class Repository
     }
 
     /**
-     * Start finder
+     * Start the Repository instance
+     *
      * @return void
      */
     public function start()
@@ -70,7 +72,7 @@ class Repository
     }
 
     /**
-     * Return the Modules Collection
+     * Return the Modules Collection instance
      *
      * @return ModuleCollection
      */
@@ -153,7 +155,8 @@ class Repository
     }
 
     /**
-     * Create module instances
+     * Create the Module instances
+     *
      * @param array $modules
      * @param string|null $groupPath
      * @return array
@@ -184,7 +187,7 @@ class Repository
     }
 
     /**
-     * Return manifest object
+     * Return the Manifest object
      * @return Manifest
      */
     public function manifest($module = null)
@@ -193,7 +196,7 @@ class Repository
     }
 
     /**
-     * Save the manifest file
+     * Save the Manifest file
      * @param  array $modules
      * @return void
      */
@@ -203,7 +206,7 @@ class Repository
     }
 
     /**
-     * Delete the manifest file
+     * Delete the Manifest file
      * @return void
      */
     public function deleteManifest()

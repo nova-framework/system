@@ -9,6 +9,7 @@
 
 use Nova\Helpers\Url as UrlHelper;
 use Nova\Support\Str;
+use Nova\Support\Collection;
 
 use Closure as Closure;
 
@@ -183,6 +184,17 @@ function __d($domain, $message, $args = null)
     $params = (func_num_args() === 3) ? (array)$args : array_slice(func_get_args(), 2);
 
     return app('language')->instance($domain)->translate($message, $params);
+}
+
+/**
+ * Create a collection from the given value.
+ *
+ * @param  mixed  $value
+ * @return \Nova\Support\Collection
+ */
+function collect($value = null)
+{
+    return new Collection($value);
 }
 
 /**

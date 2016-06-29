@@ -145,7 +145,7 @@ class Module extends ServiceProvider
         // Get files for inclusion
         $moduleInclude = (array) array_get($this->definition, 'include');
 
-        $globalInclude = $this->app['config']->get('modules.include');
+        $globalInclude = $this->app['config']['modules.includes'];
 
         $includes = array_merge($globalInclude, $moduleInclude);
 
@@ -153,7 +153,7 @@ class Module extends ServiceProvider
         foreach ($includes as $file) {
             $path = $this->path($file);
 
-            if ($this->app['files']->exists($path)) require $path;
+            if ($this->app['files']->exists($path)) require_once $path;
         }
 
         // Register alias(es) into Forge
@@ -168,7 +168,7 @@ class Module extends ServiceProvider
         }
 
         // Register command(s) into Forge
-        $commands = $this->get('command');
+        $commands = $this->get('commands');
 
         if(! is_null($commands)) {
             if(! is_array($commands)) $commands = array($commands);
@@ -187,7 +187,9 @@ class Module extends ServiceProvider
 
         if (is_null($providers)) {
             return;
-        } else if (is_array($providers)) {
+        }
+
+        if (is_array($providers)) {
             foreach ($providers as $provider) {
                 $this->app->register($instance = new $provider($this->app));
             }
