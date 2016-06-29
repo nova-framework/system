@@ -1,6 +1,6 @@
 <?php
 
-namespace Caffeinated\Modules\Console\Commands;
+namespace Nova\Modules\Console\Commands;
 
 use Nova\Console\Command;
 
