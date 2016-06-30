@@ -38,7 +38,8 @@ class LocalRepository extends Repository
             return $module;
         });
 
-        $content = $modules->toJson(JSON_PRETTY_PRINT);
+        //
+        $content = $modules->toJson();
 
         return $this->files->put($cachePath, $content);
     }
@@ -181,7 +182,7 @@ class LocalRepository extends Repository
 
         $merged = $cache->merge($module);
 
-        $content = $merged->toJson(JSON_PRETTY_PRINT);
+        $content = $merged->toJson();
 
         return $this->files->put($cachePath, $content);
     }
@@ -274,7 +275,7 @@ class LocalRepository extends Repository
         $cachePath = $this->getCachePath();
 
         if (! $this->files->exists($cachePath)) {
-            $content = json_encode(array(), JSON_PRETTY_PRINT);
+            $content = json_encode(array());
 
             $this->files->put($cachePath, $content);
 
