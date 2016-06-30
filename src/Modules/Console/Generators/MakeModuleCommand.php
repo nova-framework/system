@@ -1,0 +1,278 @@
+<?php
+
+namespace Nova\Modules\Console\Generators;
+
+use Nova\Modules\Modules;
+use Nova\Console\Command;
+use Nova\Filesystem\Filesystem;
+use Nova\Support\Str;
+
+use Symfony\Component\Console\Helper\ProgressBar;
+
+
+class MakeModuleCommand extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'make:module
+        {slug : The slug of the module}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Create a new Module and bootstrap it';
+
+    /**
+     * Module folders to be created.
+     *
+     * @var array
+     */
+    protected $moduleFolders = array(
+        'Assets/',
+        'Controllers/',
+        'Console/',
+        'Database/',
+        'Database/Migrations/',
+        'Database/Seeds/',
+        'Language/'
+        'Providers/',
+        'Views/',
+    );
+
+    /**
+     * Module files to be created.
+     *
+     * @var array
+     */
+    protected $moduleFiles = array(
+        'Database/Seeds/{{namespace}}DatabaseSeeder.php',
+        'Routes.php',
+        'Providers/{{namespace}}ServiceProvider.php',
+        'module.json',
+    );
+
+    /**
+     * Module stubs used to populate defined files.
+     *
+     * @var array
+     */
+    protected $moduleStubs = array(
+        'seeder',
+        'routes',
+        'moduleserviceprovider',
+        'manifest',
+    );
+
+    /**
+     * The modules instance.
+     *
+     * @var Modules
+     */
+    protected $module;
+
+    /**
+     * The filesystem instance.
+     *
+     * @var Filesystem
+     */
+    protected $files;
+
+    /**
+     * Array to store the configuration details.
+     *
+     * @var array
+     */
+    protected $container;
+
+    /**
+     * Create a new command instance.
+     *
+     * @param Filesystem $files
+     * @param Modules    $module
+     */
+    public function __construct(Filesystem $files, Modules $module)
+    {
+        parent::__construct();
+
+        $this->files  = $files;
+        $this->module = $module;
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function fire()
+    {
+        $this->container['slug']      = Str::slug($this->argument('slug'));
+        $this->container['name']      = Str::studly($this->container['slug']);
+        $this->container['namespace'] = Str::studly($this->container['slug']);
+
+        $this->container['version']     = '1.0';
+        $this->container['description'] = 'This is the description for the ' .$this->container['name'] .' module.';
+        $this->container['license']     = 'MIT';
+        $this->container['author']      = ' ';
+
+        return $this->generate();
+    }
+
+    /**
+     * Generate the module.
+     */
+    protected function generate()
+    {
+        $steps = array(
+            'Generating folders...'      => 'generateFolders',
+            'Generating .gitkeep...'     => 'generateGitkeep',
+            'Generating files...'        => 'generateFiles',
+            'Optimizing module cache...' => 'optimizeModules',
+        );
+
+        $progress = new ProgressBar($this->output, count($steps));
+
+        $progress->start();
+
+        foreach ($steps as $message => $function) {
+            $progress->setMessage($message);
+
+            $this->$function();
+
+            $progress->advance();
+        }
+
+        $progress->finish();
+
+        $this->info("\nModule generated successfully.");
+    }
+
+    /**
+     * Generate defined module folders.
+     */
+    protected function generateFolders()
+    {
+        if (!$this->files->isDirectory($this->module->getPath())) {
+            $this->files->makeDirectory($this->module->getPath());
+        }
+
+        $this->files->makeDirectory($this->getModulePath($this->container['slug'], true));
+
+        foreach ($this->moduleFolders as $folder) {
+            $this->files->makeDirectory($this->getModulePath($this->container['slug']).$folder);
+        }
+    }
+
+    /**
+     * Generate defined module files.
+     */
+    protected function generateFiles()
+    {
+        foreach ($this->moduleFiles as $key => $file) {
+            $file = $this->formatContent($file);
+
+            $this->files->put($this->getDestinationFile($file), $this->getStubContent($key));
+        }
+    }
+
+    /**
+     * Generate .gitkeep files within generated folders.
+     */
+    protected function generateGitkeep()
+    {
+        $modulePath = $this->getModulePath($this->container['slug']);
+
+        foreach ($this->moduleFolders as $folder) {
+            $gitkeep = $modulePath.$folder.'/.gitkeep';
+
+            $this->files->put($gitkeep, '');
+        }
+    }
+
+    /**
+     * Reset module cache of enabled and disabled modules.
+     */
+    protected function optimizeModules()
+    {
+        return $this->callSilent('module:optimize');
+    }
+
+    /**
+     * Get the path to the module.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    protected function getModulePath($slug = null, $allowNotExists = false)
+    {
+        if ($slug) {
+            return $this->module->getModulePath($slug, $allowNotExists);
+        }
+
+        return $this->module->getPath();
+    }
+
+    /**
+     * Get destination file.
+     *
+     * @param string $file
+     *
+     * @return string
+     */
+    protected function getDestinationFile($file)
+    {
+        return $this->getModulePath($this->container['slug']).$this->formatContent($file);
+    }
+
+    /**
+     * Get stub content by key.
+     *
+     * @param int $key
+     *
+     * @return string
+     */
+    protected function getStubContent($key)
+    {
+        $stub = $this->moduleStubs[$key];
+
+        return $this->formatContent($this->files->get(__DIR__ .DS .'stubs' .DS .$stub .'.stub'));
+    }
+
+    /**
+     * Replace placeholder text with correct values.
+     *
+     * @return string
+     */
+    protected function formatContent($content)
+    {
+        $searches = array(
+            '{{slug}}',
+            '{{name}}',
+            '{{namespace}}',
+            '{{version}}',
+            '{{description}}',
+            '{{author}}',
+            '{{license}}',
+            '{{path}}'
+        );
+
+        $replaces = array(
+            $this->container['slug'],
+            $this->container['name'],
+            $this->container['namespace'],
+            $this->container['version'],
+            $this->container['description'],
+            $this->container['author'],
+            $this->container['license'],
+            $this->module->getNamespace()
+        );
+
+        return str_replace($searches, $replaces, $content);
+    }
+
+}

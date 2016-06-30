@@ -1,0 +1,22 @@
+<?php
+
+namespace {{path}}\{{namespace}}\Database\Seeds;
+
+use Nova\Database\Seeder;
+use Nova\Database\Eloquent\Model;
+
+
+class {{namespace}}DatabaseSeeder extends Seeder
+{
+	/**
+	 * Run the database seeds.
+	 *
+	 * @return void
+	 */
+	public function run()
+	{
+		Model::unguard();
+
+		// $this->call('{{path}}\{{namespace}}\Database\Seeds\FoobarTableSeeder');
+	}
+}
