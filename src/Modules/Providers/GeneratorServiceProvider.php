@@ -2,6 +2,11 @@
 
 namespace Nova\Modules\Providers;
 
+use Nova\Modules\Console\Generators\MakeModuleCommand;
+use Nova\Modules\Console\Generators\MakeControllerCommand;
+use Nova\Modules\Console\Generators\MakeModelCommand;
+use Nova\Modules\Console\Generators\MakeMigrationCommand;
+use Nova\Modules\Console\Generators\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 
@@ -20,13 +25,12 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('Module', 'Controller', 'Model', 'Migration', 'Seeder');
+        $commands = array('MakeModule', 'MakeController', 'MakeModel', 'MakeMigration', 'MakeSeeder');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
         }
     }
-
 
     /**
      * Register the make:module command.
@@ -34,7 +38,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeModuleCommand()
     {
         $this->app->bindShared('command.make.module', function ($app) {
-            return $app['Nova\Modules\Console\Generators\MakeModuleCommand'];
+            return new MakeModuleCommand();
         });
 
         $this->commands('command.make.module');
@@ -46,7 +50,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeControllerCommand()
     {
         $this->app->bindShared('command.make.module.controller', function ($app) {
-            return $app['Nova\Modules\Console\Generators\MakeControllerCommand'];
+            return new MakeControllerCommand();
         });
 
         $this->commands('command.make.module.controller');
@@ -58,7 +62,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeModelCommand()
     {
         $this->app->bindShared('command.make.module.model', function ($app) {
-            return $app['Nova\Modules\Console\Generators\MakeModelCommand'];
+            return new MakeModelCommand();
         });
 
         $this->commands('command.make.module.model');
@@ -70,7 +74,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeMigrationCommand()
     {
         $this->app->bindShared('command.make.module.migration', function ($app) {
-            return $app['Nova\Modules\Console\Generators\MakeMigrationCommand'];
+            return new MakeMigrationCommand();
         });
 
         $this->commands('command.make.module.migration');
@@ -82,7 +86,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeSeederCommand()
     {
         $this->app->bindShared('command.make.module.seeder', function ($app) {
-            return $app['Nova\Modules\Console\Generators\MakeSeederCommand'];
+            return new MakeSeederCommand();
         });
 
         $this->commands('command.make.module.seeder');
