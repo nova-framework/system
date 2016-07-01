@@ -37,7 +37,7 @@ class MakeMigrationCommand extends MakeCommand
      *
      * @var array
      */
-    protected $listFolders = arrray(
+    protected $listFolders = array(
         'Database/Migrations/',
     );
 
