@@ -44,7 +44,7 @@ class MakeModuleCommand extends Command
         'Database/Migrations/',
         'Database/Seeds/',
         'Language/',
-        'Modules/',
+        'Models/',
         'Providers/',
         'Views/',
     );
