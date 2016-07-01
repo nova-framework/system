@@ -10,7 +10,7 @@ use Nova\Database\Console\Migrations\RefreshCommand;
 use Nova\Database\Console\Migrations\InstallCommand;
 use Nova\Database\Console\Migrations\MigrateCommand;
 use Nova\Database\Console\Migrations\RollbackCommand;
-use Nova\Database\Console\Migrations\MigrateMakeCommand;
+use Nova\Database\Console\Migrations\MakeMigrationCommand;
 use Nova\Database\Migrations\DatabaseMigrationRepository;
 
 
@@ -172,7 +172,7 @@ class MigrationServiceProvider extends ServiceProvider
 
             $packagePath = $app['path.base'] .DS .'vendor';
 
-            return new MigrateMakeCommand($creator, $packagePath);
+            return new MakeMigrationCommand($creator, $packagePath);
         });
     }
 

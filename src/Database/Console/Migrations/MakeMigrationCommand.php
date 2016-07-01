@@ -7,14 +7,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Nova\Database\Migrations\MigrationCreator;
 
 
-class MigrateMakeCommand extends BaseCommand
+class MakeMigrationCommand extends BaseCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'migrate:make';
+    protected $name = 'make:migrate';
 
     /**
      * The console command description.
