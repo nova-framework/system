@@ -23,7 +23,7 @@ class MakeMigrationCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new module migration file';
+    protected $description = 'Create a new Module Migration file';
 
     /**
      * String to store the command type.

@@ -21,7 +21,7 @@ class MakeModelCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new module model class';
+    protected $description = 'Create a new Module Model class';
 
     /**
      * String to store the command type.

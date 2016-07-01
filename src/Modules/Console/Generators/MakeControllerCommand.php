@@ -22,7 +22,7 @@ class MakeControllerCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new module controller class';
+    protected $description = 'Create a new Module Controller class';
 
     /**
      * String to store the command type.

@@ -21,7 +21,7 @@ class MakeSeederCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new module seeder class';
+    protected $description = 'Create a new Module Seeder class';
 
     /**
      * String to store the command type.
