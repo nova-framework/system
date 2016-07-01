@@ -38,7 +38,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeModuleCommand()
     {
         $this->app->bindShared('command.make.module', function ($app) {
-            return new MakeModuleCommand();
+            return new MakeModuleCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module');
@@ -50,7 +50,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeControllerCommand()
     {
         $this->app->bindShared('command.make.module.controller', function ($app) {
-            return new MakeControllerCommand();
+            return new MakeControllerCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.controller');
@@ -62,7 +62,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeModelCommand()
     {
         $this->app->bindShared('command.make.module.model', function ($app) {
-            return new MakeModelCommand();
+            return new MakeModelCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.model');
@@ -74,7 +74,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeMigrationCommand()
     {
         $this->app->bindShared('command.make.module.migration', function ($app) {
-            return new MakeMigrationCommand();
+            return new MakeMigrationCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.migration');
@@ -86,7 +86,7 @@ class GeneratorServiceProvider extends ServiceProvider
     private function registerMakeSeederCommand()
     {
         $this->app->bindShared('command.make.module.seeder', function ($app) {
-            return new MakeSeederCommand();
+            return new MakeSeederCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.seeder');
