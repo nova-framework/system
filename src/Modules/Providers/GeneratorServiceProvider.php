@@ -20,11 +20,11 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerMakeModuleCommand();
-        $this->registerMakeControllerCommand();
-        $this->registerMakeModelCommand();
-        $this->registerMakeMigrationCommand();
-        $this->registerMakeSeederCommand();
+        $commands = array('Module', 'Controller', 'Model', 'Migration', 'Seeder');
+
+        foreach ($commands as $command) {
+            $this->{'register' .$command .'Command'}();
+        }
     }
 
 

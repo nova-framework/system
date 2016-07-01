@@ -73,9 +73,7 @@ class RefreshCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-
             array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
-
             array('seeder', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder.'),
         );
     }

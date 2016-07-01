@@ -112,13 +112,9 @@ class MigrateMakeCommand extends BaseCommand
     {
         return array(
             array('bench', null, InputOption::VALUE_OPTIONAL, 'The workbench the migration belongs to.', null),
-
             array('create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
-
             array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to.', null),
-
             array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the migration.', null),
-
             array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }

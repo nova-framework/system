@@ -62,9 +62,11 @@ class SeedCommand extends Command
      */
     protected function getSeeder()
     {
-        $class = $this->framework->make($this->input->getOption('class'));
+        $className = $this->input->getOption('class');
 
-        return $class->setContainer($this->framework)->setCommand($this);
+        $instance = $this->framework->make($className);
+
+        return $instance->setContainer($this->framework)->setCommand($this);
     }
 
     /**
@@ -88,7 +90,6 @@ class SeedCommand extends Command
     {
         return array(
             array('class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', 'DatabaseSeeder'),
-
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed'),
         );
     }

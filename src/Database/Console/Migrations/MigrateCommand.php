@@ -45,7 +45,7 @@ class MigrateCommand extends BaseCommand
         parent::__construct();
 
         $this->migrator = $migrator;
-        
+
         $this->packagePath = $packagePath;
     }
 
@@ -98,13 +98,9 @@ class MigrateCommand extends BaseCommand
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-
             array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
-
             array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate.', null),
-
             array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
-
             array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
         );
     }
