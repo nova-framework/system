@@ -273,7 +273,7 @@ return array (
         foreach ($languageFolders as $folder) {
             $path = $modulePath .$folder .DS .'messages.php';
 
-            $this->files->put($gitkeep, $content);
+            $this->files->put($path, $content);
         }
     }
 
