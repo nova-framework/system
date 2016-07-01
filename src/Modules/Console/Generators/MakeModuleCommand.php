@@ -257,6 +257,22 @@ class MakeModuleCommand extends Command
 
             $this->files->put($this->getDestinationFile($file), $this->getStubContent($key));
         }
+
+        // Generate the Language files
+        $modulePath = $this->getModulePath($slug);
+
+        $content ='<?php
+
+return array (
+);';
+
+        $languageFolders = $this->getLanguagePaths($slug);
+
+        foreach ($languageFolders as $folder) {
+            $path = $modulePath .$folder .DS .'messages.php';
+
+            $this->files->put($gitkeep, $content);
+        }
     }
 
     /**
@@ -268,10 +284,7 @@ class MakeModuleCommand extends Command
 
         $modulePath = $this->getModulePath($slug);
 
-        //
-        $paths = array_merge($this->moduleFolders, $this->getLanguagePaths($slug));
-
-        foreach ($paths as $folder) {
+        foreach ($this->moduleFolders as $folder) {
             $path = $modulePath .$folder;
 
             //
