@@ -55,8 +55,11 @@ class MakeModuleCommand extends Command
      */
     protected $moduleFiles = array(
         'Database/Seeds/{{namespace}}DatabaseSeeder.php',
-        'Routes.php',
         'Providers/{{namespace}}ServiceProvider.php',
+        'Config.php',
+        'Events.php',
+        'Filters.php',
+        'Routes.php',
         'module.json',
     );
 
@@ -180,8 +183,8 @@ class MakeModuleCommand extends Command
     {
         $steps = array(
             'Generating folders...'      => 'generateFolders',
-            'Generating .gitkeep...'     => 'generateGitkeep',
             'Generating files...'        => 'generateFiles',
+            'Generating .gitkeep...'     => 'generateGitkeep',
             'Optimizing module cache...' => 'optimizeModules',
         );
 
@@ -207,14 +210,30 @@ class MakeModuleCommand extends Command
      */
     protected function generateFolders()
     {
-        if (!$this->files->isDirectory($this->module->getPath())) {
-            $this->files->makeDirectory($this->module->getPath());
+        $path = $this->module->getPath();
+
+        if (! $this->files->isDirectory($path)) {
+            $this->files->makeDirectory($path);
         }
 
-        $this->files->makeDirectory($this->getModulePath($this->container['slug'], true));
+        $path = $this->getModulePath($this->container['slug'], true);
 
+        $this->files->makeDirectory($path);
+
+        // Generate the Module directories.
         foreach ($this->moduleFolders as $folder) {
-            $this->files->makeDirectory($this->getModulePath($this->container['slug']).$folder);
+            $path = $this->getModulePath($this->container['slug']) .$folder;
+
+            $this->files->makeDirectory($path);
+        }
+
+        // Generate the Language inner directories.
+        $languages = $this->framework['config']['languages'];
+
+        foreach (array_keys($languages) as $code) {
+            $path = $this->getModulePath($this->container['slug']) .'Language' .DS .ucfirst($code);
+
+            $this->files->makeDirectory($path);
         }
     }
 
@@ -238,7 +257,14 @@ class MakeModuleCommand extends Command
         $modulePath = $this->getModulePath($this->container['slug']);
 
         foreach ($this->moduleFolders as $folder) {
-            $gitkeep = $modulePath.$folder.'/.gitkeep';
+            $path = $modulePath .$folder;
+
+            //
+            $files = $this->files($path);
+
+            if(! empty($files)) continue;
+
+            $gitkeep = $path .'/.gitkeep';
 
             $this->files->put($gitkeep, '');
         }
