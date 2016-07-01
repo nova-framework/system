@@ -68,7 +68,7 @@ class RoutesCommand extends Command
         parent::__construct();
 
         $this->router = $router;
-        
+
         $this->routes = $router->getRoutes();
     }
 
@@ -224,7 +224,6 @@ class RoutesCommand extends Command
     {
         return array(
             array('name', null, InputOption::VALUE_OPTIONAL, 'Filter the routes by name.'),
-
             array('path', null, InputOption::VALUE_OPTIONAL, 'Filter the routes by path.'),
         );
     }

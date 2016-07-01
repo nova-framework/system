@@ -143,9 +143,7 @@ class MakeCommandCommand extends Command
     {
         return array(
             array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', null),
-
             array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the command should be stored.', null),
-
             array('namespace', null, InputOption::VALUE_OPTIONAL, 'The command namespace.', null),
         );
     }
