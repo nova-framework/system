@@ -159,8 +159,8 @@ class MakeMigrationCommand extends MakeCommand
     protected function getOptions()
     {
         return array(
-            array('--create', null, InputOption::VALUE_REQUIRED, 'The table to be created.'),
-            array('--table',  null, InputOption::VALUE_REQUIRED, 'The table to migrate.'),
+            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
+            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
 }
