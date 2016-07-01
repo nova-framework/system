@@ -6,6 +6,7 @@ use Nova\Helpers\Inflector;
 use Nova\Console\Command as CommandGenerator;
 use Nova\Filesystem\Filesystem;
 use Nova\Modules\Modules;
+use Nova\Support\Str;
 
 
 class MakeCommand extends CommandGenerator
@@ -195,7 +196,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function parseSlug($slug)
     {
-        return str_slug($slug);
+        return Str::slug($slug);
     }
 
     /**
