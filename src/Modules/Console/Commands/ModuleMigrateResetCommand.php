@@ -205,6 +205,6 @@ class ModuleMigrateResetCommand extends Command
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
             array('pretend', null, InputOption::VALUE_OPTIONAL, 'Dump the SQL queries that would be run.'),
             array('seed', null, InputOption::VALUE_OPTIONAL, 'Indicates if the seed task should be re-run.'),
-        ];
+        );
     }
 }
