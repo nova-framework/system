@@ -70,11 +70,11 @@ class MakeModuleCommand extends Command
      */
     protected $moduleStubs = array(
         'seeder',
+        'moduleserviceprovider',
         'config',
         'events',
         'filters',
         'routes',
-        'moduleserviceprovider',
         'manifest',
     );
 
