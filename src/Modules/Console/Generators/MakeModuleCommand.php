@@ -263,7 +263,7 @@ class MakeModuleCommand extends Command
             $path = $modulePath .$folder;
 
             //
-            $files = $this->files->files($path);
+            $files = $this->files->glob($path .'/*');
 
             if(! empty($files)) continue;
 
