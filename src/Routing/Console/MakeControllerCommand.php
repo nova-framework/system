@@ -14,7 +14,7 @@ class MakeControllerCommand extends Command
      *
      * @var string
      */
-    protected $name = 'controller:make';
+    protected $name = 'make:controller';
 
     /**
      * The console command description.
