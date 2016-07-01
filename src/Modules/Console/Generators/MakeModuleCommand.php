@@ -213,28 +213,34 @@ class MakeModuleCommand extends Command
      */
     protected function generateFolders()
     {
+        $slug = $this->container['slug'];
+
+        //
         $path = $this->module->getPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
         }
 
-        $path = $this->getModulePath($this->container['slug'], true);
+        $path = $this->getModulePath($slug, true);
 
         $this->files->makeDirectory($path);
 
+        //
+        $modulePath = $this->getModulePath($slug);
+
         // Generate the Module directories.
         foreach ($this->moduleFolders as $folder) {
-            $path = $this->getModulePath($this->container['slug']) .$folder;
+            $path = $modulePath .$folder;
 
             $this->files->makeDirectory($path);
         }
 
         // Generate the Language inner directories.
-        $languageFolders = $this->getLanguagePaths($this->container['slug']);
+        $languageFolders = $this->getLanguagePaths($slug);
 
-        foreach ($languageFolders as $folter) {
-            $path = $this->getModulePath($this->container['slug']) .$folder;
+        foreach ($languageFolders as $folder) {
+            $path = $modulePath .$folder;
 
             $this->files->makeDirectory($path);
         }
@@ -261,6 +267,7 @@ class MakeModuleCommand extends Command
 
         $modulePath = $this->getModulePath($slug);
 
+        //
         $paths = array_merge($this->moduleFolders, $this->getLanguagePaths($slug));
 
         foreach ($paths as $folder) {
