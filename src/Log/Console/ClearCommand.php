@@ -20,7 +20,7 @@ class ClearCommand extends Command
      *
      * @var string
      */
-    protected $description = "Flush the Application log";
+    protected $description = "Flush the Application logs";
 
     /**
      * The File System instance.
