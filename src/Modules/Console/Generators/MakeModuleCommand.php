@@ -15,7 +15,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 class MakeModuleCommand extends Command
 {
     /**
-     * The name and signature of the console command.
+     * The name of the console command.
      *
      * @var string
      */
