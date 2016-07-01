@@ -175,7 +175,11 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function confirm($question, $default = true)
     {
-        return $this->output->confirm($question, $default);
+        $helper = $this->getHelperSet()->get('question');
+
+        $question = new ConfirmationQuestion("<question>{$question}</question> ", $default);
+
+        return $helper->ask($this->input, $this->output, $question);
     }
 
     /**
@@ -187,7 +191,11 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function ask($question, $default = null)
     {
-        return $this->output->ask($question, $default);
+        $helper = $this->getHelperSet()->get('question');
+
+        $question = new Question("<question>$question</question>", $default);
+
+        return $helper->ask($this->input, $this->output, $question);
     }
 
 
@@ -200,11 +208,13 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function secret($question, $fallback = true)
     {
-        $question = new Question($question);
+        $helper = $this->getHelperSet()->get('question');
+
+        $question = new Question("<question>$question</question>");
 
         $question->setHidden(true)->setHiddenFallback($fallback);
 
-        return $this->output->askQuestion($question);
+        return $helper->ask($this->input, $this->output, $question);
     }
 
     /**
@@ -218,11 +228,13 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function choice($question, array $choices, $default = null, $attempts = false)
     {
-        $question = new ChoiceQuestion($question, $choices, $default);
+        $helper = $this->getHelperSet()->get('question');
+
+        $question = new ChoiceQuestion("<question>$question</question>", $choices, $default);
 
         $question->setMaxAttempts($attempts)->setMultiselect($multiple);
 
-        return $this->output->askQuestion($question);
+        return $helper->ask($this->input, $this->output, $question);
     }
 
     /**
