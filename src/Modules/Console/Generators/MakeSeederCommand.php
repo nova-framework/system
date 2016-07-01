@@ -2,6 +2,8 @@
 
 namespace Nova\Modules\Console\Generators;
 
+use Symfony\Component\Console\Input\InputArgument;
+
 
 class MakeSeederCommand extends MakeCommand
 {
