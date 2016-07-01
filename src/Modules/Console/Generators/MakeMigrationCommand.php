@@ -3,6 +3,10 @@
 namespace Nova\Modules\Console\Generators;
 
 use Nova\Helpers\Inflector;
+use Nova\Modules\Console\Generators\MakeCommand;
+
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
 class MakeMigrationCommand extends MakeCommand
@@ -12,11 +16,7 @@ class MakeMigrationCommand extends MakeCommand
      *
      * @var string
      */
-    protected $signature = 'make:module:migration
-    	{slug : The slug of the module.}
-    	{name : The name of the migration.}
-    	{--create= : The table to be created.}
-        {--table= : The table to migrate.}';
+    protected $name = 'make:module:migration';
 
     /**
      * The console command description.
@@ -136,5 +136,31 @@ class MakeMigrationCommand extends MakeCommand
         );
 
         return str_replace($searches, $replaces, $content);
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Migration.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
+            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
+        );
     }
 }
