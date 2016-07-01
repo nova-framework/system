@@ -122,7 +122,11 @@ class LocalRepository extends Repository
      */
     public function exists($slug)
     {
-        return $this->slugs()->has(Str::slug($slug));
+        $slug = Str::slug($slug);
+
+        $slugs = $this->slugs();
+
+        return $slugs->has($slug);
     }
 
     /**
