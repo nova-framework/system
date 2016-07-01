@@ -2,6 +2,8 @@
 
 namespace Nova\Modules\Repositories;
 
+use Nova\Support\Str;
+
 
 class LocalRepository extends Repository
 {
@@ -120,7 +122,7 @@ class LocalRepository extends Repository
      */
     public function exists($slug)
     {
-        return $this->slugs()->contains(str_slug($slug));
+        return $this->slugs()->has(Str::slug($slug));
     }
 
     /**
