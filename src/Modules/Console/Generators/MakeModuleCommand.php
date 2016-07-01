@@ -17,8 +17,7 @@ class MakeModuleCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:module
-        {slug : The slug of the module}';
+    protected $name = 'make:module';
 
     /**
      * The console command description.
@@ -287,6 +286,18 @@ class MakeModuleCommand extends Command
         );
 
         return str_replace($searches, $replaces, $content);
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
+        );
     }
 
 }
