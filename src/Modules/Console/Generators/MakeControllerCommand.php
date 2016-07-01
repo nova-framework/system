@@ -11,14 +11,11 @@ use Symfony\Component\Console\Input\InputOption;
 class MakeControllerCommand extends MakeCommand
 {
     /**
-     * The name and signature of the console command.
+     * The name of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:module:controller
-    	{slug : The slug of the module}
-    	{name : The name of the controller class}
-    	{--resource : Generate a module resource controller class}';
+    protected $name = 'make:module:controller';
 
     /**
      * The console command description.
@@ -39,42 +36,41 @@ class MakeControllerCommand extends MakeCommand
      *
      * @var array
      */
-    protected $listFolders = [
+    protected $listFolders = array(
         'Http/Controllers/',
-    ];
+    );
 
     /**
      * Module files to be created.
      *
      * @var array
      */
-    protected $listFiles = [
+    protected $listFiles = array(
         '{{filename}}.php',
-    ];
+    );
 
     /**
      * Module signature option.
      *
      * @var array
      */
-    protected $signOption = [
+    protected $signOption = array(
         'resource',
-    ];
+    );
 
     /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = [
-        'default' => [
+    protected $listStubs = array(
+        'default' => array(
             'controller.stub',
-        ],
-
-        'resource' => [
+        ),
+        'resource' => array(
             'controller_resource.stub',
-        ],
-    ];
+        ),
+    );
 
     /**
      * Resolve Container after getting file path.
@@ -87,7 +83,9 @@ class MakeControllerCommand extends MakeCommand
     {
         $this->container['filename']  = $this->makeFileName($filePath);
         $this->container['namespace'] = $this->getNamespace($filePath);
-        $this->container['path']      = $this->getBaseNamespace();
+
+        $this->container['path'] = $this->getBaseNamespace();
+
         $this->container['classname'] = basename($filePath);
     }
 
@@ -98,20 +96,45 @@ class MakeControllerCommand extends MakeCommand
      */
     protected function formatContent($content)
     {
-        return str_replace(
-            [
-                '{{filename}}',
-                '{{path}}',
-                '{{namespace}}',
-                '{{classname}}',
-            ],
-            [
-                $this->container['filename'],
-                $this->container['path'],
-                $this->container['namespace'],
-                $this->container['classname'],
-            ],
-            $content
+        $searches = array(
+            '{{filename}}',
+            '{{path}}',
+            '{{namespace}}',
+            '{{classname}}',
+        );
+
+        $replaces = array(
+            $this->container['filename'],
+            $this->container['path'],
+            $this->container['namespace'],
+            $this->container['classname'],
+        );
+
+        return str_replace($searches, $replaces, $content);
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Controller class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--resource', InputOption::VALUE_NONE, 'Generate a module resource controller class'),
         );
     }
 }

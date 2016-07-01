@@ -109,7 +109,7 @@ class MakeSeederCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the seeder class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Seeder class.'),
         );
     }
 

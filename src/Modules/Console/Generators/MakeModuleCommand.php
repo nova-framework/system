@@ -351,7 +351,7 @@ class MakeModuleCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_OPTIONAL, 'Skip the make:module Wizard and use default values'),
+            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:module Wizard and use default values'),
         );
     }
 }
