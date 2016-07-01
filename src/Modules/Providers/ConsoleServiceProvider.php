@@ -33,7 +33,7 @@ class ConsoleServiceProvider extends ServiceProvider
         $this->registerDisableCommand();
         $this->registerEnableCommand();
         $this->registerListCommand();
-        //$this->registerMigrateCommand();
+        $this->registerMigrateCommand();
         //$this->registerMigrateRefreshCommand();
         //$this->registerMigrateResetCommand();
         //$this->registerMigrateRollbackCommand();
