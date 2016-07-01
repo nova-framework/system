@@ -1,0 +1,107 @@
+<?php
+
+namespace Nova\Modules\Console\Commands;
+
+use Nova\Modules\Modules;
+use Nova\Modules\Traits\MigrationTrait;
+use Nova\Console\Command;
+
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
+
+
+class ModuleMigrateRollbackCommand extends Command
+{
+    use MigrationTrait;
+
+    /**
+     * The console command name.
+     *
+     * @var string
+     */
+    protected $name = 'module:migrate:rollback';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Rollback the last database migrations for a specific or all modules';
+
+    /**
+     * @var Modules
+     */
+    protected $module;
+
+    /**
+     * Create a new command instance.
+     *
+     * @param Modules $module
+     */
+    public function __construct(Modules $module)
+    {
+        parent::__construct();
+
+        $this->module = $module;
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function fire()
+    {
+        $slug = $this->argument('slug');
+
+        if ($slug) {
+            return $this->rollback($slug);
+        }
+
+        foreach ($this->module->all() as $module) {
+            $this->rollback($module['slug']);
+        }
+    }
+
+    /**
+     * Run the migration rollback for the specified module.
+     *
+     * @param string $slug
+     *
+     * @return mixed
+     */
+    protected function rollback($slug)
+    {
+        $this->requireMigrations($slug);
+
+        $this->call('migrate:rollback', array(
+            '--database' => $this->option('database'),
+            '--pretend'  => $this->option('pretend'),
+        ));
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('slug', InputArgument::OPTIONAL, 'Module slug.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
+            array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
+        );
+    }
+}

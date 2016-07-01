@@ -34,9 +34,9 @@ class ConsoleServiceProvider extends ServiceProvider
         $this->registerEnableCommand();
         $this->registerListCommand();
         $this->registerMigrateCommand();
-        //$this->registerMigrateRefreshCommand();
-        //$this->registerMigrateResetCommand();
-        //$this->registerMigrateRollbackCommand();
+        $this->registerMigrateRefreshCommand();
+        $this->registerMigrateResetCommand();
+        $this->registerMigrateRollbackCommand();
         $this->registerOptimizeCommand();
         $this->registerSeedCommand();
     }

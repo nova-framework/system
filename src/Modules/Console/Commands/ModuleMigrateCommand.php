@@ -3,7 +3,6 @@
 namespace Nova\Modules\Console\Commands;
 
 use Nova\Console\Command;
-use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
 use Nova\Modules\Modules;
 use Nova\Support\Arr;
@@ -65,8 +64,6 @@ class ModuleMigrateCommand extends Command
             $module = $this->module->where('slug', $this->argument('slug'))->first();
 
             if ($this->module->isEnabled($module['slug'])) {
-                return $this->migrate($module['slug']);
-            } elseif ($this->option('force')) {
                 return $this->migrate($module['slug']);
             } else {
                 return $this->error('Nothing to migrate.');
@@ -164,7 +161,6 @@ class ModuleMigrateCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
             array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
             array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
         );
