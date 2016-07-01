@@ -2,7 +2,8 @@
 
 namespace Nova\Modules\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Nova\Support\ServiceProvider;
+
 
 class GeneratorServiceProvider extends ServiceProvider
 {
