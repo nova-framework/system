@@ -231,11 +231,9 @@ class MakeModuleCommand extends Command
         }
 
         // Generate the Language inner directories.
-        $languages = $this->framework['config']['languages'];
+        $languagePaths = $this->getLanguagePaths($this->container['slug']);
 
-        foreach (array_keys($languages) as $code) {
-            $path = $this->getModulePath($this->container['slug']) .'Language' .DS .ucfirst($code);
-
+        foreach ($languagePaths as $path) {
             $this->files->makeDirectory($path);
         }
     }
@@ -257,9 +255,13 @@ class MakeModuleCommand extends Command
      */
     protected function generateGitkeep()
     {
-        $modulePath = $this->getModulePath($this->container['slug']);
+        $slug = $this->container['slug'];
 
-        foreach ($this->moduleFolders as $folder) {
+        $modulePath = $this->getModulePath($slug);
+
+        $paths = array_merge($this->moduleFolders, $this->getLanguagePaths($slug));
+
+        foreach ($paths as $folder) {
             $path = $modulePath .$folder;
 
             //
@@ -295,6 +297,21 @@ class MakeModuleCommand extends Command
         }
 
         return $this->module->getPath();
+    }
+
+    protected function getLanguagePaths($slug)
+    {
+        $paths = array();
+
+        $path = $this->getModulePath($slug);
+
+        $languages = $this->framework['config']['languages'];
+
+        foreach (array_keys($languages) as $code) {
+            $paths[] = $path .'Language' .DS .ucfirst($code);
+        }
+
+        return $paths;
     }
 
     /**
