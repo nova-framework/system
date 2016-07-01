@@ -5,10 +5,10 @@ namespace {{path}}\{{namespace}};
 use Nova\Routing\Controller;
 
 
-class {{filename}} extends Controller
+class {{classname}} extends Controller
 {
     /**
-     * Create a new {{class}} instance.
+     * Create a new {{classname}} instance.
      */
     public function __construct()
     {
