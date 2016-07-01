@@ -39,7 +39,7 @@ class MakeModuleCommand extends Command
         'Database/',
         'Database/Migrations/',
         'Database/Seeds/',
-        'Language/'
+        'Language/',
         'Providers/',
         'Views/',
     );
@@ -87,7 +87,7 @@ class MakeModuleCommand extends Command
      *
      * @var array
      */
-    protected $container;
+    protected $container = array();
 
     /**
      * Create a new command instance.
@@ -110,14 +110,20 @@ class MakeModuleCommand extends Command
      */
     public function fire()
     {
-        $this->container['slug']      = Str::slug($this->argument('slug'));
-        $this->container['name']      = Str::studly($this->container['slug']);
-        $this->container['namespace'] = Str::studly($this->container['slug']);
+        $this->container['slug'] = Str::slug($this->argument('slug'));
+
+        //
+        $slug = $this->container['slug'];
+
+        $this->container['name']      = Str::studly($slug);
+        $this->container['namespace'] = Str::studly($slug);
 
         $this->container['version']     = '1.0';
         $this->container['description'] = 'This is the description for the ' .$this->container['name'] .' module.';
         $this->container['license']     = 'MIT';
-        $this->container['author']      = ' ';
+        $this->container['author']      = 'John Doe';
+        $this->container['email']       = 'johndoe@novaframework.dev';
+        $this->container['homepage']    = 'http://www.novaframework.dev';
 
         return $this->generate();
     }
@@ -240,7 +246,11 @@ class MakeModuleCommand extends Command
     {
         $stub = $this->moduleStubs[$key];
 
-        return $this->formatContent($this->files->get(__DIR__ .DS .'stubs' .DS .$stub .'.stub'));
+        $path = __DIR__ .DS .'stubs' .DS .$stub .'.stub';
+
+        $content = $this->files->get($path);
+
+        return $this->formatContent($content);
     }
 
     /**
@@ -257,6 +267,8 @@ class MakeModuleCommand extends Command
             '{{version}}',
             '{{description}}',
             '{{author}}',
+            '{{email}}',
+            '{{homepage}}',
             '{{license}}',
             '{{path}}'
         );
@@ -268,6 +280,8 @@ class MakeModuleCommand extends Command
             $this->container['version'],
             $this->container['description'],
             $this->container['author'],
+            $this->container['email'],
+            $this->container['homepage'],
             $this->container['license'],
             $this->module->getNamespace()
         );

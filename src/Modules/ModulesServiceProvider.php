@@ -30,6 +30,7 @@ class ModulesServiceProvider extends ServiceProvider
     {
         $this->app->register('Nova\Modules\Providers\RepositoryServiceProvider');
         $this->app->register('Nova\Modules\Providers\ConsoleServiceProvider');
+        $this->app->register('Nova\Modules\Providers\GeneratorServiceProvider');
 
         //
         $this->app->bindShared('modules', function ($app) {

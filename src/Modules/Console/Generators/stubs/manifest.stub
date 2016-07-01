@@ -1,9 +1,17 @@
 {
-	"name": "{{name}}",
-	"slug": "{{slug}}",
-	"namespace": "{{namespace}}",
-	"version": "{{version}}",
-	"author": "{{author}}",
-	"license": "{{license}}",
-	"description": "{{description}}"
+    "name": "{{name}}",
+    "description": "{{description}}",
+    "homepage": "{{homepage}}",
+    "version": "{{version}}",
+    "authors" : [
+        {
+            "name" : "{{author}}",
+            "email" : "{{email}}",
+            "homepage": "{{homepage}}",
+            "role": "Developer"
+        }
+    ],
+    "license": "{{license}}",
+    "slug": "{{slug}}",
+    "namespace": "{{namespace}}"
 }
