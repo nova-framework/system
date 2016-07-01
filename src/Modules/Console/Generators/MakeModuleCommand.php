@@ -125,7 +125,46 @@ class MakeModuleCommand extends Command
         $this->container['email']       = 'johndoe@novaframework.dev';
         $this->container['homepage']    = 'http://www.novaframework.dev';
 
-        return $this->generate();
+        if ($this->option('quick')) {
+            return $this->generate();
+        }
+
+        $this->stepOne();
+    }
+
+
+    /**
+     * Step 1: Configure module manifest.
+     *
+     * @return mixed
+     */
+    private function stepOne()
+    {
+        $this->container['name']        = $this->ask('Please enter the name of the module:', $this->container['name']);
+        $this->container['slug']        = $this->ask('Please enter the slug for the module:', $this->container['slug']);
+        $this->container['version']     = $this->ask('Please enter the module version:', $this->container['version']);
+        $this->container['description'] = $this->ask('Please enter the description of the module:', $this->container['description']);
+        $this->container['author']      = $this->ask('Please enter the author of the module:', $this->container['author']);
+        $this->container['license']     = $this->ask('Please enter the module license:', $this->container['license']);
+
+        $this->comment('You have provided the following manifest information:');
+        $this->comment('Name:        '.$this->container['name']);
+        $this->comment('Slug:        '.$this->container['slug']);
+        $this->comment('Version:     '.$this->container['version']);
+        $this->comment('Description: '.$this->container['description']);
+        $this->comment('Author:      '.$this->container['author']);
+        $this->comment('License:     '.$this->container['license']);
+
+        if ($this->confirm('Do you wish to continue?')) {
+            $this->comment('Thanks! That\'s all we need.');
+            $this->comment('Now relax while your module is generated for you.');
+
+            $this->generate();
+        } else {
+            return $this->stepOne();
+        }
+
+        return true;
     }
 
     /**
@@ -301,4 +340,15 @@ class MakeModuleCommand extends Command
         );
     }
 
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--quick', '-Q', InputOption::VALUE_OPTIONAL, 'Skip the make:module Wizard and use default values'),
+        );
+    }
 }
