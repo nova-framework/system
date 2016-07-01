@@ -134,7 +134,7 @@ class MakeControllerCommand extends MakeCommand
     protected function getOptions()
     {
         return array(
-            array('--resource', InputOption::VALUE_NONE, 'Generate a module resource controller class'),
+            array('--resource', null, InputOption::VALUE_NONE, 'Generate a module resource controller class'),
         );
     }
 }
