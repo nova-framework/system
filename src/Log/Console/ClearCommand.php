@@ -53,7 +53,13 @@ class ClearCommand extends Command
 
         $this->files->put($path, "\n");
 
-        $this->info('The Application log was cleared!');
+        //
+        $path = $this->framework['path.storage'] .DS .'Logs' .DS .'messages.log';
+
+        $this->files->put($path, "\n");
+
+        //
+        $this->info('The Application logs was cleared!');
     }
 
 }
