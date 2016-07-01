@@ -63,7 +63,7 @@ class LocalRepository extends Repository
     {
         $slugs = collect();
 
-        $this->all()->each(function ($item, $key) use ($slugs) {
+        $this->all()->each(function ($item) use ($slugs) {
             $slugs->push($item['slug']);
         });
 
