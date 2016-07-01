@@ -24,7 +24,7 @@ class GeneratorServiceProvider extends ServiceProvider
         //$this->registerMakeControllerCommand();
         //$this->registerMakeModelCommand();
         //$this->registerMakeMigrationCommand();
-        //$this->registerMakeSeederCommand();
+        $this->registerMakeSeederCommand();
     }
 
 
