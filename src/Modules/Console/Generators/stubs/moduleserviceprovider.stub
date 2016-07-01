@@ -2,7 +2,6 @@
 
 namespace {{path}}\{{namespace}}\Providers;
 
-use App;
 use Nova\Support\ServiceProvider;
 
 
