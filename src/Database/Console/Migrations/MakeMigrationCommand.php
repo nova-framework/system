@@ -21,7 +21,7 @@ class MakeMigrationCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Create a new migration file';
+    protected $description = 'Create a new Migration file';
 
     /**
      * The migration creator instance.
@@ -99,7 +99,7 @@ class MakeMigrationCommand extends BaseCommand
     protected function getArguments()
     {
         return array(
-            array('name', InputArgument::REQUIRED, 'The name of the migration'),
+            array('name', InputArgument::REQUIRED, 'The name of the Migration'),
         );
     }
 
@@ -111,10 +111,9 @@ class MakeMigrationCommand extends BaseCommand
     protected function getOptions()
     {
         return array(
-            array('bench', null, InputOption::VALUE_OPTIONAL, 'The workbench the migration belongs to.', null),
             array('create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
-            array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to.', null),
-            array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the migration.', null),
+            array('package', null, InputOption::VALUE_OPTIONAL, 'The package the Migration belongs to.', null),
+            array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the Migration.', null),
             array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
