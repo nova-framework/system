@@ -1,6 +1,6 @@
 <?php
 
-namespace Caffeinated\Modules\Console\Generators;
+namespace Nova\Modules\Console\Generators;
 
 use Nova\Modules\Console\Generators\MakeCommand;
 
