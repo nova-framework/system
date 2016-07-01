@@ -3,7 +3,7 @@
 namespace Nova\Foundation\Providers;
 
 use Nova\Support\ServiceProvider;
-use Nova\Foundation\Console\CommandMakeCommand;
+use Nova\Foundation\Console\MakeCommandCommand;
 
 
 class CommandCreatorServiceProvider extends ServiceProvider
@@ -24,7 +24,7 @@ class CommandCreatorServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.command.make', function($app)
         {
-            return new CommandMakeCommand($app['files']);
+            return new MakeCommandCommand($app['files']);
         });
 
         $this->commands('command.command.make');
