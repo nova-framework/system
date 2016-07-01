@@ -259,6 +259,8 @@ class MakeModuleCommand extends Command
         }
 
         // Generate the Language files
+        $slug = $this->container['slug'];
+
         $modulePath = $this->getModulePath($slug);
 
         $content ='<?php
