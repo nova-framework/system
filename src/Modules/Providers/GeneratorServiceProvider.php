@@ -21,7 +21,7 @@ class GeneratorServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerMakeModuleCommand();
-        //$this->registerMakeControllerCommand();
+        $this->registerMakeControllerCommand();
         $this->registerMakeModelCommand();
         $this->registerMakeMigrationCommand();
         $this->registerMakeSeederCommand();
