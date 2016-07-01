@@ -231,9 +231,11 @@ class MakeModuleCommand extends Command
         }
 
         // Generate the Language inner directories.
-        $languagePaths = $this->getLanguagePaths($this->container['slug']);
+        $languageFolders = $this->getLanguagePaths($this->container['slug']);
 
-        foreach ($languagePaths as $path) {
+        foreach ($languageFolders as $folter) {
+            $path = $this->getModulePath($this->container['slug']) .$folder;
+
             $this->files->makeDirectory($path);
         }
     }
@@ -303,12 +305,10 @@ class MakeModuleCommand extends Command
     {
         $paths = array();
 
-        $path = $this->getModulePath($slug);
-
         $languages = $this->framework['config']['languages'];
 
         foreach (array_keys($languages) as $code) {
-            $paths[] = $path .'Language' .DS .ucfirst($code);
+            $paths[] = 'Language' .DS .ucfirst($code);
         }
 
         return $paths;
