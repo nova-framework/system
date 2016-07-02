@@ -7,7 +7,7 @@
  * @date April 12th, 2016
  */
 
-use Nova\Helpers\Url as UrlHelper;
+use Nova\Helpers\Inflector;
 use Nova\Support\Str;
 use Nova\Support\Collection;
 
@@ -133,19 +133,26 @@ function site_url($path = '/')
  */
 function resource_url($path, $module = null)
 {
-    return UrlHelper::resourcePath($module) .ltrim($path, '/');
+    $basePath = ! is_null($module) ? sprintf('modules/%s', Inflector::tableize($module)) : '';
+
+    $path = sprintf('%s/assets/%s', $basePath, ltrim($path, '/'));
+
+    return app('url')->to($path);
 }
 
 /**
  * Template URL helper
  * @param string $path
  * @param string $template
- * @param string $folder
  * @return string
  */
-function template_url($path, $template = TEMPLATE, $folder = '/assets/')
+function template_url($path, $template = null)
 {
-    return UrlHelper::templatePath($template, $folder) .ltrim($path, '/');
+    $tempate = $template ?: TEMPLATE;
+
+    $path = sprintf('templates/%s/assets/%s', Inflector::tableize($template), ltrim($path, '/'));
+
+    return app('url')->to($path);
 }
 
 //
