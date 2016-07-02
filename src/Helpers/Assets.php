@@ -15,8 +15,7 @@ class Assets
     /**
      * @var array Asset templates
      */
-    protected static $templates = array
-    (
+    protected static $templates = array(
         'js'  => '<script src="%s" type="text/javascript"></script>',
         'css' => '<link href="%s" rel="stylesheet" type="text/css">'
     );
@@ -37,10 +36,12 @@ class Assets
                     echo sprintf($template, $file) . "\n";
                 }
             }
-        } else {
-            if (!empty($files)) {
-                echo sprintf($template, $files) . "\n";
-            }
+
+            return;
+        }
+
+        if (!empty($files)) {
+            echo sprintf($template, $files) . "\n";
         }
     }
 
