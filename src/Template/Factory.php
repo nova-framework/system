@@ -91,7 +91,7 @@ class Factory
     protected function viewFile($view, $template = null)
     {
         // Adjust the current Template.
-        $template = ($template !== null) ? $template : TEMPLATE;
+        $template = $template ?: $this->app['config']['app.template'];
 
         // Get the base path for the current Template files.
         $basePath = APPDIR .'Templates' .DS .$template .DS;
