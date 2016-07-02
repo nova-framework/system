@@ -148,7 +148,9 @@ function resource_url($path, $module = null)
  */
 function template_url($path, $template = null)
 {
-    $tempate = $template ?: TEMPLATE;
+    $config = app('config.app');
+
+    $template = $template ?: $config['template'];
 
     $path = sprintf('templates/%s/assets/%s', Inflector::tableize($template), ltrim($path, '/'));
 
