@@ -113,7 +113,7 @@ class MakeMigrationCommand extends BaseCommand
         return array(
             array('create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
             array('package', null, InputOption::VALUE_OPTIONAL, 'The package the Migration belongs to.', null),
-            array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the Migration.', null),
+            array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the Migration.', 'app'),
             array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
