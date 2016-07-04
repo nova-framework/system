@@ -28,7 +28,7 @@ class BaseCommand extends Command
         }
 
         // Default Migrations Path.
-        return $this->framework['path.base'] .DS .'Database' .DS .'Migrations';
+        return $this->framework['path'] .DS .'Database' .DS .'Migrations';
     }
 
 }
