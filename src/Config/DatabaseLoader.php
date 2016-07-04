@@ -58,7 +58,7 @@ class DatabaseLoader implements LoaderInterface
     {
         $token = 'options_' .md5($group);
 
-        if ((ENVIRONMENT != 'development') {
+        if (ENVIRONMENT != 'development') {
             $items = $this->cache->get($token);
 
             if(! is_null($items)) {
