@@ -94,20 +94,19 @@ class Factory
         $template = $template ?: $this->app['config']['app.template'];
 
         // Get the base path for the current Template files.
-        $basePath = APPDIR .'Templates' .DS .$template .DS;
+        $path = $this->app['path'] .'Templates' .DS .$template .DS;
 
         // Get the name of the current Template files.
         $ltrFile = $view .'.php';
         $rtlFile = $view .'-rtl.php';
 
-        // Use the LTR Template file by default.
-        $path = $basePath .$ltrFile;
-
         // Depending on the Language direction, adjust to RTL Template file, if case.
-        if ((Language::direction() == 'rtl') && file_exists($basePath .$rtlFile)) {
-            $path = $basePath .$rtlFile;
+        $language = $this->app['language'];
+
+        if (($language->direction() == 'rtl') && file_exists($path .$rtlFile)) {
+            return $path .$rtlFile;
         }
 
-        return $path;
+        return $path .$ltrFile;
     }
 }
