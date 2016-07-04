@@ -90,23 +90,27 @@ class Factory
      */
     protected function viewFile($view, $template = null)
     {
-        // Adjust the current Template.
-        $template = $template ?: $this->app['config']['app.template'];
+        $config = $this->app['config'];
 
-        // Get the base path for the current Template files.
-        $path = $this->app['path'] .DS .'Templates' .DS .$template .DS;
-
-        // Get the name of the current Template files.
-        $ltrFile = $view .'.php';
-        $rtlFile = $view .'-rtl.php';
-
-        // Depending on the Language direction, adjust to RTL Template file, if case.
         $language = $this->app['language'];
 
-        if (($language->direction() == 'rtl') && file_exists($path .$rtlFile)) {
-            return $path .$rtlFile;
+        // Get the base path.
+        $path = $this->app['path'];
+
+        // Calculate the current Template name.
+        $template = $template ?: $config['app.template'];
+
+        if ($language->direction() == 'rtl') {
+            // The current Language is RTL. Check the path of the RTL Template file.
+            $filePath = str_replace('/', DS, "$path/Templates/$template/$view-rtl.php");
+
+            if (is_readable($filePath)) {
+                // A valid RTL Template file found; return it.
+                return $filePath;
+            }
         }
 
-        return $path .$ltrFile;
+        // Return the path of the current LTR Template file.
+        return str_replace('/', DS, "$path/Templates/$template/$view.php");
     }
 }
