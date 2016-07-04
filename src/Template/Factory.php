@@ -94,7 +94,7 @@ class Factory
         $template = $template ?: $this->app['config']['app.template'];
 
         // Get the base path for the current Template files.
-        $path = $this->app['path'] .'Templates' .DS .$template .DS;
+        $path = $this->app['path'] .DS .'Templates' .DS .$template .DS;
 
         // Get the name of the current Template files.
         $ltrFile = $view .'.php';
