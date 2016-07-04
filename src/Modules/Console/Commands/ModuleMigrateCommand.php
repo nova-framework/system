@@ -60,8 +60,10 @@ class ModuleMigrateCommand extends Command
     {
         $this->prepareDatabase();
 
-        if (!empty($this->argument('slug'))) {
-            $module = $this->module->where('slug', $this->argument('slug'))->first();
+        $slug = $this->argument('slug');
+
+        if (! empty($slug)) {
+            $module = $this->module->where('slug', $slug)->first();
 
             if ($this->module->isEnabled($module['slug'])) {
                 return $this->migrate($module['slug']);
