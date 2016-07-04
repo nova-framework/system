@@ -33,7 +33,7 @@ class DatabaseLoader implements LoaderInterface
      *
      * @var \Nova\Cache\CacheManager
      */
-    protected $cache;
+    //protected $cache;
 
     /**
      * Create a new fileloader instance.
@@ -45,7 +45,7 @@ class DatabaseLoader implements LoaderInterface
         $this->connection = $connection;
 
         // Setup the Cache Driver instance.
-        $this->cache = $connection->getCacheManager();
+        //$this->cache = $connection->getCacheManager();
     }
 
     /**
