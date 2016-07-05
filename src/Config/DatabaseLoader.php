@@ -59,7 +59,7 @@ class DatabaseLoader implements LoaderInterface
             // Insert the option on list.
             $key = $result['item'];
 
-            $items[$key] = unserialize($result['value']);
+            $items[$key] = json_decode($result['value'], true);
         }
 
         return $items;
@@ -98,7 +98,7 @@ class DatabaseLoader implements LoaderInterface
      */
     protected function update($group, $item, $value)
     {
-        $value = serialize($value);
+        $value = json_encode($value);
 
         $id = $this->newQuery()
             ->where('group', $group)
