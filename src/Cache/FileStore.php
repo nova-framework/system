@@ -31,6 +31,7 @@ class FileStore implements StoreInterface
     public function __construct(Filesystem $files, $directory)
     {
         $this->files = $files;
+
         $this->directory = $directory;
     }
 
@@ -44,10 +45,7 @@ class FileStore implements StoreInterface
     {
         $path = $this->path($key);
 
-        // If the file doesn't exists, we obviously can't return the cache so we will
-        // just return null. Otherwise, we'll get the contents of the file and get
-        // the expiration UNIX timestamps from the start of the file's contents.
-        if ( ! $this->files->exists($path)) {
+        if (! $this->files->exists($path)) {
             return null;
         }
 
@@ -58,14 +56,11 @@ class FileStore implements StoreInterface
             return null;
         }
 
-        // If the current time is greater than expiration timestamps we will delete
-        // the file and return null. This helps clean up the old files and keeps
-        // this directory much cleaner for us as old files aren't hanging out.
-        if (time() >= $expire) {
-            return $this->forget($key);
+        if (time() < $expire) {
+            return unserialize(substr($contents, 10));
         }
 
-        return unserialize(substr($contents, 10));
+        return $this->forget($key);
     }
 
     /**
@@ -151,8 +146,7 @@ class FileStore implements StoreInterface
     {
         $file = $this->path($key);
 
-        if ($this->files->exists($file))
-        {
+        if ($this->files->exists($file)) {
             $this->files->delete($file);
         }
     }
@@ -164,8 +158,7 @@ class FileStore implements StoreInterface
      */
     public function flush()
     {
-        foreach ($this->files->directories($this->directory) as $directory)
-        {
+        foreach ($this->files->directories($this->directory) as $directory) {
             $this->files->deleteDirectory($directory);
         }
     }
