@@ -165,7 +165,7 @@ class DatabaseLoader implements LoaderInterface
       * @param  string  $value
      * @return bool
      */
-    protected static isJson($value)
+    protected static function isJson($value)
     {
         $value = preg_replace('/"(\\.|[^"\\\\])*"/', '', $value);
 
