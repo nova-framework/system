@@ -84,9 +84,6 @@ class DatabaseLoader implements LoaderInterface
     {
         @list($group, $item) = $this->parseKey($key);
 
-        // Delete the cached data for current Group.
-        $token = 'options_' .md5($group);
-
         // Update the information on Database.
         if (empty($item)) {
             foreach ($value as $item => $val) {
