@@ -59,11 +59,15 @@ class DatabaseLoader implements LoaderInterface
             // Insert the option on list.
             $key = $result['item'];
 
-            $value = $result['value'];
+            // Process the (optional) JSON encoding.
+            $value = json_decode($result['value'], true);
 
-            $value = static::isJson($value) ? json_decode($result['value'], true) : $value;
-
-            $items[$key] = $value;
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // A valid JSON data there.
+                $items[$key] = $value;
+            } else {
+                $items[$key] = $result['value'];
+            }
         }
 
         return $items;
@@ -157,18 +161,5 @@ class DatabaseLoader implements LoaderInterface
     public function newQuery()
     {
         return $this->connection->table($this->table);
-    }
-
-    /**
-     * Check if the given value is JSON encoded
-     *
-      * @param  string  $value
-     * @return bool
-     */
-    protected static function isJson($value)
-    {
-        $value = preg_replace('/"(\\.|[^"\\\\])*"/', '', $value);
-
-        return (preg_match('/[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t]/', $value) !== 1);
     }
 }
