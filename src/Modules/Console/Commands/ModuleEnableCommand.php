@@ -32,8 +32,8 @@ class ModuleEnableCommand extends Command
     {
         $slug = $this->argument('slug');
 
-        if ($this->framework['modules']->isDisabled($slug)) {
-            $this->framework['modules']->enable($slug);
+        if ($this->nova['modules']->isDisabled($slug)) {
+            $this->nova['modules']->enable($slug);
 
             $this->info('Module was enabled successfully.');
         } else {

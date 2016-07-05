@@ -30,6 +30,6 @@ class ModuleOptimizeCommand extends Command
     {
         $this->info('Generating optimized module cache');
 
-        $this->framework['modules']->optimize();
+        $this->nova['modules']->optimize();
     }
 }

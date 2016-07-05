@@ -8,30 +8,28 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
-use Exception;
-
 
 class Application extends \Symfony\Component\Console\Application
 {
     /**
      * The exception handler instance.
      *
-     * @var \Exception\Handler
+     * @var \Nova\Exception\Handler
      */
     protected $exceptionHandler;
 
     /**
-     * The Nova Application instance.
+     * The Laravel application instance.
      *
      * @var \Nova\Foundation\Application
      */
-    protected $framework;
+    protected $laravel;
 
     /**
      * Create and boot a new Console application.
      *
-     * @param  \Foundation\Application  $app
-     * @return \Console\Application
+     * @param  \Nova\Foundation\Application  $app
+     * @return \Nova\Console\Application
      */
     public static function start($app)
     {
@@ -41,19 +39,19 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Create a new Console application.
      *
-     * @param  \Foundation\Application  $app
-     * @return \Console\Application
+     * @param  \Nova\Foundation\Application  $app
+     * @return \Nova\Console\Application
      */
     public static function make($app)
     {
         $app->boot();
 
         $console = with($console = new static('Nova Framework', $app::VERSION))
-                                ->setFramework($app)
+                                ->setNova($app)
                                 ->setExceptionHandler($app['exception'])
                                 ->setAutoExit(false);
 
-        $app->instance('forge', $console);
+        $app->instance('artisan', $console);
 
         return $console;
     }
@@ -61,23 +59,26 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Boot the Console application.
      *
-     * @return \Nova\Console\Application
+     * @return $this
      */
     public function boot()
     {
-        require $this->framework['path'] .'/Boot/Forge.php';
+        require $this->nova['path'] .'/Boot/Forge.php';
 
-        if (isset($this->framework['events'])) {
-            $events = $this->framework['events'];
 
-            $events->fire('forge.start', array($this));
+        // If the event dispatcher is set on the application, we will fire an event
+        // with the Artisan instance to provide each listener the opportunity to
+        // register their commands on this application before it gets started.
+        if (isset($this->nova['events'])) {
+            $this->nova['events']
+                    ->fire('forge.start', array($this));
         }
 
         return $this;
     }
 
     /**
-     * Run an Forge console command by name.
+     * Run an Artisan console command by name.
      *
      * @param  string  $command
      * @param  array   $parameters
@@ -88,6 +89,9 @@ class Application extends \Symfony\Component\Console\Application
     {
         $parameters['command'] = $command;
 
+        // Unless an output interface implementation was specifically passed to us we
+        // will use the "NullOutput" implementation by default to keep any writing
+        // suppressed so it doesn't leak out to the browser or any other source.
         $output = $output ?: new NullOutput;
 
         $input = new ArrayInput($parameters);
@@ -104,29 +108,10 @@ class Application extends \Symfony\Component\Console\Application
     public function add(SymfonyCommand $command)
     {
         if ($command instanceof Command) {
-            $command->setFramework($this->framework);
+            $command->setNova($this->nova);
         }
 
         return $this->addToParent($command);
-    }
-
-    /**
-     * Add an array of commands through the Application.
-     *
-     * @param  array|dynamic  $commands
-     * @return void
-     */
-    public function addCommands(array $commands)
-    {
-        foreach ($commands as $command) {
-            if(is_string($command)) {
-                $command = '\\' .ltrim($command, '\\');
-
-                $command = new $command();
-            }
-
-            $this->add($command);
-        }
     }
 
     /**
@@ -148,20 +133,20 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function resolve($command)
     {
-        return $this->add($this->framework[$command]);
+        return $this->add($this->nova[$command]);
     }
 
     /**
      * Resolve an array of commands through the application.
      *
-     * @param  array|dynamic  $commands
+     * @param  array|mixed  $commands
      * @return void
      */
     public function resolveCommands($commands)
     {
         $commands = is_array($commands) ? $commands : func_get_args();
 
-        foreach ($commands as $command) {
+        foreach ($commands as $command)  {
             $this->resolve($command);
         }
     }
@@ -199,8 +184,11 @@ class Application extends \Symfony\Component\Console\Application
      * @param  \Symfony\Component\Console\Output\OutputInterface  $output
      * @return void
      */
-    public function renderException(Exception $e, OutputInterface $output)
+    public function renderException(\Exception $e, OutputInterface $output)
     {
+        // If we have an exception handler instance, we will call that first in case
+        // it has some handlers that need to be run first. We will pass "true" as
+        // the second parameter to indicate that it's handling a console error.
         if (isset($this->exceptionHandler)) {
             $this->exceptionHandler->handleConsole($e);
         }
@@ -211,8 +199,8 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Set the exception handler instance.
      *
-     * @param  \Exception\Handler  $handler
-     * @return \Nova\Console\Application
+     * @param  \Nova\Exception\Handler  $handler
+     * @return $this
      */
     public function setExceptionHandler($handler)
     {
@@ -224,12 +212,12 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Set the Laravel application instance.
      *
-     * @param  \Nova\Foundation\Application  $app
-     * @return \Nova\Console\Application
+     * @param  \Nova\Foundation\Application  $nova
+     * @return $this
      */
-    public function setFramework($app)
+    public function setNova($nova)
     {
-        $this->framework = $app;
+        $this->nova = $nova;
 
         return $this;
     }
@@ -238,7 +226,7 @@ class Application extends \Symfony\Component\Console\Application
      * Set whether the Console app should auto-exit when done.
      *
      * @param  bool  $boolean
-     * @return \Nova\Console\Application
+     * @return $this
      */
     public function setAutoExit($boolean)
     {

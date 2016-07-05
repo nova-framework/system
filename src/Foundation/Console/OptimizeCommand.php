@@ -62,7 +62,7 @@ class OptimizeCommand extends Command
             $this->composer->dumpOptimized();
         }
 
-        if ($this->option('force') || ! $this->framework['config']['app.debug']) {
+        if ($this->option('force') || ! $this->nova['config']['app.debug']) {
             $this->info('Compiling common classes');
 
             $this->compileClasses();
@@ -78,7 +78,7 @@ class OptimizeCommand extends Command
      */
     protected function compileClasses()
     {
-        $outputPath = $this->framework['path'] .DS .'Boot' .DS .'Compiled.php';
+        $outputPath = $this->nova['path'] .DS .'Boot' .DS .'Compiled.php';
 
         //
         $config = array('skip' => true);
@@ -105,11 +105,11 @@ class OptimizeCommand extends Command
      */
     protected function getClassFiles()
     {
-        $app = $this->framework;
+        $app = $this->nova;
 
         $core = require __DIR__ .DS .'Optimize' .DS .'config.php';
 
-        return array_merge($core, $this->framework['config']['compile']);
+        return array_merge($core, $this->nova['config']['compile']);
     }
 
     /**

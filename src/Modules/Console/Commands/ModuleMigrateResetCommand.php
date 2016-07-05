@@ -130,7 +130,7 @@ class ModuleMigrateResetCommand extends Command
 
         $className = Inflector::classify($classFile);
 
-        $table = $this->framework['config']['database.migrations'];
+        $table = $this->nova['config']['database.migrations'];
 
         //
         include $file;
@@ -139,7 +139,7 @@ class ModuleMigrateResetCommand extends Command
 
         $instance->down();
 
-        $this->framework['db']->table($table)
+        $this->nova['db']->table($table)
             ->where('migration', $migration)
             ->delete();
     }

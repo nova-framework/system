@@ -41,8 +41,7 @@ class EnvironmentDetector
             // To determine the current environment, we'll simply iterate through the possible
             // environments and look for the host that matches the host for this request we
             // are currently processing here, then return back these environment's names.
-            foreach ((array) $hosts as $host)
-            {
+            foreach ((array) $hosts as $host) {
                 if ($this->isMachine($host)) return $environment;
             }
         }
@@ -62,7 +61,7 @@ class EnvironmentDetector
         // First we will check if an environment argument was passed via console arguments
         // and if it was that automatically overrides as the environment. Otherwise, we
         // will check the environment as a "web" request like a typical HTTP request.
-        if ( ! is_null($value = $this->getEnvironmentArgument($args))) {
+        if (! is_null($value = $this->getEnvironmentArgument($args))) {
             return head(array_slice(explode('=', $value), 1));
         }
 

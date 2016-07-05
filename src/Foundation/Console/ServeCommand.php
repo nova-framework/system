@@ -32,13 +32,13 @@ class ServeCommand extends Command
     {
         $this->checkPhpVersion();
 
-        chdir($this->framework['path.base']);
+        chdir($this->nova['path.base']);
 
         $host = $this->input->getOption('host');
 
         $port = $this->input->getOption('port');
 
-        $public = $this->framework['path.public'];
+        $public = $this->nova['path.public'];
 
         $this->info("Nova Framework development Server started on http://{$host}:{$port}");
 

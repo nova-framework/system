@@ -17,7 +17,7 @@ class BaseCommand extends Command
         $path = $this->input->getOption('path');
 
         if ( ! is_null($path)) {
-            return $this->framework['path.base'] .DS .$path;
+            return $this->nova['path.base'] .DS .$path;
         }
 
         // Vendor Package Path.
@@ -28,7 +28,7 @@ class BaseCommand extends Command
         }
 
         // Default Migrations Path.
-        return $this->framework['path'] .DS .'Database' .DS .'Migrations';
+        return $this->nova['path'] .DS .'Database' .DS .'Migrations';
     }
 
 }

@@ -110,9 +110,9 @@ class MakeModelCommand extends Command
         $path = $this->input->getOption('path');
 
         if (is_null($path)) {
-            return $this->framework['path'] .DS .'Models';
+            return $this->nova['path'] .DS .'Models';
         } else {
-            return $this->framework['path.base'] .DS .$path;
+            return $this->nova['path.base'] .DS .$path;
         }
     }
 

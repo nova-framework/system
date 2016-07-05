@@ -28,7 +28,7 @@ class EnvironmentCommand extends Command
      */
     public function fire()
     {
-        $this->line('<info>Current Application Environment:</info> <comment>'.$this->framework['env'].'</comment>');
+        $this->line('<info>Current Application Environment:</info> <comment>'.$this->nova['env'].'</comment>');
     }
 
 }

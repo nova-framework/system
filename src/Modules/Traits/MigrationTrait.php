@@ -12,7 +12,7 @@ trait MigrationTrait
      */
     protected function requireMigrations($module)
     {
-        $files = $this->framework['files'];
+        $files = $this->nova['files'];
 
         //
         $path = $this->getMigrationPath($module);
@@ -33,7 +33,7 @@ trait MigrationTrait
      */
     protected function getMigrationPath($module)
     {
-        $modules = $this->framework['modules'];
+        $modules = $this->nova['modules'];
 
         //
         $path = $modules->getModulePath($module);

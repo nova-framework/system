@@ -64,9 +64,9 @@ class SeedCommand extends Command
     {
         $className = $this->input->getOption('class');
 
-        $instance = $this->framework->make($className);
+        $instance = $this->nova->make($className);
 
-        return $instance->setContainer($this->framework)->setCommand($this);
+        return $instance->setContainer($this->nova)->setCommand($this);
     }
 
     /**
@@ -78,7 +78,7 @@ class SeedCommand extends Command
     {
         $database = $this->input->getOption('database');
 
-        return $database ?: $this->framework['config']['database.default'];
+        return $database ?: $this->nova['config']['database.default'];
     }
 
     /**

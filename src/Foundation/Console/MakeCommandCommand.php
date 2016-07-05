@@ -113,9 +113,9 @@ class MakeCommandCommand extends Command
         $path = $this->input->getOption('path');
 
         if (is_null($path)) {
-            return $this->framework['path'] .DS .'Console';
+            return $this->nova['path'] .DS .'Console';
         } else {
-            return $this->framework['path.base'] .DS .$path;
+            return $this->nova['path.base'] .DS .$path;
         }
     }
 

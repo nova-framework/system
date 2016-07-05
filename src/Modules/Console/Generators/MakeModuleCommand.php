@@ -328,7 +328,7 @@ return array (
     {
         $paths = array();
 
-        $languages = $this->framework['config']['languages'];
+        $languages = $this->nova['config']['languages'];
 
         foreach (array_keys($languages) as $code) {
             $paths[] = 'Language' .DS .ucfirst($code);
