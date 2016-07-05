@@ -38,7 +38,8 @@ class RedisStore extends TaggableStore implements StoreInterface
     {
         $this->redis = $redis;
         $this->connection = $connection;
-        $this->prefix = strlen($prefix) > 0 ? $prefix.':' : '';
+
+        $this->prefix = (strlen($prefix) > 0) ? $prefix .':' : '';
     }
 
     /**
@@ -49,8 +50,7 @@ class RedisStore extends TaggableStore implements StoreInterface
      */
     public function get($key)
     {
-        if ( ! is_null($value = $this->connection()->get($this->prefix.$key)))
-        {
+        if ( ! is_null($value = $this->connection()->get($this->prefix.$key))) {
             return is_numeric($value) ? $value : unserialize($value);
         }
     }
