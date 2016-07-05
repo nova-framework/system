@@ -59,7 +59,11 @@ class DatabaseLoader implements LoaderInterface
             // Insert the option on list.
             $key = $result['item'];
 
-            $items[$key] = json_decode($result['value'], true);
+            $value = $result['value'];
+
+            $value = static::isJson($value) ? json_decode($result['value'], true) : $value;
+
+            $items[$key] = $value;
         }
 
         return $items;
@@ -98,7 +102,7 @@ class DatabaseLoader implements LoaderInterface
      */
     protected function update($group, $item, $value)
     {
-        $value = json_encode($value);
+        $value = is_string($value) ? $value : json_encode($value);
 
         $id = $this->newQuery()
             ->where('group', $group)
@@ -153,5 +157,18 @@ class DatabaseLoader implements LoaderInterface
     public function newQuery()
     {
         return $this->connection->table($this->table);
+    }
+
+    /**
+     * Check if the given value is JSON encoded
+     *
+      * @param  string  $value
+     * @return bool
+     */
+    protected static isJson($value)
+    {
+        $value = preg_replace('/"(\\.|[^"\\\\])*"/', '', $value);
+
+        return (preg_match('/[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t]/', $value) !== 1);
     }
 }
