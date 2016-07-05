@@ -169,6 +169,6 @@ class DatabaseLoader implements LoaderInterface
     {
         $value = preg_replace('/"(\\.|[^"\\\\])*"/', '', $value);
 
-        return (preg_match('/[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t]/', $value) !== 1);
+        return (preg_match('/[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t]/', $value) === 1);
     }
 }
