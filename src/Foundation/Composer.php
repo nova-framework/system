@@ -31,7 +31,6 @@ class Composer
     public function __construct(Filesystem $files, $workingPath = null)
     {
         $this->files = $files;
-        
         $this->workingPath = $workingPath;
     }
 
@@ -45,7 +44,7 @@ class Composer
     {
         $process = $this->getProcess();
 
-        $process->setCommandLine(trim($this->findComposer() .' dump-autoload '.$extra));
+        $process->setCommandLine(trim($this->findComposer().' dump-autoload '.$extra));
 
         $process->run();
     }
@@ -67,8 +66,9 @@ class Composer
      */
     protected function findComposer()
     {
-        if ($this->files->exists($this->workingPath.'/composer.phar')) {
-            return 'php composer.phar';
+        if ($this->files->exists($this->workingPath.'/composer.phar'))
+        {
+            return '"'.PHP_BINARY.'" composer.phar';
         }
 
         return 'composer';
@@ -81,14 +81,14 @@ class Composer
      */
     protected function getProcess()
     {
-        return with(new Process('', $this->workingPath))->setTimeout(null);
+        return (new Process('', $this->workingPath))->setTimeout(null);
     }
 
     /**
      * Set the working path used by the class.
      *
      * @param  string  $path
-     * @return \Nova\Foundation\Composer
+     * @return $this
      */
     public function setWorkingPath($path)
     {
