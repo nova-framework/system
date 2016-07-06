@@ -3,7 +3,9 @@
 namespace Nova\Session;
 
 use Nova\Cookie\CookieJar;
+
 use Symfony\Component\HttpFoundation\Request;
+
 
 class CookieSessionHandler implements \SessionHandlerInterface
 {
@@ -24,7 +26,7 @@ class CookieSessionHandler implements \SessionHandlerInterface
     /**
      * Create a new cookie driven handler instance.
      *
-     * @param  \Cookie\CookieJar  $cookie
+     * @param  \Nova\Cookie\CookieJar  $cookie
      * @param  int  $minutes
      * @return void
      */
