@@ -16,8 +16,7 @@ class Collection extends BaseCollection
      */
     public function find($key, $default = null)
     {
-        if ($key instanceof Model)
-        {
+        if ($key instanceof Model) {
             $key = $key->getKey();
         }
 
@@ -36,8 +35,7 @@ class Collection extends BaseCollection
      */
     public function load($relations)
     {
-        if (count($this->items) > 0)
-        {
+        if (count($this->items) > 0) {
             if (is_string($relations)) $relations = func_get_args();
 
             $query = $this->first()->newQuery()->with($relations);
@@ -131,8 +129,7 @@ class Collection extends BaseCollection
     {
         $dictionary = $this->getDictionary();
 
-        foreach ($items as $item)
-        {
+        foreach ($items as $item) {
             $dictionary[$item->getKey()] = $item;
         }
 
@@ -151,10 +148,8 @@ class Collection extends BaseCollection
 
         $dictionary = $this->getDictionary($items);
 
-        foreach ($this->items as $item)
-        {
-            if ( ! isset($dictionary[$item->getKey()]))
-            {
+        foreach ($this->items as $item) {
+            if ( ! isset($dictionary[$item->getKey()])) {
                 $diff->add($item);
             }
         }
@@ -174,10 +169,8 @@ class Collection extends BaseCollection
 
         $dictionary = $this->getDictionary($items);
 
-        foreach ($this->items as $item)
-        {
-            if (isset($dictionary[$item->getKey()]))
-            {
+        foreach ($this->items as $item) {
+            if (isset($dictionary[$item->getKey()])) {
                 $intersect->add($item);
             }
         }

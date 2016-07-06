@@ -46,8 +46,7 @@ abstract class HasOneOrMany extends Relation
      */
     public function addConstraints()
     {
-        if (static::$constraints)
-        {
+        if (static::$constraints) {
             $this->query->where($this->foreignKey, '=', $this->getParentKey());
         }
     }
@@ -105,12 +104,10 @@ abstract class HasOneOrMany extends Relation
         // Once we have the dictionary we can simply spin through the parent models to
         // link them up with their children using the keyed dictionary to make the
         // matching very convenient and easy work. Then we'll just return them.
-        foreach ($models as $model)
-        {
+        foreach ($models as $model) {
             $key = $model->getAttribute($this->localKey);
 
-            if (isset($dictionary[$key]))
-            {
+            if (isset($dictionary[$key])) {
                 $value = $this->getRelationValue($dictionary, $key, $type);
 
                 $model->setRelation($relation, $value);
@@ -150,8 +147,7 @@ abstract class HasOneOrMany extends Relation
         // First we will create a dictionary of models keyed by the foreign key of the
         // relationship as this will allow us to quickly access all of the related
         // models without having to do nested looping which will be quite slow.
-        foreach ($results as $result)
-        {
+        foreach ($results as $result) {
             $dictionary[$result->{$foreign}][] = $result;
         }
 
@@ -214,8 +210,7 @@ abstract class HasOneOrMany extends Relation
     {
         $instances = array();
 
-        foreach ($records as $record)
-        {
+        foreach ($records as $record) {
             $instances[] = $this->create($record);
         }
 
@@ -230,8 +225,7 @@ abstract class HasOneOrMany extends Relation
      */
     public function update(array $attributes)
     {
-        if ($this->related->usesTimestamps())
-        {
+        if ($this->related->usesTimestamps()) {
             $attributes[$this->relatedUpdatedAt()] = $this->related->freshTimestamp();
         }
 

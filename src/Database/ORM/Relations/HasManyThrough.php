@@ -62,8 +62,7 @@ class HasManyThrough extends Relation
 
         $this->setJoin();
 
-        if (static::$constraints)
-        {
+        if (static::$constraints) {
             $this->query->where($parentTable.'.'.$this->firstKey, '=', $this->farParent->getKey());
         }
     }
@@ -125,8 +124,7 @@ class HasManyThrough extends Relation
      */
     public function initRelation(array $models, $relation)
     {
-        foreach ($models as $model)
-        {
+        foreach ($models as $model) {
             $model->setRelation($relation, $this->related->newCollection());
         }
 
@@ -148,12 +146,10 @@ class HasManyThrough extends Relation
         // Once we have the dictionary we can simply spin through the parent models to
         // link them up with their children using the keyed dictionary to make the
         // matching very convenient and easy work. Then we'll just return them.
-        foreach ($models as $model)
-        {
+        foreach ($models as $model) {
             $key = $model->getKey();
 
-            if (isset($dictionary[$key]))
-            {
+            if (isset($dictionary[$key])) {
                 $value = $this->related->newCollection($dictionary[$key]);
 
                 $model->setRelation($relation, $value);
@@ -178,8 +174,7 @@ class HasManyThrough extends Relation
         // First we will create a dictionary of models keyed by the foreign key of the
         // relationship as this will allow us to quickly access all of the related
         // models without having to do nested looping which will be quite slow.
-        foreach ($results as $result)
-        {
+        foreach ($results as $result) {
             $dictionary[$result->{$foreign}][] = $result;
         }
 
@@ -257,8 +252,7 @@ class HasManyThrough extends Relation
      */
     protected function getSelectColumns(array $columns = array('*'))
     {
-        if ($columns == array('*'))
-        {
+        if ($columns == array('*')) {
             $columns = array($this->related->getTable().'.*');
         }
 

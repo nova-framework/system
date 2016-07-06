@@ -51,6 +51,7 @@ abstract class Relation
     {
         $this->query = $query;
         $this->parent = $parent;
+        
         $this->related = $query->getModel();
 
         $this->addConstraints();
