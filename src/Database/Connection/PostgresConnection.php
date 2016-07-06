@@ -3,10 +3,9 @@
 namespace Nova\Database\Connection;
 
 use Nova\Database\Connection;
-use Nova\Database\Query\Processors\PostgresProcessor;
 use Nova\Database\Query\Grammars\PostgresGrammar as QueryGrammar;
+use Nova\Database\Query\Processors\PostgresProcessor as QueryProcessor;
 use Nova\Database\Schema\Grammars\PostgresGrammar as SchemaGrammar;
-use Nova\Database\Query\Processors\PostgresProcessor;
 
 use Doctrine\DBAL\Driver\PDOPgSql\Driver as DoctrineDriver;
 
@@ -40,7 +39,7 @@ class PostgresConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new PostgresProcessor;
+        return new QueryProcessor;
     }
 
     /**

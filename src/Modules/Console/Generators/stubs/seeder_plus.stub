@@ -3,7 +3,7 @@
 namespace {{path}}\{{namespace}};
 
 use Nova\Database\Seeder;
-use Nova\Database\Eloquent\Model;
+use Nova\Database\ORM\Model;
 
 
 class {{classname}} extends Seeder

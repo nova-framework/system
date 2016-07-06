@@ -85,13 +85,11 @@ class SQLiteGrammar extends Grammar
         foreach ($foreigns as $foreign) {
             $sql .= $this->getForeignKey($foreign);
 
-            if ( ! is_null($foreign->onDelete))
-            {
+            if ( ! is_null($foreign->onDelete)) {
                 $sql .= " on delete {$foreign->onDelete}";
             }
 
-            if ( ! is_null($foreign->onUpdate))
-            {
+            if ( ! is_null($foreign->onUpdate)) {
                 $sql .= " on update {$foreign->onUpdate}";
             }
         }
@@ -148,6 +146,8 @@ class SQLiteGrammar extends Grammar
         $table = $this->wrapTable($blueprint);
 
         $columns = $this->prefixArray('add column', $this->getColumns($blueprint));
+
+        $statements = array();
 
         foreach ($columns as $column) {
             $statements[] = 'alter table '.$table.' '.$column;

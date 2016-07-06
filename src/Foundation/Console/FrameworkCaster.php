@@ -14,7 +14,7 @@ use Exception;
 class FrameworkCaster
 {
     /**
-     * Illuminate application methods to include in the presenter.
+     * Nova application methods to include in the presenter.
      *
      * @var array
      */

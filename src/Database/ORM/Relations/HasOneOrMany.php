@@ -6,23 +6,21 @@ use Nova\Database\ORM\Model;
 use Nova\Database\ORM\Builder;
 use Nova\Database\ORM\Collection;
 
-
 abstract class HasOneOrMany extends Relation
 {
     /**
-     * The foreign key of the parent Model.
+     * The foreign key of the parent model.
      *
      * @var string
      */
     protected $foreignKey;
 
     /**
-     * The local key of the parent Model.
+     * The local key of the parent model.
      *
      * @var string
      */
     protected $localKey;
-
 
     /**
      * Create a new has many relationship instance.
@@ -30,11 +28,12 @@ abstract class HasOneOrMany extends Relation
      * @param  \Nova\Database\ORM\Builder  $query
      * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $foreignKey
+     * @param  string  $localKey
      * @return void
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $localKey)
     {
-        $this->localKey   = $localKey;
+        $this->localKey = $localKey;
         $this->foreignKey = $foreignKey;
 
         parent::__construct($query, $parent);
@@ -47,7 +46,8 @@ abstract class HasOneOrMany extends Relation
      */
     public function addConstraints()
     {
-        if (static::$constraints) {
+        if (static::$constraints)
+        {
             $this->query->where($this->foreignKey, '=', $this->getParentKey());
         }
     }
@@ -105,10 +105,12 @@ abstract class HasOneOrMany extends Relation
         // Once we have the dictionary we can simply spin through the parent models to
         // link them up with their children using the keyed dictionary to make the
         // matching very convenient and easy work. Then we'll just return them.
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             $key = $model->getAttribute($this->localKey);
 
-            if (isset($dictionary[$key])) {
+            if (isset($dictionary[$key]))
+            {
                 $value = $this->getRelationValue($dictionary, $key, $type);
 
                 $model->setRelation($relation, $value);
@@ -130,7 +132,7 @@ abstract class HasOneOrMany extends Relation
     {
         $value = $dictionary[$key];
 
-        return ($type == 'one') ? reset($value) : $this->related->newCollection($value);
+        return $type == 'one' ? reset($value) : $this->related->newCollection($value);
     }
 
     /**
@@ -148,7 +150,8 @@ abstract class HasOneOrMany extends Relation
         // First we will create a dictionary of models keyed by the foreign key of the
         // relationship as this will allow us to quickly access all of the related
         // models without having to do nested looping which will be quite slow.
-        foreach ($results as $result) {
+        foreach ($results as $result)
+        {
             $dictionary[$result->{$foreign}][] = $result;
         }
 
@@ -189,16 +192,12 @@ abstract class HasOneOrMany extends Relation
      */
     public function create(array $attributes)
     {
-        $foreign = array(
-            $this->getPlainForeignKey() => $this->getParentKey(),
-        );
-
         // Here we will set the raw attributes to avoid hitting the "fill" method so
         // that we do not have to worry about a mass accessor rules blocking sets
         // on the models. Otherwise, some of these attributes will not get set.
-        $instance = $this->related->newInstance();
+        $instance = $this->related->newInstance($attributes);
 
-        $instance->setRawAttributes(array_merge($attributes, $foreign));
+        $instance->setAttribute($this->getPlainForeignKey(), $this->getParentKey());
 
         $instance->save();
 
@@ -215,7 +214,8 @@ abstract class HasOneOrMany extends Relation
     {
         $instances = array();
 
-        foreach ($records as $record) {
+        foreach ($records as $record)
+        {
             $instances[] = $this->create($record);
         }
 
@@ -230,7 +230,8 @@ abstract class HasOneOrMany extends Relation
      */
     public function update(array $attributes)
     {
-        if ($this->related->usesTimestamps()) {
+        if ($this->related->usesTimestamps())
+        {
             $attributes[$this->relatedUpdatedAt()] = $this->related->freshTimestamp();
         }
 
@@ -270,7 +271,7 @@ abstract class HasOneOrMany extends Relation
     }
 
     /**
-     * Get the key value of the paren's local key.
+     * Get the key value of the parent's local key.
      *
      * @return mixed
      */
@@ -286,7 +287,7 @@ abstract class HasOneOrMany extends Relation
      */
     public function getQualifiedParentKeyName()
     {
-        return $this->parent->getTable() .'.' .$this->localKey;
+        return $this->parent->getTable().'.'.$this->localKey;
     }
 
 }

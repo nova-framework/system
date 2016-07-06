@@ -3,6 +3,7 @@
 namespace Nova\Modules\Console\Commands;
 
 use Nova\Console\Command;
+use Nova\Console\ConfirmableTrait;
 use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\Migrations\Migrator;
@@ -66,6 +67,8 @@ class ModuleMigrateResetCommand extends Command
      */
     public function fire()
     {
+        if (! $this->confirmToProceed()) return;
+
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {

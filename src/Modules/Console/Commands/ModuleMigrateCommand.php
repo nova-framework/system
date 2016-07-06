@@ -3,6 +3,7 @@
 namespace Nova\Modules\Console\Commands;
 
 use Nova\Console\Command;
+use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
 use Nova\Modules\Modules;
 use Nova\Support\Arr;
@@ -58,6 +59,8 @@ class ModuleMigrateCommand extends Command
      */
     public function fire()
     {
+        if (! $this->confirmToProceed()) return;
+
         $this->prepareDatabase();
 
         $slug = $this->argument('slug');

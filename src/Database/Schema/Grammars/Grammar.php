@@ -3,15 +3,13 @@
 namespace Nova\Database\Schema\Grammars;
 
 use Nova\Support\Fluent;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\TableDiff;
 use Nova\Database\Connection;
 use Nova\Database\Query\Expression;
 use Nova\Database\Schema\Blueprint;
 use Nova\Database\Grammar as BaseGrammar;
-
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\AbstractSchemaManager as SchemaManager;
-
 
 abstract class Grammar extends BaseGrammar
 {
@@ -100,8 +98,7 @@ abstract class Grammar extends BaseGrammar
             $sql .= " on delete {$command->onDelete}";
         }
 
-        if ( ! is_null($command->onUpdate))
-        {
+        if ( ! is_null($command->onUpdate)) {
             $sql .= " on update {$command->onUpdate}";
         }
 
@@ -153,6 +150,7 @@ abstract class Grammar extends BaseGrammar
      * Get the primary key command if it exists on the blueprint.
      *
      * @param  \Nova\Database\Schema\Blueprint  $blueprint
+     * @param  string  $name
      * @return \Nova\Support\Fluent|null
      */
     protected function getCommandByName(Blueprint $blueprint, $name)
@@ -242,7 +240,7 @@ abstract class Grammar extends BaseGrammar
     {
         if ($value instanceof Expression) return $value;
 
-        if (is_bool($value)) return "'".intval($value)."'";
+        if (is_bool($value)) return "'".(int) $value."'";
 
         return "'".strval($value)."'";
     }

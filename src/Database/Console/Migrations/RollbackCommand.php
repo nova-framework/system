@@ -3,12 +3,16 @@
 namespace Nova\Database\Console\Migrations;
 
 use Nova\Console\Command;
+use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
+
 use Symfony\Component\Console\Input\InputOption;
 
 
 class RollbackCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *
@@ -50,13 +54,17 @@ class RollbackCommand extends Command
      */
     public function fire()
     {
+        if ( ! $this->confirmToProceed()) return;
+
         $this->migrator->setConnection($this->input->getOption('database'));
 
         $pretend = $this->input->getOption('pretend');
 
         $this->migrator->rollback($pretend);
 
-        //
+        // Once the migrator has run we will grab the note output and send it out to
+        // the console screen, since the migrator itself functions without having
+        // any instances of the OutputInterface contract passed into the class.
         foreach ($this->migrator->getNotes() as $note) {
             $this->output->writeln($note);
         }
@@ -71,6 +79,7 @@ class RollbackCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
+            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
             array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
         );
     }

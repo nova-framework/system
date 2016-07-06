@@ -2,9 +2,9 @@
 
 namespace Nova\Database\Migrations;
 
-use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\ConnectionResolverInterface as Resolver;
+
 
 class Migrator
 {
@@ -71,12 +71,16 @@ class Migrator
     {
         $this->notes = array();
 
-        $this->requireFiles($path, $files = $this->getMigrationFiles($path));
+        $files = $this->getMigrationFiles($path);
 
-        //
+        // Once we grab all of the migration files for the path, we will compare them
+        // against the migrations that have already been run for this package then
+        // run each of the outstanding migrations against a database connection.
         $ran = $this->repository->getRan();
 
         $migrations = array_diff($files, $ran);
+
+        $this->requireFiles($path, $migrations);
 
         $this->runMigrationList($migrations, $pretend);
     }
@@ -90,6 +94,9 @@ class Migrator
      */
     public function runMigrationList($migrations, $pretend = false)
     {
+        // First we will just make sure that there are any migrations to run. If there
+        // aren't, we will just make a note of it to the developer so they're aware
+        // that all of the migrations have been run against this database system.
         if (count($migrations) == 0) {
             $this->note('<info>Nothing to migrate.</info>');
 
@@ -98,6 +105,9 @@ class Migrator
 
         $batch = $this->repository->getNextBatchNumber();
 
+        // Once we have the array of migrations, we will spin through them and run the
+        // migrations "up" so the changes are made to the databases. We'll then log
+        // that the migration was run so we don't repeat it next time we execute.
         foreach ($migrations as $file) {
             $this->runUp($file, $batch, $pretend);
         }
@@ -113,6 +123,9 @@ class Migrator
      */
     protected function runUp($file, $batch, $pretend)
     {
+        // First we will resolve a "real" instance of the migration class from this
+        // migration file name. Once we have the instances we can run the actual
+        // command such as "up" or "down", or we can just simulate the action.
         $migration = $this->resolve($file);
 
         if ($pretend) {
@@ -121,7 +134,9 @@ class Migrator
 
         $migration->up();
 
-        //
+        // Once we have run a migrations class, we will log that it was run in this
+        // repository so that we don't try to run it next time we do a migration
+        // in the application. A migration repository keeps the migrate order.
         $this->repository->log($file, $batch);
 
         $this->note("<info>Migrated:</info> $file");
@@ -137,6 +152,9 @@ class Migrator
     {
         $this->notes = array();
 
+        // We want to pull in the last batch of migrations that ran on the previous
+        // migration operation. We'll then reverse those migrations and run each
+        // of them "down" to reverse the last migration "operation" which ran.
         $migrations = $this->repository->getLast();
 
         if (count($migrations) == 0) {
@@ -145,6 +163,9 @@ class Migrator
             return count($migrations);
         }
 
+        // We need to reverse these migrations so that they are "downed" in reverse
+        // to what they run on "up". It lets us backtrack through the migrations
+        // and properly reverse the entire database schema operation that ran.
         foreach ($migrations as $migration) {
             $this->runDown((object) $migration, $pretend);
         }
@@ -163,6 +184,9 @@ class Migrator
     {
         $file = $migration->migration;
 
+        // First we will get the file name of the migration so we can resolve out an
+        // instance of the migration. Once we get an instance we can either run a
+        // pretend execution of the migration or we can run the real migration.
         $instance = $this->resolve($file);
 
         if ($pretend) {
@@ -171,6 +195,9 @@ class Migrator
 
         $instance->down();
 
+        // Once we have successfully run the migration "down" we will remove it from
+        // the migration repository so it will be considered to have not been run
+        // by the application then will be able to fire by any later operation.
         $this->repository->delete($migration);
 
         $this->note("<info>Rolled back:</info> $file");
@@ -184,8 +211,11 @@ class Migrator
      */
     public function getMigrationFiles($path)
     {
-        $files = $this->files->glob($path .DS .'*_*.php');
+        $files = $this->files->glob($path .'/*_*.php');
 
+        // Once we have the array of files in the directory we will just remove the
+        // extension and take the basename of the file which is all we need when
+        // finding the migrations that haven't been run against the databases.
         if ($files === false) return array();
 
         $files = array_map(function($file)
@@ -194,7 +224,9 @@ class Migrator
 
         }, $files);
 
-        //
+        // Once we have all of the formatted file names we will sort them and since
+        // they all start with a timestamp this should give us the migrations in
+        // the order they were actually created by the application developers.
         sort($files);
 
         return $files;
@@ -203,20 +235,20 @@ class Migrator
     /**
      * Require in all the migration files in a given path.
      *
-     * @param  array  $files
+     * @param  string  $path
+     * @param  array   $files
      * @return void
      */
     public function requireFiles($path, array $files)
     {
-        foreach ($files as $file) {
-            $this->files->requireOnce($path .DS .$file.'.php');
-        }
+        foreach ($files as $file) $this->files->requireOnce($path.'/'.$file.'.php');
     }
 
     /**
      * Pretend to run the migrations.
      *
      * @param  object  $migration
+     * @param  string  $method
      * @return void
      */
     protected function pretendToRun($migration, $method)
@@ -239,6 +271,9 @@ class Migrator
     {
         $connection = $migration->getConnection();
 
+        // Now that we have the connections we can resolve it and pretend to run the
+        // queries against the database returning the array of raw SQL statements
+        // that would get fired against the database system for this migration.
         $db = $this->resolveConnection($connection);
 
         return $db->pretend(function() use ($migration, $method)
@@ -257,9 +292,9 @@ class Migrator
     {
         $file = implode('_', array_slice(explode('_', $file), 4));
 
-        $className = Inflector::tableize($file);
+        $class = studly_case($file);
 
-        return new $className();
+        return new $class;
     }
 
     /**
@@ -286,11 +321,12 @@ class Migrator
     /**
      * Resolve the database connection instance.
      *
+     * @param  string  $connection
      * @return \Nova\Database\Connection
      */
-    public function resolveConnection()
+    public function resolveConnection($connection)
     {
-        return $this->resolver->connection($this->connection);
+        return $this->resolver->connection($connection);
     }
 
     /**

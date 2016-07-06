@@ -3,7 +3,7 @@
 namespace Nova\Support\Facades;
 
 /**
- * @see \Illuminate\Redis\Database
+ * @see \Nova\Redis\Database
  */
 class Redis extends Facade
 {

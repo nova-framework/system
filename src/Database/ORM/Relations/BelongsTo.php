@@ -1,4 +1,6 @@
-<?php namespace Nova\Database\ORM\Relations;
+<?php
+
+namespace Nova\Database\ORM\Relations;
 
 use Nova\Database\ORM\Model;
 use Nova\Database\ORM\Builder;
@@ -29,7 +31,6 @@ class BelongsTo extends Relation
      */
     protected $relation;
 
-
     /**
      * Create a new belongs to relationship instance.
      *
@@ -42,8 +43,8 @@ class BelongsTo extends Relation
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $otherKey, $relation)
     {
-        $this->otherKey   = $otherKey;
-        $this->relation   = $relation;
+        $this->otherKey = $otherKey;
+        $this->relation = $relation;
         $this->foreignKey = $foreignKey;
 
         parent::__construct($query, $parent);
@@ -66,7 +67,8 @@ class BelongsTo extends Relation
      */
     public function addConstraints()
     {
-        if (static::$constraints) {
+        if (static::$constraints)
+        {
             // For belongs to relationships, which are essentially the inverse of has one
             // or has many relationships, we need to actually query on the primary key
             // of the related models matching on the foreign key that's on a parent.
@@ -121,7 +123,8 @@ class BelongsTo extends Relation
         // First we need to gather all of the keys from the parent models so we know what
         // to query for via the eager loading query. We will add them to an array then
         // execute a "where in" statement to gather up all of those related records.
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             if ( ! is_null($value = $model->{$this->foreignKey}))
             {
                 $keys[] = $value;
@@ -131,7 +134,8 @@ class BelongsTo extends Relation
         // If there are no keys that were not null we will just return an array with 0 in
         // it so the query doesn't fail, but will not return any results, which should
         // be what this developer is expecting in a case where this happens to them.
-        if (count($keys) == 0) {
+        if (count($keys) == 0)
+        {
             return array(0);
         }
 
@@ -147,7 +151,8 @@ class BelongsTo extends Relation
      */
     public function initRelation(array $models, $relation)
     {
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             $model->setRelation($relation, null);
         }
 
@@ -173,15 +178,18 @@ class BelongsTo extends Relation
         // the parents using that dictionary and the primary key of the children.
         $dictionary = array();
 
-        foreach ($results as $result) {
+        foreach ($results as $result)
+        {
             $dictionary[$result->getAttribute($other)] = $result;
         }
 
         // Once we have the dictionary constructed, we can loop through all the parents
         // and match back onto their children using these keys of the dictionary and
         // the primary key of the children to map them onto the correct instances.
-        foreach ($models as $model) {
-            if (isset($dictionary[$model->$foreign])) {
+        foreach ($models as $model)
+        {
+            if (isset($dictionary[$model->$foreign]))
+            {
                 $model->setRelation($relation, $dictionary[$model->$foreign]);
             }
         }
@@ -200,6 +208,18 @@ class BelongsTo extends Relation
         $this->parent->setAttribute($this->foreignKey, $model->getAttribute($this->otherKey));
 
         return $this->parent->setRelation($this->relation, $model);
+    }
+
+    /**
+     * Dissociate previously associated model from the given parent.
+     *
+     * @return \Nova\Database\ORM\Model
+     */
+    public function dissociate()
+    {
+        $this->parent->setAttribute($this->foreignKey, null);
+
+        return $this->parent->setRelation($this->relation, null);
     }
 
     /**
@@ -252,7 +272,7 @@ class BelongsTo extends Relation
      */
     public function getQualifiedOtherKeyName()
     {
-        return $this->related->getTable() .'.' .$this->otherKey;
+        return $this->related->getTable().'.'.$this->otherKey;
     }
 
 }

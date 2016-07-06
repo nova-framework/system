@@ -3,10 +3,9 @@
 namespace Nova\Database\Connection;
 
 use Nova\Database\Connection;
-use Nova\Database\Query\Processors\SqlServerProcessor;
 use Nova\Database\Query\Grammars\SqlServerGrammar as QueryGrammar;
+use Nova\Database\Query\Processors\SqlServerProcessor as QueryProcessor;
 use Nova\Database\Schema\Grammars\SqlServerGrammar as SchemaGrammar;
-use Nova\Database\Query\Processors\SqlServerProcessor;
 
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver as DoctrineDriver;
 
@@ -18,7 +17,7 @@ class SqlServerConnection extends Connection
     /**
      * Execute a Closure within a transaction.
      *
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @return mixed
      *
      * @throws \Exception
@@ -31,11 +30,20 @@ class SqlServerConnection extends Connection
 
         $this->pdo->exec('BEGIN TRAN');
 
-        try {
+        // We'll simply execute the given callback within a try / catch block
+        // and if we catch any exception we can rollback the transaction
+        // so that none of the changes are persisted to the database.
+        try
+        {
             $result = $callback($this);
 
             $this->pdo->exec('COMMIT TRAN');
-        } catch (\Exception $e) {
+        }
+
+        // If we catch an exception, we will roll back so nothing gets messed
+        // up in the database. Then we'll re-throw the exception so it can
+        // be handled how the developer sees fit for their applications.
+        catch (\Exception $e) {
             $this->pdo->exec('ROLLBACK TRAN');
 
             throw $e;
@@ -71,7 +79,7 @@ class SqlServerConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new SqlServerProcessor;
+        return new QueryProcessor;
     }
 
     /**

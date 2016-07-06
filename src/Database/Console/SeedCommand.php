@@ -3,12 +3,16 @@
 namespace Nova\Database\Console;
 
 use Nova\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
+use Nova\Console\ConfirmableTrait;
 use Nova\Database\ConnectionResolverInterface as Resolver;
+
+use Symfony\Component\Console\Input\InputOption;
 
 
 class SeedCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *
@@ -26,7 +30,7 @@ class SeedCommand extends Command
     /**
      * The connection resolver instance.
      *
-     * @var  \Nova\Database\ConnectionResolverInterface
+     * @var \Nova\Database\ConnectionResolverInterface
      */
     protected $resolver;
 
@@ -50,6 +54,8 @@ class SeedCommand extends Command
      */
     public function fire()
     {
+        if ( ! $this->confirmToProceed()) return;
+
         $this->resolver->setDefaultConnection($this->getDatabase());
 
         $this->getSeeder()->run();
@@ -62,11 +68,9 @@ class SeedCommand extends Command
      */
     protected function getSeeder()
     {
-        $className = $this->input->getOption('class');
+        $class = $this->nova->make($this->input->getOption('class'));
 
-        $instance = $this->nova->make($className);
-
-        return $instance->setContainer($this->nova)->setCommand($this);
+        return $class->setContainer($this->nova)->setCommand($this);
     }
 
     /**
@@ -91,6 +95,7 @@ class SeedCommand extends Command
         return array(
             array('class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', 'DatabaseSeeder'),
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed'),
+            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
         );
     }
 

@@ -4,6 +4,7 @@ namespace Nova\Database\Query\Grammars;
 
 use Nova\Database\Query\Builder;
 
+
 class SqlServerGrammar extends Grammar
 {
     /**
@@ -27,7 +28,11 @@ class SqlServerGrammar extends Grammar
     {
         $components = $this->compileComponents($query);
 
-        if ($query->offset > 0) {
+        // If an offset is present on the query, we will need to wrap the query in
+        // a big "ANSI" offset syntax block. This is very nasty compared to the
+        // other database systems but is necessary for implementing features.
+        if ($query->offset > 0)
+        {
             return $this->compileAnsiOffset($query, $components);
         }
 
@@ -47,7 +52,11 @@ class SqlServerGrammar extends Grammar
 
         $select = $query->distinct ? 'select distinct ' : 'select ';
 
-        if (($query->limit > 0) && ($query->offset <= 0)) {
+        // If there is a limit on the query, but not an offset, we will add the top
+        // clause to the query, which serves as a "limit" type clause within the
+        // SQL Server system similar to the limit keywords available in MySQL.
+        if ($query->limit > 0 && $query->offset <= 0)
+        {
             $select .= 'top '.$query->limit.' ';
         }
 
@@ -67,11 +76,12 @@ class SqlServerGrammar extends Grammar
 
         if (is_string($query->lock)) return $from.' '.$query->lock;
 
-        if ( ! is_null($query->lock)) {
+        if ( ! is_null($query->lock))
+        {
             return $from.' with(rowlock,'.($query->lock ? 'updlock,' : '').'holdlock)';
-        } else {
-            return $from;
         }
+
+        return $from;
     }
 
     /**
@@ -83,20 +93,33 @@ class SqlServerGrammar extends Grammar
      */
     protected function compileAnsiOffset(Builder $query, $components)
     {
-        if ( ! isset($components['orders'])) {
+        // An ORDER BY clause is required to make this offset query work, so if one does
+        // not exist we'll just create a dummy clause to trick the database and so it
+        // does not complain about the queries for not having an "order by" clause.
+        if ( ! isset($components['orders']))
+        {
             $components['orders'] = 'order by (select 0)';
         }
 
+        // We need to add the row number to the query so we can compare it to the offset
+        // and limit values given for the statements. So we will add an expression to
+        // the "select" that will give back the row numbers on each of the records.
         $orderings = $components['orders'];
 
         $components['columns'] .= $this->compileOver($orderings);
 
         unset($components['orders']);
 
+        // Next we need to calculate the constraints that should be placed on the query
+        // to get the right offset and limit from our query but if there is no limit
+        // set we will just handle the offset only since that is all that matters.
         $constraint = $this->compileRowConstraint($query);
 
         $sql = $this->concatenate($components);
 
+        // We are now ready to build the final SQL query so we'll create a common table
+        // expression from the query and get the records with row numbers within our
+        // given limit and offset value that we just put on as a query constraint.
         return $this->compileTableExpression($sql, $constraint);
     }
 
@@ -121,7 +144,8 @@ class SqlServerGrammar extends Grammar
     {
         $start = $query->offset + 1;
 
-        if ($query->limit > 0) {
+        if ($query->limit > 0)
+        {
             $finish = $query->offset + $query->limit;
 
             return "between {$start} and {$finish}";

@@ -5,8 +5,8 @@ namespace Nova\Database\Connection;
 use Nova\Database\Connection;
 use Nova\Database\Schema\MySqlBuilder;
 use Nova\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
+use Nova\Database\Query\Processors\MySqlProcessor as QueryProcessor;
 use Nova\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
-use Nova\Database\Query\Processors\MySqlProcessor;
 
 use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
 
@@ -52,7 +52,7 @@ class MySqlConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new MySqlProcessor;
+        return new QueryProcessor;
     }
 
     /**

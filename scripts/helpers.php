@@ -818,7 +818,7 @@ if ( ! function_exists('route'))
      * @param  string  $name
      * @param  array   $parameters
      * @param  bool  $absolute
-     * @param  \Illuminate\Routing\Route $route
+     * @param  \Nova\Routing\Route $route
      * @return string
      */
     function route($name, $parameters = array(), $absolute = true, $route = null)

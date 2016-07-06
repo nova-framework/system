@@ -109,7 +109,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     protected static $requestClass = 'Nova\Http\Request';
 
     /**
-     * Create a new Illuminate application instance.
+     * Create a new Nova application instance.
      *
      * @param  \Nova\Http\Request  $request
      * @return void

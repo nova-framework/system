@@ -4,6 +4,7 @@ namespace Nova\Database\Query\Grammars;
 
 use Nova\Database\Query\Builder;
 
+
 class SQLiteGrammar extends Grammar
 {
     /**
@@ -26,13 +27,21 @@ class SQLiteGrammar extends Grammar
      */
     public function compileInsert(Builder $query, array $values)
     {
+        // Essentially we will force every insert to be treated as a batch insert which
+        // simply makes creating the SQL easier for us since we can utilize the same
+        // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
 
-        if ( ! is_array(reset($values))) {
+        if ( ! is_array(reset($values)))
+        {
             $values = array($values);
         }
 
-        if (count($values) == 1) {
+        // If there is only one record being inserted, we will just use the usual query
+        // grammar insert builder because no special syntax is needed for the single
+        // row inserts in SQLite. However, if there are multiples, we'll continue.
+        if (count($values) == 1)
+        {
             return parent::compileInsert($query, reset($values));
         }
 
@@ -40,8 +49,11 @@ class SQLiteGrammar extends Grammar
 
         $columns = array();
 
-        //
-        foreach (array_keys(reset($values)) as $column) {
+        // SQLite requires us to build the multi-row insert as a listing of select with
+        // unions joining them together. So we'll build out this list of columns and
+        // then join them all together with select unions to complete the queries.
+        foreach (array_keys(reset($values)) as $column)
+        {
             $columns[] = '? as '.$this->wrap($column);
         }
 

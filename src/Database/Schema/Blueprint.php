@@ -2,10 +2,11 @@
 
 namespace Nova\Database\Schema;
 
-use Closure;
 use Nova\Support\Fluent;
 use Nova\Database\Connection;
 use Nova\Database\Schema\Grammars\Grammar;
+
+use Closure;
 
 
 class Blueprint
@@ -42,7 +43,7 @@ class Blueprint
      * Create a new schema blueprint.
      *
      * @param  string   $table
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @return void
      */
     public function __construct($table, Closure $callback = null)
@@ -61,7 +62,8 @@ class Blueprint
      */
     public function build(Connection $connection, Grammar $grammar)
     {
-        foreach ($this->toSql($connection, $grammar) as $statement) {
+        foreach ($this->toSql($connection, $grammar) as $statement)
+        {
             $connection->statement($statement);
         }
     }
@@ -116,7 +118,8 @@ class Blueprint
      */
     protected function addFluentIndexes()
     {
-        foreach ($this->columns as $column) {
+        foreach ($this->columns as $column)
+        {
             foreach (array('primary', 'unique', 'index') as $index) {
                 // If the index has been specified on the given column, but is simply
                 // equal to "true" (boolean), no name has been specified for this
@@ -130,7 +133,7 @@ class Blueprint
                 // If the index has been specified on the column and it is something
                 // other than boolean true, we will assume a name was provided on
                 // the index specification, and pass in the name to the method.
-                elseif (isset($column->$index)) {
+                else if (isset($column->$index)) {
                     $this->$index($column->name, $column->$index);
 
                     continue 2;
@@ -519,7 +522,6 @@ class Blueprint
      * @param  int|null    $total
      * @param  int|null $places
      * @return \Nova\Support\Fluent
-     *
      */
     public function double($column, $total = null, $places = null)
     {
@@ -633,11 +635,11 @@ class Blueprint
     /**
      * Add a "deleted at" timestamp for the table.
      *
-     * @return void
+     * @return \Nova\Support\Fluent
      */
     public function softDeletes()
     {
-        $this->timestamp('deleted_at')->nullable();
+        return $this->timestamp('deleted_at')->nullable();
     }
 
     /**
@@ -655,13 +657,26 @@ class Blueprint
      * Add the proper columns for a polymorphic table.
      *
      * @param  string  $name
+     * @param  string|null  $indexName
      * @return void
      */
-    public function morphs($name)
+    public function morphs($name, $indexName = null)
     {
         $this->unsignedInteger("{$name}_id");
 
         $this->string("{$name}_type");
+
+        $this->index(array("{$name}_id", "{$name}_type"), $indexName);
+    }
+
+    /**
+     * Adds the `remember_token` column to the table.
+     *
+     * @return \Nova\Support\Fluent
+     */
+    public function rememberToken()
+    {
+        return $this->string('remember_token', 100)->nullable();
     }
 
     /**
@@ -678,7 +693,7 @@ class Blueprint
 
         // If the given "index" is actually an array of columns, the developer means
         // to drop an index merely by specifying the columns involved without the
-        // conventional name, so we will built the index name from the columns.
+        // conventional name, so we will build the index name from the columns.
         if (is_array($index)) {
             $columns = $index;
 
@@ -745,13 +760,13 @@ class Blueprint
      * Remove a column from the schema blueprint.
      *
      * @param  string  $name
-     * @return \Nova\Database\Schema\Blueprint
+     * @return $this
      */
     public function removeColumn($name)
     {
-        $this->columns = array_values(array_filter($this->columns, function($column) use ($name)
+        $this->columns = array_values(array_filter($this->columns, function($c) use ($name)
         {
-            return $column['attributes']['name'] != $name;
+            return $c['attributes']['name'] != $name;
         }));
 
         return $this;

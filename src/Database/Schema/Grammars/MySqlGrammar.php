@@ -14,7 +14,7 @@ class MySqlGrammar extends Grammar
      *
      * @var array
      */
-    protected $modifiers = array('Unsigned', 'Nullable', 'Default', 'Increment', 'After');
+    protected $modifiers = array('Unsigned', 'Nullable', 'Default', 'Increment', 'Comment', 'After');
 
     /**
      * The possible column serials
@@ -36,7 +36,6 @@ class MySqlGrammar extends Grammar
     /**
      * Compile the query to determine the list of columns.
      *
-     * @param  string  $table
      * @return string
      */
     public function compileColumnExists()
@@ -91,7 +90,7 @@ class MySqlGrammar extends Grammar
     }
 
     /**
-     * Compile a create table command.
+     * Compile an add column command.
      *
      * @param  \Nova\Database\Schema\Blueprint  $blueprint
      * @param  \Nova\Support\Fluent  $command
@@ -398,11 +397,12 @@ class MySqlGrammar extends Grammar
      */
     protected function typeDouble(Fluent $column)
     {
-        if ($column->total && $column->places) {
+        if ($column->total && $column->places)
+        {
             return "double({$column->total}, {$column->places})";
-        } else {
-            return 'double';
         }
+
+        return 'double';
     }
 
     /**
@@ -528,7 +528,7 @@ class MySqlGrammar extends Grammar
      */
     protected function modifyDefault(Blueprint $blueprint, Fluent $column)
     {
-        if ( ! is_null($column->default)) {
+        if ( ! is_null($column->default))  {
             return " default ".$this->getDefaultValue($column->default);
         }
     }
@@ -558,6 +558,20 @@ class MySqlGrammar extends Grammar
     {
         if ( ! is_null($column->after)) {
             return ' after '.$this->wrap($column->after);
+        }
+    }
+
+    /**
+     * Get the SQL for an "comment" column modifier.
+     *
+     * @param  \Nova\Database\Schema\Blueprint  $blueprint
+     * @param  \Nova\Support\Fluent  $column
+     * @return string|null
+     */
+    protected function modifyComment(Blueprint $blueprint, Fluent $column)
+    {
+        if ( ! is_null($column->comment)) {
+            return ' comment "'.$column->comment.'"';
         }
     }
 

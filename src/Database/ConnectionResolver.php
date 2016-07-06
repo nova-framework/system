@@ -2,7 +2,6 @@
 
 namespace Nova\Database;
 
-
 class ConnectionResolver implements ConnectionResolverInterface
 {
     /**

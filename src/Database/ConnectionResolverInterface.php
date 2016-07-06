@@ -2,11 +2,10 @@
 
 namespace Nova\Database;
 
-
 interface ConnectionResolverInterface
 {
     /**
-     * Get a Database Connection instance.
+     * Get a database connection instance.
      *
      * @param  string  $name
      * @return \Nova\Database\Connection
@@ -14,14 +13,14 @@ interface ConnectionResolverInterface
     public function connection($name = null);
 
     /**
-     * Get the default Connection name.
+     * Get the default connection name.
      *
      * @return string
      */
     public function getDefaultConnection();
 
     /**
-     * Set the default Connection name.
+     * Set the default connection name.
      *
      * @param  string  $name
      * @return void

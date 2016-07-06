@@ -5,6 +5,7 @@ namespace Nova\Modules\Console\Commands;
 use Nova\Modules\Modules;
 use Nova\Modules\Traits\MigrationTrait;
 use Nova\Console\Command;
+use Nova\Console\ConfirmableTrait;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -52,6 +53,8 @@ class ModuleMigrateRollbackCommand extends Command
      */
     public function fire()
     {
+        if (! $this->confirmToProceed()) return;
+
         $slug = $this->argument('slug');
 
         if ($slug) {

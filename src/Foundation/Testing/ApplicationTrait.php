@@ -8,7 +8,7 @@ use Nova\Auth\UserInterface;
 trait ApplicationTrait
 {
     /**
-     * The Illuminate application instance.
+     * The Nova application instance.
      *
      * @var \Nova\Foundation\Application
      */

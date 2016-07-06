@@ -10,12 +10,9 @@ use Nova\Database\Connection\Connectors\MySqlConnector;
 use Nova\Database\Connection\Connectors\SQLiteConnector;
 use Nova\Database\Connection\Connectors\PostgresConnector;
 use Nova\Database\Connection\Connectors\SqlServerConnector;
-
-
 use Nova\Container\Container;
 
 use PDO;
-
 
 class ConnectionFactory
 {
@@ -50,9 +47,9 @@ class ConnectionFactory
 
         if (isset($config['read'])) {
             return $this->createReadWriteConnection($config);
-        } else {
-            return $this->createSingleConnection($config);
         }
+
+        return $this->createSingleConnection($config);
     }
 
     /**
@@ -123,7 +120,7 @@ class ConnectionFactory
     /**
      * Get a read / write level configuration.
      *
-     * @param  array  $config
+     * @param  array   $config
      * @param  string  $type
      * @return array
      */
@@ -131,9 +128,9 @@ class ConnectionFactory
     {
         if (isset($config[$type][0])) {
             return $config[$type][array_rand($config[$type])];
-        } else {
-            return $config[$type];
         }
+
+        return $config[$type];
     }
 
     /**
@@ -181,16 +178,16 @@ class ConnectionFactory
         switch ($config['driver'])
         {
             case 'mysql':
-                return new MySqlConnector();
+                return new MySqlConnector;
 
             case 'pgsql':
-                return new PostgresConnector();
+                return new PostgresConnector;
 
             case 'sqlite':
-                return new SQLiteConnector();
+                return new SQLiteConnector;
 
             case 'sqlsrv':
-                return new SqlServerConnector();
+                return new SqlServerConnector;
         }
 
         throw new \InvalidArgumentException("Unsupported driver [{$config['driver']}]");
@@ -199,18 +196,19 @@ class ConnectionFactory
     /**
      * Create a new connection instance.
      *
-     * @param  string  $driver
-     * @param  PDO     $connection
-     * @param  string  $database
-     * @param  string  $prefix
-     * @param  array   $config
+     * @param  string   $driver
+     * @param  \PDO     $connection
+     * @param  string   $database
+     * @param  string   $prefix
+     * @param  array    $config
      * @return \Nova\Database\Connection
      *
      * @throws \InvalidArgumentException
      */
     protected function createConnection($driver, PDO $connection, $database, $prefix = '', array $config = array())
     {
-        if ($this->container->bound($key = "db.connection.{$driver}")) {
+        if ($this->container->bound($key = "db.connection.{$driver}"))
+        {
             return $this->container->make($key, array($connection, $database, $prefix, $config));
         }
 

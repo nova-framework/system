@@ -3,8 +3,10 @@
 namespace Nova\Database\Console\Migrations;
 
 use Nova\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Nova\Database\Migrations\MigrationRepositoryInterface;
+
+use Symfony\Component\Console\Input\InputOption;
+
 
 class InstallCommand extends Command
 {

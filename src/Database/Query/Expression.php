@@ -2,7 +2,6 @@
 
 namespace Nova\Database\Query;
 
-
 class Expression
 {
     /**

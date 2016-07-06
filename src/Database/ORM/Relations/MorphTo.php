@@ -5,7 +5,6 @@ namespace Nova\Database\ORM\Relations;
 use Nova\Database\ORM\Model;
 use Nova\Database\ORM\Builder;
 use Nova\Database\ORM\Collection;
-use Nova\Database\ORM\Relations\BelongsTo;
 use Nova\Support\Collection as BaseCollection;
 
 
@@ -32,6 +31,12 @@ class MorphTo extends BelongsTo
      */
     protected $dictionary = array();
 
+    /*
+     * Indicates if soft-deleted model instances should be fetched.
+     *
+     * @var bool
+     */
+    protected $withTrashed = false;
 
     /**
      * Create a new belongs to relationship instance.
@@ -65,13 +70,15 @@ class MorphTo extends BelongsTo
     /**
      * Build a dictionary with the models.
      *
-     * @param  \Nova\Database\ORM\Models  $models
+     * @param  \Nova\Database\ORM\Collection  $models
      * @return void
      */
     protected function buildDictionary(Collection $models)
     {
-        foreach ($models as $model) {
-            if ($model->{$this->morphType}) {
+        foreach ($models as $model)
+        {
+            if ($model->{$this->morphType})
+            {
                 $this->dictionary[$model->{$this->morphType}][$model->{$this->foreignKey}][] = $model;
             }
         }
@@ -100,7 +107,7 @@ class MorphTo extends BelongsTo
     {
         $this->parent->setAttribute($this->foreignKey, $model->getKey());
 
-        $this->parent->setAttribute($this->morphType, get_class($model));
+        $this->parent->setAttribute($this->morphType, $model->getMorphClass());
 
         return $this->parent->setRelation($this->relation, $model);
     }
@@ -114,7 +121,8 @@ class MorphTo extends BelongsTo
      */
     public function getEager()
     {
-        foreach (array_keys($this->dictionary) as $type) {
+        foreach (array_keys($this->dictionary) as $type)
+        {
             $this->matchToMorphParents($type, $this->getResultsByType($type));
         }
 
@@ -130,7 +138,8 @@ class MorphTo extends BelongsTo
      */
     protected function matchToMorphParents($type, Collection $results)
     {
-        foreach ($results as $result) {
+        foreach ($results as $result)
+        {
             if (isset($this->dictionary[$type][$result->getKey()]))
             {
                 foreach ($this->dictionary[$type][$result->getKey()] as $model)
@@ -153,7 +162,11 @@ class MorphTo extends BelongsTo
 
         $key = $instance->getKeyName();
 
-        return $instance->whereIn($key, $this->gatherKeysByType($type)->all())->get();
+        $query = $instance->newQuery();
+
+        $query = $this->useWithTrashed($query);
+
+        return $query->whereIn($key, $this->gatherKeysByType($type)->all())->get();
     }
 
     /**
@@ -185,6 +198,16 @@ class MorphTo extends BelongsTo
     }
 
     /**
+     * Get the foreign key "type" name.
+     *
+     * @return string
+     */
+    public function getMorphType()
+    {
+        return $this->morphType;
+    }
+
+    /**
      * Get the dictionary used by the relationship.
      *
      * @return array
@@ -192,6 +215,35 @@ class MorphTo extends BelongsTo
     public function getDictionary()
     {
         return $this->dictionary;
+    }
+
+    /**
+     * Fetch soft-deleted model instances with query
+     *
+     * @return $this
+     */
+    public function withTrashed()
+    {
+        $this->withTrashed = true;
+
+        $this->query = $this->useWithTrashed($this->query);
+
+        return $this;
+    }
+
+    /**
+     * Return trashed models with query if told so
+     *
+     * @param  \Nova\Database\ORM\Builder  $query
+     * @return \Nova\Database\ORM\Builder
+     */
+    protected function useWithTrashed(Builder $query)
+    {
+        if ($this->withTrashed && $query->getMacro('withTrashed') !== null)
+        {
+            return $query->withTrashed();
+        }
+        return $query;
     }
 
 }

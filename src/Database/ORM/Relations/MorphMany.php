@@ -3,7 +3,6 @@
 namespace Nova\Database\ORM\Relations;
 
 use Nova\Database\ORM\Collection;
-use Nova\Database\ORM\Relations\MorphOneOrMany;
 
 
 class MorphMany extends MorphOneOrMany
@@ -27,7 +26,8 @@ class MorphMany extends MorphOneOrMany
      */
     public function initRelation(array $models, $relation)
     {
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             $model->setRelation($relation, $this->related->newCollection());
         }
 

@@ -6,6 +6,7 @@ use Nova\Database\ORM\Model;
 use Nova\Database\ORM\Builder;
 use Nova\Database\Query\Expression;
 use Nova\Database\ORM\Collection;
+use Nova\Database\ORM\ModelNotFoundException;
 
 
 class HasManyThrough extends Relation
@@ -31,11 +32,11 @@ class HasManyThrough extends Relation
      */
     protected $secondKey;
 
-
     /**
      * Create a new has many relationship instance.
      *
      * @param  \Nova\Database\ORM\Builder  $query
+     * @param  \Nova\Database\ORM\Model  $farParent
      * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $firstKey
      * @param  string  $secondKey
@@ -43,7 +44,7 @@ class HasManyThrough extends Relation
      */
     public function __construct(Builder $query, Model $farParent, Model $parent, $firstKey, $secondKey)
     {
-        $this->firstKey  = $firstKey;
+        $this->firstKey = $firstKey;
         $this->secondKey = $secondKey;
         $this->farParent = $farParent;
 
@@ -61,7 +62,8 @@ class HasManyThrough extends Relation
 
         $this->setJoin();
 
-        if (static::$constraints) {
+        if (static::$constraints)
+        {
             $this->query->where($parentTable.'.'.$this->firstKey, '=', $this->farParent->getKey());
         }
     }
@@ -123,7 +125,8 @@ class HasManyThrough extends Relation
      */
     public function initRelation(array $models, $relation)
     {
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             $model->setRelation($relation, $this->related->newCollection());
         }
 
@@ -145,10 +148,12 @@ class HasManyThrough extends Relation
         // Once we have the dictionary we can simply spin through the parent models to
         // link them up with their children using the keyed dictionary to make the
         // matching very convenient and easy work. Then we'll just return them.
-        foreach ($models as $model) {
+        foreach ($models as $model)
+        {
             $key = $model->getKey();
 
-            if (isset($dictionary[$key]))  {
+            if (isset($dictionary[$key]))
+            {
                 $value = $this->related->newCollection($dictionary[$key]);
 
                 $model->setRelation($relation, $value);
@@ -168,12 +173,13 @@ class HasManyThrough extends Relation
     {
         $dictionary = array();
 
-        $foreign = $this->farParent->getForeignKey();
+        $foreign = $this->firstKey;
 
         // First we will create a dictionary of models keyed by the foreign key of the
         // relationship as this will allow us to quickly access all of the related
         // models without having to do nested looping which will be quite slow.
-        foreach ($results as $result) {
+        foreach ($results as $result)
+        {
             $dictionary[$result->{$foreign}][] = $result;
         }
 
@@ -204,6 +210,21 @@ class HasManyThrough extends Relation
     }
 
     /**
+     * Execute the query and get the first result or throw an exception.
+     *
+     * @param  array  $columns
+     * @return \Nova\Database\ORM\Model|static
+     *
+     * @throws \Nova\Database\ORM\ModelNotFoundException
+     */
+    public function firstOrFail($columns = array('*'))
+    {
+        if ( ! is_null($model = $this->first($columns))) return $model;
+
+        throw new ModelNotFoundException;
+    }
+
+    /**
      * Execute the query as a "select" statement.
      *
      * @param  array  $columns
@@ -211,6 +232,9 @@ class HasManyThrough extends Relation
      */
     public function get($columns = array('*'))
     {
+        // First we'll add the proper select columns onto the query so it is run with
+        // the proper columns. Then, we will get the results and hydrate out pivot
+        // models with the result of those columns as a separate model relation.
         $select = $this->getSelectColumns($columns);
 
         $models = $this->query->addSelect($select)->getModels();
@@ -226,43 +250,35 @@ class HasManyThrough extends Relation
     }
 
     /**
-     * Get a paginator for the "select" statement.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Pagination\Paginator
-     */
-    public function paginate($perPage = null, $columns = array('*'))
-    {
-        $select = $this->getSelectColumns($columns);
-
-        $this->query->addSelect($select);
-
-        return $this->query->paginate($perPage, $columns);
-    }
-
-    /**
      * Set the select clause for the relation query.
      *
+     * @param  array  $columns
      * @return \Nova\Database\ORM\Relations\BelongsToMany
      */
     protected function getSelectColumns(array $columns = array('*'))
     {
-        if ($columns == array('*')) {
+        if ($columns == array('*'))
+        {
             $columns = array($this->related->getTable().'.*');
         }
 
-        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey));
+        return array_merge($columns, array($this->parent->getTable().'.'.$this->firstKey));
     }
 
     /**
-     * Get the key name of the parent model.
+     * Get a paginator for the "select" statement.
      *
-     * @return string
+     * @param  int    $perPage
+     * @param  array  $columns
+     * @return \Nova\Pagination\Paginator
      */
-    protected function getQualifiedParentKeyName()
+    public function paginate($perPage = null, $columns = array('*'))
     {
-        return $this->parent->getQualifiedKeyName();
+        $this->query->addSelect($this->getSelectColumns($columns));
+
+        $pager = $this->query->paginate($perPage, $columns);
+
+        return $pager;
     }
 
     /**

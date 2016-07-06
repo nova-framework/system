@@ -48,7 +48,7 @@ class Guard
     protected $session;
 
     /**
-     * The Illuminate cookie creator service.
+     * The Nova cookie creator service.
      *
      * @var \Nova\Cookie\CookieJar
      */

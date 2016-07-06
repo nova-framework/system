@@ -5,7 +5,6 @@ namespace Nova\Database;
 use Nova\Console\Command;
 use Nova\Container\Container;
 
-
 class Seeder
 {
     /**
@@ -68,10 +67,10 @@ class Seeder
     }
 
     /**
-     * Set the IoC Container instance.
+     * Set the IoC container instance.
      *
      * @param  \Nova\Container\Container  $container
-     * @return \Nova\Database\Seeder
+     * @return $this
      */
     public function setContainer(Container $container)
     {
@@ -84,7 +83,7 @@ class Seeder
      * Set the console command instance.
      *
      * @param  \Nova\Console\Command  $command
-     * @return \Nova\Database\Seeder
+     * @return $this
      */
     public function setCommand(Command $command)
     {

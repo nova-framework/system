@@ -160,8 +160,6 @@ class SqlServerGrammar extends Grammar
      */
     public function compileDropPrimary(Blueprint $blueprint, Fluent $command)
     {
-        $table = $blueprint->getTable();
-
         $table = $this->wrapTable($blueprint);
 
         return "alter table {$table} drop constraint {$command->index}";
@@ -233,7 +231,6 @@ class SqlServerGrammar extends Grammar
     {
         return "nchar({$column->length})";
     }
-
 
     /**
      * Create the column definition for a string type.
@@ -465,8 +462,7 @@ class SqlServerGrammar extends Grammar
      */
     protected function modifyDefault(Blueprint $blueprint, Fluent $column)
     {
-        if ( ! is_null($column->default))
-        {
+        if ( ! is_null($column->default)) {
             return " default ".$this->getDefaultValue($column->default);
         }
     }

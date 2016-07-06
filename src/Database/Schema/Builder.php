@@ -1,6 +1,4 @@
-<?php
-
-namespace Nova\Database\Schema;
+<?php namespace Nova\Database\Schema;
 
 use Nova\Database\Connection;
 
@@ -39,7 +37,7 @@ class Builder
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
-
+        
         $this->grammar = $connection->getSchemaGrammar();
     }
 
@@ -55,7 +53,7 @@ class Builder
 
         $table = $this->connection->getTablePrefix().$table;
 
-        return (count($this->connection->select($sql, array($table))) > 0);
+        return count($this->connection->select($sql, array($table))) > 0;
     }
 
     /**
@@ -90,8 +88,8 @@ class Builder
     /**
      * Modify a table on the schema.
      *
-     * @param  string   $table
-     * @param  Closure  $callback
+     * @param  string    $table
+     * @param  \Closure  $callback
      * @return \Nova\Database\Schema\Blueprint
      */
     public function table($table, Closure $callback)
@@ -102,8 +100,8 @@ class Builder
     /**
      * Create a new table on the schema.
      *
-     * @param  string   $table
-     * @param  Closure  $callback
+     * @param  string    $table
+     * @param  \Closure  $callback
      * @return \Nova\Database\Schema\Blueprint
      */
     public function create($table, Closure $callback)
@@ -177,17 +175,18 @@ class Builder
     /**
      * Create a new command set with a Closure.
      *
-     * @param  string   $table
-     * @param  Closure  $callback
+     * @param  string    $table
+     * @param  \Closure  $callback
      * @return \Nova\Database\Schema\Blueprint
      */
     protected function createBlueprint($table, Closure $callback = null)
     {
-        if (isset($this->resolver)) {
+        if (isset($this->resolver))
+        {
             return call_user_func($this->resolver, $table, $callback);
-        } else {
-            return new Blueprint($table, $callback);
         }
+
+        return new Blueprint($table, $callback);
     }
 
     /**
@@ -204,7 +203,7 @@ class Builder
      * Set the database connection instance.
      *
      * @param  \Nova\Database\Connection
-     * @return \Nova\Database\Schema\Builder
+     * @return $this
      */
     public function setConnection(Connection $connection)
     {
