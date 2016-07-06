@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+use Exception;
+
 
 class Application extends \Symfony\Component\Console\Application
 {
@@ -23,7 +25,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var \Nova\Foundation\Application
      */
-    protected $laravel;
+    protected $nova;
 
     /**
      * Create and boot a new Console application.
@@ -51,7 +53,7 @@ class Application extends \Symfony\Component\Console\Application
                                 ->setExceptionHandler($app['exception'])
                                 ->setAutoExit(false);
 
-        $app->instance('artisan', $console);
+        $app->instance('forge', $console);
 
         return $console;
     }
@@ -63,22 +65,26 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        require $this->nova['path'] .'/Boot/Forge.php';
+        $path = $this->nova['path'] .'/Boot/Forge.php';
 
+        if (file_exists($path)) {
+            require $path;
+        }
 
         // If the event dispatcher is set on the application, we will fire an event
-        // with the Artisan instance to provide each listener the opportunity to
+        // with the Nova instance to provide each listener the opportunity to
         // register their commands on this application before it gets started.
         if (isset($this->nova['events'])) {
-            $this->nova['events']
-                    ->fire('forge.start', array($this));
+            $events = $this->nova['events'];
+
+            $events->fire('forge.start', array($this));
         }
 
         return $this;
     }
 
     /**
-     * Run an Artisan console command by name.
+     * Run an Nova console command by name.
      *
      * @param  string  $command
      * @param  array   $parameters
@@ -184,7 +190,7 @@ class Application extends \Symfony\Component\Console\Application
      * @param  \Symfony\Component\Console\Output\OutputInterface  $output
      * @return void
      */
-    public function renderException(\Exception $e, OutputInterface $output)
+    public function renderException(Exception $e, OutputInterface $output)
     {
         // If we have an exception handler instance, we will call that first in case
         // it has some handlers that need to be run first. We will pass "true" as

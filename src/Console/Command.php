@@ -368,7 +368,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function getNova()
     {
-        return $this->laravel;
+        return $this->nova;
     }
 
     /**
