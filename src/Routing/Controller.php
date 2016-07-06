@@ -89,7 +89,7 @@ abstract class Controller
         if(! isset($this->template)) {
             $config = app('config');
 
-            $this->template = $config['app.template'];
+            $this->template = $config->get('app.template', 'Default');
         }
     }
 
@@ -177,7 +177,8 @@ abstract class Controller
      */
     protected function isInstanceFilter($filter)
     {
-        if (is_string($filter) && starts_with($filter, '@')) {
+        if (is_string($filter) && starts_with($filter, '@'))
+        {
             if (method_exists($this, substr($filter, 1))) return true;
 
             throw new \InvalidArgumentException("Filter method [$filter] does not exist.");
@@ -442,7 +443,7 @@ abstract class Controller
      */
     public function __call($method, $parameters)
     {
-        throw new BadMethodCallException("Method [$method] does not exist.");
+        throw new \BadMethodCallException("Method [$method] does not exist.");
     }
 
 }

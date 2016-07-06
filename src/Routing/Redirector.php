@@ -5,6 +5,7 @@ namespace Nova\Routing;
 use Nova\Http\RedirectResponse;
 use Nova\Session\Store as SessionStore;
 
+
 class Redirector
 {
     /**
@@ -96,9 +97,7 @@ class Redirector
      */
     public function intended($default = '/', $status = 302, $headers = array(), $secure = null)
     {
-        $path = $this->session->get('url.intended', $default);
-
-        $this->session->forget('url.intended');
+        $path = $this->session->pull('url.intended', $default);
 
         return $this->to($path, $status, $headers, $secure);
     }
@@ -189,7 +188,8 @@ class Redirector
     {
         $redirect = new RedirectResponse($path, $status, $headers);
 
-        if (isset($this->session)) {
+        if (isset($this->session))
+        {
             $redirect->setSession($this->session);
         }
 

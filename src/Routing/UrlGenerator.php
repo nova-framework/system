@@ -2,7 +2,7 @@
 
 namespace Nova\Routing;
 
-use Symfony\Component\HttpFoundation\Request;
+use Nova\Http\Request;
 
 use InvalidArgumentException;
 
@@ -19,9 +19,23 @@ class UrlGenerator
     /**
      * The request instance.
      *
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var \Nova\Http\Request
      */
     protected $request;
+
+    /**
+     * The force URL root.
+     *
+     * @var string
+     */
+    protected $forcedRoot;
+
+    /**
+     * The forced schema for URLs.
+     *
+     * @var string
+     */
+    protected $forceSchema;
 
     /**
      * Characters that should not be URL encoded.
@@ -90,17 +104,25 @@ class UrlGenerator
      *
      * @param  string  $path
      * @param  mixed  $extra
-     * @param  bool  $secure
+     * @param  bool|null  $secure
      * @return string
      */
     public function to($path, $extra = array(), $secure = null)
     {
+        // First we will check if the URL is already a valid URL. If it is we will not
+        // try to generate a new one but will simply return the URL as is, which is
+        // convenient since developers do not always have to check if it's valid.
         if ($this->isValidUrl($path)) return $path;
 
         $scheme = $this->getScheme($secure);
 
-        $tail = implode('/', array_map('rawurlencode', (array) $extra));
+        $tail = implode('/', array_map(
+            'rawurlencode', (array) $extra)
+        );
 
+        // Once we have the scheme we will compile the "tail" by collapsing the values
+        // into a single string delimited by slashes. This just makes it convenient
+        // for passing the array of parameters to this URL as a list of segments.
         $root = $this->getRootUrl($scheme);
 
         return $this->trimUrl($root, $path, $tail);
@@ -122,13 +144,16 @@ class UrlGenerator
      * Generate a URL to an application asset.
      *
      * @param  string  $path
-     * @param  bool    $secure
+     * @param  bool|null  $secure
      * @return string
      */
     public function asset($path, $secure = null)
     {
         if ($this->isValidUrl($path)) return $path;
 
+        // Once we get the root URL, we will check to see if it contains an index.php
+        // file in the paths. If it does, we will remove it since it is not needed
+        // for asset paths, but only for routes to endpoints in the application.
         $root = $this->getRootUrl($this->getScheme($secure));
 
         return $this->removeIndex($root).'/'.trim($path, '/');
@@ -161,16 +186,27 @@ class UrlGenerator
     /**
      * Get the scheme for a raw URL.
      *
-     * @param  bool    $secure
+     * @param  bool|null  $secure
      * @return string
      */
     protected function getScheme($secure)
     {
         if (is_null($secure)) {
-            return $this->request->getScheme().'://';
-        } else {
-            return $secure ? 'https://' : 'http://';
+            return $this->forceSchema ?: $this->request->getScheme().'://';
         }
+
+        return $secure ? 'https://' : 'http://';
+    }
+
+    /**
+     * Force the schema for URLs.
+     *
+     * @param  string  $schema
+     * @return void
+     */
+    public function forceSchema($schema)
+    {
+        $this->forceSchema = $schema.'://';
     }
 
     /**
@@ -192,9 +228,9 @@ class UrlGenerator
 
         if ( ! is_null($route)) {
             return $this->toRoute($route, $parameters, $absolute);
-        } else {
-            throw new InvalidArgumentException("Route [{$name}] not defined.");
         }
+
+        throw new InvalidArgumentException("Route [{$name}] not defined.");
     }
 
     /**
@@ -211,7 +247,6 @@ class UrlGenerator
 
         $uri = strtr(rawurlencode($this->trimUrl(
             $root = $this->replaceRoot($route, $domain, $parameters),
-
             $this->replaceRouteParameters($route->uri(), $parameters)
         )), $this->dontEncode) .$this->getRouteQueryString($parameters);
 
@@ -273,19 +308,25 @@ class UrlGenerator
      */
     protected function getRouteQueryString(array $parameters)
     {
+        // First we will get all of the string parameters that are remaining after we
+        // have replaced the route wildcards. We'll then build a query string from
+        // these string parameters then use it as a starting point for the rest.
         if (count($parameters) == 0) return '';
 
         $query = http_build_query(
             $keyed = $this->getStringParameters($parameters)
         );
 
+        // Lastly, if there are still parameters remaining, we will fetch the numeric
+        // parameters that are in the array and add them to the query string or we
+        // will make the initial query string if it wasn't started with strings.
         if (count($keyed) < count($parameters)) {
-            $query .= '&'.implode(
+            $query .= '&' .implode(
                 '&', $this->getNumericParameters($parameters)
             );
         }
 
-        return '?'.trim($query, '&');
+        return '?' .trim($query, '&');
     }
 
     /**
@@ -355,9 +396,9 @@ class UrlGenerator
     {
         if (in_array($this->request->getPort(), array('80', '443'))) {
             return $domain;
-        } else {
-            return $domain .= ':'.$this->request->getPort();
         }
+
+        return $domain .':' .$this->request->getPort();
     }
 
     /**
@@ -384,9 +425,9 @@ class UrlGenerator
             return $this->getScheme(false);
         } else if ($route->httpsOnly()) {
             return $this->getScheme(true);
-        } else {
-            return $this->getScheme(null);
         }
+
+        return $this->getScheme(null);
     }
 
     /**
@@ -411,11 +452,24 @@ class UrlGenerator
      */
     protected function getRootUrl($scheme, $root = null)
     {
-        $root = $root ?: $this->request->root();
+        if (is_null($root)) {
+            $root = $this->forcedRoot ?: $this->request->root();
+        }
 
         $start = starts_with($root, 'http://') ? 'http://' : 'https://';
 
         return preg_replace('~'.$start.'~', $scheme, $root, 1);
+    }
+
+    /**
+     * Set the forced root URL.
+     *
+     * @param  string  $root
+     * @return void
+     */
+    public function forceRootUrl($root)
+    {
+        $this->forcedRoot = $root;
     }
 
     /**
@@ -426,7 +480,7 @@ class UrlGenerator
      */
     public function isValidUrl($path)
     {
-        if (starts_with($path, array('#', '//', 'mailto:', 'tel:'))) return true;
+        if (starts_with($path, ['#', '//', 'mailto:', 'tel:', 'http://', 'https://'])) return true;
 
         return filter_var($path, FILTER_VALIDATE_URL) !== false;
     }
@@ -441,7 +495,7 @@ class UrlGenerator
      */
     protected function trimUrl($root, $path, $tail = '')
     {
-        return trim($root .'/' .trim($path .'/' .$tail, '/'), '/');
+        return trim($root.'/'.trim($path.'/'.$tail, '/'), '/');
     }
 
     /**
@@ -457,7 +511,7 @@ class UrlGenerator
     /**
      * Set the current request instance.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
     public function setRequest(Request $request)

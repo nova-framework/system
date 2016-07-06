@@ -5,7 +5,6 @@ namespace Nova\Routing\Matching;
 use Nova\Http\Request;
 use Nova\Routing\Route;
 
-
 interface ValidatorInterface
 {
     /**
