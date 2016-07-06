@@ -68,8 +68,7 @@ class PostgresGrammar extends Grammar
         // When gathering the columns for an update statement, we'll wrap each of the
         // columns and convert it to a parameter value. Then we will concatenate a
         // list of the columns that can be added into this update query clauses.
-        foreach ($values as $key => $value)
-        {
+        foreach ($values as $key => $value) {
             $columns[] = $this->wrap($key).' = '.$this->parameter($value);
         }
 
@@ -91,8 +90,7 @@ class PostgresGrammar extends Grammar
         // When using Postgres, updates with joins list the joined tables in the from
         // clause, which is different than other systems like MySQL. Here, we will
         // compile out the tables that are joined and add them to a from clause.
-        foreach ($query->joins as $join)
-        {
+        foreach ($query->joins as $join) {
             $froms[] = $this->wrapTable($join->table);
         }
 
@@ -116,8 +114,7 @@ class PostgresGrammar extends Grammar
         // strip the leading boolean we will do so when using as the only where.
         $joinWhere = $this->compileUpdateJoinWheres($query);
 
-        if (trim($baseWhere) == '')
-        {
+        if (trim($baseWhere) == '') {
             return 'where '.$this->removeLeadingBoolean($joinWhere);
         }
 
@@ -137,10 +134,8 @@ class PostgresGrammar extends Grammar
         // Here we will just loop through all of the join constraints and compile them
         // all out then implode them. This should give us "where" like syntax after
         // everything has been built and then we will join it to the real wheres.
-        foreach ($query->joins as $join)
-        {
-            foreach ($join->clauses as $clause)
-            {
+        foreach ($query->joins as $join) {
+            foreach ($join->clauses as $clause) {
                 $joinWheres[] = $this->compileJoinConstraint($clause);
             }
         }

@@ -36,8 +36,7 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileSelect($query);
 
-        if ($query->unions)
-        {
+        if ($query->unions) {
             $sql = '('.$sql.') '.$this->compileUnions($query);
         }
 
@@ -82,13 +81,11 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileUpdate($query, $values);
 
-        if (isset($query->orders))
-        {
+        if (isset($query->orders)) {
             $sql .= ' '.$this->compileOrders($query, $query->orders);
         }
 
-        if (isset($query->limit))
-        {
+        if (isset($query->limit)) {
             $sql .= ' '.$this->compileLimit($query, $query->limit);
         }
 
@@ -107,8 +104,7 @@ class MySqlGrammar extends Grammar
 
         $where = is_array($query->wheres) ? $this->compileWheres($query) : '';
 
-        if (isset($query->joins))
-        {
+        if (isset($query->joins)) {
             $joins = ' '.$this->compileJoins($query, $query->joins);
 
             return trim("delete $table from {$table}{$joins} $where");
