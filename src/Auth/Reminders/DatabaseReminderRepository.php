@@ -2,16 +2,17 @@
 
 namespace Nova\Auth\Reminders;
 
-use Carbon\Carbon;
 use Nova\Database\Connection;
 
+use Carbon\Carbon;
 
-class ReminderRepository implements ReminderRepositoryInterface
+
+class DatabaseReminderRepository implements ReminderRepositoryInterface
 {
     /**
      * The database connection instance.
      *
-     * @var \Database\Connection
+     * @var \Nova\Database\Connection
      */
     protected $connection;
 
@@ -39,7 +40,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     /**
      * Create a new reminder repository instance.
      *
-     * @param  \Database\Connection  $connection
+     * @param  \Nova\Database\Connection  $connection
      * @param  string  $table
      * @param  string  $hashKey
      * @param  int  $expires
@@ -47,10 +48,9 @@ class ReminderRepository implements ReminderRepositoryInterface
      */
     public function __construct(Connection $connection, $table, $hashKey, $expires = 60)
     {
-        $this->table   = $table;
+        $this->table = $table;
         $this->hashKey = $hashKey;
         $this->expires = $expires * 60;
-
         $this->connection = $connection;
     }
 
@@ -64,6 +64,8 @@ class ReminderRepository implements ReminderRepositoryInterface
     {
         $email = $user->getReminderEmail();
 
+        $this->deleteExisting($user);
+
         // We will create a new, random token for the user so that we can e-mail them
         // a safe link to the password reset form. Then we will insert a record in
         // the database so that we can verify the token within the actual reset.
@@ -72,6 +74,17 @@ class ReminderRepository implements ReminderRepositoryInterface
         $this->getTable()->insert($this->getPayload($email, $token));
 
         return $token;
+    }
+
+    /**
+     * Delete all existing reset tokens from the database.
+     *
+     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
+     * @return int
+     */
+    protected function deleteExisting(RemindableInterface $user)
+    {
+        return $this->getTable()->where('email', $user->getReminderEmail())->delete();
     }
 
     /**
@@ -99,7 +112,7 @@ class ReminderRepository implements ReminderRepositoryInterface
 
         $reminder = (array) $this->getTable()->where('email', $email)->where('token', $token)->first();
 
-        return ($reminder && ! $this->reminderExpired($reminder));
+        return $reminder && ! $this->reminderExpired($reminder);
     }
 
     /**
@@ -112,7 +125,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     {
         $createdPlusHour = strtotime($reminder['created_at']) + $this->expires;
 
-        return ($createdPlusHour < $this->getCurrentTime());
+        return $createdPlusHour < $this->getCurrentTime();
     }
 
     /**
@@ -158,15 +171,15 @@ class ReminderRepository implements ReminderRepositoryInterface
     {
         $email = $user->getReminderEmail();
 
-        $value = str_shuffle(sha1($email .spl_object_hash($this) .microtime(true)));
+        $value = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
 
-        return hash_hmac('sha256', $value, $this->hashKey);
+        return hash_hmac('sha1', $value, $this->hashKey);
     }
 
     /**
      * Begin a new database query against the table.
      *
-     * @return \Database\Query\Builder
+     * @return \Nova\Database\Query\Builder
      */
     protected function getTable()
     {
@@ -176,7 +189,7 @@ class ReminderRepository implements ReminderRepositoryInterface
     /**
      * Get the database connection instance.
      *
-     * @return \Database\Connection
+     * @return \Nova\Database\Connection
      */
     public function getConnection()
     {

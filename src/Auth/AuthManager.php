@@ -2,9 +2,6 @@
 
 namespace Nova\Auth;
 
-use Nova\AuthGuard;
-use Nova\AuthDatabaseUserProvider;
-use Nova\AuthExtendedUserProvider;
 use Nova\Support\Manager;
 
 
@@ -20,21 +17,21 @@ class AuthManager extends Manager
     {
         $guard = parent::createDriver($driver);
 
+        // When using the remember me functionality of the authentication services we
+        // will need to be set the encryption instance of the guard, which allows
+        // secure, encrypted cookie values to get generated for those cookies.
         $guard->setCookieJar($this->app['cookie']);
 
         $guard->setDispatcher($this->app['events']);
 
-        //
-        $request = $this->app->refresh('request', $guard, 'setRequest');
-
-        return $guard->setRequest($request);
+        return $guard->setRequest($this->app->refresh('request', $guard, 'setRequest'));
     }
 
     /**
      * Call a custom driver creator.
      *
      * @param  string  $driver
-     * @return mixed
+     * @return \Nova\Auth\Guard
      */
     protected function callCustomCreator($driver)
     {
@@ -48,7 +45,7 @@ class AuthManager extends Manager
     /**
      * Create an instance of the database driver.
      *
-     * @return \Nova\AuthGuard
+     * @return \Nova\Auth\Guard
      */
     public function createDatabaseDriver()
     {
@@ -60,21 +57,24 @@ class AuthManager extends Manager
     /**
      * Create an instance of the database user provider.
      *
-     * @return \Nova\AuthDatabaseUserProvider
+     * @return \Nova\Auth\DatabaseUserProvider
      */
     protected function createDatabaseProvider()
     {
         $connection = $this->app['db']->connection();
 
+        // When using the basic database user provider, we need to inject the table we
+        // want to use, since this is not an Extended model we will have no way to
+        // know without telling the provider, so we'll inject the config value.
         $table = $this->app['config']['auth.table'];
 
         return new DatabaseUserProvider($connection, $this->app['hash'], $table);
     }
 
     /**
-     * Create an instance of the Eloquent driver.
+     * Create an instance of the Extended driver.
      *
-     * @return \Nova\AuthGuard
+     * @return \Nova\Auth\Guard
      */
     public function createExtendedDriver()
     {
@@ -84,9 +84,9 @@ class AuthManager extends Manager
     }
 
     /**
-     * Create an instance of the Eloquent user provider.
+     * Create an instance of the Extended user provider.
      *
-     * @return \Nova\AuthExtendedUserProvider
+     * @return \Nova\Auth\ExtendedUserProvider
      */
     protected function createExtendedProvider()
     {

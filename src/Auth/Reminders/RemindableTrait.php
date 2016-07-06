@@ -3,13 +3,16 @@
 namespace Nova\Auth\Reminders;
 
 
-interface RemindableInterface
+trait RemindableTrait
 {
     /**
      * Get the e-mail address where password reminders are sent.
      *
      * @return string
      */
-    public function getReminderEmail();
+    public function getReminderEmail()
+    {
+        return $this->email;
+    }
 
 }
