@@ -820,8 +820,9 @@ class Connection implements ConnectionInterface
      */
     public function setPdo($pdo)
     {
-        if ($this->transactions >= 1)
+        if ($this->transactions >= 1) {
             throw new \RuntimeException("Can't swap PDO instance while within transaction.");
+        }
 
         $this->pdo = $pdo;
 
@@ -976,8 +977,7 @@ class Connection implements ConnectionInterface
      */
     public function getPaginator()
     {
-        if ($this->paginator instanceof Closure)
-        {
+        if ($this->paginator instanceof Closure) {
             $this->paginator = call_user_func($this->paginator);
         }
 

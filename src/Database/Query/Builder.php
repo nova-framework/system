@@ -1953,8 +1953,7 @@ class Builder
      */
     public function truncate()
     {
-        foreach ($this->grammar->compileTruncate($this) as $sql => $bindings)
-        {
+        foreach ($this->grammar->compileTruncate($this) as $sql => $bindings) {
             $this->connection->statement($sql, $bindings);
         }
     }
