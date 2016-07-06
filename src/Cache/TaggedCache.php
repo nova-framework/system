@@ -2,8 +2,10 @@
 
 namespace Nova\Cache;
 
-use Closure;
+use Carbon\Carbon;
 
+use Closure;
+use DateTime;
 
 class TaggedCache implements StoreInterface
 {
@@ -64,12 +66,16 @@ class TaggedCache implements StoreInterface
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @param  int     $minutes
+     * @param  \DateTime|int  $minutes
      * @return void
      */
     public function put($key, $value, $minutes)
     {
-        return $this->store->put($this->taggedItemKey($key), $value, $minutes);
+        $minutes = $this->getMinutes($minutes);
+
+        if ( ! is_null($minutes)) {
+            $this->store->put($this->taggedItemKey($key), $value, $minutes);
+        }
     }
 
     /**
@@ -129,11 +135,11 @@ class TaggedCache implements StoreInterface
      * Remove an item from the cache.
      *
      * @param  string  $key
-     * @return void
+     * @return bool
      */
     public function forget($key)
     {
-        $this->store->forget($this->taggedItemKey($key));
+        return $this->store->forget($this->taggedItemKey($key));
     }
 
     /**
@@ -149,9 +155,9 @@ class TaggedCache implements StoreInterface
     /**
      * Get an item from the cache, or store the default value.
      *
-     * @param  string   $key
-     * @param  int      $minutes
-     * @param  Closure  $callback
+     * @param  string  $key
+     * @param  \DateTime|int  $minutes
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function remember($key, $minutes, Closure $callback)
@@ -159,7 +165,7 @@ class TaggedCache implements StoreInterface
         // If the item exists in the cache we will just return this immediately
         // otherwise we will execute the given Closure and cache the result
         // of that execution for the given number of minutes in storage.
-        if ($this->has($key)) return $this->get($key);
+        if ( ! is_null($value = $this->get($key))) return $value;
 
         $this->put($key, $value = $callback(), $minutes);
 
@@ -169,8 +175,8 @@ class TaggedCache implements StoreInterface
     /**
      * Get an item from the cache, or store the default value forever.
      *
-     * @param  string   $key
-     * @param  Closure  $callback
+     * @param  string    $key
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function sear($key, Closure $callback)
@@ -181,8 +187,8 @@ class TaggedCache implements StoreInterface
     /**
      * Get an item from the cache, or store the default value forever.
      *
-     * @param  string   $key
-     * @param  Closure  $callback
+     * @param  string    $key
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function rememberForever($key, Closure $callback)
@@ -190,7 +196,7 @@ class TaggedCache implements StoreInterface
         // If the item exists in the cache we will just return this immediately
         // otherwise we will execute the given Closure and cache the result
         // of that execution for the given number of minutes. It's easy.
-        if ($this->has($key)) return $this->get($key);
+        if ( ! is_null($value = $this->get($key))) return $value;
 
         $this->forever($key, $value = $callback());
 
@@ -205,7 +211,7 @@ class TaggedCache implements StoreInterface
      */
     public function taggedItemKey($key)
     {
-        return $this->getPrefix().sha1($this->tags->getNamespace()).':'.$key;
+        return sha1($this->tags->getNamespace()).':'.$key;
     }
 
     /**
@@ -216,6 +222,23 @@ class TaggedCache implements StoreInterface
     public function getPrefix()
     {
         return $this->store->getPrefix();
+    }
+
+    /**
+     * Calculate the number of minutes with the given duration.
+     *
+     * @param  \DateTime|int  $duration
+     * @return int|null
+     */
+    protected function getMinutes($duration)
+    {
+        if ($duration instanceof DateTime) {
+            $fromNow = Carbon::instance($duration)->diffInMinutes();
+
+            return $fromNow > 0 ? $fromNow : null;
+        }
+
+        return is_string($duration) ? (int) $duration : $duration;
     }
 
 }

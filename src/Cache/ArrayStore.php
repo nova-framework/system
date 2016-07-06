@@ -2,7 +2,6 @@
 
 namespace Nova\Cache;
 
-
 class ArrayStore extends TaggableStore implements StoreInterface
 {
     /**
@@ -20,8 +19,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      */
     public function get($key)
     {
-        if (array_key_exists($key, $this->storage))
-        {
+        if (array_key_exists($key, $this->storage)) {
             return $this->storage[$key];
         }
     }
@@ -44,7 +42,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @return void
+     * @return int
      */
     public function increment($key, $value = 1)
     {
@@ -58,13 +56,11 @@ class ArrayStore extends TaggableStore implements StoreInterface
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @return void
+     * @return int
      */
     public function decrement($key, $value = 1)
     {
-        $this->storage[$key] = $this->storage[$key] - $value;
-
-        return $this->storage[$key];
+        return $this->increment($key, $value * -1);
     }
 
     /**

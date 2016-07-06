@@ -5,6 +5,7 @@ namespace Nova\Cache;
 use Nova\Database\Connection;
 use Nova\Encryption\Encrypter;
 
+
 class DatabaseStore implements StoreInterface
 {
     /**
@@ -67,14 +68,16 @@ class DatabaseStore implements StoreInterface
         // If we have a cache record we will check the expiration time against current
         // time on the system and see if the record has expired. If it has, we will
         // remove the records from the database table so it isn't returned again.
-        if (! is_null($cache)) {
+        if ( ! is_null($cache)) {
             if (is_array($cache)) $cache = (object) $cache;
 
-            if (time() < $cache->expiration) {
-                return $this->encrypter->decrypt($cache->value);
+            if (time() >= $cache->expiration) {
+                $this->forget($key);
+
+                return null;
             }
 
-            $this->forget($key);
+            return $this->encrypter->decrypt($cache->value);
         }
     }
 
@@ -88,7 +91,7 @@ class DatabaseStore implements StoreInterface
      */
     public function put($key, $value, $minutes)
     {
-        $key = $this->prefix .$key;
+        $key = $this->prefix.$key;
 
         // All of the cached values in the database are encrypted in case this is used
         // as a session data store by the consumer. We'll also calculate the expire
@@ -100,9 +103,7 @@ class DatabaseStore implements StoreInterface
         try
         {
             $this->table()->insert(compact('key', 'value', 'expiration'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $this->table()->where('key', '=', $key)->update(compact('value', 'expiration'));
         }
     }

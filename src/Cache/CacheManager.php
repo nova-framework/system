@@ -2,8 +2,8 @@
 
 namespace Nova\Cache;
 
+use Closure;
 use Nova\Support\Manager;
-
 
 class CacheManager extends Manager
 {
@@ -51,6 +51,16 @@ class CacheManager extends Manager
         $memcached = $this->app['memcached.connector']->connect($servers);
 
         return $this->repository(new MemcachedStore($memcached, $this->getPrefix()));
+    }
+
+    /**
+     * Create an instance of the Null cache driver.
+     *
+     * @return \Nova\Cache\NullStore
+     */
+    protected function createNullDriver()
+    {
+        return $this->repository(new NullStore);
     }
 
     /**

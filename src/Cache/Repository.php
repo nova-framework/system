@@ -2,13 +2,21 @@
 
 namespace Nova\Cache;
 
+use Nova\Support\Traits\MacroableTrait;
+
+use Carbon\Carbon;
+
 use Closure;
 use DateTime;
 use ArrayAccess;
-use Carbon\Carbon;
+
 
 class Repository implements ArrayAccess
 {
+    use MacroableTrait {
+        __call as macroCall;
+    }
+
     /**
      * The cache store implementation.
      *
@@ -22,13 +30,6 @@ class Repository implements ArrayAccess
      * @var int
      */
     protected $default = 60;
-
-    /**
-     * An array of registered Cache macros.
-     *
-     * @var array
-     */
-    protected $macros = array();
 
     /**
      * Create a new cache repository instance.
@@ -66,6 +67,22 @@ class Repository implements ArrayAccess
     }
 
     /**
+     * Retrieve an item from the cache and delete it.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    public function pull($key, $default = null)
+    {
+        $value = $this->get($key, $default);
+
+        $this->forget($key);
+
+        return $value;
+    }
+
+    /**
      * Store an item in the cache.
      *
      * @param  string  $key
@@ -77,7 +94,9 @@ class Repository implements ArrayAccess
     {
         $minutes = $this->getMinutes($minutes);
 
-        $this->store->put($key, $value, $minutes);
+        if ( ! is_null($minutes)) {
+            $this->store->put($key, $value, $minutes);
+        }
     }
 
     /**
@@ -102,7 +121,7 @@ class Repository implements ArrayAccess
      *
      * @param  string  $key
      * @param  \DateTime|int  $minutes
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function remember($key, $minutes, Closure $callback)
@@ -123,7 +142,7 @@ class Repository implements ArrayAccess
      * Get an item from the cache, or store the default value forever.
      *
      * @param  string   $key
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function sear($key, Closure $callback)
@@ -135,7 +154,7 @@ class Repository implements ArrayAccess
      * Get an item from the cache, or store the default value forever.
      *
      * @param  string   $key
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @return mixed
      */
     public function rememberForever($key, Closure $callback)
@@ -232,29 +251,17 @@ class Repository implements ArrayAccess
      * Calculate the number of minutes with the given duration.
      *
      * @param  \DateTime|int  $duration
-     * @return int
+     * @return int|null
      */
     protected function getMinutes($duration)
     {
         if ($duration instanceof DateTime) {
-            $duration = Carbon::instance($duration);
+            $fromNow = Carbon::instance($duration)->diffInMinutes();
 
-            return max(0, Carbon::now()->diffInMinutes($duration, false));
-        } else {
-            return is_string($duration) ? intval($duration) : $duration;
+            return $fromNow > 0 ? $fromNow : null;
         }
-    }
 
-    /**
-     * Register a macro with the Cache class.
-     *
-     * @param  string    $name
-     * @param  callable  $callback
-     * @return void
-     */
-    public function macro($name, $callback)
-    {
-        $this->macros[$name] = $callback;
+        return is_string($duration) ? (int) $duration : $duration;
     }
 
     /**
@@ -266,11 +273,11 @@ class Repository implements ArrayAccess
      */
     public function __call($method, $parameters)
     {
-        if (isset($this->macros[$method])) {
-            return call_user_func_array($this->macros[$method], $parameters);
-        } else {
-            return call_user_func_array(array($this->store, $method), $parameters);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
         }
+
+        return call_user_func_array(array($this->store, $method), $parameters);
     }
 
 }

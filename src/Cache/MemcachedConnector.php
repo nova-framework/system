@@ -4,12 +4,13 @@ namespace Nova\Cache;
 
 use Memcached;
 
+
 class MemcachedConnector
 {
     /**
      * Create a new Memcached connection.
      *
-     * @param array  $servers
+     * @param  array  $servers
      * @return \Memcached
      *
      * @throws \RuntimeException
@@ -21,14 +22,15 @@ class MemcachedConnector
         // For each server in the array, we'll just extract the configuration and add
         // the server to the Memcached connection. Once we have added all of these
         // servers we'll verify the connection is successful and return it back.
-        foreach ($servers as $server)  {
+        foreach ($servers as $server) {
             $memcached->addServer(
-                $server['host'], $server['port'], $server['weight']
+                $server['host'],
+                $server['port'],
+                $server['weight']
             );
         }
 
-        if ($memcached->getVersion() === false)
-        {
+        if ($memcached->getVersion() === false) {
             throw new \RuntimeException("Could not establish Memcached connection.");
         }
 

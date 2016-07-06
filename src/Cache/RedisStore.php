@@ -1,4 +1,6 @@
-<?php namespace Nova\Cache;
+<?php
+
+namespace Nova\Cache;
 
 use Nova\Redis\Database as Redis;
 
@@ -37,6 +39,7 @@ class RedisStore extends TaggableStore implements StoreInterface
     public function __construct(Redis $redis, $prefix = '', $connection = 'default')
     {
         $this->redis = $redis;
+
         $this->connection = $connection;
 
         $this->prefix = (strlen($prefix) > 0) ? $prefix .':' : '';
@@ -67,9 +70,9 @@ class RedisStore extends TaggableStore implements StoreInterface
     {
         $value = is_numeric($value) ? $value : serialize($value);
 
-        $this->connection()->set($this->prefix.$key, $value);
+        $minutes = max(1, $minutes);
 
-        $this->connection()->expire($this->prefix.$key, $minutes * 60);
+        $this->connection()->setex($this->prefix.$key, $minutes * 60, $value);
     }
 
     /**
@@ -77,7 +80,7 @@ class RedisStore extends TaggableStore implements StoreInterface
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @return void
+     * @return int
      */
     public function increment($key, $value = 1)
     {
@@ -89,7 +92,7 @@ class RedisStore extends TaggableStore implements StoreInterface
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @return void
+     * @return int
      */
     public function decrement($key, $value = 1)
     {
@@ -134,7 +137,7 @@ class RedisStore extends TaggableStore implements StoreInterface
     /**
      * Begin executing a new tags operation.
      *
-     * @param  array|dynamic  $names
+     * @param  array|mixed  $names
      * @return \Nova\Cache\RedisTaggedCache
      */
     public function tags($names)
@@ -145,7 +148,7 @@ class RedisStore extends TaggableStore implements StoreInterface
     /**
      * Get the Redis connection instance.
      *
-     * @return \Predis\Connection\SingleConnectionInterface
+     * @return \Predis\ClientInterface
      */
     public function connection()
     {
