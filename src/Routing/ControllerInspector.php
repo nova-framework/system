@@ -60,7 +60,7 @@ class ControllerInspector
     {
         if ($method->class == 'Nova\Routing\Controller') return false;
 
-        return ($method->isPublic() && str_starts_with($method->name, $this->verbs));
+        return ($method->isPublic() && starts_with($method->name, $this->verbs));
     }
 
     /**

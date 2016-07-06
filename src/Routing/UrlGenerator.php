@@ -413,7 +413,7 @@ class UrlGenerator
     {
         $root = $root ?: $this->request->root();
 
-        $start = str_starts_with($root, 'http://') ? 'http://' : 'https://';
+        $start = starts_with($root, 'http://') ? 'http://' : 'https://';
 
         return preg_replace('~'.$start.'~', $scheme, $root, 1);
     }
@@ -426,7 +426,7 @@ class UrlGenerator
      */
     public function isValidUrl($path)
     {
-        if (str_starts_with($path, array('#', '//', 'mailto:', 'tel:'))) return true;
+        if (starts_with($path, array('#', '//', 'mailto:', 'tel:'))) return true;
 
         return filter_var($path, FILTER_VALIDATE_URL) !== false;
     }

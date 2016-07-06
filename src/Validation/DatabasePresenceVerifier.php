@@ -10,9 +10,10 @@ namespace Nova\Validation;
 
 use Nova\Database\Connection;
 use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Validation\PresenceVerifierInterface;
 
 
-class DatabasePresenceVerifier
+class DatabasePresenceVerifier implements PresenceVerifierInterface
 {
     /**
      * The database Connection instance.

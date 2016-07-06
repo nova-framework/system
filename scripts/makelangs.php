@@ -26,7 +26,7 @@ $workPaths = array(
 );
 
 //
-function str_starts_with($haystack, $needle) {
+function starts_with($haystack, $needle) {
     return (($needle === '') || (strpos($haystack, $needle) === 0));
 }
 

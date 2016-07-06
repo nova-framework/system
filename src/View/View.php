@@ -359,7 +359,7 @@ class View implements ArrayAccess, Renderable
     public function __call($method, $params)
     {
         // Add the support for the dynamic withX Methods.
-        if (str_starts_with($method, 'with')) {
+        if (starts_with($method, 'with')) {
             $name = lcfirst(substr($method, 4));
 
             return $this->with($name, array_shift($params));

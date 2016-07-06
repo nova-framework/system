@@ -553,7 +553,7 @@ class Builder
     {
         $dots = str_contains($name, '.');
 
-        return $dots && str_starts_with($name, $relation .'.');
+        return $dots && starts_with($name, $relation .'.');
     }
 
     /**

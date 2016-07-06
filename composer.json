@@ -45,7 +45,7 @@
             "Nova\\" : "src/"
         },
         "files": [
-            "helpers/functions.php"
+            "scripts/helpers.php"
         ]
     },
     "suggest": {

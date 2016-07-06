@@ -195,7 +195,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      */
     public function __call($method, $parameters)
     {
-        if (str_starts_with($method, 'with')) {
+        if (starts_with($method, 'with')) {
             return $this->with(lcfirst(substr($method, 4)), $parameters[0]);
         }
 
