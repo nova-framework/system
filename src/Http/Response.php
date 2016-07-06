@@ -2,67 +2,47 @@
 
 namespace Nova\Http;
 
-use Nova\Support\Contracts\JsonableInterface as Jsonable;
-use Nova\Support\Contracts\RenderableInterface as Renderable;
+use Nova\Support\Contracts\JsonableInterface;
+use Nova\Support\Contracts\RenderableInterface;
 
 use ArrayObject;
-use Symfony\Component\HttpFoundation\Cookie;
 
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
+    use ResponseTrait;
+
     /**
-     * The original content of the Response.
+     * The original content of the response.
      *
      * @var mixed
      */
     public $original;
 
-
-    /**
-     * Set a header on the Response.
-     *
-     * @param  string  $key
-     * @param  string  $value
-     * @param  bool    $replace
-     * @return \Nova\Http\Response
-     */
-    public function header($key, $value, $replace = true)
-    {
-        $this->headers->set($key, $value, $replace);
-
-        return $this;
-    }
-
-    /**
-     * Add a cookie to the response.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
-     * @return \Nova\Http\Response
-     */
-    public function withCookie(Cookie $cookie)
-    {
-        $this->headers->setCookie($cookie);
-
-        return $this;
-    }
-
     /**
      * Set the content on the response.
      *
      * @param  mixed  $content
-     * @return void
+     * @return $this
      */
     public function setContent($content)
     {
         $this->original = $content;
 
+        // If the content is "JSONable" we will set the appropriate header and convert
+        // the content to JSON. This is useful when returning something like models
+        // from routes that will be automatically transformed to their JSON form.
         if ($this->shouldBeJson($content)) {
             $this->headers->set('Content-Type', 'application/json');
 
             $content = $this->morphToJson($content);
-        } else if ($content instanceof Renderable) {
-            $content = $content->fetch();
+        }
+
+        // If this content implements the "RenderableInterface", then we will call the
+        // render method on the object so we will avoid any "__toString" exceptions
+        // that might be thrown and have their errors obscured by PHP's handling.
+        else if ($content instanceof RenderableInterface) {
+            $content = $content->render();
         }
 
         return parent::setContent($content);
@@ -76,9 +56,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function morphToJson($content)
     {
-        if ($content instanceof Jsonable) {
-            return $content->toJson();
-        }
+        if ($content instanceof JsonableInterface) return $content->toJson();
 
         return json_encode($content);
     }
@@ -91,7 +69,9 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function shouldBeJson($content)
     {
-        return (($content instanceof JsonableInterface) || ($content instanceof ArrayObject) || is_array($content));
+        return ($content instanceof JsonableInterface) ||
+               ($content instanceof ArrayObject) ||
+               is_array($content);
     }
 
     /**

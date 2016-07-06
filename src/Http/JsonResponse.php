@@ -2,10 +2,11 @@
 
 namespace Nova\Http;
 
-use Symfony\Component\HttpFoundation\Cookie;
-use Support\Contracts\JsonableInterface;
+use Nova\Support\Contracts\JsonableInterface;
 
-class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
+class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse
+{
+    use ResponseTrait;
 
     /**
      * The json encoding options.
@@ -32,8 +33,8 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
     /**
      * Get the json_decoded data from the response
      *
-     * @param  bool $assoc
-     * @param  int  $depth
+     * @param  bool  $assoc
+     * @param  int   $depth
      * @return mixed
      */
     public function getData($assoc = false, $depth = 512)
@@ -56,31 +57,26 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
     }
 
     /**
-     * Set a header on the Response.
+     * Get the JSON encoding options.
      *
-     * @param  string  $key
-     * @param  string  $value
-     * @param  bool    $replace
-     * @return \Http\Response
+     * @return int
      */
-    public function header($key, $value, $replace = true)
+    public function getJsonOptions()
     {
-        $this->headers->set($key, $value, $replace);
-
-        return $this;
+        return $this->jsonOptions;
     }
 
     /**
-     * Add a cookie to the response.
+     * Set the JSON encoding options.
      *
-     * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
-     * @return \Http\Response
+     * @param  int  $options
+     * @return mixed
      */
-    public function withCookie(Cookie $cookie)
+    public function setJsonOptions($options)
     {
-        $this->headers->setCookie($cookie);
+        $this->jsonOptions = $options;
 
-        return $this;
+        return $this->setData($this->getData());
     }
 
 }

@@ -3,10 +3,12 @@
 namespace Nova\Http;
 
 use Nova\Support\MessageBag;
+use Nova\Support\ViewErrorBag;
 use Nova\Session\Store as SessionStore;
 use Nova\Support\Contracts\MessageProviderInterface;
 
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 
 class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectResponse
@@ -14,14 +16,14 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * The request instance.
      *
-     * @var \Http\Request
+     * @var \Nova\Http\Request
      */
     protected $request;
 
     /**
      * The session store implementation.
      *
-     * @var \Session\Store
+     * @var \Nova\Session\Store
      */
     protected $session;
 
@@ -31,7 +33,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * @param  string  $key
      * @param  string  $value
      * @param  bool  $replace
-     * @return \Nova\Http\RedirectResponse
+     * @return $this
      */
     public function header($key, $value, $replace = true)
     {
@@ -49,10 +51,10 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      */
     public function with($key, $value = null)
     {
-        if (is_array($key)) {
-            foreach ($key as $k => $v) $this->with($k, $v);
-        } else {
-            $this->session->flash($key, $value);
+        $key = is_array($key) ? $key : [$key => $value];
+
+        foreach ($key as $k => $v) {
+            $this->session->flash($k, $v);
         }
 
         return $this;
@@ -62,7 +64,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * Add a cookie to the response.
      *
      * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
-     * @return \Nova\Http\RedirectResponse
+     * @return $this
      */
     public function withCookie(Cookie $cookie)
     {
@@ -72,16 +74,17 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Flash an array of input to the session.
+     * Add multiple cookies to the response.
      *
-     * @param  array  $input
-     * @return \Nova\Http\RedirectResponse
+     * @param  array  $cookie
+     * @return $this
      */
-    public function withInput(array $input = null)
+    public function withCookies(array $cookies)
     {
-        $input = $input ?: $this->request->input();
-
-        $this->session->flashInput($input);
+        foreach ($cookies as $cookie)
+        {
+            $this->headers->setCookie($cookie);
+        }
 
         return $this;
     }
@@ -89,8 +92,26 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * Flash an array of input to the session.
      *
-     * @param  dynamic  string
-     * @return \Nova\Http\RedirectResponse
+     * @param  array  $input
+     * @return $this
+     */
+    public function withInput(array $input = null)
+    {
+        $input = $input ?: $this->request->input();
+
+        $this->session->flashInput(array_filter($input, function ($value)
+        {
+            return ! $value instanceof UploadedFile;
+        }));
+
+        return $this;
+    }
+
+    /**
+     * Flash an array of input to the session.
+     *
+     * @param  mixed  string
+     * @return $this
      */
     public function onlyInput()
     {
@@ -100,29 +121,12 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     /**
      * Flash an array of input to the session.
      *
-     * @param  dynamic  string
+     * @param  mixed  string
      * @return \Nova\Http\RedirectResponse
      */
     public function exceptInput()
     {
         return $this->withInput($this->request->except(func_get_args()));
-    }
-
-    /**
-     * Flash a container of errors to the session.
-     *
-     * @param  \Support\Contracts\MessageProviderInterface|array  $provider
-     * @return \Nova\Http\RedirectResponse
-     */
-    public function withErrors($provider)
-    {
-        if ($provider instanceof MessageProviderInterface) {
-            $this->with('errors', $provider->getMessageBag());
-        } else {
-            $this->with('errors', new MessageBag((array) $provider));
-        }
-
-        return $this;
     }
 
     /**
@@ -143,7 +147,40 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Get the Request instance.
+     * Flash a container of errors to the session.
+     *
+     * @param  \Nova\Support\Contracts\MessageProviderInterface|array  $provider
+     * @param  string  $key
+     * @return $this
+     */
+    public function withErrors($provider, $key = 'default')
+    {
+        $value = $this->parseErrors($provider);
+
+        $this->session->flash(
+            'errors', $this->session->get('errors', new ViewErrorBag)->put($key, $value)
+        );
+
+        return $this;
+    }
+
+    /**
+     * Parse the given errors into an appropriate value.
+     *
+     * @param  \Nova\Support\Contracts\MessageProviderInterface|array  $provider
+     * @return \Nova\Support\MessageBag
+     */
+    protected function parseErrors($provider)
+    {
+        if ($provider instanceof MessageProviderInterface) {
+            return $provider->getMessageBag();
+        }
+
+        return new MessageBag((array) $provider);
+    }
+
+    /**
+     * Get the request instance.
      *
      * @return  \Nova\Http\Request
      */
@@ -153,7 +190,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Set the Request instance.
+     * Set the request instance.
      *
      * @param  \Nova\Http\Request  $request
      * @return void
@@ -164,7 +201,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Get the Session Store implementation.
+     * Get the session store implementation.
      *
      * @return \Nova\Session\Store
      */
@@ -174,9 +211,9 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Set the Session Store implementation.
+     * Set the session store implementation.
      *
-     * @param \Session\Store  $store
+     * @param  \Nova\Session\Store  $session
      * @return void
      */
     public function setSession(SessionStore $session)
@@ -185,7 +222,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     }
 
     /**
-     * Dynamically bind flash data in the Session.
+     * Dynamically bind flash data in the session.
      *
      * @param  string  $method
      * @param  array  $parameters
@@ -196,9 +233,10 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
     public function __call($method, $parameters)
     {
         if (starts_with($method, 'with')) {
-            return $this->with(lcfirst(substr($method, 4)), $parameters[0]);
+            return $this->with(snake_case(substr($method, 4)), $parameters[0]);
         }
 
         throw new \BadMethodCallException("Method [$method] does not exist on Redirect.");
     }
+
 }
