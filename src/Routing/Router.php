@@ -995,7 +995,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
                 return $this->prepareResponse($request, $result);
             }
         }
-        
+
         // If no response was returned from the before filter, we will call the proper
         // route instance to get the response. If no route is found a response will
         // still get returned based on why no routes were found for this request.
@@ -1497,7 +1497,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function prepareResponse($request, $response)
     {
-        if ( ! $response instanceof SymfonyResponse) {
+        if (! $response instanceof SymfonyResponse) {
             $response = new Response($response);
         }
 

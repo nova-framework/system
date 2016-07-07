@@ -12,17 +12,7 @@ class {{classname}} extends Controller
      */
     public function __construct()
     {
-        parent::__construct();
-    }
-
-    /**
-     * Middleware - method executed before any Action.
-     *
-     * @return bool
-     */
-    protected function before()
-    {
-        return parent::before();
+        //
     }
 
 }

@@ -2,14 +2,14 @@
 
 namespace Nova\Routing;
 
+use Nova\Http\Response;
 use Nova\View\View;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Response;
 use Template;
-use View as ViewFacade;
+use View as ViewFactory;
 
 use BadMethodCallException;
 use Closure;
@@ -17,20 +17,6 @@ use Closure;
 
 abstract class Controller
 {
-    /**
-     * The requested Method by Router.
-     *
-     * @var string|null
-     */
-    private $method = null;
-
-    /**
-     * The parameters given by Router.
-     *
-     * @var array
-     */
-    private $parameters = array();
-
     /**
      * The Module name.
      *
@@ -57,7 +43,7 @@ abstract class Controller
      *
      * @var string
      */
-    protected $layout = 'default';
+    protected $layout;
 
     /**
      * The "before" filters registered on the controller.
@@ -80,19 +66,7 @@ abstract class Controller
      */
     protected static $filterer;
 
-    /**
-     * On the initial run, create an instance of the config class and the view class.
-     */
-    public function __construct()
-    {
-        // Adjust to the default Template, if it is not defined.
-        if(! isset($this->template)) {
-            $config = app('config');
-
-            $this->template = $config->get('app.template', 'Default');
-        }
-    }
-
+    
     /**
      * Register a "before" filter on the controller.
      *
@@ -266,6 +240,13 @@ abstract class Controller
     }
 
     /**
+     * Create the layout used by the controller.
+     *
+     * @return void
+     */
+    protected function setupLayout() {}
+
+    /**
      * Execute an action on the controller.
      *
      * @param string  $method
@@ -274,16 +255,22 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
-        $this->method = $method;
-        $this->parameters = $parameters;
+        $this->setupLayout();
 
-        // Before the Action execution stage.
-        $response = $this->before();
+        // Execute the requested Method with the given arguments.
+        $response = call_user_func_array(array($this, $method), $parameters);
 
-        // Process the stage result.
-        if (! $response instanceof SymfonyResponse) {
-            // Execute the requested Method with the given arguments.
-            $response = call_user_func_array(array($this, $method), $parameters);
+        // If the response is returned from the controller action is a SymfonyResponse
+        // instance, we will assume that no further response processing is required.
+        if ($response instanceof SymfonyResponse) {
+            return $response;
+        }
+
+        // If no response is returned from the controller action and a layout is being
+        // used we will assume we want to just return the Layout view as any nested
+        // Views were probably bound on this view during this Controller actions.
+        else if (is_null($response) && ($this->layout instanceof View)) {
+            $response = $this->layout;
         }
 
         // Create a proper Response and return it.
@@ -298,51 +285,12 @@ abstract class Controller
      */
     private function prepareResponse($response)
     {
-        if ($response instanceof SymfonyResponse) {
-            return $response;
-        }
-
-        if (($this->layout !== false) && ($response instanceof View) && ! $response->isTemplate()) {
+        if (isset($this->layout) && ($response instanceof View) && ! $response->isTemplate()) {
             $response = Template::make($this->layout, $this->template)->with('content', $response);
         }
 
         // Create a Response instance and return it.
-        return Response::make($response);
-    }
-
-    /**
-     * Method automatically invoked before the requested Action.
-     *
-     * @return mixed|void
-     */
-    protected function before()
-    {
-    }
-
-    /**
-     * @return void
-     */
-    private function setupDefaultView()
-    {
-        if (isset($this->defaultView)) {
-            return;
-        }
-
-        // Prepare the View Path using the Controller's full Name including its namespace.
-        $path = str_replace('\\', '/', ltrim(static::class, '\\'));
-
-        // First, check on the App path.
-        if (preg_match('#^App/Controllers/(.*)$#i', $path, $matches)) {
-            $this->defaultView = $matches[1] .DS .ucfirst($this->method);
-            // Secondly, check on the Modules path.
-        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $path, $matches)) {
-            $this->module = $matches[1];
-
-            // The View is in Module sub-directories.
-            $this->defaultView = $matches[2] .DS .ucfirst($this->method);
-        } else {
-            throw new BadMethodCallException('Invalid Controller: ' .static::class);
-        }
+        return new Response($response);
     }
 
     /**
@@ -352,7 +300,7 @@ abstract class Controller
      */
     protected function title($title)
     {
-        ViewFacade::share('title', $title);
+        ViewFactory::share('title', $title);
     }
 
     /**
@@ -362,19 +310,34 @@ abstract class Controller
      */
     protected function getView(array $data = array())
     {
-        $this->setupDefaultView();
+        if(! isset($this->defaultView)) {
+            list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
-        return ViewFacade::make($this->defaultView, $data, $this->module);
+            $this->setupDefaultView($caller['function']);
+        }
+
+        return ViewFactory::make($this->defaultView, $data, $this->module);
     }
 
     /**
-     * @return string
+     * @return void
      */
-    protected function getViewName()
+    private function setupDefaultView($method)
     {
-        $this->setupDefaultView();
+        // Prepare the View Path using the Controller's full Name including its namespace.
+        $classPath = str_replace('\\', '/', static::class);
 
-        return $this->defaultView;
+        if (preg_match('#^App/Controllers/(.*)$#i', $classPath, $matches)) {
+            // The View is in default App sub-directory.
+            $this->defaultView = $matches[1] .DS .ucfirst($method);
+        } else if (preg_match('#^App/Modules/(.+)/Controllers/(.*)$#i', $classPath, $matches)) {
+             // The View is in a Module sub-directory.
+            $this->module = $matches[1];
+
+            $this->defaultView = $matches[2] .DS .ucfirst($method);
+        } else {
+            throw new BadMethodCallException('Invalid Controller: ' .static::class);
+        }
     }
 
     /**
@@ -382,8 +345,6 @@ abstract class Controller
      */
     protected function getModule()
     {
-        $this->setupDefaultView();
-
         return $this->module;
     }
 
@@ -401,22 +362,6 @@ abstract class Controller
     protected function getLayout()
     {
         return $this->layout;
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getParameters()
-    {
-        return $this->parameters;
     }
 
     /**

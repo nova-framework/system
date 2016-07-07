@@ -801,7 +801,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // since that is most likely the name of the polymorphic interface. We can
         // use that to get both the class and foreign key that will be utilized.
         if (is_null($name)) {
-            list(, $caller) = debug_backtrace(false, 2);
+            list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
             $name = snake_case($caller['function']);
         }
@@ -1005,7 +1005,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         $self = __FUNCTION__;
 
-        $caller = array_first(debug_backtrace(false), function($key, $trace) use ($self)
+        $caller = array_first(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), function($key, $trace) use ($self)
         {
             $caller = $trace['function'];
 
