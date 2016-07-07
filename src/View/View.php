@@ -48,14 +48,14 @@ class View implements ArrayAccess, Renderable
     /**
      * @var bool Falg marking the View as Template.
      */
-    protected $template = false;
+    protected $layout = false;
 
     /**
      * Constructor
      * @param mixed $path
      * @param array $data
      */
-    public function __construct(Factory $factory, $view, $path, $data = array(), $template = false)
+    public function __construct(Factory $factory, $view, $path, $data = array(), $layout = false)
     {
         $this->factory = $factory;
 
@@ -64,7 +64,7 @@ class View implements ArrayAccess, Renderable
 
         $this->data = ($data instanceof Arrayable) ? $data->toArray() : (array) $data;
 
-        $this->template = $template;
+        $this->layout = $layout;
     }
 
     /**
@@ -231,9 +231,9 @@ class View implements ArrayAccess, Renderable
      *
      * @return bool
      */
-    public function isTemplate()
+    public function isLayout()
     {
-        return $this->template;
+        return $this->layout;
     }
 
     /**
