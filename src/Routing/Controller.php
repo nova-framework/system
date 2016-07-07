@@ -236,16 +236,10 @@ abstract class Controller
         // Execute the requested Method with the given arguments.
         $response = call_user_func_array(array($this, $method), $parameters);
 
-        // If the response is returned from the controller action is a SymfonyResponse
-        // instance, we will assume we want to just return the response.
-        if ($response instanceof SymfonyResponse) {
-            return $response;
-        }
-
         // If no response is returned from the controller action and a layout is being
         // used we will assume we want to just return the Layout view as any nested
         // Views were probably bound on this view during this Controller actions.
-        else if (is_null($response) && ($this->layout instanceof View)) {
+        if (is_null($response) && ($this->layout instanceof View)) {
             $response = $this->layout;
         }
 
