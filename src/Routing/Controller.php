@@ -8,9 +8,6 @@ use Nova\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Template;
-use View as ViewFactory;
-
 use BadMethodCallException;
 use Closure;
 
@@ -271,7 +268,8 @@ abstract class Controller
         // templated environment, setup via the current controller properties.
         else if ($response instanceof View) {
             if (isset($this->layout) && ! $response->isTemplate()) {
-                $response = Template::make($this->layout, $this->template)
+                $response = app('template')
+                    ->make($this->layout, $this->template)
                     ->with('content', $response->fetch());
             }
         }
@@ -279,8 +277,10 @@ abstract class Controller
         // If no response is returned from the controller action and a layout is being
         // used we will assume we want to just return the Layout view as any nested
         // Views were probably bound on this view during this Controller actions.
-        else if (is_null($response) && ($this->layout instanceof View)) {
-            $response = $this->layout;
+        else if (is_null($response)) {
+            if ($this->layout instanceof View) {
+                $response = $this->layout;
+            }
         }
 
         // Create a proper Response and return it.
@@ -294,7 +294,7 @@ abstract class Controller
      */
     protected function title($title)
     {
-        ViewFactory::share('title', $title);
+        app('view')->share('title', $title);
     }
 
     /**
@@ -310,7 +310,7 @@ abstract class Controller
             $this->setupDefaultView($caller['function']);
         }
 
-        return ViewFactory::make($this->defaultView, $data, $this->module);
+        return app('view')->make($this->defaultView, $data, $this->module);
     }
 
     /**
