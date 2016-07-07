@@ -66,7 +66,7 @@ abstract class Controller
      */
     protected static $filterer;
 
-    
+
     /**
      * Register a "before" filter on the controller.
      *
@@ -261,9 +261,19 @@ abstract class Controller
         $response = call_user_func_array(array($this, $method), $parameters);
 
         // If the response is returned from the controller action is a SymfonyResponse
-        // instance, we will assume that no further response processing is required.
+        // instance, we will assume we want to just return the response.
         if ($response instanceof SymfonyResponse) {
             return $response;
+        }
+
+        // If the response is returned from the controller action is a View instance
+        // and it is not a Template, we will assume we want to render it on the default
+        // templated environment, setup via the current controller properties.
+        else if ($response instanceof View) {
+            if (isset($this->layout) && ! $response->isTemplate()) {
+                $response = Template::make($this->layout, $this->template)
+                    ->with('content', $response->fetch());
+            }
         }
 
         // If no response is returned from the controller action and a layout is being
@@ -274,23 +284,7 @@ abstract class Controller
         }
 
         // Create a proper Response and return it.
-        return $this->prepareResponse($response);
-    }
-
-    /**
-     * Create from the given result a Response instance and send it.
-     *
-     * @param mixed  $result
-     * @return bool
-     */
-    private function prepareResponse($response)
-    {
-        if (isset($this->layout) && ($response instanceof View) && ! $response->isTemplate()) {
-            $response = Template::make($this->layout, $this->template)->with('content', $response);
-        }
-
-        // Create a Response instance and return it.
-        return new Response($response);
+        return $response;
     }
 
     /**
