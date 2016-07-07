@@ -264,10 +264,10 @@ abstract class Controller
         }
 
         // If the response is returned from the controller action is a View instance
-        // and it is not a Template, we will assume we want to render it on the default
-        // templated environment, setup via the current controller properties.
+        // and it is not marked as Template, we will assume we want to render it on the
+        // default templated environment, setup via the current controller properties.
         else if ($response instanceof View) {
-            if (isset($this->layout) && ! $response->isTemplate()) {
+            if (is_string($this->layout) && ! $response->isTemplate()) {
                 $response = app('template')
                     ->make($this->layout, $this->template)
                     ->with('content', $response->fetch());
