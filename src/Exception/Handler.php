@@ -9,6 +9,7 @@ use Symfony\Component\Debug\Exception\FatalErrorException as FatalError;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
+use Exception;
 use ErrorException;
 use ReflectionFunction;
 
