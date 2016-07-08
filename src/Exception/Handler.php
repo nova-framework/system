@@ -6,6 +6,7 @@ use Nova\Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Debug\Exception\FatalErrorException as FatalError;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
 use ErrorException;
@@ -149,6 +150,10 @@ class Handler
      */
     public function handleException($exception)
     {
+        if (! $exception instanceof Exception) {
+            $exception = new FatalThrowableError($exception);
+        }
+
         $response = $this->callCustomHandlers($exception);
 
         // If one of the custom error handlers returned a response, we will send that
