@@ -655,7 +655,17 @@ class Connection implements ConnectionInterface
      */
     protected function causedByLostConnection(QueryException $e)
     {
-        return str_contains($e->getPrevious()->getMessage(), 'server has gone away');
+        $message = $e->getMessage();
+
+        return str_contains($message, array(
+            'server has gone away',
+            'no connection to the server',
+            'Lost connection',
+            'is dead or not enabled',
+            'Error while sending',
+            'decryption failed or bad record mac',
+            'SSL connection has been closed unexpectedly',
+        ));
     }
 
     /**
