@@ -70,7 +70,7 @@ class AssetFileDispatcher
 
             $path = $matches[4];
 
-            if($matches[1] == 'modules') {
+            if(strtolower($matches[1]) == 'modules') {
                 // A Module Asset file.
                 $filePath = $this->getModuleAssetPath($module, $folder, $path);
             } else {
