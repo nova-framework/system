@@ -29,7 +29,7 @@ if ( ! function_exists('resource_url'))
      */
     function resource_url($path, $module = null)
     {
-        $basePath = ! is_null($module) ? sprintf('modules/%s', snake_case($module)) : '';
+        $basePath = ! is_null($module) ? sprintf('Modules/%s', snake_case($module)) : '';
 
         $path = sprintf('%s/assets/%s', $basePath, ltrim($path, '/'));
 
