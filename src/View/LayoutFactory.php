@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Template;
+namespace Nova\View;
 
 use Nova\Foundation\Application;
 use Nova\View\View;
@@ -8,7 +8,7 @@ use Nova\View\View;
 use Language;
 
 
-class Factory
+class LayoutFactory
 {
     /**
      * The Application instance.

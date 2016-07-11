@@ -3,6 +3,7 @@
 namespace Nova\View;
 
 use Nova\View\Factory;
+use Nova\View\LayoutFactory;
 use Nova\Support\ServiceProvider;
 
 
@@ -26,6 +27,11 @@ class ViewServiceProvider extends ServiceProvider
         {
             return new Factory($app);
         });
+
+        $this->app->bindShared('template', function($app)
+        {
+            return new LayoutFactory($app);
+        });
     }
 
     /**
@@ -35,6 +41,6 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('view');
+        return array('view', 'template');
     }
 }
