@@ -3,7 +3,6 @@
 namespace Nova\View;
 
 use Nova\Foundation\Application;
-use Nova\View\Factory;
 use Nova\View\View;
 
 use Language;
@@ -19,14 +18,6 @@ class Template
     protected $app;
 
     /**
-     * The Factory instance.
-     *
-     * @var \Nova\View\Factory
-     */
-    protected $factory;
-
-
-    /**
      * Create new Template Factory instance.
      *
      * @return void
@@ -34,8 +25,6 @@ class Template
     function __construct(Application $app)
     {
         $this->app = $app;
-
-        $this->factory = $app['view'];
     }
 
     /**
@@ -57,12 +46,15 @@ class Template
             $data = array();
         }
 
+        // Get the View Factory instance.
+        $factory = $this->app['view'];
+
         // Get the View file path.
         $path = $this->viewFile($view, $template);
 
         $data = $this->parseData($data);
 
-        return new View($this->factory, $view, $path, $data, true);
+        return new View($factory, $view, $path, $data, true);
     }
 
     /**
