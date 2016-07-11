@@ -7,7 +7,7 @@ use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\View;
 
 
-class Factory
+class ViewFactory
 {
     /**
      * The Application instance.

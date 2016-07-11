@@ -3,7 +3,7 @@
 namespace Nova\Mail;
 
 use Nova\Log\Writer;
-use Nova\View\Factory;
+use Nova\View\ViewFactory as Factory;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
 
@@ -18,7 +18,7 @@ class Mailer
     /**
      * The view factory instance.
      *
-     * @var \Nova\View\Factory
+     * @var \Nova\View\ViewFactory
      */
     protected $views;
 
@@ -81,7 +81,7 @@ class Mailer
     /**
      * Create a new Mailer instance.
      *
-     * @param  \Nova\View\Factory  $views
+     * @param  \Nova\View\ViewFactory  $views
      * @param  \Swift_Mailer  $swift
      * @param  \Nova\Events\Dispatcher  $events
      * @return void
@@ -305,7 +305,7 @@ class Mailer
     /**
      * Get the view factory instance.
      *
-     * @return \Nova\View\Factory
+     * @return \Nova\View\ViewFactory
      */
     public function getViewFactory()
     {

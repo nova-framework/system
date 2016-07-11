@@ -11,7 +11,7 @@ namespace Nova\View;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
 use Nova\Support\MessageBag;
-use Nova\View\Factory;
+use Nova\View\ViewFactory as Factory;
 
 use Response;
 
@@ -26,7 +26,7 @@ class View implements ArrayAccess, Renderable
     /**
      * The View Factory instance.
      *
-     * @var \Nova\View\Factory
+     * @var \Nova\View\ViewFactory
      */
     protected $factory;
 
@@ -219,7 +219,7 @@ class View implements ArrayAccess, Renderable
     /**
      * Get the View Factory instance.
      *
-     * @return \Nova\View\Factory
+     * @return \Nova\View\ViewFactory
      */
     public function getFactory()
     {
