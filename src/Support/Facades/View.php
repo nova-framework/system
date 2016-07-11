@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\View\ViewFactory
+ * @see \Nova\View\Factory
  */
 class View extends Facade
 {

@@ -2,8 +2,8 @@
 
 namespace Nova\View;
 
-use Nova\View\ViewFactory;
-use Nova\View\LayoutFactory;
+use Nova\View\Factory;
+use Nova\View\Template;
 use Nova\Support\ServiceProvider;
 
 
@@ -25,12 +25,12 @@ class ViewServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('view', function($app)
         {
-            return new ViewFactory($app);
+            return new Factory($app);
         });
 
         $this->app->bindShared('template', function($app)
         {
-            return new LayoutFactory($app);
+            return new Template($app);
         });
     }
 

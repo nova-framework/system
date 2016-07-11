@@ -1112,8 +1112,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
-            'template'       => 'Nova\View\LayoutFactory',
-            'view'           => 'Nova\View\ViewFactory',
+            'view'           => 'Nova\View\Factory',
+            'template'       => 'Nova\View\Template',
         );
 
         foreach ($aliases as $key => $alias) {

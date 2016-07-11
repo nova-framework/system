@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\Template\Factory
+ * @see \Nova\View\Template
  */
 class Template extends Facade
 {
