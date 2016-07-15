@@ -66,7 +66,7 @@ class ModuleMigrateCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            $module = $this->module->where('slug', $slug)->first();
+            $module = $this->module->where('slug', $slug);
 
             if ($this->module->isEnabled($module['slug'])) {
                 return $this->migrate($module['slug']);
