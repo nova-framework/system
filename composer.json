@@ -37,7 +37,8 @@
         "monolog/monolog": "^1.19",
         "filp/whoops": "^2.1",
         "predis/predis": "0.8.*",
-        "guzzlehttp/guzzle": "^4.0"
+        "guzzlehttp/guzzle": "^4.0",
+        "phpseclib/phpseclib": "2.0.*"
     },
     "autoload": {
         "psr-4": {
