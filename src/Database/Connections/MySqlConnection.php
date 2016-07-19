@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connection;
+namespace Nova\Database\Connections;
 
 use Nova\Database\Connection;
 use Nova\Database\Schema\MySqlBuilder;

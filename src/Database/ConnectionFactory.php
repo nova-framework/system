@@ -1,18 +1,19 @@
 <?php
 
-namespace Nova\Database\Connection;
+namespace Nova\Database;
 
-use Nova\Database\Connection\MySqlConnection;
-use Nova\Database\Connection\SQLiteConnection;
-use Nova\Database\Connection\PostgresConnection;
-use Nova\Database\Connection\SqlServerConnection;
-use Nova\Database\Connection\Connectors\MySqlConnector;
-use Nova\Database\Connection\Connectors\SQLiteConnector;
-use Nova\Database\Connection\Connectors\PostgresConnector;
-use Nova\Database\Connection\Connectors\SqlServerConnector;
 use Nova\Container\Container;
+use Nova\Database\Connections\MySqlConnection;
+use Nova\Database\Connections\SQLiteConnection;
+use Nova\Database\Connections\PostgresConnection;
+use Nova\Database\Connections\SqlServerConnection;
+use Nova\Database\Connectors\MySqlConnector;
+use Nova\Database\Connectors\SQLiteConnector;
+use Nova\Database\Connectors\PostgresConnector;
+use Nova\Database\Connectors\SqlServerConnector;
 
 use PDO;
+
 
 class ConnectionFactory
 {
