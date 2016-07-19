@@ -1,10 +1,13 @@
-<?php namespace Nova\Queue;
+<?php
+
+namespace Nova\Queue;
 
 use Aws\Sqs\SqsClient;
 use Nova\Queue\Jobs\SqsJob;
 
-class SqsQueue extends Queue implements QueueInterface {
 
+class SqsQueue extends Queue implements QueueInterface
+{
     /**
      * The Amazon SQS instance.
      *

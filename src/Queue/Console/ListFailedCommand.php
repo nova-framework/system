@@ -4,6 +4,8 @@ namespace Nova\Queue\Console;
 
 use Nova\Console\Command;
 
+use Symfony\Component\Console\Helper\Table;
+
 
 class ListFailedCommand extends Command
 {
@@ -38,7 +40,7 @@ class ListFailedCommand extends Command
             return $this->info('No failed jobs!');
         }
 
-        $table = $this->getHelperSet()->get('table');
+        $table = new Table($this->output);
 
         $table->setHeaders(array('ID', 'Connection', 'Queue', 'Class', 'Failed At'))
               ->setRows($rows)

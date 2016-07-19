@@ -1,7 +1,10 @@
-<?php namespace Nova\Queue;
+<?php
 
-class SyncQueue extends Queue implements QueueInterface {
+namespace Nova\Queue;
 
+
+class SyncQueue extends Queue implements QueueInterface
+{
     /**
      * Push a new job onto the queue.
      *

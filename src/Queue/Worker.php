@@ -1,4 +1,6 @@
-<?php namespace Nova\Queue;
+<?php
+
+namespace Nova\Queue;
 
 use Nova\Queue\Jobs\Job;
 use Nova\Events\Dispatcher;
