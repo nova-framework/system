@@ -17,7 +17,7 @@
         "classpreloader/classpreloader": "^3.0",
         "paragonie/random_compat": "~1.4",
         "psy/psysh": "0.7.*",
-        "jeremeamia/superclosure": "2.0.*",
+        "jeremeamia/superclosure": "~2.2",
         "symfony/browser-kit": "^3.1",
         "symfony/console": "^3.1",
         "symfony/css-selector": "^3.1",
