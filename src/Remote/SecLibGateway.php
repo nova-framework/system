@@ -4,9 +4,9 @@ namespace Nova\Remote;
 
 use Nova\Filesystem\Filesystem;
 
-use Net_SFTP;
-use Crypt_RSA;
-use System_SSH_Agent;
+use phpseclib\Net\SFTP as NetSFTP;
+use phpseclib\Crypt\RSA as CryptRSA;
+use phpseclib\System\SSH\Agent as SSHAgent;
 
 
 class SecLibGateway implements GatewayInterface
@@ -42,7 +42,7 @@ class SecLibGateway implements GatewayInterface
     /**
      * The SecLib connection instance.
      *
-     * @var \Net_SFTP
+     * @var \NetSFTP
      */
     protected $connection;
 
@@ -58,6 +58,7 @@ class SecLibGateway implements GatewayInterface
     {
         $this->auth = $auth;
         $this->files = $files;
+
         $this->setHostAndPort($host);
     }
 
@@ -172,7 +173,7 @@ class SecLibGateway implements GatewayInterface
     /**
      * Get the authentication object for login.
      *
-     * @return \Crypt_RSA|\System_SSH_Agent|string
+     * @return \phpseclib\Crypt\RSA|\phpseclib\System\SSH\Agent|string
      * @throws \InvalidArgumentException
      */
     protected function getAuthForLogin()
@@ -212,7 +213,7 @@ class SecLibGateway implements GatewayInterface
      * Load the RSA key instance.
      *
      * @param  array  $auth
-     * @return \Crypt_RSA
+     * @return \phpseclib\Crypt\RSA
      */
     protected function loadRsaKey(array $auth)
     {
@@ -238,7 +239,7 @@ class SecLibGateway implements GatewayInterface
      * Create a new RSA key instance.
      *
      * @param  array  $auth
-     * @return \Crypt_RSA
+     * @return \phpseclib\Crypt\RSA
      */
     protected function getKey(array $auth)
     {
@@ -260,21 +261,21 @@ class SecLibGateway implements GatewayInterface
     /**
      * Get a new SSH Agent instance.
      *
-     * @return \System_SSH_Agent
+     * @return \phpseclib\System\SSH\Agent
      */
     public function getAgent()
     {
-        return new System_SSH_Agent;
+        return new SSHAgent();
     }
 
     /**
      * Get a new RSA key instance.
      *
-     * @return \Crypt_RSA
+     * @return \phpseclib\Crypt\RSA
      */
     public function getNewKey()
     {
-        return new Crypt_RSA;
+        return new CryptRSA();
     }
 
     /**
@@ -308,15 +309,15 @@ class SecLibGateway implements GatewayInterface
     }
 
     /**
-     * Get the underlying Net_SFTP connection.
+     * Get the underlying NetSFTP connection.
      *
-     * @return \Net_SFTP
+     * @return \phpseclib\Net\SFTP
      */
     public function getConnection()
     {
         if ($this->connection) return $this->connection;
 
-        return $this->connection = new Net_SFTP($this->host, $this->port);
+        return $this->connection = new NetSFTP($this->host, $this->port);
     }
 
 }
