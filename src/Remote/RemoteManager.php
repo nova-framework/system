@@ -128,7 +128,7 @@ class RemoteManager
      */
     protected function getAuth(array $config)
     {
-        if (isset($config['agent']) && $config['agent'] === true) {
+        if (isset($config['agent']) && ($config['agent'] === true)) {
             return array('agent' => true);
         } else if (isset($config['key']) && (trim($config['key']) != '')) {
             return array('key' => $config['key'], 'keyphrase' => $config['keyphrase']);

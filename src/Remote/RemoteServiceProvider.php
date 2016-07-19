@@ -2,20 +2,21 @@
 
 namespace Nova\Remote;
 
+use Nova\Remote\RemoteManager;
 use Nova\Support\ServiceProvider;
 
 
 class RemoteServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
+     * Indicates if loading of the Provider is deferred.
      *
      * @var bool
      */
     protected $defer = true;
 
     /**
-     * Register the service provider.
+     * Register the Service Provider.
      *
      * @return void
      */
