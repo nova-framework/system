@@ -6,7 +6,7 @@ use Nova\Filesystem\Filesystem;
 
 use phpseclib\Net\SFTP;
 use phpseclib\Crypt\RSA;
-use phpseclib\System\SSH\Agent;
+use phpseclib\System\SSH\Agent as SSH_Agent;
 
 
 class SecLibGateway implements GatewayInterface
@@ -265,7 +265,7 @@ class SecLibGateway implements GatewayInterface
      */
     public function getAgent()
     {
-        return new Agent();
+        return new SSH_Agent();
     }
 
     /**
