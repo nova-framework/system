@@ -5,7 +5,7 @@ namespace Nova\Remote;
 use Nova\Filesystem\Filesystem;
 
 use phpseclib\Net\SFTP;
-use phpseclib\Crypt\RSA as CryptRSA;
+use phpseclib\Crypt\RSA;
 use phpseclib\System\SSH\Agent;
 
 
@@ -275,7 +275,7 @@ class SecLibGateway implements GatewayInterface
      */
     public function getNewKey()
     {
-        return new CryptRSA();
+        return new RSA();
     }
 
     /**
