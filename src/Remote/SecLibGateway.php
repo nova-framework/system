@@ -4,9 +4,9 @@ namespace Nova\Remote;
 
 use Nova\Filesystem\Filesystem;
 
-use phpseclib\Net\SFTP as NetSFTP;
+use phpseclib\Net\SFTP;
 use phpseclib\Crypt\RSA as CryptRSA;
-use phpseclib\System\SSH\Agent as SSHAgent;
+use phpseclib\System\SSH\Agent;
 
 
 class SecLibGateway implements GatewayInterface
@@ -42,7 +42,7 @@ class SecLibGateway implements GatewayInterface
     /**
      * The SecLib connection instance.
      *
-     * @var \NetSFTP
+     * @var \phpseclib\Net\SFTP
      */
     protected $connection;
 
@@ -265,7 +265,7 @@ class SecLibGateway implements GatewayInterface
      */
     public function getAgent()
     {
-        return new SSHAgent();
+        return new Agent();
     }
 
     /**
@@ -309,7 +309,7 @@ class SecLibGateway implements GatewayInterface
     }
 
     /**
-     * Get the underlying NetSFTP connection.
+     * Get the underlying SFTP connection.
      *
      * @return \phpseclib\Net\SFTP
      */
@@ -317,7 +317,7 @@ class SecLibGateway implements GatewayInterface
     {
         if ($this->connection) return $this->connection;
 
-        return $this->connection = new NetSFTP($this->host, $this->port);
+        return $this->connection = new SFTP($this->host, $this->port);
     }
 
 }
