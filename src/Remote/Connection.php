@@ -67,7 +67,9 @@ class Connection implements ConnectionInterface
     {
         $this->name = $name;
         $this->host = $host;
+
         $this->username = $username;
+        
         $this->gateway = $gateway ?: new SecLibGateway($host, $auth, new Filesystem);
     }
 
@@ -92,8 +94,7 @@ class Connection implements ConnectionInterface
      */
     public function task($task, Closure $callback = null)
     {
-        if (isset($this->tasks[$task]))
-        {
+        if (isset($this->tasks[$task])) {
             return $this->run($this->tasks[$task], $callback);
         }
     }
@@ -181,11 +182,11 @@ class Connection implements ConnectionInterface
      */
     public function display($line)
     {
-        $server = $this->username.'@'.$this->host;
+        $server = $this->username .'@' .$this->host;
 
         $lead = '<comment>['.$server.']</comment> <info>('.$this->name.')</info>';
 
-        $this->getOutput()->writeln($lead.' '.$line);
+        $this->getOutput()->writeln($lead .' ' .$line);
     }
 
     /**
@@ -207,7 +208,7 @@ class Connection implements ConnectionInterface
      */
     protected function getCallback($callback)
     {
-        if ( ! is_null($callback)) return $callback;
+        if (! is_null($callback)) return $callback;
 
         return function($line) { $this->display($line); };
     }
@@ -231,8 +232,7 @@ class Connection implements ConnectionInterface
      */
     public function getGateway()
     {
-        if ( ! $this->gateway->connected() && ! $this->gateway->connect($this->username))
-        {
+        if ( ! $this->gateway->connected() && ! $this->gateway->connect($this->username)) {
             throw new \RuntimeException("Unable to connect to remote server.");
         }
 
