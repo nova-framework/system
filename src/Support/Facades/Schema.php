@@ -2,6 +2,7 @@
 
 namespace Nova\Support\Facades;
 
+
 /**
  * @see \Nova\Database\Schema\Builder
  */

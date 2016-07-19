@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace Nova\Support\Facades;
+
 
 /**
  * @see \Nova\Remote\RemoteManager
@@ -8,11 +9,11 @@ namespace Nova\Support\Facades;
  */
 class SSH extends Facade
 {
-	/**
-	 * Get the registered name of the component.
-	 *
-	 * @return string
-	 */
-	protected static function getFacadeAccessor() { return 'remote'; }
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor() { return 'remote'; }
 
 }

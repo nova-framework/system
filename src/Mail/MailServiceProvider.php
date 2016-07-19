@@ -78,6 +78,10 @@ class MailServiceProvider extends ServiceProvider
         if ($app->bound('log')) {
             $mailer->setLogger($app['log']);
         }
+
+        if ($app->bound('queue')) {
+            $mailer->setQueue($app['queue']);
+        }
     }
 
     /**

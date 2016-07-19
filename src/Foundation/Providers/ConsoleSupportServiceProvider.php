@@ -21,6 +21,7 @@ class ConsoleSupportServiceProvider extends ServiceProvider
         'Nova\Foundation\Providers\RouteListServiceProvider',
         'Nova\Foundation\Providers\ServerServiceProvider',
         'Nova\Foundation\Providers\TinkerServiceProvider',
+        'Nova\Queue\FailConsoleServiceProvider',
     );
 
     /**
