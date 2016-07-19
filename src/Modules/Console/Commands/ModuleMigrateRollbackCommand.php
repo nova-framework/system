@@ -2,10 +2,10 @@
 
 namespace Nova\Modules\Console\Commands;
 
-use Nova\Modules\Modules;
-use Nova\Modules\Traits\MigrationTrait;
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
+use Nova\Modules\Console\MigrationTrait;
+use Nova\Modules\Modules;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
