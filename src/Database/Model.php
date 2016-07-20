@@ -111,7 +111,7 @@ class Model
     /**
      * Find Records by their primary key.
      *
-     * @param  mixed  $id
+     * @param  array  $ids
      * @param  array  $columns
      * @return Model
      */
