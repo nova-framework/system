@@ -109,6 +109,18 @@ class Model
     }
 
     /**
+     * Find Records by their primary key.
+     *
+     * @param  mixed  $id
+     * @param  array  $columns
+     * @return Model
+     */
+    public function findMany($ids, $columns = array('*'))
+    {
+        return $this->newQuery()->findMany($ids, $columns);
+    }
+
+    /**
      * Insert a new Record and get the value of the primary key.
      *
      * @param  array   $values
