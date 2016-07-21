@@ -10,8 +10,8 @@ namespace Nova\Database;
 
 use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
-use Database\Query\Builder as QueryBuilder;
-use Database\Query as Builder;
+use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Database\Query as Builder;
 use Nova\Helpers\Inflector;
 
 use DB;
@@ -280,8 +280,13 @@ class Model
      */
     public function newQuery()
     {
-        $query = new QueryBuilder($this->db);
+        $connection = $this->getConnection();
 
+        $grammar = $connection->getQueryGrammar();
+
+        $query = new QueryBuilder($connection, $grammar, $connection->getPostProcessor());
+
+        //
         $builder = $this->newBuilder($query);
 
         $builder->setModel($this);
