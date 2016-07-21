@@ -280,27 +280,34 @@ class Model
      */
     public function newQuery()
     {
+        $query = $this->newBaseQueryBuilder();
+
+        $builder = $this->newQueryBuilder($query);
+
+        return $builder->setModel($this);
+    }
+
+    /**
+     * Get a new query builder instance for the connection.
+     *
+     * @return \Nova\Database\Query\Builder
+     */
+    protected function newBaseQueryBuilder()
+    {
         $connection = $this->getConnection();
 
         $grammar = $connection->getQueryGrammar();
 
-        $query = new QueryBuilder($connection, $grammar, $connection->getPostProcessor());
-
-        //
-        $builder = $this->newBuilder($query);
-
-        $builder->setModel($this);
-
-        return $builder;
+        return new QueryBuilder($connection, $grammar, $connection->getPostProcessor());
     }
 
     /**
      * Create a new ORM query builder for the Model.
      *
-     * @param  \Database\Query\Builder $query
-     * @return \Database\Query|static
+     * @param  \Nova\Database\Query\Builder $query
+     * @return \Nova\Database\Query|static
      */
-    public function newBuilder($query)
+    public function newQueryBuilder($query)
     {
         return new Builder($query);
     }
