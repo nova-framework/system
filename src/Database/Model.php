@@ -70,8 +70,10 @@ class Model
      */
     public function __construct($connection = null)
     {
-        // Setup the Connection name.
-        if(! is_null($connection)) {
+        if($connection === false) {
+            // Nothing to do; the user want a bare Model instance.
+            return;
+        } else if(! is_null($connection)) {
             $this->connection = $connection;
         }
 
@@ -151,6 +153,18 @@ class Model
             ->delete();
 
         return true;
+    }
+
+    /**
+     * Get the table associated with the model.
+     *
+     * @return void
+     */
+    public static function getTableName()
+    {
+        $model = new static(false);
+
+        return $model->getTable();
     }
 
     /**
