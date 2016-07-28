@@ -79,12 +79,18 @@ class AssetFileDispatcher
             }
         }
 
-        if (! empty($filePath)) {
-            // Serve the specified Asset File.
-            return $this->serveFile($filePath);
+        if (empty($filePath)) {
+            return false;
         }
 
-        return false;
+        // Serve the specified Asset File.
+        $response = $this->serveFile($filePath);
+
+        if($response instanceof BinaryFileResponse) {
+            $response->isNotModified($request);
+        }
+
+        return $response;
     }
 
     /**
@@ -172,26 +178,15 @@ class AssetFileDispatcher
         }
 
         // Create a BinaryFileResponse instance.
-        $response = new BinaryFileResponse($filePath, 200, array(), true, 'inline');
+        $response = new BinaryFileResponse($filePath, 200, array(), true, 'inline', true, false);
 
         // Set the Content type.
         $response->headers->set('Content-Type', $contentType);
 
-        // Set the Expires.
-        $expires = Carbon::now()->addYear();
-
-        $response->setExpires($expires);
-
-        // Set the Caching.
-        $lastModified = Carbon::createFromTimestamp(filemtime($filePath));
-
-        $response->setCache(array(
-            'last_modified' => $lastModified,
-            'max_age'       => 600,
-            's_maxage'      => 600,
-            'private'       => false,
-            'public'        => true,
-        ));
+        // Set the Cache Control.
+        $response->setTtl(600);
+        $response->setMaxAge(10800);
+        $response->setSharedMaxAge(600);
 
         return $response;
     }
