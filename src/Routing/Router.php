@@ -989,10 +989,10 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
         // First, we will supose that URI is associated with an Asset File.
         if ($request->method() == 'GET') {
-            $result = $this->dispatchAssetFile($request);
+            $response = $this->dispatchAssetFile($request);
 
-            if($result instanceof SymfonyResponse) {
-                return $this->prepareResponse($request, $result);
+            if($response instanceof SymfonyResponse) {
+                return $this->prepareResponse($request, $response);
             }
         }
 
