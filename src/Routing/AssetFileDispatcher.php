@@ -58,6 +58,9 @@ class AssetFileDispatcher
 
         $uri = $request->path();
 
+        //
+        $filePath = null;
+        
         if (preg_match('#^assets/(.*)$#i', $uri, $matches)) {
             $filePath = ROOTDIR .'assets' .DS .$matches[1];
         } else if (preg_match('#^(templates|modules)/([^/]+)/assets/([^/]+)/(.*)$#i', $uri, $matches)) {
