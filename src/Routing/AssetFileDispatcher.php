@@ -71,7 +71,8 @@ class AssetFileDispatcher
                 $filePath = $this->getTemplateAssetPath($module, $matches[3], $matches[4]);
             }
         } else {
-            $filePath = null;
+            // The URI does not match a Asset path; return null.
+            return null;
         }
 
         // Serve the specified Asset File.
@@ -144,9 +145,7 @@ class AssetFileDispatcher
      */
     public function serveFile($filePath)
     {
-        if (empty($filePath)) {
-            return null;
-        } else if (! file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             return new Response('', 404);
         } else if (! is_readable($filePath)) {
             return new Response('', 403);
