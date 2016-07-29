@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ModuleSeedCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *

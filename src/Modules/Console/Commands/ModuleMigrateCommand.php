@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class ModuleMigrateCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *

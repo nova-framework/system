@@ -15,6 +15,8 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class ModuleMigrateResetCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *

@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class ModuleMigrateRollbackCommand extends Command
 {
+    use ConfirmableTrait;
     use MigrationTrait;
 
     /**

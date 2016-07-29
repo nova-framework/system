@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ModuleMigrateRefreshCommand extends Command
 {
+    use ConfirmableTrait;
+
     /**
      * The console command name.
      *
