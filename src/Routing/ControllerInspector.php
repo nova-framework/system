@@ -126,7 +126,7 @@ class ControllerInspector
      */
     public function addUriWildcards($uri)
     {
-        return $uri.'/{one?}/{two?}/{three?}/{four?}/{five?}';
+        return $uri.'/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}';
     }
 
 }
