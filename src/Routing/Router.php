@@ -1715,7 +1715,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getAssetFileDispatcher()
     {
         if (is_null($this->assetDispatcher)) {
-            $this->assetDispatcher = new AssetFileDispatcher($this, $this->container);
+            $this->assetDispatcher = new AssetFileDispatcher($this->container);
         }
 
         return $this->assetDispatcher;

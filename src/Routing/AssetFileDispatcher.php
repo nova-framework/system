@@ -18,30 +18,12 @@ use Closure;
 class AssetFileDispatcher
 {
     /**
-     * The routing filterer implementation.
-     *
-     * @var \Nova\Routing\RouteFiltererInterface  $filterer
-     */
-    protected $filterer;
-
-    /**
-     * The IoC container instance.
-     *
-     * @var \Nova\Container\Container
-     */
-    protected $container;
-
-    /**
      * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\RouteFiltererInterface  $filterer
-     * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(RouteFiltererInterface $filterer, Container $container = null)
+    public function __construct()
     {
-        $this->filterer = $filterer;
-        $this->container = $container;
     }
 
     /**
@@ -60,7 +42,7 @@ class AssetFileDispatcher
 
         //
         $filePath = null;
-        
+
         if (preg_match('#^assets/(.*)$#i', $uri, $matches)) {
             $filePath = ROOTDIR .'assets' .DS .$matches[1];
         } else if (preg_match('#^(templates|modules)/([^/]+)/assets/([^/]+)/(.*)$#i', $uri, $matches)) {
