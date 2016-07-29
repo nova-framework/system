@@ -4,15 +4,10 @@ namespace Nova\Routing;
 
 use Nova\Http\Request;
 use Nova\Http\Response;
-use Nova\Container\Container;
 use Nova\Helpers\Inflector;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
-
-use Carbon\Carbon;
-
-use Closure;
 
 
 class AssetFileDispatcher
