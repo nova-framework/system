@@ -222,8 +222,7 @@ class LocalRepository extends Repository
      */
     public function isEnabled($slug)
     {
-        $module = $this->where('slug', $slug)
-            ->first();
+        $module = $this->where('slug', $slug);
 
         return $module['enabled'] === true;
     }
@@ -237,8 +236,7 @@ class LocalRepository extends Repository
      */
     public function isDisabled($slug)
     {
-        $module = $this->where('slug', $slug)
-            ->first();
+        $module = $this->where('slug', $slug);
 
         return $module['enabled'] === false;
     }
