@@ -256,10 +256,6 @@ abstract class Controller
      */
     protected function processResponse($response)
     {
-        if (! $response instanceof SymfonyResponse) {
-            $response = new Response($response);
-        }
-
         return $response;
     }
 

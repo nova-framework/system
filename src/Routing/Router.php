@@ -62,9 +62,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     /**
      * The asset file dispatcher instance.
      *
-     * @var \Nova\Routing\AssetFileDispatcher
+     * @var \Nova\Routing\FileDispatcher
      */
-    protected $assetDispatcher;
+    protected $fileDispatcher;
 
     /**
      * The controller inspector instance.
@@ -254,8 +254,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function controllers(array $controllers)
     {
-        foreach ($controllers as $uri => $name)
-        {
+        foreach ($controllers as $uri => $name) {
             $this->controller($uri, $name);
         }
     }
@@ -988,7 +987,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->currentRequest = $request;
 
         // First, we will supose that URI is associated with an Asset File.
-        $response = $this->dispatchAssetFile($request);
+        $response = $this->dispatchToFile($request);
 
         if (! is_null($response)) return $response;
 
@@ -1009,19 +1008,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->callFilter('after', $request, $response);
 
         return $response;
-    }
-
-    /**
-     * Dispatch the request to a asset file and return the response.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function dispatchAssetFile(Request $request)
-    {
-        $assetDispatcher = $this->getAssetFileDispatcher();
-
-        return $assetDispatcher->dispatch($request);
     }
 
     /**
@@ -1053,6 +1039,19 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->callRouteAfter($route, $request, $response);
 
         return $response;
+    }
+
+    /**
+     * Dispatch the request to a asset file and return the response.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return mixed
+     */
+    public function dispatchToFile(Request $request)
+    {
+        $fileDispatcher = $this->getFileDispatcher();
+
+        return $fileDispatcher->dispatch($request);
     }
 
     /**
@@ -1708,13 +1707,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      *
      * @return \Nova\Routing\ControllerDispatcher
      */
-    public function getAssetFileDispatcher()
+    public function getFileDispatcher()
     {
-        if (is_null($this->assetDispatcher)) {
-            $this->assetDispatcher = new AssetFileDispatcher();
+        if (is_null($this->fileDispatcher)) {
+            $this->fileDispatcher = new FileDispatcher();
         }
 
-        return $this->assetDispatcher;
+        return $this->fileDispatcher;
     }
 
     /**
