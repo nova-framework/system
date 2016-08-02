@@ -2,16 +2,17 @@
 
 namespace Nova\Http;
 
+use Nova\Session\Store as SessionStore;
 use Nova\Support\MessageBag;
 use Nova\Support\ViewErrorBag;
-use Nova\Session\Store as SessionStore;
 use Nova\Support\Contracts\MessageProviderInterface;
 
-use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 
-class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectResponse
+class RedirectResponse extends SymfonyRedirectResponse
 {
     /**
      * The request instance.
@@ -66,7 +67,7 @@ class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectRespons
      * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
      * @return $this
      */
-    public function withCookie(Cookie $cookie)
+    public function withCookie(SymfonyCookie $cookie)
     {
         $this->headers->setCookie($cookie);
 

@@ -2,13 +2,16 @@
 
 namespace Nova\Http;
 
+use Nova\Http\ResponseTrait;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\RenderableInterface;
+
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 use ArrayObject;
 
 
-class Response extends \Symfony\Component\HttpFoundation\Response
+class Response extends SymfonyResponse
 {
     use ResponseTrait;
 

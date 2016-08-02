@@ -2,9 +2,13 @@
 
 namespace Nova\Http;
 
+use Nova\Http\ResponseTrait;
 use Nova\Support\Contracts\JsonableInterface;
 
-class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse
+use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
+
+
+class JsonResponse extends SymfonyJsonResponse
 {
     use ResponseTrait;
 

@@ -2,7 +2,7 @@
 
 namespace Nova\Http;
 
-use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 
 
 trait ResponseTrait
@@ -28,7 +28,7 @@ trait ResponseTrait
      * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
      * @return $this
      */
-    public function withCookie(Cookie $cookie)
+    public function withCookie(SymfonyCookie $cookie)
     {
         $this->headers->setCookie($cookie);
 
