@@ -21,11 +21,13 @@ class LocalRepository extends Repository
         $modules = collect();
 
         $basenames->each(function ($module) use ($modules, $cache) {
-            $temp = collect($cache->get($module));
+            $basename = collect(array('basename' => $module));
 
-            $manifest = collect($this->getManifest($module));
+            $temp = $basename->merge(collect($cache->get($module)));
 
-            $modules->put($module, $temp->merge($manifest));
+            $manifest = $temp->merge(collect($this->getManifest($module)));
+
+            $modules->put($module, $manifest);
         });
 
         $modules->each(function ($module) {
@@ -41,7 +43,7 @@ class LocalRepository extends Repository
         });
 
         //
-        $content = $modules->toJson();
+        $content = $modules->toJson(JSON_PRETTY_PRINT);
 
         return $this->files->put($cachePath, $content);
     }
@@ -82,7 +84,7 @@ class LocalRepository extends Repository
      */
     public function where($key, $value)
     {
-        return $this->all()->where($key, $value)->first();
+        return collect($this->all()->where($key, $value)->first());
     }
 
     /**
@@ -174,21 +176,17 @@ class LocalRepository extends Repository
 
         $module = $this->where('slug', $slug);
 
-        $moduleKey = $module->keys()->first();
-
-        $values = $module->first();
-
-        if (isset($values[$key])) {
-            unset($values[$key]);
+        if (isset($module[$key])) {
+            unset($module[$key]);
         }
 
-        $values[$key] = $value;
+        $module[$key] = $value;
 
-        $module = collect(array($moduleKey => $values));
+        $module = collect(array($module['basename'] => $module));
 
         $merged = $cache->merge($module);
 
-        $content = $merged->toJson();
+        $content = $merged->toJson(JSON_PRETTY_PRINT);
 
         return $this->files->put($cachePath, $content);
     }
@@ -224,7 +222,7 @@ class LocalRepository extends Repository
     {
         $module = $this->where('slug', $slug);
 
-        return $module['enabled'] === true;
+        return ($module['enabled'] === true);
     }
 
     /**
@@ -238,7 +236,7 @@ class LocalRepository extends Repository
     {
         $module = $this->where('slug', $slug);
 
-        return $module['enabled'] === false;
+        return ($module['enabled'] === false);
     }
 
     /**
@@ -279,7 +277,7 @@ class LocalRepository extends Repository
         $cachePath = $this->getCachePath();
 
         if (! $this->files->exists($cachePath)) {
-            $content = json_encode(array());
+            $content = json_encode(array(), JSON_PRETTY_PRINT);
 
             $this->files->put($cachePath, $content);
 

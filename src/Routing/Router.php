@@ -1242,12 +1242,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function bind($key, $binder)
     {
-        if (is_string($binder))
-        {
+        if (is_string($binder)) {
             $binder = $this->createClassBinding($binder);
         }
 
-        $this->binders[str_replace('-', '_', $key)] = $binder;
+        $key = str_replace('-', '_', $key);
+
+        $this->binders[$key] = $binder;
     }
 
     /**
@@ -1267,7 +1268,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
             $method = count($segments) == 2 ? $segments[1] : 'bind';
 
-            $callable = [$this->container->make($segments[0]), $method];
+            $callable = array($this->container->make($segments[0]), $method);
 
             return call_user_func($callable, $value, $route);
         };
@@ -1479,7 +1480,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         return array_filter($parameters, function($p)
         {
-            return ! is_null($p) && $p !== '';
+            return ! is_null($p) && ($p !== '');
         });
     }
 
