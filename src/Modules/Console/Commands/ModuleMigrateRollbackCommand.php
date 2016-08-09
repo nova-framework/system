@@ -80,6 +80,7 @@ class ModuleMigrateRollbackCommand extends Command
 
         $this->call('migrate:rollback', array(
             '--database' => $this->option('database'),
+            '--force'    => $this->option('force'),
             '--pretend'  => $this->option('pretend'),
         ));
     }
@@ -105,6 +106,7 @@ class ModuleMigrateRollbackCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
+            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
             array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
         );
     }
