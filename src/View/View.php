@@ -70,20 +70,6 @@ class View implements ArrayAccess, Renderable
     /**
      * Render the View and return the result.
      *
-     * @return string
-     */
-    public function fetch()
-    {
-        ob_start();
-
-        $this->render();
-
-        return ob_get_clean();
-    }
-
-    /**
-     * Render the View and output the result.
-     *
      * @return void
      *
      * @throws \InvalidArgumentException
@@ -97,24 +83,17 @@ class View implements ArrayAccess, Renderable
         // Get a local copy of the prepared data.
         $data = $this->gatherData();
 
+        // Start output buffering.
+        ob_start();
+
         // Extract the rendering variables from the local data copy.
         foreach ($data as $variable => $value) {
             ${$variable} = $value;
         }
 
         require $this->path;
-    }
 
-    /**
-     * Render the View and display the result.
-     *
-     * @return void
-     */
-    public function display()
-    {
-        Response::sendHeaders();
-
-        $this->render();
+        return ob_get_clean();
     }
 
     /**
@@ -129,7 +108,7 @@ class View implements ArrayAccess, Renderable
         // All nested Views are evaluated before the main View.
         foreach ($data as $key => $value) {
             if ($value instanceof Renderable) {
-                $data[$key] = $value->fetch();
+                $data[$key] = $value->render();
             }
         }
 
@@ -341,7 +320,7 @@ class View implements ArrayAccess, Renderable
     public function __toString()
     {
         try {
-            return $this->fetch();
+            return $this->render();
         } catch (\Exception $e) {
             return '';
         }

@@ -45,7 +45,7 @@ class Response extends SymfonyResponse
         // render method on the object so we will avoid any "__toString" exceptions
         // that might be thrown and have their errors obscured by PHP's handling.
         else if ($content instanceof RenderableInterface) {
-            $content = $content->fetch();
+            $content = $content->render();
         }
 
         return parent::setContent($content);

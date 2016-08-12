@@ -391,7 +391,7 @@ class Mailer
      */
     protected function getView($view, $data)
     {
-        return $this->views->make($view, $data)->fetch();
+        return $this->views->make($view, $data)->render();
     }
 
     /**
