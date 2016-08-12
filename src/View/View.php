@@ -206,7 +206,7 @@ class View implements ArrayAccess, Renderable
     }
 
     /**
-     * Return true if the current View instance is a Template.
+     * Return true if the current View instance is a Layout.
      *
      * @return bool
      */
