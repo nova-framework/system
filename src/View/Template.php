@@ -3,6 +3,7 @@
 namespace Nova\View;
 
 use Nova\Foundation\Application;
+use Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\View;
 
 use Language;
