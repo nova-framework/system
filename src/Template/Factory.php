@@ -9,7 +9,7 @@ use Nova\View\View;
 use Language;
 
 
-class Template
+class Factory
 {
     /**
      * The Application instance.
