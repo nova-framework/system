@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View;
+namespace Nova\Template;
 
 use Nova\Foundation\Application;
 use Support\Contracts\ArrayableInterface as Arrayable;
