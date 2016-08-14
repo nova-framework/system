@@ -11,11 +11,4 @@ interface RenderableInterface
      * @return string
      */
     public function render();
-
-    /**
-     * Return true if the current Renderable instance is a Layout.
-     *
-     * @return bool
-     */
-    public function isLayout();
 }
