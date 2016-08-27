@@ -68,7 +68,7 @@ class Language
         //
         $pathName = Inflector::classify($domain);
 
-        if ($pathName == 'System') {
+        if ($pathName == 'Nova') {
             $basePath = SYSTEMDIR;
         } else if (is_dir(APPDIR .'Modules' .DS .$pathName)) {
             $basePath = APPDIR .'Modules/' .$pathName .DS;
