@@ -336,7 +336,7 @@ class Modules implements RepositoryInterface
      */
     public function resolveNamespace($properties)
     {
-        if(isset($properties['namespace'])) $properties['namespace'];
+        if (isset($properties['namespace'])) return $properties['namespace'];
 
         return Inflector::classify($properties['slug']);
     }
