@@ -2,30 +2,52 @@
 
 namespace Nova\Template;
 
-use Nova\Foundation\Application;
-use Support\Contracts\ArrayableInterface as Arrayable;
+use Nova\Config\Config;
+use Nova\Language\LanguageManager;
+use Nova\Support\Contracts\ArrayableInterface as Arrayable;
+use Nova\Template\Template;
+use Nova\View\Factory as ViewFactory;
+use Nova\View\ViewFinderInterface;
 use Nova\View\View;
-
-use Language;
 
 
 class Factory
 {
     /**
-     * The Application instance.
+     * The View Factory instance.
      *
-     * @var \Foundation\Application
+     * @var \Nova\View\Factory
      */
-    protected $app;
+    protected $factory;
+
+    /**
+     * The view finder implementation.
+     *
+     * @var \Nova\View\ViewFinderInterface
+     */
+    protected $finder;
+
+    /**
+     * The Language Manager instance.
+     *
+     * @var \Nova\Language\LanguageManager
+     */
+    protected $languages;
+
 
     /**
      * Create new Template Factory instance.
      *
+     * @param $factory The View Factory instance.
      * @return void
      */
-    function __construct(Application $app)
+    function __construct(ViewFactory $factory, ViewFinderInterface $finder, LanguageManager $languages)
     {
-        $this->app = $app;
+        $this->factory = $factory;
+
+        $this->finder = $finder;
+
+        $this->languages = $languages;
     }
 
     /**
@@ -47,15 +69,30 @@ class Factory
             $data = array();
         }
 
-        // Get the View Factory instance.
-        $factory = $this->app['view'];
-
         // Get the View file path.
-        $path = $this->viewFile($view, $template);
+        $path = $this->find($view, $template);
 
+        // Get the parsed data.
         $data = $this->parseData($data);
 
-        return new View($factory, $view, $path, $data, true);
+        return new Template($this->factory, $view, $path, $data);
+    }
+
+    /**
+     * Check if the view file exists.
+     *
+     * @param    string     $view
+     * @return    bool
+     */
+    public function exists($view, $template = null)
+    {
+        try {
+            $this->find($view, $template);
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -70,48 +107,50 @@ class Factory
     }
 
     /**
-     * Check if the view file exists.
+     * Find the View file.
      *
      * @param    string     $view
-     * @return    bool
+     * @param    string     $template
+     * @return    string
      */
-    public function exists($view, $template = null)
+    protected function find($view, $template = null)
     {
-        // Get the View file path.
-        $path = $this->viewFile($view, $template);
+        // Calculate the current Template name.
+        $template = $template ?: Config::get('app.template');
 
-        return file_exists($path);
+        // Calculate the search path.
+        $path = sprintf('Templates/%s/%s', $template, $view);
+
+        // Make the path absolute and adjust the directory separator.
+        $path = str_replace('/', DS, APPDIR .$path);
+
+        // Find the View file depending on the Language direction.
+        $language = $this->getLanguage();
+
+        if ($language->direction() == 'rtl') {
+            // Search for the View file used on the RTL languages.
+            $filePath = $this->finder->find($path .'-rtl');
+        } else {
+            $filePath = null;
+        }
+
+        if (is_null($filePath)) {
+            $filePath = $this->finder->find($path);
+        }
+
+        if (! is_null($filePath)) return $filePath;
+
+        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
     }
 
     /**
-     * Get the view file.
+     * Return the current Language instance.
      *
-     * @param    string     $view
-     * @return    string
+     * @return \Nova\Language\Language
      */
-    protected function viewFile($view, $template = null)
+    protected function getLanguage()
     {
-        $config = $this->app['config'];
-
-        $language = $this->app['language'];
-
-        // Get the base path.
-        $path = $this->app['path'];
-
-        // Calculate the current Template name.
-        $template = $template ?: $config['app.template'];
-
-        if ($language->direction() == 'rtl') {
-            // The current Language is RTL. Check the path of the RTL Template file.
-            $filePath = str_replace('/', DS, "$path/Templates/$template/$view-rtl.php");
-
-            if (is_readable($filePath)) {
-                // A valid RTL Template file found; return it.
-                return $filePath;
-            }
-        }
-
-        // Return the path of the current LTR Template file.
-        return str_replace('/', DS, "$path/Templates/$template/$view.php");
+        return $this->languages->instance();
     }
+
 }
