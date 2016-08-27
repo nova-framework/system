@@ -78,7 +78,7 @@ class Modules implements RepositoryInterface
     protected function autoloadFiles($properties)
     {
         if (! isset($properties['autoload'])) {
-            $files = array('Config.php', 'Events.php', 'Filters.php', 'Routes.php');
+            $files = array('Config.php', 'Events.php', 'Filters.php', 'Routes.php', 'Bootstrap.php');
         } else {
             $files = $properties['autoload'];
         }

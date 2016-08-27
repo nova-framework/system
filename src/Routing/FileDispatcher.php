@@ -19,6 +19,7 @@ class FileDispatcher
      */
     public function __construct()
     {
+        //
     }
 
     /**
@@ -52,24 +53,11 @@ class FileDispatcher
             }
         } else {
             // The URI is not a Asset File path.
-            $path = null;
+            return null;
         }
 
-        //
-        // Serve the specified Asset File.
-        if (! empty($path)) {
-            $response = $this->serve($path);
-        } else {
-            $response = null;
-        }
-
-        if($response instanceof BinaryFileResponse) {
-            $response->isNotModified($request);
-
-            $response->prepare($request);
-        }
-
-        return $response;
+        // Get the Response instance and return it
+        return $this->serve($path, $request);
     }
 
     /**
@@ -79,7 +67,7 @@ class FileDispatcher
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function serve($path)
+    public function serve($path, Request $request)
     {
         if (! file_exists($path)) {
             return new Response('', 404);
@@ -115,6 +103,9 @@ class FileDispatcher
         $response->setTtl(600);
         $response->setMaxAge(10800);
         $response->setSharedMaxAge(600);
+
+        // Prepare against the Request instance.
+        $response->isNotModified($request);
 
         return $response;
     }
