@@ -710,7 +710,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected function updateGroupStack(array $attributes)
     {
         if ( ! empty($this->groupStack)) {
-            $attributes = $this->mergeGroup($attributes, last($this->groupStack));
+            $attributes = static::mergeGroup($attributes, last($this->groupStack));
         }
 
         $this->groupStack[] = $attributes;
@@ -724,7 +724,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function mergeWithLastGroup($new)
     {
-        return $this->mergeGroup($new, last($this->groupStack));
+        return static::mergeGroup($new, last($this->groupStack));
     }
 
     /**
