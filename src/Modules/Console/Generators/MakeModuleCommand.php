@@ -57,6 +57,7 @@ class MakeModuleCommand extends Command
     protected $moduleFiles = array(
         'Database/Seeds/{{namespace}}DatabaseSeeder.php',
         'Providers/{{namespace}}ServiceProvider.php',
+        'Bootstrap.php',
         'Config.php',
         'Events.php',
         'Filters.php',
