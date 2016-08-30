@@ -3,6 +3,7 @@
 namespace Nova\Database\Query\Grammars;
 
 use Nova\Database\Query\Builder;
+use Nova\Database\Query\Grammar;
 
 
 class SQLiteGrammar extends Grammar

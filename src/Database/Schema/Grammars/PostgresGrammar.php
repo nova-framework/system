@@ -4,6 +4,7 @@ namespace Nova\Database\Schema\Grammars;
 
 use Nova\Support\Fluent;
 use Nova\Database\Schema\Blueprint;
+use Nova\Database\Schema\Grammar;
 
 
 class PostgresGrammar extends Grammar

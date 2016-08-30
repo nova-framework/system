@@ -2,8 +2,8 @@
 
 use Nova\Support\Collection;
 use Nova\Database\ConnectionInterface;
-use Nova\Database\Query\Grammars\Grammar;
-use Nova\Database\Query\Processors\Processor;
+use Nova\Database\Query\Grammar;
+use Nova\Database\Query\Processor;
 
 use Closure;
 
@@ -20,14 +20,14 @@ class Builder
     /**
      * The database query grammar instance.
      *
-     * @var \Nova\Database\Query\Grammars\Grammar
+     * @var \Nova\Database\Query\Grammar
      */
     protected $grammar;
 
     /**
      * The database query post processor instance.
      *
-     * @var \Nova\Database\Query\Processors\Processor
+     * @var \Nova\Database\Query\Processor
      */
     protected $processor;
 
@@ -214,13 +214,11 @@ class Builder
      * Create a new query builder instance.
      *
      * @param  \Nova\Database\ConnectionInterface  $connection
-     * @param  \Nova\Database\Query\Grammars\Grammar  $grammar
-     * @param  \Nova\Database\Query\Processors\Processor  $processor
+     * @param  \Nova\Database\Query\Grammar  $grammar
+     * @param  \Nova\Database\Query\Processor  $processor
      * @return void
      */
-    public function __construct(ConnectionInterface $connection,
-                                Grammar $grammar,
-                                Processor $processor)
+    public function __construct(ConnectionInterface $connection, Grammar $grammar, Processor $processor)
     {
         $this->grammar = $grammar;
         $this->processor = $processor;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Query\Processors;
+namespace Nova\Database\Query;
 
 use Nova\Database\Query\Builder;
 

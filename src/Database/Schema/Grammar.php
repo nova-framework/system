@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Schema\Grammars;
+namespace Nova\Database\Schema;
 
 use Nova\Support\Fluent;
 use Doctrine\DBAL\Schema\Column;
@@ -10,6 +10,7 @@ use Nova\Database\Query\Expression;
 use Nova\Database\Schema\Blueprint;
 use Nova\Database\Grammar as BaseGrammar;
 use Doctrine\DBAL\Schema\AbstractSchemaManager as SchemaManager;
+
 
 abstract class Grammar extends BaseGrammar
 {

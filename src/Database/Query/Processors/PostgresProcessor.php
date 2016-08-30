@@ -3,6 +3,7 @@
 namespace Nova\Database\Query\Processors;
 
 use Nova\Database\Query\Builder;
+use Nova\Database\Query\Processor;
 
 
 class PostgresProcessor extends Processor

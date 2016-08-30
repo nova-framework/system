@@ -4,7 +4,7 @@ namespace Nova\Database\Schema;
 
 use Nova\Support\Fluent;
 use Nova\Database\Connection;
-use Nova\Database\Schema\Grammars\Grammar;
+use Nova\Database\Schema\Grammar;
 
 use Closure;
 

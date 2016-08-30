@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Query\Grammars;
+namespace Nova\Database\Query;
 
 use Nova\Database\Query\Builder;
 use Nova\Database\Grammar as BaseGrammar;
