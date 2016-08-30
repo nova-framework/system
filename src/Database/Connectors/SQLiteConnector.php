@@ -2,6 +2,9 @@
 
 namespace Nova\Database\Connectors;
 
+use Nova\Database\Connector;
+use Nova\Database\ConnectorInterface;
+
 
 class SQLiteConnector extends Connector implements ConnectorInterface
 {

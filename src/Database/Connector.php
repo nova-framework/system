@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Connectors;
+namespace Nova\Database;
 
 use PDO;
 
