@@ -9,7 +9,7 @@
 namespace Nova\Helpers;
 
 use Config;
-use ClassPreloader\Exceptions\RedirectToException;
+use Exceptions;
 use Nova\Helpers\Session;
 use Nova\Helpers\Inflector;
 
