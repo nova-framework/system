@@ -181,7 +181,7 @@ class Connection implements ConnectionInterface
      */
     protected function getDefaultQueryGrammar()
     {
-        return new Query\Grammars\Grammar;
+        return new Query\Grammar;
     }
 
     /**
@@ -218,7 +218,7 @@ class Connection implements ConnectionInterface
      */
     protected function getDefaultPostProcessor()
     {
-        return new Query\Processors\Processor;
+        return new Query\Processor;
     }
 
     /**
