@@ -3,10 +3,9 @@
 namespace Nova\Template;
 
 use Nova\Config\Config;
-use Nova\Language\LanguageManager;
+use Nova\Foundation\Application;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Template\Template;
-use Nova\View\Factory as ViewFactory;
 use Nova\View\ViewFinderInterface;
 use Nova\View\View;
 
@@ -16,9 +15,9 @@ class Factory
     /**
      * The View Factory instance.
      *
-     * @var \Nova\View\Factory
+     * @var \Nova\Foundation\Application
      */
-    protected $factory;
+    protected $app;
 
     /**
      * The view finder implementation.
@@ -27,27 +26,18 @@ class Factory
      */
     protected $finder;
 
-    /**
-     * The Language Manager instance.
-     *
-     * @var \Nova\Language\LanguageManager
-     */
-    protected $languages;
-
-
+    
     /**
      * Create new Template Factory instance.
      *
      * @param $factory The View Factory instance.
      * @return void
      */
-    function __construct(ViewFactory $factory, ViewFinderInterface $finder, LanguageManager $languages)
+    function __construct(Application $app, ViewFinderInterface $finder)
     {
-        $this->factory = $factory;
+        $this->app = $app;
 
         $this->finder = $finder;
-
-        $this->languages = $languages;
     }
 
     /**
@@ -75,7 +65,10 @@ class Factory
         // Get the parsed data.
         $data = $this->parseData($data);
 
-        return new Template($this->factory, $view, $path, $data);
+        // Get the View Factory instance.
+        $factory = $this->getViewFactory();
+
+        return new Template($factory, $view, $path, $data);
     }
 
     /**
@@ -143,6 +136,17 @@ class Factory
         throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
     }
 
+
+    /**
+     * Return the current View Factory instance.
+     *
+     * @return \Nova\View\Factory
+     */
+    protected function getViewFactory()
+    {
+        return $this->app['view'];
+    }
+
     /**
      * Return the current Language instance.
      *
@@ -150,7 +154,9 @@ class Factory
      */
     protected function getLanguage()
     {
-        return $this->languages->instance();
+        $languages = $this->app['language'];
+
+        return $languages->instance();
     }
 
 }
