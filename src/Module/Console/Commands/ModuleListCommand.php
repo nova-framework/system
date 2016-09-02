@@ -2,7 +2,7 @@
 
 namespace Nova\Module\Console\Commands;
 
-use Nova\Module\Modules;
+use Nova\Module\ModuleRepository;
 use Nova\Console\Command;
 
 
@@ -23,7 +23,7 @@ class ModuleListCommand extends Command
     protected $description = 'List all application modules';
 
     /**
-     * @var Modules
+     * @var \Nova\Module\ModuleRepository
      */
     protected $module;
 
@@ -37,9 +37,9 @@ class ModuleListCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @param Modules $module
+     * @param \Nova\Module\ModuleRepository $module
      */
-    public function __construct(Modules $module)
+    public function __construct(ModuleRepository $module)
     {
         parent::__construct();
 

@@ -5,7 +5,7 @@ namespace Nova\Module\Console\Commands;
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
-use Nova\Module\Modules;
+use Nova\Module\ModuleRepository;
 use Nova\Support\Arr;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -31,7 +31,7 @@ class ModuleMigrateCommand extends Command
     protected $description = 'Run the database migrations for a specific or all modules';
 
     /**
-     * @var Modules
+     * @var \Nova\Module\ModuleRepository
      */
     protected $module;
 
@@ -44,9 +44,9 @@ class ModuleMigrateCommand extends Command
      * Create a new command instance.
      *
      * @param Migrator $migrator
-     * @param Modules  $module
+     * @param ModuleRepository  $module
      */
-    public function __construct(Migrator $migrator, Modules $module)
+    public function __construct(Migrator $migrator, ModuleRepository $module)
     {
         parent::__construct();
 

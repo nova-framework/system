@@ -7,7 +7,7 @@ use Nova\Foundation\Application;
 use Nova\Module\RepositoryInterface;
 
 
-class Modules implements RepositoryInterface
+class ModuleRepository implements RepositoryInterface
 {
     /**
      * @var Application
@@ -20,7 +20,7 @@ class Modules implements RepositoryInterface
     protected $repository;
 
     /**
-     * Create a new Modules instance.
+     * Create a new ModuleRepository instance.
      *
      * @param Application         $app
      * @param RepositoryInterface $repository
@@ -55,7 +55,7 @@ class Modules implements RepositoryInterface
      *
      * @return string
      *
-     * @throws \Nova\Modules\FileMissingException
+     * @throws \Nova\Module\FileMissingException
      */
     protected function registerServiceProvider($properties)
     {

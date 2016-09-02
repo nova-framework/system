@@ -7,7 +7,7 @@ use Nova\Console\ConfirmableTrait;
 use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\Migrations\Migrator;
-use Nova\Module\Modules;
+use Nova\Module\ModuleRepository;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,7 +32,7 @@ class ModuleMigrateResetCommand extends Command
     protected $description = 'Rollback all database migrations for a specific or all modules';
 
     /**
-     * @var Modules
+     * @var \Nova\Module\ModuleRepository
      */
     protected $module;
 
@@ -53,7 +53,7 @@ class ModuleMigrateResetCommand extends Command
      * @param Filesystem $files
      * @param Migrator   $migrator
      */
-    public function __construct(Modules $module, Filesystem $files, Migrator $migrator)
+    public function __construct(ModuleRepository $module, Filesystem $files, Migrator $migrator)
     {
         parent::__construct();
 

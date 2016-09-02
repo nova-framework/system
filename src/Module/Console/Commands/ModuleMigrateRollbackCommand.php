@@ -5,7 +5,7 @@ namespace Nova\Module\Console\Commands;
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Nova\Module\Console\MigrationTrait;
-use Nova\Module\Modules;
+use Nova\Module\ModuleRepository;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,16 +31,16 @@ class ModuleMigrateRollbackCommand extends Command
     protected $description = 'Rollback the last database migrations for a specific or all modules';
 
     /**
-     * @var Modules
+     * @var \Nova\Module\ModuleRepository
      */
     protected $module;
 
     /**
      * Create a new command instance.
      *
-     * @param Modules $module
+     * @param \Nova\Module\ModuleRepository $module
      */
-    public function __construct(Modules $module)
+    public function __construct(ModuleRepository $module)
     {
         parent::__construct();
 
