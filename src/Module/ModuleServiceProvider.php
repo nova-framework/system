@@ -6,7 +6,7 @@ use Nova\Module\Modules;
 use Nova\Support\ServiceProvider;
 
 
-class ModulesServiceProvider extends ServiceProvider
+class ModuleServiceProvider extends ServiceProvider
 {
     /**
      * @var bool Indicates if loading of the Provider is deferred.
