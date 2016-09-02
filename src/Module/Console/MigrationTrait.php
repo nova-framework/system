@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Modules\Console;
+namespace Nova\Module\Console;
 
 
 trait MigrationTrait

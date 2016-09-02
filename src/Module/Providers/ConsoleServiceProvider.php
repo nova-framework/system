@@ -1,16 +1,16 @@
 <?php
 
-namespace Nova\Modules\Providers;
+namespace Nova\Module\Providers;
 
-use Nova\Modules\Console\Commands\ModuleDisableCommand;
-use Nova\Modules\Console\Commands\ModuleEnableCommand;
-use Nova\Modules\Console\Commands\ModuleListCommand;
-use Nova\Modules\Console\Commands\ModuleMigrateCommand;
-use Nova\Modules\Console\Commands\ModuleMigrateRefreshCommand;
-use Nova\Modules\Console\Commands\ModuleMigrateResetCommand;
-use Nova\Modules\Console\Commands\ModuleMigrateRollbackCommand;
-use Nova\Modules\Console\Commands\ModuleOptimizeCommand;
-use Nova\Modules\Console\Commands\ModuleSeedCommand;
+use Nova\Module\Console\Commands\ModuleDisableCommand;
+use Nova\Module\Console\Commands\ModuleEnableCommand;
+use Nova\Module\Console\Commands\ModuleListCommand;
+use Nova\Module\Console\Commands\ModuleMigrateCommand;
+use Nova\Module\Console\Commands\ModuleMigrateRefreshCommand;
+use Nova\Module\Console\Commands\ModuleMigrateResetCommand;
+use Nova\Module\Console\Commands\ModuleMigrateRollbackCommand;
+use Nova\Module\Console\Commands\ModuleOptimizeCommand;
+use Nova\Module\Console\Commands\ModuleSeedCommand;
 
 use Nova\Support\ServiceProvider;
 

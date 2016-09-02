@@ -1,11 +1,11 @@
 <?php
 
-namespace Nova\Modules\Repositories;
+namespace Nova\Module\Repositories;
 
-use Nova\Helpers\Inflector;
-use Nova\Modules\RepositoryInterface;
 use Nova\Config\Repository as Config;
+use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
+use Nova\Module\RepositoryInterface;
 use Nova\Support\Str;
 
 

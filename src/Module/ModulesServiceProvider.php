@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Modules;
+namespace Nova\Module;
 
-use Nova\Modules\Modules;
+use Nova\Module\Modules;
 use Nova\Support\ServiceProvider;
 
 

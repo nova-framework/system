@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Modules\Repositories;
+namespace Nova\Module\Repositories;
 
 use Nova\Helpers\Inflector;
 

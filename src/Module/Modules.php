@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Modules;
+namespace Nova\Module;
 
 use Nova\Helpers\Inflector;
-use Nova\Modules\RepositoryInterface;
 use Nova\Foundation\Application;
+use Nova\Module\RepositoryInterface;
 
 
 class Modules implements RepositoryInterface

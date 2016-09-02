@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Modules;
+namespace Nova\Module;
 
 
 interface RepositoryInterface

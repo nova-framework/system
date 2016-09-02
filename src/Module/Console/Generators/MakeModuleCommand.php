@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Modules\Console\Generators;
+namespace Nova\Module\Console\Generators;
 
-use Nova\Modules\Modules;
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
+use Nova\Module\Modules;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;

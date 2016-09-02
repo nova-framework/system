@@ -1,11 +1,11 @@
 <?php
 
-namespace Nova\Modules\Console\Generators;
+namespace Nova\Module\Console\Generators;
 
-use Nova\Helpers\Inflector;
 use Nova\Console\Command as CommandGenerator;
+use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
-use Nova\Modules\Modules;
+use Nova\Module\Modules;
 use Nova\Support\Str;
 
 

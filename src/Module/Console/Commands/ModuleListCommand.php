@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Modules\Console\Commands;
+namespace Nova\Module\Console\Commands;
 
-use Nova\Modules\Modules;
+use Nova\Module\Modules;
 use Nova\Console\Command;
 
 

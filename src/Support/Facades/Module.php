@@ -5,6 +5,9 @@ namespace Nova\Support\Facades;
 use Nova\Support\Facades\Facade;
 
 
+/**
+ * @see \Module\Modules
+ */
 class Module extends Facade
 {
     /**
@@ -12,8 +15,5 @@ class Module extends Facade
      *
      * @return string
      */
-    protected static function getFacadeAccessor()
-    {
-        return 'modules';
-    }
+    protected static function getFacadeAccessor() { return 'modules'; }
 }

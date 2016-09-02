@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\Modules\Providers;
+namespace Nova\Module\Providers;
 
-use Nova\Modules\Console\Generators\MakeModuleCommand;
-use Nova\Modules\Console\Generators\MakeControllerCommand;
-use Nova\Modules\Console\Generators\MakeModelCommand;
-use Nova\Modules\Console\Generators\MakeMigrationCommand;
-use Nova\Modules\Console\Generators\MakeSeederCommand;
+use Nova\Module\Console\Generators\MakeModuleCommand;
+use Nova\Module\Console\Generators\MakeControllerCommand;
+use Nova\Module\Console\Generators\MakeModelCommand;
+use Nova\Module\Console\Generators\MakeMigrationCommand;
+use Nova\Module\Console\Generators\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 
