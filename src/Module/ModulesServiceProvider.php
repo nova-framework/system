@@ -28,13 +28,13 @@ class ModulesServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->register('Nova\Modules\Providers\RepositoryServiceProvider');
-        $this->app->register('Nova\Modules\Providers\ConsoleServiceProvider');
-        $this->app->register('Nova\Modules\Providers\GeneratorServiceProvider');
+        $this->app->register('Nova\Module\Providers\RepositoryServiceProvider');
+        $this->app->register('Nova\Module\Providers\ConsoleServiceProvider');
+        $this->app->register('Nova\Module\Providers\GeneratorServiceProvider');
 
         //
         $this->app->bindShared('modules', function ($app) {
-            $repository = $app->make('Nova\Modules\RepositoryInterface');
+            $repository = $app->make('Nova\Module\RepositoryInterface');
 
             return new Modules($app, $repository);
         });
