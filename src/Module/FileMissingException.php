@@ -3,6 +3,4 @@
 namespace Nova\Module;
 
 
-class FileMissingException extends \Exception
-{
-}
+class FileMissingException extends \Exception {}
