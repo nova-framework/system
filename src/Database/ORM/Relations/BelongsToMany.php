@@ -136,7 +136,7 @@ class BelongsToMany extends Relation
      */
     public function firstOrFail($columns = array('*'))
     {
-        if ( ! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) return $model;
 
         throw new ModelNotFoundException;
     }
@@ -623,7 +623,7 @@ class BelongsToMany extends Relation
         $results = array();
 
         foreach ($records as $id => $attributes) {
-            if ( ! is_array($attributes)) {
+            if (! is_array($attributes)) {
                 list($id, $attributes) = array($attributes, array());
             }
 
@@ -649,7 +649,7 @@ class BelongsToMany extends Relation
             // If the ID is not in the list of existing pivot IDs, we will insert a new pivot
             // record, otherwise, we will just update this existing record on this joining
             // table, so that the developers will easily update these records pain free.
-            if ( ! in_array($id, $current)) {
+            if (! in_array($id, $current)) {
                 $this->attach($id, $attributes, $touch);
 
                 $changes['attached'][] = (int) $id;
@@ -802,7 +802,7 @@ class BelongsToMany extends Relation
     {
         $fresh = $this->parent->freshTimestamp();
 
-        if ( ! $exists && $this->hasPivotColumn($this->createdAt())) {
+        if (! $exists && $this->hasPivotColumn($this->createdAt())) {
             $record[$this->createdAt()] = $fresh;
         }
 

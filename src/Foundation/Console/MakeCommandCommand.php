@@ -62,7 +62,7 @@ class MakeCommandCommand extends Command
      */
     protected function writeCommand($file, $stub)
     {
-        if ( ! file_exists($file)) {
+        if (! file_exists($file)) {
             $this->files->put($file, $this->formatStub($stub));
 
             $this->info('Command created successfully.');
@@ -81,7 +81,7 @@ class MakeCommandCommand extends Command
     {
         $stub = str_replace('{{class}}', $this->input->getArgument('name'), $stub);
 
-        if ( ! is_null($this->option('command'))) {
+        if (! is_null($this->option('command'))) {
             $stub = str_replace('command:name', $this->option('command'), $stub);
         }
 
@@ -96,7 +96,7 @@ class MakeCommandCommand extends Command
      */
     protected function addNamespace($stub)
     {
-        if ( ! is_null($namespace = $this->input->getOption('namespace'))) {
+        if (! is_null($namespace = $this->input->getOption('namespace'))) {
             return str_replace('{{namespace}}', ' namespace App\Console\\'.$namespace.';', $stub);
         } else {
             return str_replace('{{namespace}}', ' namespace App\Console;', $stub);

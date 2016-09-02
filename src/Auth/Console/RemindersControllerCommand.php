@@ -53,7 +53,7 @@ class RemindersControllerCommand extends Command
     {
         $destination = $this->getPath() .DS .'Reminders.php';
 
-        if ( ! $this->files->exists($destination)) {
+        if (! $this->files->exists($destination)) {
             $this->files->copy(__DIR__ .DS .'stubs' .DS .'controller.stub', $destination);
 
             $this->info('Password reminders controller created successfully!');
@@ -71,7 +71,7 @@ class RemindersControllerCommand extends Command
      */
     private function getPath()
     {
-        if ( ! $path = $this->input->getOption('path')) {
+        if (! $path = $this->input->getOption('path')) {
             $path = $this->nova['path'] .DS .'Controllers';
         }
 

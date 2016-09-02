@@ -50,7 +50,7 @@ class Blueprint
     {
         $this->table = $table;
 
-        if ( ! is_null($callback)) $callback($this);
+        if (! is_null($callback)) $callback($this);
     }
 
     /**
@@ -88,7 +88,7 @@ class Blueprint
             $method = 'compile'.ucfirst($command->name);
 
             if (method_exists($grammar, $method)) {
-                if ( ! is_null($sql = $grammar->$method($this, $command, $connection))) {
+                if (! is_null($sql = $grammar->$method($this, $command, $connection))) {
                     $statements = array_merge($statements, (array) $sql);
                 }
             }

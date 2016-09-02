@@ -54,7 +54,7 @@ class RollbackCommand extends Command
      */
     public function fire()
     {
-        if ( ! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) return;
 
         $this->migrator->setConnection($this->input->getOption('database'));
 

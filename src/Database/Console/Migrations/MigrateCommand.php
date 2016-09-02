@@ -60,7 +60,7 @@ class MigrateCommand extends BaseCommand
      */
     public function fire()
     {
-        if ( ! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) return;
 
         $this->prepareDatabase();
 
@@ -97,7 +97,7 @@ class MigrateCommand extends BaseCommand
     {
         $this->migrator->setConnection($this->input->getOption('database'));
 
-        if ( ! $this->migrator->repositoryExists()) {
+        if (! $this->migrator->repositoryExists()) {
             $options = array('--database' => $this->input->getOption('database'));
 
             $this->call('migrate:install', $options);

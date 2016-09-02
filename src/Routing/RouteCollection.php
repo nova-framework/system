@@ -109,7 +109,7 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function addToActionList($action, $route)
     {
-        if ( ! isset($this->actionList[$action['controller']])) {
+        if (! isset($this->actionList[$action['controller']])) {
             $this->actionList[$action['controller']] = $route;
         }
     }
@@ -131,7 +131,7 @@ class RouteCollection implements Countable, IteratorAggregate
         // by the consumer. Otherwise we will check for routes with another verb.
         $route = $this->check($routes, $request);
 
-        if ( ! is_null($route)) {
+        if (! is_null($route)) {
             return $route->bind($request);
         }
 
@@ -163,7 +163,7 @@ class RouteCollection implements Countable, IteratorAggregate
         $others = array();
 
         foreach ($methods as $method) {
-            if ( ! is_null($this->check($this->get($method), $request, false))) {
+            if (! is_null($this->check($this->get($method), $request, false))) {
                 $others[] = $method;
             }
         }

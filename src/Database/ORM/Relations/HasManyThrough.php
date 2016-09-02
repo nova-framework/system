@@ -214,7 +214,7 @@ class HasManyThrough extends Relation
      */
     public function firstOrFail($columns = array('*'))
     {
-        if ( ! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) return $model;
 
         throw new ModelNotFoundException;
     }

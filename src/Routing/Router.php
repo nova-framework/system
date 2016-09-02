@@ -274,7 +274,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // First, we will check to see if a controller prefix has been registered in
         // the route group. If it has, we will need to prefix it before trying to
         // reflect into the class instance and pull out the method for routing.
-        if ( ! empty($this->groupStack)) {
+        if (! empty($this->groupStack)) {
             $prepended = $this->prependGroupUses($controller);
         }
 
@@ -425,7 +425,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function getResourceUri($resource)
     {
-        if ( ! str_contains($resource, '.')) return $resource;
+        if (! str_contains($resource, '.')) return $resource;
 
         // Once we have built the base URI, we'll remove the wildcard holder for this
         // base resource name so that the individual route adders can suffix these
@@ -709,7 +709,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function updateGroupStack(array $attributes)
     {
-        if ( ! empty($this->groupStack)) {
+        if (! empty($this->groupStack)) {
             $attributes = static::mergeGroup($attributes, last($this->groupStack));
         }
 
@@ -788,7 +788,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function getLastGroupPrefix()
     {
-        if ( ! empty($this->groupStack)) {
+        if (! empty($this->groupStack)) {
             $last = end($this->groupStack);
 
             return isset($last['prefix']) ? $last['prefix'] : '';
@@ -834,7 +834,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // If we have groups that need to be merged, we will merge them now after this
         // route has already been created and is ready to go. After we're done with
         // the merge we will be ready to return the route back out to the caller.
-        if ( ! empty($this->groupStack)) {
+        if (! empty($this->groupStack)) {
             $this->mergeController($route);
         }
 
@@ -921,7 +921,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // Here we'll get an instance of this controller dispatcher and hand it off to
         // the Closure so it will be used to resolve the class instances out of our
         // IoC container instance and call the appropriate methods on the class.
-        if ( ! empty($this->groupStack)) {
+        if (! empty($this->groupStack)) {
             $action['uses'] = $this->prependGroupUses($action['uses']);
         }
 
@@ -1181,7 +1181,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function when($pattern, $name, $methods = null)
     {
-        if ( ! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
+        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
 
         $this->patternFilters[$pattern][] = compact('name', 'methods');
     }
@@ -1196,7 +1196,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function whenRegex($pattern, $name, $methods = null)
     {
-        if ( ! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
+        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
 
         $this->regexFilters[$pattern][] = compact('name', 'methods');
     }
@@ -1311,7 +1311,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function callFilter($filter, $request, $response = null)
     {
-        if ( ! $this->filtering) return null;
+        if (! $this->filtering) return null;
 
         return $this->events->until('router.'.$filter, array($request, $response));
     }
@@ -1342,7 +1342,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         foreach ($this->findPatternFilters($request) as $filter => $parameters) {
             $response = $this->callRouteFilter($filter, $parameters, $route, $request);
 
-            if ( ! is_null($response)) return $response;
+            if (! is_null($response)) return $response;
         }
     }
 
@@ -1434,7 +1434,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         foreach ($route->beforeFilters() as $filter => $parameters) {
             $response = $this->callRouteFilter($filter, $parameters, $route, $request);
 
-            if ( ! is_null($response)) return $response;
+            if (! is_null($response)) return $response;
         }
     }
 
@@ -1465,7 +1465,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function callRouteFilter($filter, $parameters, $route, $request, $response = null)
     {
-        if ( ! $this->filtering) return null;
+        if (! $this->filtering) return null;
 
         $data = array_merge(array($route, $request, $response), $parameters);
 
@@ -1625,7 +1625,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function currentRouteAction()
     {
-        if ( ! $this->current()) return;
+        if (! $this->current()) return;
 
         $action = $this->current()->getAction();
 

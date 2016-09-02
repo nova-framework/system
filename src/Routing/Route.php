@@ -125,9 +125,9 @@ class Route
         $this->compileRoute();
 
         foreach ($this->getValidators() as $validator) {
-            if ( ! $includingMethod && $validator instanceof MethodValidator) continue;
+            if (! $includingMethod && $validator instanceof MethodValidator) continue;
 
-            if ( ! $validator->matches($this, $request)) return false;
+            if (! $validator->matches($this, $request)) return false;
         }
 
         return true;
@@ -168,7 +168,7 @@ class Route
      */
     public function beforeFilters()
     {
-        if ( ! isset($this->action['before'])) return array();
+        if (! isset($this->action['before'])) return array();
 
         return $this->parseFilters($this->action['before']);
     }
@@ -180,7 +180,7 @@ class Route
      */
     public function afterFilters()
     {
-        if ( ! isset($this->action['after'])) return array();
+        if (! isset($this->action['after'])) return array();
 
         return $this->parseFilters($this->action['after']);
     }
@@ -393,7 +393,7 @@ class Route
         // If the route has a regular expression for the host part of the URI, we will
         // compile that and get the parameter matches for this domain. We will then
         // merge them into this parameters array so that this array is completed.
-        if ( ! is_null($this->compiled->getHostRegex())) {
+        if (! is_null($this->compiled->getHostRegex())) {
             $params = $this->bindHostParameters(
                 $request, $params
             );
@@ -481,7 +481,7 @@ class Route
         // If no "uses" property has been set, we will dig through the array to find a
         // Closure instance within this list. We will set the first Closure we come
         // across into the "uses" property that will get fired off by this route.
-        else if ( ! isset($action['uses'])) {
+        else if (! isset($action['uses'])) {
             $action['uses'] = $this->findClosure($action);
         }
 

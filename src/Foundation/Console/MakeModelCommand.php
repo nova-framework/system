@@ -63,7 +63,7 @@ class MakeModelCommand extends Command
      */
     protected function writeCommand($file, $stub)
     {
-        if ( ! file_exists($file)) {
+        if (! file_exists($file)) {
             $this->files->put($file, $this->formatStub($stub));
 
             $this->info('Model created successfully.');
@@ -93,7 +93,7 @@ class MakeModelCommand extends Command
      */
     protected function addNamespace($stub)
     {
-        if ( ! is_null($namespace = $this->input->getOption('namespace'))) {
+        if (! is_null($namespace = $this->input->getOption('namespace'))) {
             return str_replace('{{namespace}}', ' namespace App\Models\\'.$namespace.';', $stub);
         } else {
             return str_replace('{{namespace}}', ' namespace App\Models;', $stub);

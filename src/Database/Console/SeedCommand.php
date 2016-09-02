@@ -54,7 +54,7 @@ class SeedCommand extends Command
      */
     public function fire()
     {
-        if ( ! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) return;
 
         $this->resolver->setDefaultConnection($this->getDatabase());
 

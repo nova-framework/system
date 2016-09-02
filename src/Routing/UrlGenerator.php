@@ -226,7 +226,7 @@ class UrlGenerator
 
         $parameters = (array) $parameters;
 
-        if ( ! is_null($route)) {
+        if (! is_null($route)) {
             return $this->toRoute($route, $parameters, $absolute);
         }
 

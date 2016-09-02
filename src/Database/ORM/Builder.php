@@ -112,7 +112,7 @@ class Builder
      */
     public function findOrFail($id, $columns = array('*'))
     {
-        if ( ! is_null($model = $this->find($id, $columns))) return $model;
+        if (! is_null($model = $this->find($id, $columns))) return $model;
 
         throw (new ModelNotFoundException)->setModel(get_class($this->model));
     }
@@ -138,7 +138,7 @@ class Builder
      */
     public function firstOrFail($columns = array('*'))
     {
-        if ( ! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) return $model;
 
         throw (new ModelNotFoundException)->setModel(get_class($this->model));
     }
@@ -352,7 +352,7 @@ class Builder
      */
     protected function addUpdatedAtColumn(array $values)
     {
-        if ( ! $this->model->usesTimestamps()) return $values;
+        if (! $this->model->usesTimestamps()) return $values;
 
         $column = $this->model->getUpdatedAtColumn();
 
@@ -816,7 +816,7 @@ class Builder
         foreach (explode('.', $name) as $segment) {
             $progress[] = $segment;
 
-            if ( ! isset($results[$last = implode('.', $progress)])) {
+            if (! isset($results[$last = implode('.', $progress)])) {
                 $results[$last] = function() {};
             }
         }
