@@ -74,6 +74,10 @@ class ModuleMigrateResetCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
+            if (! $this->module->exists($slug)) {
+                return $this->error('Module does not exist.');
+            }
+
             if ($this->module->isEnabled($slug)) {
                 return $this->reset($slug);
             }

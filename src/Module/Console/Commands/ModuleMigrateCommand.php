@@ -68,10 +68,12 @@ class ModuleMigrateCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            $module = $this->module->where('slug', $slug);
+            if (! $this->module->exists($slug)) {
+                return $this->error('Module does not exist.');
+            }
 
-            if ($this->module->isEnabled($module['slug'])) {
-                return $this->migrate($module['slug']);
+            if ($this->module->isEnabled($slug)) {
+                return $this->migrate($slug);
             } else {
                 return $this->error('Nothing to migrate.');
             }

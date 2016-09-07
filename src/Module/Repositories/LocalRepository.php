@@ -21,6 +21,8 @@ class LocalRepository extends Repository
         $modules = collect();
 
         $basenames->each(function ($module) use ($modules, $cache) {
+            echo $module ."\n";
+
             $basename = collect(array('basename' => $module));
 
             $temp = $basename->merge(collect($cache->get($module)));
@@ -286,7 +288,7 @@ class LocalRepository extends Repository
             return collect(json_decode($content, true));
         }
 
-        return collect(json_decode($this->files->get($cachePath), true));
+        return collect(array_values(json_decode($this->files->get($cachePath), true)));
     }
 
     /**

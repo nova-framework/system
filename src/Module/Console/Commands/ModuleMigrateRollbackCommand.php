@@ -59,6 +59,10 @@ class ModuleMigrateRollbackCommand extends Command
         $slug = $this->argument('slug');
 
         if ($slug) {
+            if (! $this->module->exists($slug)) {
+                return $this->error('Module does not exist.');
+            }
+
             return $this->rollback($slug);
         }
 
