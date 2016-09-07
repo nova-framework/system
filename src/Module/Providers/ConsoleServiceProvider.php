@@ -100,8 +100,8 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected function registerMigrateRefreshCommand()
     {
-        $this->app->singleton('command.module.migrate.refresh', function () {
-            return new ModuleMigrateRefreshCommand();
+        $this->app->singleton('command.module.migrate.refresh', function ($app) {
+            return new ModuleMigrateRefreshCommand($app['modules']);
         });
 
         $this->commands('command.module.migrate.refresh');

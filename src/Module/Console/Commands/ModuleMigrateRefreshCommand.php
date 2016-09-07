@@ -4,6 +4,7 @@ namespace Nova\Module\Console\Commands;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
+use Nova\Module\ModuleRepository;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -28,6 +29,23 @@ class ModuleMigrateRefreshCommand extends Command
     protected $description = 'Reset and re-run all migrations for a specific or all modules';
 
     /**
+     * @var \Nova\Module\ModuleRepository
+     */
+    protected $module;
+
+    /**
+     * Create a new command instance.
+     *
+     * @param ModuleRepository  $module
+     */
+    public function __construct(ModuleRepository $module)
+    {
+        parent::__construct();
+
+        $this->module = $module;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -37,6 +55,10 @@ class ModuleMigrateRefreshCommand extends Command
         if (! $this->confirmToProceed()) return;
 
         $slug = $this->argument('slug');
+
+        if (! $this->module->exists($slug)) {
+            return $this->error('Module does not exist.');
+        }
 
         $this->call('module:migrate:reset', array(
             'slug'       => $slug,
