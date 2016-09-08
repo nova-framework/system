@@ -21,8 +21,6 @@ class LocalRepository extends Repository
         $modules = collect();
 
         $basenames->each(function ($module) use ($modules, $cache) {
-            echo $module ."\n";
-
             $basename = collect(array('basename' => $module));
 
             $temp = $basename->merge(collect($cache->get($module)));
