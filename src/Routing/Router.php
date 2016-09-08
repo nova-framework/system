@@ -1714,7 +1714,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         if (isset($this->fileDispatcher)) return $this->fileDispatcher;
 
-        return $this->fileDispatcher = $this->container->make('Routing\Assets\DispatcherInterface');
+        return $this->fileDispatcher = $this->container->make('Nova\Routing\Assets\DispatcherInterface');
     }
 
     /**
