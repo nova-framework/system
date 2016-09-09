@@ -989,9 +989,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // First, we will supose that URI is associated with an Asset File.
         $response = $this->dispatchToFile($request);
 
-        if (! is_null($response)) {
-            return $this->prepareResponse($request, $response);
-        }
+        if (! is_null($response)) return $response;
 
         // If no response was returned from the before filter, we will call the proper
         // route instance to get the response. If no route is found a response will

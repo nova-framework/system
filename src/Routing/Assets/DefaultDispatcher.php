@@ -61,8 +61,13 @@ class DefaultDispatcher implements DispatcherInterface
             return null;
         }
 
-        // Get the Response instance and return it.
-        return $this->serve($path, $request);
+        // Get the Response instance associated to the Asset File.
+        $response = $this->serve($path, $request);
+
+        // Prepare the Response instance.
+        $response->prepare($request);
+
+        return $response;
     }
 
     /**
