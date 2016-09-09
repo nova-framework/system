@@ -3,17 +3,28 @@
 namespace Nova\Routing\Assets;
 
 use Nova\Config\Config;
-use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
+
+use Carbon\Carbon;
 
 
 class DefaultDispatcher implements DispatcherInterface
 {
+    /**
+     * The currently accepted encodings for Response content compression.
+     *
+     * @var array
+     */
+    protected static $algorithms = array('gzip', 'deflate');
+
+
     /**
      * Create a new Default Dispatcher instance.
      *
@@ -29,7 +40,7 @@ class DefaultDispatcher implements DispatcherInterface
      *
      * @return \Symfony\Component\HttpFoundation\Response|null
      */
-    public function dispatch(Request $request)
+    public function dispatch(SymfonyRequest $request)
     {
         // For proper Assets serving, the file URI should be either of the following:
         //
@@ -78,12 +89,12 @@ class DefaultDispatcher implements DispatcherInterface
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function serve($path, Request $request)
+    public function serve($path, SymfonyRequest $request)
     {
         if (! file_exists($path)) {
-            return new Response('', 404);
+            return new Response('File Not Found', 404);
         } else if (! is_readable($path)) {
-            return new Response('', 403);
+            return new Response('Unauthorized Access', 403);
         }
 
         // Collect the current file information.
@@ -95,17 +106,32 @@ class DefaultDispatcher implements DispatcherInterface
         switch ($fileExt = pathinfo($path, PATHINFO_EXTENSION)) {
             case 'css':
                 $contentType = 'text/css';
+
                 break;
             case 'js':
                 $contentType = 'application/javascript';
+
                 break;
             default:
                 $contentType = $guesser->guess($path);
+
                 break;
         }
 
-        // Create a BinaryFileResponse instance.
-        $response = new BinaryFileResponse($path, 200, array(), true, 'inline', true, false);
+        // Calculate the file type.
+        $type = str_is('text/*', $contentType) ? 'text' : $contentType;
+
+        switch($type) {
+            case 'application/javascript':
+            case 'text':
+                $response = $this->createFileResponse($path, $request);
+
+                break;
+            default:
+                $response = $this->createBinaryFileResponse($path);
+
+                break;
+        }
 
         // Set the Content type.
         $response->headers->set('Content-Type', $contentType);
@@ -119,6 +145,71 @@ class DefaultDispatcher implements DispatcherInterface
 
         // Prepare against the Request instance.
         $response->isNotModified($request);
+
+        return $response;
+    }
+
+    protected function createBinaryFileResponse($path, $contentDisposition = null)
+    {
+        $contentDisposition = $contentDisposition ?: 'inline';
+
+        return new BinaryFileResponse($path, 200, array(), true, $contentDisposition, true, false);
+    }
+
+    protected function createFileResponse($path, SymfonyRequest $request)
+    {
+        // Create a Response instance.
+        $response = new Response(file_get_contents($path), 200);
+
+        // Setup the Last-Modified header.
+        $lastModified = Carbon::createFromTimestampUTC(filemtime($path));
+
+        $response->headers->set('Last-Modified', $lastModified->format('D, j M Y H:i:s') .' GMT');
+
+        return $this->compressResponse($response, $request);
+    }
+
+    protected function compressResponse(SymfonyResponse $response, SymfonyRequest $request)
+    {
+        // Get the accepted encodings from Request instance.
+        $acceptEncoding = $request->headers->get('Accept-Encoding');
+
+        if (! is_null($acceptEncoding)) {
+            $acceptEncoding = array_map('trim', explode(',', $acceptEncoding));
+        } else {
+            $acceptEncoding = array();
+        }
+
+        // Calculate the available algorithms.
+        $algorithms = array_values(array_intersect($acceptEncoding, static::$algorithms));
+
+        // If there are no available compression algorithms, just return the Response instance.
+        if (empty($algorithms)) {
+            $response->headers->set('Content-Length', strlen($response->getContent()));
+
+            return $response;
+        }
+
+        // Get the (first) compression algorithm.
+        $algorithm = array_shift($algorithms);
+
+        // Compress the Response content.
+        if ($algorithm == 'gzip') {
+            $content = gzencode($response->getContent(), -1, FORCE_GZIP);
+        } else if ($algorithm == 'deflate') {
+            $content = gzencode($response->getContent(), -1, FORCE_DEFLATE);
+        } else {
+            $content = $response->getContent();
+        }
+
+        // Setup the (new) Response content.
+        $response->setContent($content);
+
+        // Setup the (new) Content Length.
+        $response->headers->set('Content-Length', strlen($content));
+
+        // Setup the Content Encoding.
+        $response->headers->set('Content-Encoding', $algorithm);
 
         return $response;
     }
