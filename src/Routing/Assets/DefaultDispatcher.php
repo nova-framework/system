@@ -110,8 +110,10 @@ class DefaultDispatcher implements DispatcherInterface
         $response->headers->set('Content-Type', $contentType);
 
         // Set the Cache Control.
+        $cacheTime = Config::get('routing.assets.cacheTime', 10800);
+
         $response->setTtl(600);
-        $response->setMaxAge(10800);
+        $response->setMaxAge($cacheTime);
         $response->setSharedMaxAge(600);
 
         // Prepare against the Request instance.
