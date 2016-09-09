@@ -2,6 +2,7 @@
 
 namespace Nova\Routing\Assets;
 
+use Nova\Config\Config;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;
