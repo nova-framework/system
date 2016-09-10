@@ -149,19 +149,6 @@ class DefaultDispatcher implements DispatcherInterface
 
     protected function createFileResponse($path, SymfonyRequest $request)
     {
-        // Create a Response instance.
-        $response = new Response(file_get_contents($path), 200);
-
-        // Setup the Last-Modified header.
-        $lastModified = Carbon::createFromTimestampUTC(filemtime($path));
-
-        $response->headers->set('Last-Modified', $lastModified->format('D, j M Y H:i:s') .' GMT');
-
-        return $this->compressResponse($response, $request);
-    }
-
-    protected function compressResponse(SymfonyResponse $response, SymfonyRequest $request)
-    {
         // Get the accepted encodings from Request instance.
         $acceptEncoding = $request->headers->get('Accept-Encoding');
 
@@ -171,6 +158,19 @@ class DefaultDispatcher implements DispatcherInterface
             $acceptEncoding = array();
         }
 
+        // Create a Response instance.
+        $response = new Response(file_get_contents($path), 200);
+
+        // Setup the Last-Modified header.
+        $lastModified = Carbon::createFromTimestampUTC(filemtime($path));
+
+        $response->headers->set('Last-Modified', $lastModified->format('D, j M Y H:i:s') .' GMT');
+
+        return $this->compressResponseContent($response, $acceptEncoding);
+    }
+
+    protected function compressResponseContent(SymfonyResponse $response, array $acceptEncoding)
+    {
         // Calculate the available algorithms.
         $algorithms = array_values(array_intersect($acceptEncoding, static::$algorithms));
 
