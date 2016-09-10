@@ -140,13 +140,6 @@ class DefaultDispatcher implements DispatcherInterface
         return $response;
     }
 
-    protected function createBinaryFileResponse($path, $contentDisposition = null)
-    {
-        $contentDisposition = $contentDisposition ?: 'inline';
-
-        return new BinaryFileResponse($path, 200, array(), true, $contentDisposition, true, false);
-    }
-
     protected function createFileResponse($path, SymfonyRequest $request)
     {
         // Get the accepted encodings from Request instance.
@@ -169,6 +162,13 @@ class DefaultDispatcher implements DispatcherInterface
         return $this->compressResponseContent($response, $acceptEncoding);
     }
 
+    protected function createBinaryFileResponse($path, $contentDisposition = null)
+    {
+        $contentDisposition = $contentDisposition ?: 'inline';
+
+        return new BinaryFileResponse($path, 200, array(), true, $contentDisposition, true, false);
+    }
+    
     protected function compressResponseContent(SymfonyResponse $response, array $acceptEncoding)
     {
         // Calculate the available algorithms.
