@@ -94,6 +94,11 @@ class LanguageManager
     public function setLocale($locale)
     {
         $this->locale = $locale;
+
+        //
+        setlocale(LC_ALL, $locale);
+
+        Carbon::setLocale($locale);
     }
 
     /**
