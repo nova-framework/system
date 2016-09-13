@@ -24,7 +24,7 @@ class DefaultDispatcher implements DispatcherInterface
      * @var array
      */
     protected $paths = array();
-    
+
     /**
      * The currently accepted encodings for Response content compression.
      *
@@ -77,10 +77,11 @@ class DefaultDispatcher implements DispatcherInterface
             $baseFolder = strtolower($matches[1]);
 
             if (($baseFolder == 'vendor') && ! Str::startsWith($path, $this->paths)) {
-                // The current URI is not a valid Vendor path; nothing to do.
-            } else {
-                $filePath = ROOTDIR .$baseFolder .DS .str_replace('/', DS, $path);
+                // The current URI is not a valid Vendor path.
+                return null;
             }
+
+            $filePath = ROOTDIR .$baseFolder .DS .str_replace('/', DS, $path);
         }
 
         if (! is_null($filePath) && in_array($request->method(), array('GET', 'HEAD'))) {
