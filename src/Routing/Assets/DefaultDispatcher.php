@@ -20,6 +20,12 @@ use LogicException;
 class DefaultDispatcher implements DispatcherInterface
 {
     /**
+     * The valid Vendor paths.
+     * @var array
+     */
+    protected $paths = array();
+    
+    /**
      * The currently accepted encodings for Response content compression.
      *
      * @var array
@@ -34,7 +40,7 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function __construct()
     {
-        //
+        $this->paths = Config::get('routing.assets.paths', array());
     }
 
     /**
@@ -209,5 +215,5 @@ class DefaultDispatcher implements DispatcherInterface
 
         return $response;
     }
-    
+
 }
