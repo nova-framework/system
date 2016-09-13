@@ -50,38 +50,41 @@ class DefaultDispatcher implements DispatcherInterface
         // /modules/blog/assets/css/style.css
         // /assets/css/style.css
 
-        // Check the HTTP Method on the Request.
-        if (! in_array($request->method(), array('GET', 'HEAD'))) {
-            return null;
-        }
-
-        // Check the URI on the Request.
         $uri = $request->path();
 
-        if (preg_match('#^assets/(.*)$#i', $uri, $matches)) {
-            $path = ROOTDIR .'assets' .DS .$matches[1];
-        } else if (preg_match('#^(templates|modules)/([^/]+)/assets/([^/]+)/(.*)$#i', $uri, $matches)) {
-            $module = Str::studly($matches[2]);
+        // Calculate the Asset File path, if it is a valid one.
+        $filePath = null;
 
-            if(strtolower($matches[1]) == 'modules') {
-                // A Module Asset file.
-                $path = static::getModulePath($module, $matches[3], $matches[4]);
+        if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $path = $matches[3];
+
+            //
+            $baseFolder = (strtolower($matches[1]) == 'modules') ? 'Modules' : 'Templates';
+
+            $basePath = APPDIR .$baseFolder .DS .Str::studly($matches[2]) .DS .'Assets' .DS;
+
+            $filePath = $basePath .str_replace('/', DS, $path);
+        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
+            $path = $matches[2];
+
+            //
+            $baseFolder = strtolower($matches[1]);
+
+            if (($baseFolder == 'vendor') && ! Str::startsWith($path, $this->paths)) {
+                // The current URI is not a valid Vendor path; nothing to do.
             } else {
-                // A Template Asset file.
-                $path = static::getTemplatePath($module, $matches[3], $matches[4]);
+                $filePath = ROOTDIR .$baseFolder .DS .str_replace('/', DS, $path);
             }
-        } else {
-            // The URI is not a Asset File path.
-            return null;
         }
 
-        // Get the Response instance associated to the Asset File.
-        $response = $this->serve($path, $request);
+        if (! is_null($filePath) && in_array($request->method(), array('GET', 'HEAD'))) {
+            $response = $this->serve($filePath, $request);
 
-        // Prepare the Response instance.
-        $response->prepare($request);
+            // Prepare the Response instance.
+            $response->prepare($request);
 
-        return $response;
+            return $response;
+        }
     }
 
     /**
@@ -206,70 +209,5 @@ class DefaultDispatcher implements DispatcherInterface
 
         return $response;
     }
-
-    /**
-     * Get the path of a Asset file
-     * @return string|null
-     */
-    protected static function getModulePath($module, $folder, $path)
-    {
-        $path = str_replace('/', DS, $path);
-
-        //
-        $basePath = APPDIR .str_replace('/', DS, "Modules/$module/Assets/");
-
-        return $basePath .$folder .DS .$path;
-    }
-
-    /**
-     * Get the path of a Asset file
-     * @return string|null
-     */
-    protected static function getTemplatePath($template, $folder, $path)
-    {
-        $path = str_replace('/', DS, $path);
-
-        // Retrieve the Template Info
-        $info = static::getTemplateInfo($template);
-
-        //
-        $basePath = null;
-
-        // Get the current Asset Folder's Mode.
-        $mode = array_get($info, 'assets.paths.' .$folder, 'local');
-
-        if ($mode == 'local') {
-            $basePath = APPDIR .str_replace('/', DS, "Templates/$template/Assets/");
-        } else if ($mode == 'vendor') {
-            // Get the Vendor name.
-            $vendor = array_get($info, 'assets.vendor', '');
-
-            if (! empty($vendor)) {
-                $basePath = ROOTDIR .str_replace('/', DS, "vendor/$vendor/");
-            }
-        }
-
-        return ! empty($basePath) ? $basePath .$folder .DS .$path : '';
-    }
-
-    /**
-     * Get the Template Info
-     * @return array
-     */
-    protected static function getTemplateInfo($template)
-    {
-        // Retrieve the Template Info
-        $filePath = APPDIR .'Templates' .DS .$template .DS .'template.json';
-
-        if (! is_readable($filePath)) {
-            return array();
-        }
-
-        // Get the file contents and decode the JSON content.
-        $result = json_decode(file_get_contents($filePath), true);
-
-        // The Template Info should be always an array; ensure that.
-        return $result ?: array();
-    }
-
+    
 }
