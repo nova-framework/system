@@ -74,7 +74,7 @@ class ReCaptcha
         if (! $this->isActive()) return true;
 
         // Get the Http Request instance.
-        $request = HttpRequest::instance();
+        $request = Request::instance();
 
         // Get the recaptcha response value.
         $response = $response ?: $request->input('g-recaptcha-response', '');
