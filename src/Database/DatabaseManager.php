@@ -189,7 +189,7 @@ class DatabaseManager implements ConnectionResolverInterface
 
         // The database connection can also utilize a cache manager instance when cache
         // functionality is used on queries, which provides an expressive interface
-        // to caching both fluent queries and Eloquent queries that are executed.
+        // to caching both fluent queries and ORM queries that are executed.
         $app = $this->app;
 
         $connection->setCacheManager(function() use ($app)

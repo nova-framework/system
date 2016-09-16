@@ -57,7 +57,7 @@ class Builder
     );
 
     /**
-     * Create a new Eloquent query builder instance.
+     * Create a new ORM query builder instance.
      *
      * @param  \Nova\Database\Query\Builder  $query
      * @return void
@@ -212,7 +212,7 @@ class Builder
 
         // If the model has a mutator for the requested column, we will spin through
         // the results and mutate the values so that the mutated version of these
-        // columns are returned as you would expect from these Eloquent models.
+        // columns are returned as you would expect from these ORM models.
         if ($this->model->hasGetMutator($column)) {
             foreach ($results as $key => &$value) {
                 $fill = array($column => $value);
@@ -403,7 +403,7 @@ class Builder
     public function getModels($columns = array('*'))
     {
         // First, we will simply get the raw results from the query builders which we
-        // can use to populate an array with Eloquent models. We will pass columns
+        // can use to populate an array with ORM models. We will pass columns
         // that should be selected as well, which are typically just everything.
         $results = $this->query->get($columns);
 

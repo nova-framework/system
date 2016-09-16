@@ -240,7 +240,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     const UPDATED_AT = 'updated_at';
 
     /**
-     * Create a new Eloquent model instance.
+     * Create a new ORM model instance.
      *
      * @param  array  $attributes
      * @return void
@@ -435,7 +435,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         // This method just provides a convenient way for us to generate fresh model
         // instances of this current model. It is particularly useful during the
-        // hydration of new objects via the Eloquent query builder instances.
+        // hydration of new objects via the ORM query builder instances.
         $model = new static((array) $attributes);
 
         $model->exists = $exists;
@@ -777,7 +777,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 
         $instance = new $related;
 
-        // Once we have the foreign key names, we'll just create a new Eloquent query
+        // Once we have the foreign key names, we'll just create a new ORM query
         // for the related models and returns the relationship instance which will
         // actually be responsible for retrieving and hydrating every relations.
         $query = $instance->newQuery();
@@ -1743,7 +1743,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function newQueryWithoutScopes()
     {
-        $builder = $this->newEloquentBuilder(
+        $builder = $this->newORMBuilder(
             $this->newBaseQueryBuilder()
         );
 
@@ -1754,7 +1754,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
-     * Apply all of the global scopes to an Eloquent builder.
+     * Apply all of the global scopes to an ORM builder.
      *
      * @param  \Nova\Database\ORM\Builder  $builder
      * @return \Nova\Database\ORM\Builder
@@ -1769,7 +1769,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
-     * Remove all of the global scopes from an Eloquent builder.
+     * Remove all of the global scopes from an ORM builder.
      *
      * @param  \Nova\Database\ORM\Builder  $builder
      * @return \Nova\Database\ORM\Builder
@@ -1784,12 +1784,12 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
+     * Create a new ORM query builder for the model.
      *
      * @param  \Nova\Database\Query\Builder $query
      * @return \Nova\Database\ORM\Builder|static
      */
-    public function newEloquentBuilder($query)
+    public function newORMBuilder($query)
     {
         return new Builder($query);
     }
@@ -1809,7 +1809,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
-     * Create a new Eloquent Collection instance.
+     * Create a new ORM Collection instance.
      *
      * @param  array  $models
      * @return \Nova\Database\ORM\Collection

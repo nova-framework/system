@@ -183,7 +183,7 @@ class BelongsToMany extends Relation
 
         // When paginating results, we need to add the pivot columns to the query and
         // then hydrate into the pivot objects once the results have been gathered
-        // from the database since this isn't performed by the Eloquent builder.
+        // from the database since this isn't performed by the ORM builder.
         $pager = $this->query->paginate($perPage, $columns);
 
         $this->hydratePivotRelation($pager->getItems());

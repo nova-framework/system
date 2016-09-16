@@ -13,7 +13,7 @@ use Closure;
 abstract class Relation
 {
     /**
-     * The Eloquent query builder instance.
+     * The ORM query builder instance.
      *
      * @var \Nova\Database\ORM\Builder
      */
@@ -51,7 +51,7 @@ abstract class Relation
     {
         $this->query = $query;
         $this->parent = $parent;
-        
+
         $this->related = $query->getModel();
 
         $this->addConstraints();
@@ -194,7 +194,7 @@ abstract class Relation
     }
 
     /**
-     * Get the base query builder driving the Eloquent builder.
+     * Get the base query builder driving the ORM builder.
      *
      * @return \Nova\Database\Query\Builder
      */
