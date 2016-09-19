@@ -40,7 +40,28 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function __construct()
     {
-        $this->paths = Config::get('routing.assets.paths', array());
+        $config = Config::get('routing.assets.paths', array());
+
+        $this->paths = $this->parseVendorPaths($config);
+    }
+
+    protected function parseVendorPaths(array $config)
+    {
+        $result = array();
+
+        foreach ($config as $vendor => $paths) {
+            if (is_array($paths)) {
+                $result = array_merge($result, array_map(function($value) use ($vendor)
+                {
+                    return $vendor .'/' .$value;
+
+                }, $paths));
+            } else if (is_string($paths)) {
+                $result[] = $vendor .'/' .$paths;
+            }
+        }
+
+        return $result;
     }
 
     /**
