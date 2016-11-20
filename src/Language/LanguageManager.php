@@ -13,7 +13,7 @@ class LanguageManager
     /**
      * The Application instance.
      *
-     * @var \Foundation\Application
+     * @var \Nova\Foundation\Application
      */
     protected $app;
 
@@ -23,6 +23,13 @@ class LanguageManager
      * @var string
      */
     protected $locale;
+
+    /**
+     * The know Languages.
+     *
+     * @var array
+     */
+    protected $languages = array();
 
     /**
      * The active Language instances.
@@ -42,6 +49,9 @@ class LanguageManager
         $this->app = $app;
 
         $this->locale = $locale;
+
+        // Setup the know Languages.
+        $this->languages = $app['config']['languages'];
     }
 
     /**
@@ -59,12 +69,20 @@ class LanguageManager
 
         // Initialize the domain instance, if not already exists.
         if (! isset($this->instances[$id])) {
-            $languages = $this->app['config']['languages'];
-
-            $this->instances[$id] = new Language($languages, $domain, $locale);
+            $this->instances[$id] = new Language($this, $domain, $locale);
         }
 
         return $this->instances[$id];
+    }
+
+    /**
+     * Get the know Languages.
+     *
+     * @return string
+     */
+    public function getLanguages()
+    {
+        return $this->languages;
     }
 
     /**
@@ -95,10 +113,14 @@ class LanguageManager
      */
     public function setLocale($locale)
     {
+        // Setup the Framework locale.
         $this->locale = $locale;
 
-        //
-        setlocale(LC_ALL, $locale);
+        // Retrieve the full locale from languages list.
+        $language = array_get($this->languages, $locale .'.locale', 'en_US') .'.utf8';
+
+        // Setup the Carbon and PHP's time locale.
+        setlocale(LC_TIME, $language);
 
         Carbon::setLocale($locale);
     }

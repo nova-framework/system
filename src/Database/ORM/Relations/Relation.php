@@ -49,7 +49,7 @@ abstract class Relation
      */
     public function __construct(Builder $query, Model $parent)
     {
-        $this->query = $query;
+        $this->query  = $query;
         $this->parent = $parent;
 
         $this->related = $query->getModel();
@@ -157,9 +157,7 @@ abstract class Relation
     {
         static::$constraints = false;
 
-        // When resetting the relation where clause, we want to shift the first element
-        // off of the bindings, leaving only the constraints that the developers put
-        // as "extra" on the relationships, and not original relation constraints.
+        //
         $results = call_user_func($callback);
 
         static::$constraints = true;

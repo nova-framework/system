@@ -1,11 +1,17 @@
 <?php
+/**
+ * Connector - A PDO based Database Connector.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Database;
 
 use PDO;
 
 
-class Connector
+abstract class Connector
 {
     /**
      * The default PDO connection options.
@@ -13,12 +19,18 @@ class Connector
      * @var array
      */
     protected $options = array(
-            PDO::ATTR_CASE => PDO::CASE_NATURAL,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-            PDO::ATTR_STRINGIFY_FETCHES => false,
-            PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
+        PDO::ATTR_STRINGIFY_FETCHES => false,
+        PDO::ATTR_EMULATE_PREPARES  => false,
     );
+
+
+    public function __construct()
+    {
+        //
+    }
 
     /**
      * Get the PDO options based on the configuration.
@@ -39,7 +51,7 @@ class Connector
      * @param  string  $dsn
      * @param  array   $config
      * @param  array   $options
-     * @return \PDO
+     * @return PDO
      */
     public function createConnection($dsn, array $config, array $options)
     {

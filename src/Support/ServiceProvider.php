@@ -51,26 +51,6 @@ abstract class ServiceProvider
      */
     abstract public function register();
 
-    /**
-     * Register the package's custom Forge commands.
-     *
-     * @param  array  $commands
-     * @return void
-     */
-    public function commands($commands)
-    {
-        $commands = is_array($commands) ? $commands : func_get_args();
-
-        // To register the commands with Forge, we will grab each of the arguments
-        // passed into the method and listen for Forge "start" event which will
-        // give us the Forge console instance which we will give commands to.
-        $events = $this->app['events'];
-
-        $events->listen('forge.start', function($forge) use ($commands)
-        {
-            $forge->resolveCommands($commands);
-        });
-    }
 
     /**
      * Get the services provided by the provider.
@@ -91,7 +71,7 @@ abstract class ServiceProvider
     {
         return array();
     }
-    
+
     /**
      * Determine if the provider is deferred.
      *

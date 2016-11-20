@@ -1,8 +1,13 @@
-<?php namespace Nova\Database\Query;
+<?php
+
+namespace Nova\Database\Query;
 
 use Nova\Support\Collection;
+use Nova\Support\Str;
 use Nova\Database\ConnectionInterface;
+use Nova\Database\Query\Expression;
 use Nova\Database\Query\Grammar;
+use Nova\Database\Query\JoinClause;
 use Nova\Database\Query\Processor;
 
 use Closure;
@@ -203,12 +208,6 @@ class Builder
         'rlike', 'regexp', 'not regexp',
     );
 
-    /**
-     * Whether use write pdo for select.
-     *
-     * @var bool
-     */
-    protected $useWritePdo = false;
 
     /**
      * Create a new query builder instance.
@@ -220,8 +219,8 @@ class Builder
      */
     public function __construct(ConnectionInterface $connection, Grammar $grammar, Processor $processor)
     {
-        $this->grammar = $grammar;
-        $this->processor = $processor;
+        $this->grammar    = $grammar;
+        $this->processor  = $processor;
         $this->connection = $connection;
     }
 
@@ -302,19 +301,11 @@ class Builder
      */
     public function join($table, $one, $operator = null, $two = null, $type = 'inner', $where = false)
     {
-        // If the first "column" of the join is really a Closure instance the developer
-        // is trying to build a join with a complex "on" clause containing more than
-        // one condition, so we'll add the join and call a Closure with the query.
         if ($one instanceof Closure) {
             $this->joins[] = new JoinClause($type, $table);
 
             call_user_func($one, end($this->joins));
-        }
-
-        // If the column is simply a string, we can assume the join simply has a basic
-        // "on" clause with a single condition. So we will just build the join with
-        // this simple join clauses attached to it. There is not a join callback.
-        else {
+        } else {
             $join = new JoinClause($type, $table);
 
             $this->joins[] = $join->on(
@@ -409,9 +400,6 @@ class Builder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
-        // If the column is an array, we will assume it is an array of key-value pairs
-        // and can add them each as a where clause. We will maintain the boolean we
-        // received when the method was called and pass it into the nested where.
         if (is_array($column)) {
             return $this->whereNested(function($query) use ($column)
             {
@@ -421,46 +409,29 @@ class Builder
             }, $boolean);
         }
 
-        // Here we will make some assumptions about the operator. If only 2 values are
-        // passed to the method, we will assume that the operator is an equals sign
-        // and keep going. Otherwise, we'll require the operator to be passed in.
         if (func_num_args() == 2) {
             list($value, $operator) = array($operator, '=');
         } else if ($this->invalidOperatorAndValue($operator, $value)) {
             throw new \InvalidArgumentException("Value must be provided.");
         }
 
-        // If the columns is actually a Closure instance, we will assume the developer
-        // wants to begin a nested where statement which is wrapped in parenthesis.
-        // We'll add that Closure to the query then return back out immediately.
         if ($column instanceof Closure) {
             return $this->whereNested($column, $boolean);
         }
 
-        // If the given operator is not found in the list of valid operators we will
-        // assume that the developer is just short-cutting the '=' operators and
-        // we will set the operators to '=' and set the values appropriately.
         if (! in_array(strtolower($operator), $this->operators, true)) {
             list($value, $operator) = array($operator, '=');
         }
 
-        // If the value is a Closure, it means the developer is performing an entire
-        // sub-select within the query and we will need to compile the sub-select
-        // within the where clause to get the appropriate query record results.
         if ($value instanceof Closure) {
             return $this->whereSub($column, $operator, $value, $boolean);
         }
 
-        // If the value is "null", we will just assume the developer wants to add a
-        // where null clause to the query. So, we will allow a short-cut here to
-        // that method for convenience so the developer doesn't have to check.
         if (is_null($value)) {
             return $this->whereNull($column, $boolean, $operator != '=');
         }
 
-        // Now that we are working with just a simple query we can put the elements
-        // in our array and add the query binding to our array of bindings that
-        // will be bound to each SQL statements when it is finally executed.
+        //
         $type = 'Basic';
 
         $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
@@ -596,9 +567,6 @@ class Builder
      */
     public function whereNested(Closure $callback, $boolean = 'and')
     {
-        // To handle nested queries we'll actually create a brand new query instance
-        // and pass it off to the Closure that we have. The Closure can simply do
-        // do whatever it wants to a query then we will store it for compiling.
         $query = $this->newQuery();
 
         $query->from($this->from);
@@ -643,9 +611,7 @@ class Builder
 
         $query = $this->newQuery();
 
-        // Once we have the query instance we can simply execute it so it can add all
-        // of the sub-select's conditions to itself, and then we can cache it off
-        // in the array of where clauses for the "main" parent query instance.
+        //
         call_user_func($callback, $query);
 
         $this->wheres[] = compact('type', 'column', 'operator', 'query', 'boolean');
@@ -669,9 +635,7 @@ class Builder
 
         $query = $this->newQuery();
 
-        // Similar to the sub-select clause, we will create a new query instance so
-        // the developer may cleanly specify the entire exists query and we will
-        // compile the whole thing in the grammar and insert it into the SQL.
+        //
         call_user_func($callback, $query);
 
         $this->wheres[] = compact('type', 'operator', 'query', 'boolean');
@@ -729,9 +693,6 @@ class Builder
     {
         $type = $not ? 'NotIn' : 'In';
 
-        // If the value of the where in clause is actually a Closure, we will assume that
-        // the developer is using a full sub-select for this "in" statement, and will
-        // execute those Closures, then we can re-construct the entire sub-selects.
         if ($values instanceof Closure) {
             return $this->whereInSub($column, $values, $boolean, $not);
         }
@@ -793,9 +754,7 @@ class Builder
     {
         $type = $not ? 'NotInSub' : 'InSub';
 
-        // To create the exists sub-select, we will actually create a query and call the
-        // provided callback with the query so the developer may set any of the query
-        // conditions they want for the in clause, then we'll put it in this array.
+        //
         call_user_func($callback, $query = $this->newQuery());
 
         $this->wheres[] = compact('type', 'column', 'query', 'boolean');
@@ -944,27 +903,16 @@ class Builder
 
         $segments = preg_split('/(And|Or)(?=[A-Z])/', $finder, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-        // The connector variable will determine which connector will be used for the
-        // query condition. We will change it as we come across new boolean values
-        // in the dynamic method strings, which could contain a number of these.
         $connector = 'and';
 
         $index = 0;
 
         foreach ($segments as $segment) {
-            // If the segment is not a boolean connector, we can assume it is a column's name
-            // and we will add it to the query as a new constraint as a where clause, then
-            // we can keep iterating through the dynamic method string's segments again.
             if ($segment != 'And' && $segment != 'Or') {
                 $this->addDynamic($segment, $connector, $parameters, $index);
 
                 $index++;
-            }
-
-            // Otherwise, we will store the connector so we know how the next where clause we
-            // find in the query should be connected to the previous ones, meaning we will
-            // have the proper boolean connector to connect the next where clause found.
-            else {
+            } else {
                 $connector = $segment;
             }
         }
@@ -983,12 +931,9 @@ class Builder
      */
     protected function addDynamic($segment, $connector, $parameters, $index)
     {
-        // Once we have parsed out the columns and formatted the boolean operators we
-        // are ready to add it to this query as a where clause just like any other
-        // clause on the query. Then we'll increment the parameter index values.
         $bool = strtolower($connector);
 
-        $this->where(snake_case($segment), '=', $parameters[$index], $bool);
+        $this->where(Str::snake($segment), '=', $parameters[$index], $bool);
     }
 
     /**
@@ -1386,10 +1331,6 @@ class Builder
      */
     protected function runSelect()
     {
-        if ($this->useWritePdo) {
-            return $this->connection->select($this->toSql(), $this->getBindings(), false);
-        }
-
         return $this->connection->select($this->toSql(), $this->getBindings());
     }
 
@@ -1403,18 +1344,13 @@ class Builder
     {
         if (is_null($this->columns)) $this->columns = $columns;
 
-        // If the query is requested to be cached, we will cache it using a unique key
-        // for this database connection and query statement, including the bindings
-        // that are used on this query, providing great convenience when caching.
+        //
         list($key, $minutes) = $this->getCacheInfo();
 
         $cache = $this->getCache();
 
         $callback = $this->getCacheCallback($columns);
 
-        // If the "minutes" value is less than zero, we will use that as the indicator
-        // that the value should be remembered values should be stored indefinitely
-        // and if we have minutes we will use the typical remember function here.
         if ($minutes < 0) {
             return $cache->rememberForever($key, $callback);
         }
@@ -1489,9 +1425,6 @@ class Builder
         $results = $this->forPage($page = 1, $count)->get();
 
         while (count($results) > 0) {
-            // On each chunk result set, we will pass them to the callback and then let the
-            // developer take care of everything within the callback, which allows us to
-            // keep the memory low for spinning through large result sets for working.
             call_user_func($callback, $results);
 
             $page++;
@@ -1511,16 +1444,11 @@ class Builder
     {
         $columns = $this->getListSelect($column, $key);
 
-        // First we will just get all of the column values for the record result set
-        // then we can associate those values with the column if it was specified
-        // otherwise we can just give these values back without a specific key.
+        //
         $results = new Collection($this->get($columns));
 
         $values = $results->fetch($columns[0])->all();
 
-        // If a key was specified and we have results, we will go ahead and combine
-        // the values with the keys of all of the records so that the values can
-        // be accessed by the key of the rows instead of simply being numeric.
         if (! is_null($key) && count($results) > 0) {
             $keys = $results->fetch($key)->all();
 
@@ -1541,9 +1469,6 @@ class Builder
     {
         $select = is_null($key) ? array($column) : array($column, $key);
 
-        // If the selected column contains a "dot", we will remove it so that the list
-        // operation can run normally. Specifying the table is not needed, since we
-        // really want the names of the columns as it is in this resulting array.
         if (($dot = strpos($select[0], '.')) !== false) {
             $select[0] = substr($select[0], $dot + 1);
         }
@@ -1608,9 +1533,6 @@ class Builder
      */
     public function buildRawPaginator($paginator, $results, $perPage)
     {
-        // For queries which have a group by, we will actually retrieve the entire set
-        // of rows from the table and "slice" them via PHP. This is inefficient and
-        // the developer must be aware of this behavior; however, it's an option.
         $start = ($paginator->getCurrentPage() - 1) * $perPage;
 
         $sliced = array_slice($results, $start, $perPage);
@@ -1630,9 +1552,6 @@ class Builder
     {
         $total = $this->getPaginationCount();
 
-        // Once we have the total number of records to be paginated, we can grab the
-        // current page and the result array. Then we are ready to create a brand
-        // new Paginator instances for the results which will create the links.
         $page = $paginator->getCurrentPage($total);
 
         $results = $this->forPage($page, $perPage)->get($columns);
@@ -1649,9 +1568,6 @@ class Builder
     {
         $this->backupFieldsForCount();
 
-        // Because some database engines may throw errors if we leave the ordering
-        // statements on the query, we will "back them up" and remove them from
-        // the query. Once we have the count we will put them back onto this.
         $total = $this->count();
 
         $this->restoreFieldsForCount();
@@ -1802,9 +1718,6 @@ class Builder
 
         $results = $this->get($columns);
 
-        // Once we have executed the query, we will reset the aggregate property so
-        // that more select queries can be executed against the database without
-        // the aggregate value getting in the way when the grammar builds it.
         $this->aggregate = null;
 
         $this->columns = $previousColumns;
@@ -1824,25 +1737,14 @@ class Builder
      */
     public function insert(array $values)
     {
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
         if (! is_array(reset($values))) {
             $values = array($values);
-        }
-
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
-        else {
+        } else {
             foreach ($values as $key => $value) {
                 ksort($value); $values[$key] = $value;
             }
         }
 
-        // We'll treat every insert like a batch insert so we can easily insert each
-        // of the records into the database consistently. This will make it much
-        // easier on the grammars to just handle one type of record insertion.
         $bindings = array();
 
         foreach ($values as $record) {
@@ -1853,9 +1755,6 @@ class Builder
 
         $sql = $this->grammar->compileInsert($this, $values);
 
-        // Once we have compiled the insert statement's SQL we can execute it on the
-        // connection and return a result as a boolean success indicator as that
-        // is the same type of result returned by the raw connection instance.
         $bindings = $this->cleanBindings($bindings);
 
         return $this->connection->insert($sql, $bindings);
@@ -1934,9 +1833,6 @@ class Builder
      */
     public function delete($id = null)
     {
-        // If an ID is passed to the method, we will set the where clause to check
-        // the ID to allow developers to simply and quickly remove a single row
-        // from their database without manually specifying the where clauses.
         if (! is_null($id)) $this->where('id', '=', $id);
 
         $sql = $this->grammar->compileDelete($this);
@@ -2113,18 +2009,6 @@ class Builder
     }
 
     /**
-     * Use the write pdo for query.
-     *
-     * @return $this
-     */
-    public function useWritePdo()
-    {
-        $this->useWritePdo = true;
-
-        return $this;
-    }
-
-    /**
      * Handle dynamic method calls into the method.
      *
      * @param  string  $method
@@ -2135,7 +2019,7 @@ class Builder
      */
     public function __call($method, $parameters)
     {
-        if (starts_with($method, 'where')) {
+        if (str_starts_with($method, 'where')) {
             return $this->dynamicWhere($method, $parameters);
         }
 

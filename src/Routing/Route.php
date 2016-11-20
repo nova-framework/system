@@ -1,4 +1,10 @@
 <?php
+/**
+ * Route - manage a route to an HTTP request and an assigned callback function.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Routing;
 
@@ -10,32 +16,38 @@ use Nova\Routing\Matching\SchemeValidator;
 
 use Symfony\Component\Routing\Route as SymfonyRoute;
 
+use BadMethodCallException;
+use LogicException;
 
+
+/**
+ * The Route class is responsible for routing an HTTP request to an assigned Callback function.
+ */
 class Route
 {
     /**
-     * The URI pattern the route responds to.
+     * The URI pattern the Route responds to.
      *
      * @var string
      */
-    protected $uri;
+    private $uri = null;
 
     /**
-     * The HTTP methods the route responds to.
+     * Supported HTTP methods.
      *
      * @var array
      */
-    protected $methods;
+    private $methods = array();
 
     /**
      * The route action array.
      *
      * @var array
      */
-    protected $action;
+    protected $action = array();
 
     /**
-     * The default values for the route.
+     * The default values for the Route.
      *
      * @var array
      */
@@ -49,11 +61,11 @@ class Route
     protected $wheres = array();
 
     /**
-     * The array of matched parameters.
+     * The matched Route parameters.
      *
      * @var array
      */
-    protected $parameters;
+    private $parameters;
 
     /**
      * The parameter names for the route.
@@ -63,13 +75,6 @@ class Route
     protected $parameterNames;
 
     /**
-     * The compiled version of the route.
-     *
-     * @var \Symfony\Component\Routing\CompiledRoute
-     */
-    protected $compiled;
-
-    /**
      * The validators used by the routes.
      *
      * @var array
@@ -77,12 +82,19 @@ class Route
     protected static $validators;
 
     /**
-     * Create a new Route instance.
+     * The compiled version of the Route.
      *
-     * @param  array   $methods
-     * @param  string  $uri
-     * @param  \Closure|array  $action
-     * @return void
+     * @var \Symfony\Component\Routing\CompiledRoute
+     */
+    protected $compiled = null;
+
+
+    /**
+     * Constructor.
+     *
+     * @param string|array $methods HTTP methods
+     * @param string $uri URL pattern
+     * @param string|array|callable $action Callback function or options
      */
     public function __construct($methods, $uri, $action)
     {
@@ -102,30 +114,33 @@ class Route
     }
 
     /**
-     * Run the route action and return the response.
+     * Run the Route action and return the response.
      *
      * @return mixed
      */
     public function run()
     {
-        $parameters = array_filter($this->parameters(), function($p) { return isset($p); });
+        $parameters = array_filter($this->getParams(), function($param)
+        {
+            return isset($param);
+        });
 
         return call_user_func_array($this->action['uses'], $parameters);
     }
 
     /**
-     * Determine if the route matches given request.
+     * Checks if a Request matches the Route pattern.
      *
-     * @param  \Nova\Http\Request  $request
-     * @param  bool  $includingMethod
-     * @return bool
+     * @param \Http\Request $request The dispatched Request instance
+     * @param bool $includingMethod Wheter or not is matched the HTTP Method
+     * @return bool Match status
      */
     public function matches(Request $request, $includingMethod = true)
     {
         $this->compileRoute();
 
         foreach ($this->getValidators() as $validator) {
-            if (! $includingMethod && $validator instanceof MethodValidator) continue;
+            if (! $includingMethod && ($validator instanceof MethodValidator)) continue;
 
             if (! $validator->matches($this, $request)) return false;
         }
@@ -134,11 +149,12 @@ class Route
     }
 
     /**
-     * Compile the route into a Symfony CompiledRoute instance.
+     * Compile the Route pattern for matching and return it.
      *
-     * @return void
+     * @return string
+     * @throws \LogicException
      */
-    protected function compileRoute()
+    public function compileRoute()
     {
         $optionals = $this->extractOptionalParameters();
 
@@ -158,7 +174,97 @@ class Route
     {
         preg_match_all('/\{(\w+?)\?\}/', $this->uri, $matches);
 
-        return isset($matches[1]) ? array_fill_keys($matches[1], null) : [];
+        return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
+    }
+
+    /**
+     * Parse the Route Action into a standard array.
+     *
+     * @param  \Closure|array  $action
+     * @return array
+     */
+    protected function parseAction($action)
+    {
+        if (is_string($action) || is_callable($action)) {
+            // A null, string or Closure is given as Action.
+            return array('uses' => $action);
+        } else if (! isset($action['uses'])) {
+            // Find the Closure in the Action array.
+            $action['uses'] = $this->findClosure($action);
+        }
+
+        return $action;
+    }
+
+    /**
+     * Find the Closure in an action array.
+     *
+     * @param  array  $action
+     * @return \Closure
+     */
+    protected function findClosure(array $action)
+    {
+        return array_first($action, function($key, $value)
+        {
+            return is_callable($value);
+        });
+    }
+
+    /**
+     * Get the route validators for the instance.
+     *
+     * @return array
+     */
+    public static function getValidators()
+    {
+        if (isset(static::$validators)) return static::$validators;
+
+        return static::$validators = array(
+            new MethodValidator(),
+            new SchemeValidator(),
+            new HostValidator(),
+            new UriValidator(),
+        );
+    }
+
+    /**
+     * Add before filters to the route.
+     *
+     * @param  string  $filters
+     * @return $this
+     */
+    public function before($filters)
+    {
+        return $this->addFilters('before', $filters);
+    }
+
+    /**
+     * Add after filters to the route.
+     *
+     * @param  string  $filters
+     * @return $this
+     */
+    public function after($filters)
+    {
+        return $this->addFilters('after', $filters);
+    }
+
+    /**
+     * Add the given Filters to the route by type.
+     *
+     * @param  string  $type
+     * @param  string  $filters
+     * @return \Nova\Routing\Route
+     */
+    protected function addFilters($type, $filters)
+    {
+        if (isset($this->action[$type])) {
+            $this->action[$type] .= '|' .$filters;
+        } else {
+            $this->action[$type] = $filters;
+        }
+
+        return $this;
     }
 
     /**
@@ -170,7 +276,10 @@ class Route
     {
         if (! isset($this->action['before'])) return array();
 
-        return $this->parseFilters($this->action['before']);
+        //
+        $filters = $this->action['before'];
+
+        return $this->parseFilters($filters);
     }
 
     /**
@@ -182,7 +291,10 @@ class Route
     {
         if (! isset($this->action['after'])) return array();
 
-        return $this->parseFilters($this->action['after']);
+        //
+        $filters = $this->action['after'];
+
+        return $this->parseFilters($filters);
     }
 
     /**
@@ -191,11 +303,11 @@ class Route
      * @param  string  $filters
      * @return array
      */
-    public static function parseFilters($filters)
+    protected function parseFilters($filters)
     {
         return array_build(static::explodeFilters($filters), function($key, $value)
         {
-            return Route::parseFilter($value);
+            return static::parseFilter($value);
         });
     }
 
@@ -207,9 +319,11 @@ class Route
      */
     protected static function explodeFilters($filters)
     {
-        if (is_array($filters)) return static::explodeArrayFilters($filters);
+        if (is_array($filters)) {
+            return static::explodeArrayFilters($filters);
+        }
 
-        return array_map('trim', explode('|', $filters));
+        return explode('|', $filters);
     }
 
     /**
@@ -223,7 +337,7 @@ class Route
         $results = array();
 
         foreach ($filters as $filter) {
-            $results = array_merge($results, array_map('trim', explode('|', $filter)));
+            $results = array_merge($results, explode('|', $filter));
         }
 
         return $results;
@@ -237,7 +351,9 @@ class Route
      */
     public static function parseFilter($filter)
     {
-        if (! str_contains($filter, ':')) return array($filter, array());
+        if (! str_contains($filter, ':')) {
+            return array($filter, array());
+        }
 
         return static::parseParameterFilter($filter);
     }
@@ -315,15 +431,15 @@ class Route
      */
     public function parameters()
     {
-        if (isset($this->parameters)) {
-            return array_map(function($value)
-            {
-                return is_string($value) ? rawurldecode($value) : $value;
-
-            }, $this->parameters);
+        if (! isset($this->parameters)) {
+            throw new LogicException("Route is not bound.");
         }
 
-        throw new \LogicException("Route is not bound.");
+        return array_map(function($value)
+        {
+            return is_string($value) ? rawurldecode($value) : $value;
+
+        }, $this->parameters);
     }
 
     /**
@@ -333,7 +449,10 @@ class Route
      */
     public function parametersWithoutNulls()
     {
-        return array_filter($this->parameters(), function($p) { return ! is_null($p); });
+        return array_filter($this->parameters(), function($value)
+        {
+            return ! is_null($value);
+        });
     }
 
     /**
@@ -355,13 +474,17 @@ class Route
      */
     protected function compileParameterNames()
     {
-        preg_match_all('/\{(.*?)\}/', $this->domain().$this->uri, $matches);
+        preg_match_all('/\{(.*?)\}/', $this->domain() .$this->uri, $matches);
 
-        return array_map(function($m) { return trim($m, '?'); }, $matches[1]);
+        return array_map(function($value)
+        {
+            return trim($value, '?');
+
+        }, $matches[1]);
     }
 
     /**
-     * Bind the route to a given request for execution.
+     * Bind the Route to a given Request for execution.
      *
      * @param  \Nova\Http\Request  $request
      * @return $this
@@ -383,23 +506,15 @@ class Route
      */
     public function bindParameters(Request $request)
     {
-        // If the route has a regular expression for the host part of the URI, we will
-        // compile that and get the parameter matches for this domain. We will then
-        // merge them into this parameters array so that this array is completed.
-        $params = $this->matchToKeys(
+        $parameters = $this->matchToKeys(
             array_slice($this->bindPathParameters($request), 1)
         );
 
-        // If the route has a regular expression for the host part of the URI, we will
-        // compile that and get the parameter matches for this domain. We will then
-        // merge them into this parameters array so that this array is completed.
         if (! is_null($this->compiled->getHostRegex())) {
-            $params = $this->bindHostParameters(
-                $request, $params
-            );
+            $params = $this->bindHostParameters($request, $params);
         }
 
-        return $this->parameters = $this->replaceDefaults($params);
+        return $this->parameters = $this->replaceDefaults($parameters);
     }
 
     /**
@@ -410,7 +525,7 @@ class Route
      */
     protected function bindPathParameters(Request $request)
     {
-        preg_match($this->compiled->getRegex(), '/'.$request->decodedPath(), $matches);
+        preg_match($this->compiled->getRegex(), '/' .$request->decodedPath(), $matches);
 
         return $matches;
     }
@@ -443,7 +558,7 @@ class Route
 
         return array_filter($parameters, function($value)
         {
-            return is_string($value) && strlen($value) > 0;
+            return is_string($value) && (strlen($value) > 0);
         });
     }
 
@@ -455,115 +570,11 @@ class Route
      */
     protected function replaceDefaults(array $parameters)
     {
-        foreach ($parameters as $key => &$value)
-        {
+        foreach ($parameters as $key => &$value) {
             $value = isset($value) ? $value : array_get($this->defaults, $key);
         }
 
         return $parameters;
-    }
-
-    /**
-     * Parse the route action into a standard array.
-     *
-     * @param  callable|array  $action
-     * @return array
-     */
-    protected function parseAction($action)
-    {
-        // If the action is already a Closure instance, we will just set that instance
-        // as the "uses" property, because there is nothing else we need to do when
-        // it is available. Otherwise we will need to find it in the action list.
-        if (is_callable($action)) {
-            return array('uses' => $action);
-        }
-
-        // If no "uses" property has been set, we will dig through the array to find a
-        // Closure instance within this list. We will set the first Closure we come
-        // across into the "uses" property that will get fired off by this route.
-        else if (! isset($action['uses'])) {
-            $action['uses'] = $this->findClosure($action);
-        }
-
-        return $action;
-    }
-
-    /**
-     * Find the Closure in an action array.
-     *
-     * @param  array  $action
-     * @return \Closure
-     */
-    protected function findClosure(array $action)
-    {
-        return array_first($action, function($key, $value)
-        {
-            return is_callable($value);
-        });
-    }
-
-    /**
-     * Get the route validators for the instance.
-     *
-     * @return array
-     */
-    public static function getValidators()
-    {
-        if (isset(static::$validators)) return static::$validators;
-
-        // To match the route, we will use a chain of responsibility pattern with the
-        // validator implementations. We will spin through each one making sure it
-        // passes and then we will know if the route as a whole matches request.
-        return static::$validators = array(
-            new MethodValidator,
-            new SchemeValidator,
-            new HostValidator,
-            new UriValidator,
-        );
-    }
-
-    /**
-     * Add before filters to the route.
-     *
-     * @param  string  $filters
-     * @return $this
-     */
-    public function before($filters)
-    {
-        return $this->addFilters('before', $filters);
-    }
-
-    /**
-     * Add after filters to the route.
-     *
-     * @param  string  $filters
-     * @return $this
-     */
-    public function after($filters)
-    {
-        return $this->addFilters('after', $filters);
-    }
-
-    /**
-     * Add the given filters to the route by type.
-     *
-     * @param  string  $type
-     * @param  string  $filters
-     * @return $this
-     */
-    protected function addFilters($type, $filters)
-    {
-        $filters = static::explodeFilters($filters);
-
-        if (isset($this->action[$type])) {
-            $existing = static::explodeFilters($this->action[$type]);
-
-            $this->action[$type] = array_merge($existing, $filters);
-        } else {
-            $this->action[$type] = $filters;
-        }
-
-        return $this;
     }
 
     /**
@@ -586,6 +597,7 @@ class Route
      * @param  array|string  $name
      * @param  string  $expression
      * @return $this
+     * @throws \BadMethodCallException
      */
     public function where($name, $expression = null)
     {
@@ -627,11 +639,11 @@ class Route
      * Add a prefix to the route URI.
      *
      * @param  string  $prefix
-     * @return $this
+     * @return \Nova\Routing\Route
      */
     public function prefix($prefix)
     {
-        $this->uri = trim($prefix, '/').'/'.trim($this->uri, '/');
+        $this->uri = trim($prefix, '/') .'/' .trim($this->uri, '/');
 
         return $this;
     }
@@ -657,18 +669,14 @@ class Route
     }
 
     /**
-     * Get the HTTP verbs the route responds to.
-     *
      * @return array
      */
     public function getMethods()
     {
-        return $this->methods();
+        return $this->methods;
     }
 
     /**
-     * Get the HTTP verbs the route responds to.
-     *
      * @return array
      */
     public function methods()
@@ -707,7 +715,7 @@ class Route
     }
 
     /**
-     * Get the domain defined for the route.
+     * Get the domain defined for the Route.
      *
      * @return string|null
      */
@@ -717,13 +725,11 @@ class Route
     }
 
     /**
-     * Get the URI that the route responds to.
-     *
-     * @return string
+     * @return string|null
      */
     public function getUri()
     {
-        return $this->uri;
+        return $this->uri();
     }
 
     /**
@@ -737,6 +743,14 @@ class Route
         $this->uri = $uri;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->parameters();
     }
 
     /**
@@ -770,7 +784,7 @@ class Route
     }
 
     /**
-     * Get the action array for the route.
+     * Return the Action array.
      *
      * @return array
      */
@@ -780,10 +794,10 @@ class Route
     }
 
     /**
-     * Set the action array for the route.
+     * Set the Action array for the Route.
      *
      * @param  array  $action
-     * @return $this
+     * @return \Nova\Routing\Route
      */
     public function setAction(array $action)
     {
@@ -793,7 +807,7 @@ class Route
     }
 
     /**
-     * Get the compiled version of the route.
+     * Get the compiled version of the Route.
      *
      * @return \Symfony\Component\Routing\CompiledRoute
      */

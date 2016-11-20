@@ -16,7 +16,7 @@ class Session extends Facade
     /**
      * Return the Application instance.
      *
-     * @return \Nova\Session\SessionManager
+     * @return \Nova\Pagination\Factory
      */
     public static function instance()
     {

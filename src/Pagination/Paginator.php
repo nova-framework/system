@@ -471,7 +471,7 @@ class Paginator implements ArrayableInterface, ArrayAccess, Countable, IteratorA
     /**
      * Set the Presenter instance.
      *
-     * @param \Nova\Pagination\Presenter $presenter
+     * @param \Pagination\Presenter $presenter
      * @return \Nova\Pagination\Paginator
      */
     public function setPresenter(Presenter $presenter)

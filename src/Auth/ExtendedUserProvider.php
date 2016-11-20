@@ -24,7 +24,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Create a new database user provider.
      *
-     * @param  \Nova\Hashing\HasherInterface  $hasher
+     * @param  \Hashing\HasherInterface  $hasher
      * @param  string  $model
      * @return void
      */
@@ -65,7 +65,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  string  $token
      * @return void
      */
@@ -99,7 +99,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  array  $credentials
      * @return bool
      */

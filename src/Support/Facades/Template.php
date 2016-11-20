@@ -4,9 +4,9 @@ namespace Nova\Support\Facades;
 
 use Nova\Support\Facades\Facade;
 
-
 /**
- * @see \Nova\View\Template
+ * @see \Nova\Template\Factory
+ * @see \Nova\Template\Template
  */
 class Template extends Facade
 {

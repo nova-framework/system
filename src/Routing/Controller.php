@@ -129,7 +129,7 @@ abstract class Controller
      */
     protected function isInstanceFilter($filter)
     {
-        if (is_string($filter) && starts_with($filter, '@')) {
+        if (is_string($filter) && str_starts_with($filter, '@')) {
             $method = substr($filter, 1);
 
             if (method_exists($this, $method)) return true;
@@ -267,7 +267,7 @@ abstract class Controller
     }
 
     /**
-     * Handle calls to missing methods on the controller.
+     * Handle calls to missing methods on the Controller.
      *
      * @param  array   $parameters
      * @return mixed
@@ -280,7 +280,7 @@ abstract class Controller
     }
 
     /**
-     * Handle calls to missing methods on the controller.
+     * Handle calls to missing methods on the Controller.
      *
      * @param  string  $method
      * @param  array   $parameters

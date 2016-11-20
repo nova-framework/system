@@ -1,31 +1,44 @@
 <?php
+/**
+ * DatabaseServiceProvider - Implements a Service Provider for Database.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Database;
 
-use Nova\Database\Model as SimpleModel;
 use Nova\Database\ORM\Model;
-use Nova\Support\ServiceProvider;
 use Nova\Database\ConnectionFactory;
+use Nova\Database\DatabaseManager;
+use Nova\Database\Model as BasicModel;
+use Nova\Support\ServiceProvider;
 
 
 class DatabaseServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application events.
+     * Bootstrap the Application events.
      *
      * @return void
      */
     public function boot()
     {
-        SimpleModel::setConnectionResolver($this->app['db']);
+        $db = $this->app['db'];
 
-        Model::setConnectionResolver($this->app['db']);
+        $events = $this->app['events'];
 
-        Model::setEventDispatcher($this->app['events']);
+        // Setup the ORM Model.
+        Model::setConnectionResolver($db);
+
+        Model::setEventDispatcher($events);
+
+        // Setup the (basic) Model.
+        BasicModel::setConnectionResolver($db);
     }
 
     /**
-     * Register the service provider.
+     * Register the Service Provider.
      *
      * @return void
      */

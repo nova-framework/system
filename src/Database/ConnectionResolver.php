@@ -2,6 +2,7 @@
 
 namespace Nova\Database;
 
+
 class ConnectionResolver implements ConnectionResolverInterface
 {
     /**
@@ -26,8 +27,7 @@ class ConnectionResolver implements ConnectionResolverInterface
      */
     public function __construct(array $connections = array())
     {
-        foreach ($connections as $name => $connection)
-        {
+        foreach ($connections as $name => $connection) {
             $this->addConnection($name, $connection);
         }
     }

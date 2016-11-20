@@ -24,12 +24,12 @@
 
 namespace Nova\Forensics;
 
+use Nova\Config\Config;
+
 use Nova\Forensics\Console;
 use Nova\Forensics\PdoDebugger;
-
-use Config;
-use DB;
-use Request;
+use Nova\Support\Facades\DB;
+use Nova\Support\Facades\Request;
 
 use PDO;
 

@@ -25,7 +25,7 @@ class Queue implements HttpKernelInterface
      * Create a new CookieQueue instance.
      *
      * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Nova\Cookie\CookieJar  $cookies
+     * @param  \Cookie\CookieJar  $cookies
      * @return void
      */
     public function __construct(HttpKernelInterface $app, CookieJar $cookies)

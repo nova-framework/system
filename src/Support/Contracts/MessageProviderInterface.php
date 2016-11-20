@@ -8,7 +8,7 @@ interface MessageProviderInterface
     /**
      * Get the messages for the instance.
      *
-     * @return \Support\MessageBag
+     * @return \Nova\Support\MessageBag
      */
     public function getMessageBag();
 }

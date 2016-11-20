@@ -68,9 +68,6 @@ class BelongsTo extends Relation
     public function addConstraints()
     {
         if (static::$constraints) {
-            // For belongs to relationships, which are essentially the inverse of has one
-            // or has many relationships, we need to actually query on the primary key
-            // of the related models matching on the foreign key that's on a parent.
             $table = $this->related->getTable();
 
             $this->query->where($table.'.'.$this->otherKey, '=', $this->parent->{$this->foreignKey});
@@ -101,9 +98,6 @@ class BelongsTo extends Relation
      */
     public function addEagerConstraints(array $models)
     {
-        // We'll grab the primary key name of the related models since it could be set to
-        // a non-standard name and not "id". We will then construct the constraint for
-        // our eagerly loading query so it returns the proper models from execution.
         $key = $this->related->getTable().'.'.$this->otherKey;
 
         $this->query->whereIn($key, $this->getEagerModelKeys($models));
@@ -119,18 +113,12 @@ class BelongsTo extends Relation
     {
         $keys = array();
 
-        // First we need to gather all of the keys from the parent models so we know what
-        // to query for via the eager loading query. We will add them to an array then
-        // execute a "where in" statement to gather up all of those related records.
         foreach ($models as $model) {
             if (! is_null($value = $model->{$this->foreignKey})) {
                 $keys[] = $value;
             }
         }
 
-        // If there are no keys that were not null we will just return an array with 0 in
-        // it so the query doesn't fail, but will not return any results, which should
-        // be what this developer is expecting in a case where this happens to them.
         if (count($keys) == 0) {
             return array(0);
         }
@@ -168,18 +156,12 @@ class BelongsTo extends Relation
 
         $other = $this->otherKey;
 
-        // First we will get to build a dictionary of the child models by their primary
-        // key of the relationship, then we can easily match the children back onto
-        // the parents using that dictionary and the primary key of the children.
         $dictionary = array();
 
         foreach ($results as $result) {
             $dictionary[$result->getAttribute($other)] = $result;
         }
 
-        // Once we have the dictionary constructed, we can loop through all the parents
-        // and match back onto their children using these keys of the dictionary and
-        // the primary key of the children to map them onto the correct instances.
         foreach ($models as $model) {
             if (isset($dictionary[$model->$foreign])) {
                 $model->setRelation($relation, $dictionary[$model->$foreign]);

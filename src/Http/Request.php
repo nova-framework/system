@@ -593,7 +593,7 @@ class Request extends SymfonyRequest
     /**
      * Get the session associated with the request.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      *
      * @throws \RuntimeException
      */

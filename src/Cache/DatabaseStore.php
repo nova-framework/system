@@ -40,7 +40,7 @@ class DatabaseStore implements StoreInterface
      * Create a new database store.
      *
      * @param  \Nova\Database\Connection  $connection
-     * @param  \Nova\Encryption\Encrypter  $encrypter
+     * @param  \Encryption\Encrypter  $encrypter
      * @param  string  $table
      * @param  string  $prefix
      * @return void
@@ -202,7 +202,7 @@ class DatabaseStore implements StoreInterface
     /**
      * Get the encrypter instance.
      *
-     * @return \Nova\Encryption\Encrypter
+     * @return \Encryption\Encrypter
      */
     public function getEncrypter()
     {

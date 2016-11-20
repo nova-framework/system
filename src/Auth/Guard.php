@@ -85,8 +85,8 @@ class Guard
     /**
      * Create a new authentication guard.
      *
-     * @param  \Nova\Auth\UserProviderInterface  $provider
-     * @param  \Nova\Session\Store  $session
+     * @param  \Auth\UserProviderInterface  $provider
+     * @param  \Session\Store  $session
      * @param  \Symfony\Component\HttpFoundation\Request  $request
      * @return void
      */
@@ -407,7 +407,7 @@ class Guard
     /**
      * Log a user into the application.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  bool  $remember
      * @return void
      */
@@ -480,7 +480,7 @@ class Guard
     /**
      * Queue the recaller cookie into the cookie jar.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function queueRecallerCookie(UserInterface $user)
@@ -548,7 +548,7 @@ class Guard
     /**
      * Refresh the remember token for the user.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function refreshRememberToken(UserInterface $user)
@@ -561,7 +561,7 @@ class Guard
     /**
      * Create a new remember token for the user if one doesn't already exist.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function createRememberTokenIfDoesntExist(UserInterface $user)
@@ -576,7 +576,7 @@ class Guard
     /**
      * Get the cookie creator instance used by the guard.
      *
-     * @return \Nova\Cookie\CookieJar
+     * @return \Cookie\CookieJar
      *
      * @throws \RuntimeException
      */
@@ -592,7 +592,7 @@ class Guard
     /**
      * Set the cookie creator instance used by the guard.
      *
-     * @param  \Nova\Cookie\CookieJar  $cookie
+     * @param  \Cookie\CookieJar  $cookie
      * @return void
      */
     public function setCookieJar(CookieJar $cookie)
@@ -603,7 +603,7 @@ class Guard
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Nova\Events\Dispatcher
+     * @return \Events\Dispatcher
      */
     public function getDispatcher()
     {
@@ -624,7 +624,7 @@ class Guard
     /**
      * Get the session store used by the guard.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     public function getSession()
     {
@@ -644,7 +644,7 @@ class Guard
     /**
      * Set the user provider used by the guard.
      *
-     * @param  \Nova\Auth\UserProviderInterface  $provider
+     * @param  \Auth\UserProviderInterface  $provider
      * @return void
      */
     public function setProvider(UserProviderInterface $provider)
@@ -665,7 +665,7 @@ class Guard
     /**
      * Set the current user of the application.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     public function setUser(UserInterface $user)

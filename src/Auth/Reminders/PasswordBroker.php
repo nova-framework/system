@@ -62,7 +62,7 @@ class PasswordBroker
     /**
      * The mailer instance.
      *
-     * @var \Nova\Mail\Mailer
+     * @var \Mail\Mailer
      */
     protected $mailer;
 
@@ -83,8 +83,8 @@ class PasswordBroker
     /**
      * Create a new password broker instance.
      *
-     * @param  \Nova\Auth\Reminders\ReminderRepositoryInterface  $reminders
-     * @param  \Nova\Auth\UserProviderInterface  $users
+     * @param  \Auth\Reminders\ReminderRepositoryInterface  $reminders
+     * @param  \Auth\UserProviderInterface  $users
      * @param  \Nova\Mail\Mailer  $mailer
      * @param  string  $reminderView
      * @return void
@@ -131,7 +131,7 @@ class PasswordBroker
     /**
      * Send the password reminder e-mail.
      *
-     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
+     * @param  \Auth\Reminders\RemindableInterface  $user
      * @param  string    $token
      * @param  \Closure  $callback
      * @return int

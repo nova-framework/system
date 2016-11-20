@@ -15,6 +15,7 @@ use Nova\View\Engines\EngineInterface;
 use Nova\View\Factory;
 
 use ArrayAccess;
+use Closure;
 use Exception;
 
 
@@ -133,10 +134,8 @@ class View implements ArrayAccess, Renderable
      */
     public function nest($key, $view, array $data = array(), $module = null)
     {
-        if(empty($data)) {
-            // The nested View instance inherit parent Data if none is given.
-            $data = $this->data;
-        }
+        // The nested View instance inherit parent Data if none is given.
+        if (empty($data)) $data = $this->data;
 
         return $this->with($key, $this->factory->make($view, $data, $module));
     }
@@ -313,7 +312,7 @@ class View implements ArrayAccess, Renderable
     public function __call($method, $params)
     {
         // Add the support for the dynamic withX Methods.
-        if (starts_with($method, 'with')) {
+        if (str_starts_with($method, 'with')) {
             $name = lcfirst(substr($method, 4));
 
             return $this->with($name, array_shift($params));

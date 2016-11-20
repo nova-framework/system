@@ -51,14 +51,14 @@ class SqlServerConnector extends Connector implements ConnectorInterface
         if (in_array('dblib', $this->getAvailableDrivers())) {
             $port = isset($config['port']) ? ':'.$port : '';
 
-            return "dblib:host={$host}{$port};dbname={$database}";
+            return "dblib:host={$hostname}{$port};dbname={$database}";
         }
 
         $port = isset($config['port']) ? ','.$port : '';
 
         $dbName = $database != '' ? ";Database={$database}" : '';
 
-        return "sqlsrv:Server={$host}{$port}{$dbName}";
+        return "sqlsrv:Server={$hostname}{$port}{$dbName}";
     }
 
     /**

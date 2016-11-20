@@ -8,6 +8,7 @@
 
 namespace Nova\Helpers;
 
+
 /**
  * Collection of useful methods.
  */

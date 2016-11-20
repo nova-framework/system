@@ -32,11 +32,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class Application extends Container implements HttpKernelInterface, TerminableInterface, ResponsePreparerInterface
 {
     /**
-     * The Laravel framework version.
+     * The Nova framework version.
      *
      * @var string
      */
-    const VERSION = '4.0-dev';
+    const VERSION = '3.74.2';
 
     /**
      * Indicates if the application has "booted".
@@ -198,9 +198,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $this->instance('path', realpath($paths['app']));
 
-        // Here we will bind the install paths into the container as strings that can be
-        // accessed from any point in the system. Each path key is prefixed with path
-        // so that they have the consistent naming convention inside the container.
         foreach (array_except($paths, array('app')) as $key => $value) {
             $this->instance("path.{$key}", realpath($value));
         }
@@ -315,27 +312,18 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             return $registered;
         }
 
-        // If the given "provider" is a string, we will resolve it, passing in the
-        // application instance automatically for the developer. This is simply
-        // a more convenient way of specifying your service provider classes.
         if (is_string($provider)) {
             $provider = $this->resolveProviderClass($provider);
         }
 
         $provider->register();
 
-        // Once we have registered the service we will iterate through the options
-        // and set each of them on the application so they will be available on
-        // the actual loading of the service objects and for developer usage.
         foreach ($options as $key => $value) {
             $this[$key] = $value;
         }
 
         $this->markAsRegistered($provider);
 
-        // If the application has already booted, we will call this boot method on
-        // the provider class so it has an opportunity to do its boot logic and
-        // will be ready for any usage by the developer's application logics.
         if ($this->booted) $provider->boot();
 
         return $provider;
@@ -392,9 +380,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function loadDeferredProviders()
     {
-        // We will simply spin through each of the deferred providers and register each
-        // one and boot them if the application has booted. This should make each of
-        // the remaining services available to this application for immediate use.
         foreach ($this->deferredServices as $service => $provider) {
             $this->loadDeferredProvider($service);
         }
@@ -412,9 +397,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $provider = $this->deferredServices[$service];
 
-        // If the service provider has not already been loaded and registered we can
-        // register it with the application and remove the service from this list
-        // of deferred services, since it will already be loaded on subsequent.
         if (! isset($this->loadedProviders[$provider])) {
             $this->registerDeferredProvider($provider, $service);
         }
@@ -429,9 +411,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function registerDeferredProvider($provider, $service = null)
     {
-        // Once the provider that provides the deferred service has been registered we
-        // will remove it from our local list of the deferred services with related
-        // providers so that this container does not try to resolve it out again.
         if ($service) unset($this->deferredServices[$service]);
 
         $this->register($instance = new $provider($this));
@@ -592,9 +571,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     protected function bootApplication()
     {
-        // Once the application has booted we will also fire some "booted" callbacks
-        // for any listeners that need to do work after this initial booting gets
-        // finished. This is useful when ordering the boot-up processes we run.
         $this->fireAppCallbacks($this->bootingCallbacks);
 
         $this->booted = true;
@@ -733,14 +709,14 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
-        try
-        {
+        try {
             $this->refreshRequest($request = Request::createFromBase($request));
 
             $this->boot();
 
             return $this->dispatch($request);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if (! $catch || $this->runningUnitTests()) throw $e;
 
             return $this['exception']->handleException($e);
@@ -1088,7 +1064,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $aliases = array(
             'app'            => 'Nova\Foundation\Application',
-            'forge'          => 'Nova\Console\Application',
             'auth'           => 'Nova\Auth\AuthManager',
             'cache'          => 'Nova\Cache\CacheManager',
             'cache.store'    => 'Nova\Cache\Repository',
@@ -1100,8 +1075,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'events'         => 'Nova\Events\Dispatcher',
             'files'          => 'Nova\Filesystem\Filesystem',
             'hash'           => 'Nova\Hashing\HasherInterface',
-            'log'            => 'Nova\Log\Writer',
             'language'       => 'Nova\Language\LanguageManager',
+            'log'            => 'Nova\Log\Writer',
             'mailer'         => 'Nova\Mail\Mailer',
             'paginator'      => 'Nova\Pagination\Environment',
             'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
@@ -1112,8 +1087,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
+            'template'       => 'Nova\Template\Factory',
             'view'           => 'Nova\View\Factory',
-            'template'       => 'Nova\View\Template',
         );
 
         foreach ($aliases as $key => $alias) {

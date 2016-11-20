@@ -136,7 +136,7 @@ class Repository implements \ArrayAccess
     /**
      * Get the loader manager instance.
      *
-     * @return \Config\LoaderInterface
+     * @return \Nova\Config\LoaderInterface
      */
     public function getLoader()
     {
