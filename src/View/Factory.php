@@ -178,7 +178,7 @@ class Factory
 
         return array_first($extensions, function($key, $value) use ($path)
         {
-            return str_ends_with($path, $value);
+            return ends_with($path, $value);
         });
     }
 
