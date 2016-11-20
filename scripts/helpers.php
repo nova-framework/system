@@ -70,6 +70,10 @@ if (! function_exists('template_url'))
         } else {
             $template = Str::lower($template);
         }
+
+        $path = sprintf('templates/%s/assets/%s', $template, ltrim($path, '/'));
+
+        return url($path);
     }
 }
 
