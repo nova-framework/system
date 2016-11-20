@@ -52,7 +52,7 @@ class Request extends Facade
         $instance = static::instance();
 
         // Support the checking of HTTP Method via isX.
-        if (str_starts_with($method, 'is') && (strlen($method) > 4)) {
+        if (starts_with($method, 'is') && (strlen($method) > 4)) {
             return ($instance->method() == strtoupper(substr($method, 2)));
         }
 

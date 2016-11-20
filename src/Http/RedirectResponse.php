@@ -234,7 +234,7 @@ class RedirectResponse extends SymfonyRedirectResponse
      */
     public function __call($method, $parameters)
     {
-        if (str_starts_with($method, 'with')) {
+        if (starts_with($method, 'with')) {
             return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
         }
 
