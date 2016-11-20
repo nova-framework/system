@@ -253,7 +253,7 @@ class Mailer
     /**
      * Create a new message instance.
      *
-     * @return \Nova\Mail\Message
+     * @return \Mail\Message
      */
     protected function createMessage()
     {
@@ -346,7 +346,7 @@ class Mailer
     /**
      * Set the log writer instance.
      *
-     * @param  \Nova\Log\Writer  $logger
+     * @param  \Log\Writer  $logger
      * @return $this
      */
     public function setLogger(Writer $logger)

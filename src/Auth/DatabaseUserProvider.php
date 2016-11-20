@@ -33,7 +33,7 @@ class DatabaseUserProvider implements UserProviderInterface
      * Create a new database user provider.
      *
      * @param  \Nova\Database\Connection  $conn
-     * @param  \Nova\Hashing\HasherInterface  $hasher
+     * @param  \Hashing\HasherInterface  $hasher
      * @param  string  $table
      * @return void
      */
@@ -83,7 +83,7 @@ class DatabaseUserProvider implements UserProviderInterface
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  string  $token
      * @return void
      */
@@ -129,7 +129,7 @@ class DatabaseUserProvider implements UserProviderInterface
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  array  $credentials
      * @return bool
      */

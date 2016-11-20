@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\Cron\CronManager
+ * @see \Nova\Cron\Manager
  */
 class Cron extends Facade
 {

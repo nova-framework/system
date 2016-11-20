@@ -25,5 +25,4 @@ interface RouteFiltererInterface
      * @return mixed
      */
     public function callRouteFilter($filter, $parameters, $route, $request, $response = null);
-
 }

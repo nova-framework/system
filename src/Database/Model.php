@@ -12,9 +12,7 @@ use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\Query as Builder;
-use Nova\Helpers\Inflector;
-
-use DB;
+use Nova\Support\Str;
 
 
 class Model
@@ -25,13 +23,6 @@ class Model
      * @var string
      */
     protected $connection = null;
-
-    /**
-     * The database connection instance.
-     *
-     * @var \Nova\Database\Connection
-     */
-    protected $db;
 
     /**
      * The table associated with the Model.
@@ -70,16 +61,7 @@ class Model
      */
     public function __construct($connection = null)
     {
-        if($connection === false) {
-            // Nothing to do; the user want a bare Model instance.
-            return;
-        }
-
-        // Setup the Connection name.
         $this->connection = $connection;
-
-        // Setup the Connection instance.
-        $this->db = $this->getConnection();
     }
 
     /**
@@ -90,7 +72,8 @@ class Model
      */
     public function all($columns = array('*'))
     {
-        return $this->newQuery()->get($columns);
+        return $this->newQuery()
+            ->get($columns);
     }
 
     /**
@@ -102,7 +85,8 @@ class Model
      */
     public function find($id, $columns = array('*'))
     {
-        return $this->newQuery()->find($id, $columns);
+        return $this->newQuery()
+            ->find($id, $columns);
     }
 
     /**
@@ -114,7 +98,8 @@ class Model
      */
     public function findMany($ids, $columns = array('*'))
     {
-        return $this->newQuery()->findMany($ids, $columns);
+        return $this->newQuery()
+            ->findMany($ids, $columns);
     }
 
     /**
@@ -125,7 +110,8 @@ class Model
      */
     public function insert(array $values)
     {
-        return $this->newQuery()->insertGetId($values);
+        return $this->newQuery()
+            ->insertGetId($values);
     }
 
     /**
@@ -163,7 +149,7 @@ class Model
      */
     public static function getTableName()
     {
-        $model = new static(false);
+        $model = new static();
 
         return $model->getTable();
     }
@@ -177,9 +163,7 @@ class Model
     {
         if (isset($this->table)) return $this->table;
 
-        $baseName = class_basename($this);
-
-        return str_replace('\\', '', Inflector::tableize($baseName));
+        return str_replace('\\', '', Str::snake(class_basename($this)));
     }
 
     /**
@@ -252,7 +236,7 @@ class Model
      * @param  string  $connection
      * @return \Nova\Database\Connection
      */
-    public static function resolveConnection($connection = null)
+    public function resolveConnection($connection = null)
     {
         return static::$resolver->connection($connection);
     }
@@ -297,7 +281,7 @@ class Model
     {
         $query = $this->newBaseQueryBuilder();
 
-        $builder = $this->newQueryBuilder($query);
+        $builder = $this->newBuilder($query);
 
         return $builder->setModel($this);
     }
@@ -313,7 +297,9 @@ class Model
 
         $grammar = $connection->getQueryGrammar();
 
-        return new QueryBuilder($connection, $grammar, $connection->getPostProcessor());
+        $processor = $connection->getPostProcessor();
+
+        return new QueryBuilder($connection, $grammar, $processor);
     }
 
     /**
@@ -322,9 +308,33 @@ class Model
      * @param  \Nova\Database\Query\Builder $query
      * @return \Nova\Database\Query|static
      */
-    public function newQueryBuilder($query)
+    public function newBuilder($query)
     {
         return new Builder($query);
+    }
+
+    /**
+     * Dynamically retrieve attributes on the Model.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        if ($key == 'db') {
+            return $this->getConnection();
+        }
+    }
+
+    /**
+     * Determine if an attribute exists on the Model.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        return ($key == 'db');
     }
 
     /**

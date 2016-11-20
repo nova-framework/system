@@ -10,7 +10,8 @@ namespace Nova\Helpers;
 
 use Nova\Config\Config;
 
-use Request;
+use Nova\Support\Facades\Request as HttpRequest;
+
 
 /**
  * ReCaptcha: Google Anti-spam protection for your website.
@@ -74,7 +75,7 @@ class ReCaptcha
         if (! $this->isActive()) return true;
 
         // Get the Http Request instance.
-        $request = Request::instance();
+        $request = HttpRequest::instance();
 
         // Get the recaptcha response value.
         $response = $response ?: $request->input('g-recaptcha-response', '');

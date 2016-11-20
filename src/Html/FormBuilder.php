@@ -180,7 +180,7 @@ class FormBuilder
      */
     public function token()
     {
-        return $this->hidden('_token', $this->csrfToken);
+        return $this->hidden('csrfToken', $this->csrfToken);
     }
 
     /**
@@ -964,7 +964,7 @@ class FormBuilder
     /**
      * Get the session store implementation.
      *
-     * @return  \Nova\Session\Store  $session
+     * @return  \Session\Store  $session
      */
     public function getSessionStore()
     {
@@ -974,7 +974,7 @@ class FormBuilder
     /**
      * Set the session store implementation.
      *
-     * @param  \Nova\Session\Store  $session
+     * @param  \Session\Store  $session
      * @return $this
      */
     public function setSessionStore(Session $session)

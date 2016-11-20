@@ -33,7 +33,7 @@ class FileSessionHandler implements \SessionHandlerInterface
     public function __construct(Filesystem $files, $path)
     {
         $this->path = $path;
-        
+
         $this->files = $files;
     }
 

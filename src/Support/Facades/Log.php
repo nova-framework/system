@@ -2,9 +2,6 @@
 
 namespace Nova\Support\Facades;
 
-use Nova\Support\Facades\Facade;
-
-
 /**
  * @see \Nova\Log\Writer
  */

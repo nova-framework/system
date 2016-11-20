@@ -2,10 +2,11 @@
 
 namespace Nova\Validation;
 
+use Nova\Container\Container;
 use Nova\Support\Fluent;
 use Nova\Support\MessageBag;
-use Nova\Container\Container;
 use Nova\Support\Contracts\MessageProviderInterface;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -28,7 +29,7 @@ class Validator implements MessageProviderInterface
     /**
      * The Presence Verifier implementation.
      *
-     * @var \Nova\Validation\PresenceVerifierInterface
+     * @var \Validation\PresenceVerifierInterface
      */
     protected $presenceVerifier;
 
@@ -1475,7 +1476,7 @@ class Validator implements MessageProviderInterface
      */
     protected function getMessage($attribute, $rule)
     {
-        $lowerRule = snake_case($rule);
+        $lowerRule = Str::snake($rule);
 
         $inlineMessage = $this->getInlineMessage($attribute, $lowerRule);
 
@@ -1554,7 +1555,7 @@ class Validator implements MessageProviderInterface
      */
     protected function getSizeMessage($attribute, $rule)
     {
-        $lowerRule = snake_case($rule);
+        $lowerRule = Str::snake($rule);
 
         // There are three different types of size validations. The attribute may be
         // either a number, file, or string so we will check a few things to know
@@ -1606,9 +1607,9 @@ class Validator implements MessageProviderInterface
     {
         $message = str_replace(':attribute', $this->getAttribute($attribute), $message);
 
-        if (isset($this->replacers[snake_case($rule)]))
+        if (isset($this->replacers[Str::snake($rule)]))
         {
-            $message = $this->callReplacer($message, $attribute, snake_case($rule), $parameters);
+            $message = $this->callReplacer($message, $attribute, Str::snake($rule), $parameters);
         }
         elseif (method_exists($this, $replacer = "replace{$rule}"))
         {
@@ -1668,7 +1669,7 @@ class Validator implements MessageProviderInterface
         // If no language line has been specified for the attribute all of the
         // underscores are removed from the attribute name and that will be
         // used as default versions of the attribute's displayable names.
-        return str_replace('_', ' ', snake_case($attribute));
+        return str_replace('_', ' ', Str::snake($attribute));
     }
 
     /**
@@ -2023,7 +2024,7 @@ class Validator implements MessageProviderInterface
      */
     protected function parseArrayRule(array $rules)
     {
-        return array(studly_case(trim(array_get($rules, 0))), array_slice($rules, 1));
+        return array(Str::studly(trim(array_get($rules, 0))), array_slice($rules, 1));
     }
 
     /**
@@ -2046,7 +2047,7 @@ class Validator implements MessageProviderInterface
             $parameters = $this->parseParameters($rules, $parameter);
         }
 
-        return array(studly_case(trim($rules)), $parameters);
+        return array(Str::studly(trim($rules)), $parameters);
     }
 
     /**
@@ -2083,7 +2084,7 @@ class Validator implements MessageProviderInterface
     {
         if ($extensions)
         {
-            $keys = array_map('snake_case', array_keys($extensions));
+            $keys = array_map('Str::snake', array_keys($extensions));
 
             $extensions = array_combine($keys, array_values($extensions));
         }
@@ -2103,7 +2104,7 @@ class Validator implements MessageProviderInterface
 
         foreach ($extensions as $rule => $extension)
         {
-            $this->implicitRules[] = studly_case($rule);
+            $this->implicitRules[] = Str::studly($rule);
         }
     }
 
@@ -2116,7 +2117,7 @@ class Validator implements MessageProviderInterface
      */
     public function addExtension($rule, $extension)
     {
-        $this->extensions[snake_case($rule)] = $extension;
+        $this->extensions[Str::snake($rule)] = $extension;
     }
 
     /**
@@ -2130,7 +2131,7 @@ class Validator implements MessageProviderInterface
     {
         $this->addExtension($rule, $extension);
 
-        $this->implicitRules[] = studly_case($rule);
+        $this->implicitRules[] = Str::studly($rule);
     }
 
     /**
@@ -2153,7 +2154,7 @@ class Validator implements MessageProviderInterface
     {
         if ($replacers)
         {
-            $keys = array_map('snake_case', array_keys($replacers));
+            $keys = array_map('Str::snake', array_keys($replacers));
 
             $replacers = array_combine($keys, array_values($replacers));
         }
@@ -2170,7 +2171,7 @@ class Validator implements MessageProviderInterface
      */
     public function addReplacer($rule, $replacer)
     {
-        $this->replacers[snake_case($rule)] = $replacer;
+        $this->replacers[Str::snake($rule)] = $replacer;
     }
 
     /**
@@ -2269,7 +2270,7 @@ class Validator implements MessageProviderInterface
     /**
      * Get the Presence Verifier implementation.
      *
-     * @return \Nova\Validation\PresenceVerifierInterface
+     * @return \Validation\PresenceVerifierInterface
      *
      * @throws \RuntimeException
      */
@@ -2286,7 +2287,7 @@ class Validator implements MessageProviderInterface
     /**
      * Set the Presence Verifier implementation.
      *
-     * @param  \Nova\Validation\PresenceVerifierInterface  $presenceVerifier
+     * @param  \Validation\PresenceVerifierInterface  $presenceVerifier
      * @return void
      */
     public function setPresenceVerifier(PresenceVerifierInterface $presenceVerifier)
@@ -2559,7 +2560,7 @@ class Validator implements MessageProviderInterface
      */
     public function __call($method, $parameters)
     {
-        $rule = snake_case(substr($method, 8));
+        $rule = Str::snake(substr($method, 8));
 
         if (isset($this->extensions[$rule]))
         {

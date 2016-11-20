@@ -52,9 +52,6 @@ class Grammar extends BaseGrammar
         $sql = array();
 
         foreach ($this->selectComponents as $component) {
-            // To compile the query, we'll spin through each component of the query and
-            // see if that component exists. If it does we'll just call the compiler
-            // function for the component which is responsible for making the SQL.
             if (! is_null($query->$component)) {
                 $method = 'compile'.ucfirst($component);
 
@@ -76,9 +73,6 @@ class Grammar extends BaseGrammar
     {
         $column = $this->columnize($aggregate['columns']);
 
-        // If the query has a "distinct" constraint and we're not asking for all columns
-        // we need to prepend "distinct" onto the column name so that the query takes
-        // it into account when it performs the aggregating operations on the data.
         if ($query->distinct && ($column !== '*')) {
             $column = 'distinct '.$column;
         }
@@ -95,9 +89,6 @@ class Grammar extends BaseGrammar
      */
     protected function compileColumns(Builder $query, $columns)
     {
-        // If the query is actually performing an aggregating select, we will let that
-        // compiler handle the building of the select clauses, as it will need some
-        // more syntax that is best handled by that function to keep things neat.
         if (! is_null($query->aggregate)) return;
 
         $select = $query->distinct ? 'select distinct ' : 'select ';
@@ -133,9 +124,6 @@ class Grammar extends BaseGrammar
         foreach ($joins as $join) {
             $table = $this->wrapTable($join->table);
 
-            // First we need to build all of the "on" clauses for the join. There may be many
-            // of these clauses so we will need to iterate through each one and build them
-            // separately, then we'll join them up into a single string when we're done.
             $clauses = array();
 
             foreach ($join->clauses as $clause) {
@@ -146,18 +134,13 @@ class Grammar extends BaseGrammar
                 $query->addBinding($binding, 'join');
             }
 
-            // Once we have constructed the clauses, we'll need to take the boolean connector
-            // off of the first clause as it obviously will not be required on that clause
-            // because it leads the rest of the clauses, thus not requiring any boolean.
             $clauses[0] = $this->removeLeadingBoolean($clauses[0]);
 
             $clauses = implode(' ', $clauses);
 
             $type = $join->type;
 
-            // Once we have everything ready to go, we will just concatenate all the parts to
-            // build the final join statement SQL for the query and we can then return the
-            // final clause back to the callers as a single, stringified join statement.
+            //
             $sql[] = "$type join $table on $clauses";
         }
 
@@ -191,18 +174,12 @@ class Grammar extends BaseGrammar
 
         if (is_null($query->wheres)) return '';
 
-        // Each type of where clauses has its own compiler function which is responsible
-        // for actually creating the where clauses SQL. This helps keep the code nice
-        // and maintainable since each clause has a very small method that it uses.
         foreach ($query->wheres as $where) {
             $method = "where{$where['type']}";
 
             $sql[] = $where['boolean'].' '.$this->$method($query, $where);
         }
 
-        // If we actually have some where clauses, we will strip off the first boolean
-        // operator, which is added by the query builders for convenience so we can
-        // avoid checking for the first clauses in each of the compilers methods.
         if (count($sql) > 0) {
             $sql = implode(' ', $sql);
 
@@ -485,9 +462,6 @@ class Grammar extends BaseGrammar
      */
     protected function compileHaving(array $having)
     {
-        // If the having clause is "raw", we can just return the clause straight away
-        // without doing any more processing on it. Otherwise, we will compile the
-        // clause into SQL based on the components that make it up from builder.
         if ($having['type'] === 'raw') {
             return $having['boolean'].' '.$having['sql'];
         }
@@ -603,9 +577,6 @@ class Grammar extends BaseGrammar
      */
     public function compileInsert(Builder $query, array $values)
     {
-        // Essentially we will force every insert to be treated as a batch insert which
-        // simply makes creating the SQL easier for us since we can utilize the same
-        // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
 
         if (! is_array(reset($values))) {
@@ -614,9 +585,6 @@ class Grammar extends BaseGrammar
 
         $columns = $this->columnize(array_keys(reset($values)));
 
-        // We need to build a list of parameter place-holders of values that are bound
-        // to the query. Each insert should have the exact same amount of parameter
-        // bindings so we can just go off the first list of values in this array.
         $parameters = $this->parameterize(reset($values));
 
         $value = array_fill(0, count($values), "($parameters)");
@@ -650,9 +618,6 @@ class Grammar extends BaseGrammar
     {
         $table = $this->wrapTable($query->from);
 
-        // Each one of the columns in the update statements needs to be wrapped in the
-        // keyword identifiers, also a place-holder needs to be created for each of
-        // the values in the list of bindings so we can make the sets statements.
         $columns = array();
 
         foreach ($values as $key => $value) {
@@ -661,20 +626,12 @@ class Grammar extends BaseGrammar
 
         $columns = implode(', ', $columns);
 
-        // If the query has any "join" clauses, we will setup the joins on the builder
-        // and compile them so we can attach them to this update, as update queries
-        // can get join statements to attach to other tables when they're needed.
         if (isset($query->joins)) {
             $joins = ' '.$this->compileJoins($query, $query->joins);
-        }
-        else
-        {
+        } else {
             $joins = '';
         }
 
-        // Of course, update queries may also be constrained by where clauses so we'll
-        // need to compile the where clauses and attach it to the query so only the
-        // intended records are updated by the SQL statements we generate to run.
         $where = $this->compileWheres($query);
 
         return trim("update {$table}{$joins} set $columns $where");

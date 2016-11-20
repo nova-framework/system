@@ -8,7 +8,7 @@ interface ReminderRepositoryInterface
     /**
      * Create a new reminder record and token.
      *
-     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
+     * @param  \Auth\Reminders\RemindableInterface  $user
      * @return string
      */
     public function create(RemindableInterface $user);
@@ -16,7 +16,7 @@ interface ReminderRepositoryInterface
     /**
      * Determine if a reminder record exists and is valid.
      *
-     * @param  \Nova\Auth\Reminders\RemindableInterface  $user
+     * @param  \Auth\Reminders\RemindableInterface  $user
      * @param  string  $token
      * @return bool
      */

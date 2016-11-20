@@ -209,7 +209,7 @@ class Writer
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Nova\Events\Dispatcher
+     * @return \Events\Dispatcher
      */
     public function getEventDispatcher()
     {

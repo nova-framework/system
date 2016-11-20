@@ -1,4 +1,10 @@
 <?php
+/**
+ * MySqlGrammar - A simple MySQL Grammar for the QueryBuilder.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Database\Query\Grammars;
 
@@ -24,8 +30,9 @@ class MySqlGrammar extends Grammar
         'orders',
         'limit',
         'offset',
-        'lock',
+        'lock'
     );
+
 
     /**
      * Compile a select query into SQL.
@@ -38,7 +45,7 @@ class MySqlGrammar extends Grammar
         $sql = parent::compileSelect($query);
 
         if ($query->unions) {
-            $sql = '('.$sql.') '.$this->compileUnions($query);
+            $sql = '(' .$sql .') ' .$this->compileUnions($query);
         }
 
         return $sql;
@@ -54,7 +61,7 @@ class MySqlGrammar extends Grammar
     {
         $joiner = $union['all'] ? ' union all ' : ' union ';
 
-        return $joiner.'('.$union['query']->toSql().')';
+        return $joiner .'(' .$union['query']->toSql() .')';
     }
 
     /**
@@ -83,11 +90,11 @@ class MySqlGrammar extends Grammar
         $sql = parent::compileUpdate($query, $values);
 
         if (isset($query->orders)) {
-            $sql .= ' '.$this->compileOrders($query, $query->orders);
+            $sql .= ' ' .$this->compileOrders($query, $query->orders);
         }
 
         if (isset($query->limit)) {
-            $sql .= ' '.$this->compileLimit($query, $query->limit);
+            $sql .= ' ' .$this->compileLimit($query, $query->limit);
         }
 
         return rtrim($sql);
@@ -106,7 +113,7 @@ class MySqlGrammar extends Grammar
         $where = is_array($query->wheres) ? $this->compileWheres($query) : '';
 
         if (isset($query->joins)) {
-            $joins = ' '.$this->compileJoins($query, $query->joins);
+            $joins = ' ' .$this->compileJoins($query, $query->joins);
 
             return trim("delete $table from {$table}{$joins} $where");
         }

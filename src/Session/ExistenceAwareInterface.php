@@ -2,6 +2,7 @@
 
 namespace Nova\Session;
 
+
 interface ExistenceAwareInterface
 {
     /**

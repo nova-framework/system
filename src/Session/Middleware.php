@@ -39,7 +39,7 @@ class Middleware implements HttpKernelInterface
      * Create a new session middleware.
      *
      * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Nova\Session\SessionManager  $manager
+     * @param  \Session\SessionManager  $manager
      * @param  \Closure|null  $reject
      * @return void
      */
@@ -66,7 +66,7 @@ class Middleware implements HttpKernelInterface
         $this->checkRequestForArraySessions($request);
 
         // If a session driver has been configured, we will need to start the session here
-        // so that the data is ready for an application. Note that the Laravel sessions
+        // so that the data is ready for an application. Note that the Nova sessions
         // do not make use of PHP "native" sessions in any way since they are crappy.
         if ($this->sessionConfigured()) {
             $session = $this->startSession($request);
@@ -107,7 +107,7 @@ class Middleware implements HttpKernelInterface
      * Start the session for the given request.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @return \Nova\Session\SessionInterface
+     * @return \Session\SessionInterface
      */
     protected function startSession(Request $request)
     {
@@ -121,7 +121,7 @@ class Middleware implements HttpKernelInterface
     /**
      * Close the session handling for the request.
      *
-     * @param  \Nova\Session\SessionInterface  $session
+     * @param  \Session\SessionInterface  $session
      * @return void
      */
     protected function closeSession(SessionInterface $session)
@@ -147,7 +147,7 @@ class Middleware implements HttpKernelInterface
     /**
      * Remove the garbage from the session if necessary.
      *
-     * @param  \Nova\Session\SessionInterface  $session
+     * @param  \Session\SessionInterface  $session
      * @return void
      */
     protected function collectGarbage(SessionInterface $session)
@@ -248,7 +248,7 @@ class Middleware implements HttpKernelInterface
      * Get the session implementation from the manager.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @return \Nova\Session\SessionInterface
+     * @return \Session\SessionInterface
      */
     public function getSession(Request $request)
     {

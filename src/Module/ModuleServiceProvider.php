@@ -2,7 +2,7 @@
 
 namespace Nova\Module;
 
-use Nova\Module\ModuleRepository;
+use Nova\Module\ModuleManager;
 use Nova\Support\ServiceProvider;
 
 
@@ -28,15 +28,9 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->register('Nova\Module\Providers\RepositoryServiceProvider');
-        $this->app->register('Nova\Module\Providers\ConsoleServiceProvider');
-        $this->app->register('Nova\Module\Providers\GeneratorServiceProvider');
-
-        //
-        $this->app->bindShared('modules', function ($app) {
-            $repository = $app->make('Nova\Module\RepositoryInterface');
-
-            return new ModuleRepository($app, $repository);
+        $this->app->bindShared('modules', function ($app)
+        {
+            return new ModuleManager($app, $app['config']);
         });
     }
 

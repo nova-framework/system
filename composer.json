@@ -10,38 +10,29 @@
             "email": "dave@daveismyname.com",
             "homepage": "http://daveismyname.com",
             "role": "Developer"
+        },
+        {
+            "name": "Virgil-Adrian Teaca",
+            "email": "virgil@giulianaeassociati.com",
+            "homepage": "http://giulianaeassociati.com",
+            "role": "Developer"
         }
     ],
     "require": {
         "php": ">=5.5.0",
-        "classpreloader/classpreloader": "^3.0",
-        "paragonie/random_compat": "~1.4",
-        "psy/psysh": "0.7.*",
-        "symfony/browser-kit": "^3.1",
         "symfony/console": "^3.1",
-        "symfony/css-selector": "^3.1",
-        "symfony/debug": "^3.1",
-        "symfony/dom-crawler": "^3.1",
-        "symfony/process": "^3.1",
         "symfony/finder": "^3.1",
         "symfony/http-foundation": "^3.1",
         "symfony/http-kernel": "^3.1",
         "symfony/routing": "^3.1",
-        "symfony/translation": "^3.1",
-        "symfony/var-dumper": "^3.1",
         "stack/builder": "^1.0",
-        "doctrine/inflector": "1.0.*",
+        "doctrine/inflector": "1.1.*",
         "patchwork/utf8": "~1.2",
         "nesbot/carbon": "^1.21",
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
-        "filp/whoops": "^2.1",
-        "predis/predis": "0.8.*",
-        "guzzlehttp/guzzle": "^4.0"
-    },
-    "require-dev": {
-        "mockery/mockery": "~0.9",
-        "phpunit/phpunit": "~4.0"
+        "predis/predis": "1.1.*",
+        "filp/whoops": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -50,9 +41,6 @@
         "files": [
             "scripts/helpers.php"
         ]
-    },
-    "suggest": {
-        "doctrine/dbal": "Allow renaming columns and dropping SQLite columns."
     },
     "prefer-stable": true,
     "minimum-stability": "dev"

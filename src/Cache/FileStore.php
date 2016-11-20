@@ -223,7 +223,7 @@ class FileStore implements StoreInterface
     /**
      * Get the Filesystem instance.
      *
-     * @return \Nova\Filesystem\Filesystem
+     * @return \Filesystem\Filesystem
      */
     public function getFilesystem()
     {

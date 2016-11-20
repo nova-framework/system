@@ -23,7 +23,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the "array" session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createArrayDriver()
     {
@@ -33,7 +33,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the "cookie" session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createCookieDriver()
     {
@@ -45,7 +45,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the file session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createFileDriver()
     {
@@ -55,7 +55,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the file session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createNativeDriver()
     {
@@ -67,7 +67,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the database session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createDatabaseDriver()
     {
@@ -93,7 +93,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the APC session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createApcDriver()
     {
@@ -103,7 +103,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the Memcached session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createMemcachedDriver()
     {
@@ -113,7 +113,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the Wincache session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createWincacheDriver()
     {
@@ -123,7 +123,7 @@ class SessionManager extends Manager
     /**
      * Create an instance of the Redis session driver.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createRedisDriver()
     {
@@ -138,7 +138,7 @@ class SessionManager extends Manager
      * Create an instance of a cache driven driver.
      *
      * @param  string  $driver
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function createCacheBased($driver)
     {
@@ -149,7 +149,7 @@ class SessionManager extends Manager
      * Create the cache based session handler instance.
      *
      * @param  string  $driver
-     * @return \Nova\Session\CacheBasedSessionHandler
+     * @return \Session\CacheBasedSessionHandler
      */
     protected function createCacheHandler($driver)
     {
@@ -162,7 +162,7 @@ class SessionManager extends Manager
      * Build the session instance.
      *
      * @param  \SessionHandlerInterface  $handler
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     protected function buildSession($handler)
     {

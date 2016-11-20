@@ -9,9 +9,7 @@
 namespace Nova\Language;
 
 use Nova\Helpers\Inflector;
-
-use Cookie;
-use Session;
+use Nova\Language\LanguageManager;
 
 use MessageFormatter;
 
@@ -21,6 +19,13 @@ use MessageFormatter;
  */
 class Language
 {
+    /**
+     * The Language Manager Instance.
+     *
+     * @var \Nova\Language\LanguageManager
+     */
+    protected $manager;
+
     /**
      * Holds an array with the Domain's Messages.
      *
@@ -42,19 +47,29 @@ class Language
     private $locale    = 'en-US';
     private $direction = 'ltr';
 
+    /**
+     * Holds an array with the Legacy Messages.
+     *
+     * @var array
+     */
+    private $legacyMessages = array();
+
 
     /**
      * Language constructor.
      * @param string $domain
      * @param string $code
      */
-    public function __construct($languages, $domain, $code)
+    public function __construct(LanguageManager $manager, $domain, $code)
     {
+        $languages = $manager->getLanguages();
+
         if (isset($languages[$code]) && ! empty($languages[$code])) {
             $info = $languages[$code];
 
             $this->code = $code;
 
+            //
             $this->info      = $info['info'];
             $this->name      = $info['name'];
             $this->locale    = $info['locale'];
@@ -66,7 +81,11 @@ class Language
         $this->domain = $domain;
 
         //
-        $pathName = Inflector::classify($domain);
+        if (strtolower($domain) == 'adminlte') {
+            $pathName = 'AdminLTE';
+        } else {
+            $pathName = Inflector::classify($domain);
+        }
 
         if ($pathName == 'Nova') {
             $basePath = SYSTEMDIR;
@@ -187,4 +206,5 @@ class Language
     {
         return $this->direction;
     }
+
 }

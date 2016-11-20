@@ -25,7 +25,7 @@ interface UserProviderInterface
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  string  $token
      * @return void
      */
@@ -42,7 +42,7 @@ interface UserProviderInterface
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  array  $credentials
      * @return bool
      */

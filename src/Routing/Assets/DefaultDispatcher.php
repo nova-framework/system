@@ -82,27 +82,41 @@ class DefaultDispatcher implements DispatcherInterface
             return null;
         }
 
-        // Calculate the Asset File path, , looking for a valid one.
+        // Calculate the Asset File path, looking for a valid one.
         $uri = $request->path();
 
         if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $baseName = strtolower($matches[1]);
+
+            //
             $folder = $matches[2];
 
-            // Adjust the name of the requested folder, the short ones becoming uppercase.
-            $folder = (strlen($folder) > 3) ? Str::studly($folder) : strtoupper($folder);
+            if (($folder == 'adminlte') && ($baseName == 'templates')) {
+                // The Asset path is on the AdminLTE Template.
+                $folder = 'AdminLTE';
+            } else if (strlen($folder) > 3) {
+                // A standard Template or Module name.
+                $folder = Str::studly($folder);
+            } else {
+                // A short Template or Module name.
+                $folder = strtoupper($folder);
+            }
 
-            //
             $path = str_replace('/', DS, $matches[3]);
 
-            //
-            $baseName = strtolower($matches[1]);
+            // Calculate the base path.
+            if ($baseName == 'modules') {
+                $basePath = Config::get('modules.path', APPDIR .'Modules');
+            } else {
+                $basePath = APPDIR .'Templates';
+            }
 
-            $filePath = APPDIR .ucfirst($baseName) .DS .$folder .DS .'Assets' .DS .$path;
+            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
         } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
-            $path = $matches[2];
+            $baseName = strtolower($matches[1]);
 
             //
-            $baseName = strtolower($matches[1]);
+            $path = $matches[2];
 
             if (($baseName == 'vendor') && ! Str::startsWith($path, $this->paths)) {
                 // The current URI is not a valid Asset File path on Vendor.
@@ -160,7 +174,7 @@ class DefaultDispatcher implements DispatcherInterface
                 break;
         }
 
-        if (str_is('text/*', $contentType) || ($contentType == 'application/javascript')) {
+        if (($contentType == 'application/javascript') || str_is('text/*', $contentType)) {
             $response = $this->createFileResponse($path, $request);
         } else {
             $response = $this->createBinaryFileResponse($path);

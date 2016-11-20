@@ -4,6 +4,7 @@ namespace Nova\Database;
 
 use Closure;
 
+
 interface ConnectionInterface
 {
     /**

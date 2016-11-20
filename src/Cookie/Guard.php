@@ -22,7 +22,7 @@ class Guard implements HttpKernelInterface
     /**
      * The encrypter instance.
      *
-     * @var \Encryption\Encrypter
+     * @var \Nova\Encryption\Encrypter
      */
     protected $encrypter;
 
@@ -30,7 +30,7 @@ class Guard implements HttpKernelInterface
      * Create a new CookieGuard instance.
      *
      * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Nova\Encryption\Encrypter  $encrypter
+     * @param  \Encryption\Encrypter  $encrypter
      * @return void
      */
     public function __construct(HttpKernelInterface $app, Encrypter $encrypter)

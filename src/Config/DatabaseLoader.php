@@ -153,7 +153,7 @@ class DatabaseLoader implements LoaderInterface
     /**
      * Create a new database query
      *
-     * @return \Database\Query
+     * @return \Nova\Database\Query
      */
     public function newQuery()
     {

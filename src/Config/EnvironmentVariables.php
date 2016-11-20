@@ -19,7 +19,7 @@ class EnvironmentVariables
     /**
      * The server environment instance.
      *
-     * @param  \Nova\Config\EnvironmentLoaderInterface  $loader
+     * @param  \Config\EnvironmentLoaderInterface  $loader
      * @return void
      */
     public function __construct(EnvironmentVariablesLoaderInterface $loader)

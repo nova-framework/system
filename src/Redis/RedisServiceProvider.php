@@ -1,4 +1,6 @@
-<?php namespace Nova\Redis;
+<?php
+
+namespace Nova\Redis;
 
 use Nova\Support\ServiceProvider;
 

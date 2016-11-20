@@ -2,7 +2,6 @@
 
 namespace Nova\Support\Facades;
 
-
 /**
  * @see \Nova\Filesystem\Filesystem
  */
