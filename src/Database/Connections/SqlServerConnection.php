@@ -19,6 +19,7 @@ class SqlServerConnection extends Connection
      * @return mixed
      *
      * @throws \Exception
+     * @throws \Throwable
      */
     public function transaction(Closure $callback)
     {
@@ -32,7 +33,13 @@ class SqlServerConnection extends Connection
             $result = $callback($this);
 
             $this->pdo->exec('COMMIT TRAN');
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
+            $this->pdo->exec('ROLLBACK TRAN');
+
+           throw $e;
+        }
+        catch (\Throwable $e) {
             $this->pdo->exec('ROLLBACK TRAN');
 
             throw $e;

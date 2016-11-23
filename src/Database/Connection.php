@@ -400,6 +400,7 @@ class Connection implements ConnectionInterface
      * @return mixed
      *
      * @throws \Exception
+     * @throws \Throwable
      */
     public function transaction(Closure $callback)
     {
@@ -411,6 +412,11 @@ class Connection implements ConnectionInterface
             $this->commit();
         }
         catch (\Exception $e) {
+            $this->rollBack();
+
+           throw $e;
+        }
+        catch (\Throwable $e) {
             $this->rollBack();
 
             throw $e;

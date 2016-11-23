@@ -156,10 +156,6 @@ class Handler
      */
     public function handleException($exception)
     {
-        if (! $exception instanceof Exception) {
-            $exception = new FatalThrowableError($exception);
-        }
-
         $response = $this->callCustomHandlers($exception);
 
         if (! is_null($response)) {
@@ -244,8 +240,10 @@ class Handler
             try {
                 $response = $handler($exception, $code, $fromConsole);
             }
-            catch (\Exception $e)
-            {
+            catch (\Exception $e) {
+                $response = $this->formatException($e);
+            }
+            catch (\Throwable $e) {
                 $response = $this->formatException($e);
             }
 
@@ -264,6 +262,10 @@ class Handler
     protected function displayException($exception)
     {
         $displayer = $this->debug ? $this->debugDisplayer : $this->plainDisplayer;
+
+        if (! $exception instanceof \Exception) {
+            $exception = new FatalThrowableError($exception);
+        }
 
         return $displayer->display($exception);
     }
