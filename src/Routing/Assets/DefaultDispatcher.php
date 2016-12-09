@@ -26,6 +26,18 @@ class DefaultDispatcher implements DispatcherInterface
     protected $paths = array();
 
     /**
+     * The cache control options.
+     * @var int
+     */
+    protected $cacheControl = array();
+
+    /**
+     * Wheter or not the CSS and JS files are auto-compressed.
+     * @var boolean
+     */
+    protected $compress = true;
+
+    /**
      * The currently accepted encodings for Response content compression.
      *
      * @var array
@@ -43,25 +55,11 @@ class DefaultDispatcher implements DispatcherInterface
         $paths = Config::get('routing.assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
-    }
 
-    protected function parsePaths(array $paths)
-    {
-        $result = array();
+        //
+        $this->compress = Config::get('routing.assets.compress', true);
 
-        foreach ($paths as $vendor => $value) {
-            $values = is_array($value) ? $value : array($value);
-
-            $values = array_map(function($value) use ($vendor)
-            {
-                return $vendor .'/' .$value .'/';
-
-            }, $values);
-
-            $result = array_merge($result, $values);
-        }
-
-        return array_unique($result);
+        $this->cacheControl = Config::get('routing.assets.cache', array());
     }
 
     /**
@@ -153,42 +151,48 @@ class DefaultDispatcher implements DispatcherInterface
             return new Response('Unauthorized Access', 403);
         }
 
-        // Collect the current file information.
-        $guesser = MimeTypeGuesser::getInstance();
+        // Retrieve the file content type.
+        $mimeType = $this->getMimeType($path);
 
-        // Even the Symfony's HTTP Foundation have troubles with the CSS and JS files?
-        //
-        // Hard coding the correct mime types for presently needed file extensions.
-        switch ($fileExt = pathinfo($path, PATHINFO_EXTENSION)) {
-            case 'css':
-                $contentType = 'text/css';
+        // Calculate the available compression algorithms.
+        $algorithms = $this->getEncodingAlgorithms($request);
 
-                break;
-            case 'js':
-                $contentType = 'application/javascript';
+        // Determine if the file could be compressed.
+        $compressable = (($mimeType == 'application/javascript') || str_is('text/*', $mimeType));
 
-                break;
-            default:
-                $contentType = $guesser->guess($path);
+        if ($this->compressFiles() && ! empty($algorithms) && $compressable) {
+            // Get the (first) encoding algorithm.
+            $algorithm = array_shift($algorithms);
 
-                break;
-        }
+            // Retrieve the file content.
+            $content = file_get_contents($path);
 
-        if (($contentType == 'application/javascript') || str_is('text/*', $contentType)) {
-            $response = $this->createFileResponse($path, $request);
+            // Encode the content using the specified algorithm.
+            $content = $this->encodeContent($content, $algorithm);
+
+            // Retrieve the Last-Modified information.
+            $timestamp = filemtime($path);
+
+            $modifyTime = Carbon::createFromTimestampUTC($timestamp);
+
+            $lastModified = $modifyTime->format('D, j M Y H:i:s') .' GMT';
+
+            // Create the custom Response instance.
+            $response = new Response($content, 200, array(
+                'Content-Type'     => $mimeType,
+                'Content-Encoding' => $algorithm,
+                'Last-Modified'    => $lastModified,
+            ));
         } else {
-            $response = $this->createBinaryFileResponse($path);
+            // Create a Binary File Response instance.
+            $response = new BinaryFileResponse($path, 200, array(), true, 'inline', true, false);
+
+            // Set the Content type.
+            $response->headers->set('Content-Type', $mimeType);
         }
 
-        // Set the Content type.
-        $response->headers->set('Content-Type', $contentType);
-
-        // Set the Cache Control.
-        $cacheTime = Config::get('routing.assets.cacheTime', 10800);
-
-        $response->setTtl(600);
-        $response->setMaxAge($cacheTime);
-        $response->setSharedMaxAge(600);
+        // Setup the (browser) Cache Control.
+        $this->setupCacheControl($response);
 
         // Prepare against the Request instance.
         $response->isNotModified($request);
@@ -196,66 +200,109 @@ class DefaultDispatcher implements DispatcherInterface
         return $response;
     }
 
-    protected function createFileResponse($path, SymfonyRequest $request)
+    protected function setupCacheControl(SymfonyResponse $response)
     {
-        // Get the accepted encodings from Request instance.
+        $ttl    = array_get($this->cacheControl, 'ttl', 600);
+        $maxAge = array_get($this->cacheControl, 'maxAge', 10800);
+
+        $sharedMaxAge = array_get($this->cacheControl, 'sharedMaxAge', 600);
+
+        //
+        $response->setTtl($ttl);
+        $response->setMaxAge($maxAge);
+        $response->setSharedMaxAge($sharedMaxAge);
+    }
+
+    protected function encodeContent($content, $algorithm)
+    {
+        if ($algorithm == 'gzip') {
+            return gzencode($content, -1, FORCE_GZIP);
+        } else if ($algorithm == 'deflate') {
+            return gzencode($content, -1, FORCE_DEFLATE);
+        }
+
+        throw new LogicException('Unknow encoding algorithm: ' .$algorithm);
+    }
+
+    protected function getEncodingAlgorithms(SymfonyRequest $request)
+    {
+        $algorithms = array();
+
+        // Get the accepted encodings from the Request instance.
         $acceptEncoding = $request->headers->get('Accept-Encoding');
 
         if (! is_null($acceptEncoding)) {
-            $acceptEncoding = array_map('trim', explode(',', $acceptEncoding));
-        } else {
-            $acceptEncoding = array();
+            $values = explode(',', $acceptEncoding);
+
+            $algorithms = array_filter($values, function($value)
+            {
+                return ! empty(trim($value));
+            });
         }
 
-        // Create a Response instance.
-        $response = new Response(file_get_contents($path), 200);
-
-        // Setup the Last-Modified header.
-        $lastModified = Carbon::createFromTimestampUTC(filemtime($path));
-
-        $response->headers->set('Last-Modified', $lastModified->format('D, j M Y H:i:s') .' GMT');
-
-        return $this->compressResponseContent($response, $acceptEncoding);
+        return array_values(array_intersect($algorithms, static::$algorithms));
     }
 
-    protected function createBinaryFileResponse($path, $contentDisposition = null)
+    protected function getMimeType($path)
     {
-        $contentDisposition = $contentDisposition ?: 'inline';
+        // Even the Symfony's HTTP Foundation have troubles with the CSS and JS files?
+        //
+        // Hard coding the correct mime types for presently needed file extensions.
 
-        return new BinaryFileResponse($path, 200, array(), true, $contentDisposition, true, false);
+        switch ($fileExt = pathinfo($path, PATHINFO_EXTENSION)) {
+            case 'css':
+                return 'text/css';
+
+            case 'js':
+                return 'application/javascript';
+
+            default:
+                break;
+        }
+
+        // Guess the path's Mime Type.
+        $guesser = MimeTypeGuesser::getInstance();
+
+        return $guesser->guess($path);
     }
 
-    protected function compressResponseContent(SymfonyResponse $response, array $acceptEncoding)
+    private function parsePaths(array $paths)
     {
-        // Calculate the available algorithms.
-        $algorithms = array_values(array_intersect($acceptEncoding, static::$algorithms));
+        $result = array();
 
-        // If there are no available compression algorithms, just return the Response instance.
-        if (empty($algorithms)) {
-            $response->headers->set('Content-Length', strlen($response->getContent()));
+        foreach ($paths as $vendor => $value) {
+            $values = is_array($value) ? $value : array($value);
 
-            return $response;
+            $values = array_map(function($value) use ($vendor)
+            {
+                return $vendor .'/' .$value .'/';
+
+            }, $values);
+
+            $result = array_merge($result, $values);
         }
 
-        // Get the (first) compression algorithm.
-        $algorithm = array_shift($algorithms);
+        return array_unique($result);
+    }
 
-        // Compress the Response content.
-        if ($algorithm == 'gzip') {
-            $content = gzencode($response->getContent(), -1, FORCE_GZIP);
-        } else if ($algorithm == 'deflate') {
-            $content = gzencode($response->getContent(), -1, FORCE_DEFLATE);
-        } else {
-            throw new LogicException('Unknow encoding algorithm: ' .$algorithm);
-        }
+    /**
+     * Wheter or not the CSS and JS files are auto-compressed.
+     *
+     * @return boolean
+     */
+    public function compressFiles()
+    {
+        return $this->compress;
+    }
 
-        // Setup the (new) Response content.
-        $response->setContent($content);
-
-        // Setup the Content Encoding.
-        $response->headers->set('Content-Encoding', $algorithm);
-
-        return $response;
+    /**
+     * Return the cache control options.
+     *
+     * @return array
+     */
+    public function getCacheControl()
+    {
+        return $this->cacheControl;
     }
 
 }
