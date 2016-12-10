@@ -226,21 +226,26 @@ class DefaultDispatcher implements DispatcherInterface
 
     protected function getEncodingAlgorithms(SymfonyRequest $request)
     {
-        $algorithms = array();
-
         // Get the accepted encodings from the Request instance.
         $acceptEncoding = $request->headers->get('Accept-Encoding');
 
-        if (! is_null($acceptEncoding)) {
-            $values = explode(',', $acceptEncoding);
-
-            $algorithms = array_filter($values, function($value)
-            {
-                return ! empty(trim($value));
-            });
+        if (is_null($acceptEncoding)) {
+            // No encoding accepted?
+            return array();
         }
 
-        return array_values(array_intersect($algorithms, static::$algorithms));
+        // Retrieve the accepted encoding values.
+        $values = explode(',', $acceptEncoding);
+
+        // Filter the meaningful values.
+        $values = array_filter($values, function($value)
+        {
+            $value = trim($value);
+
+            return ! empty($value);
+        });
+
+        return array_values(array_intersect($values, static::$algorithms));
     }
 
     protected function getMimeType($path)
