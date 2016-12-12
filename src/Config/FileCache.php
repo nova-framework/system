@@ -47,7 +47,7 @@ class FileCache
      *
      * @return bool
      */
-    public function isCachingActive()
+    public function active()
     {
         return $this->active;
     }
@@ -73,7 +73,7 @@ class FileCache
     {
         $filename = $this->getFileName($key);
 
-        if ($this->isCachingActive() && is_readable($filename)) {
+        if ($this->active() && is_readable($filename)) {
             // Retrieve the file contents.
             $content = file_get_contents($filename);
 
@@ -110,7 +110,7 @@ class FileCache
     {
         $filename = $this->getFileName($key);
 
-        if ($this->isCachingActive()) {
+        if ($this->active()) {
             // Serializing along with the TTL.
             $data = array(time() + $ttl, $data);
 
