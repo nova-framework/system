@@ -32,11 +32,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class Application extends Container implements HttpKernelInterface, TerminableInterface, ResponsePreparerInterface
 {
     /**
-     * The Laravel framework version.
+     * The Nova framework version.
      *
      * @var string
      */
-    const VERSION = '4.0-dev';
+    const VERSION = '4.0.0';
 
     /**
      * Indicates if the application has "booted".
@@ -730,17 +730,23 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Exception
+     * @throws \Throwable
      */
     public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
-        try
-        {
+        try {
             $this->refreshRequest($request = Request::createFromBase($request));
 
             $this->boot();
 
             return $this->dispatch($request);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
+            if (! $catch || $this->runningUnitTests()) throw $e;
+
+            return $this['exception']->handleException($e);
+        }
+        catch (\Throwable $e) {
             if (! $catch || $this->runningUnitTests()) throw $e;
 
             return $this['exception']->handleException($e);
@@ -1112,8 +1118,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
+            'layout'         => 'Nova\Layout\Factory',
             'view'           => 'Nova\View\Factory',
-            'template'       => 'Nova\View\Template',
         );
 
         foreach ($aliases as $key => $alias) {

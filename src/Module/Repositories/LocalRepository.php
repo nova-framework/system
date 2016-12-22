@@ -3,6 +3,7 @@
 namespace Nova\Module\Repositories;
 
 use Nova\Helpers\Inflector;
+use Nova\Module\Repositories\Repository;
 
 
 class LocalRepository extends Repository
@@ -43,9 +44,9 @@ class LocalRepository extends Repository
         });
 
         //
-        $content = $modules->toJson(JSON_PRETTY_PRINT);
+        $data = $modules->toArray();
 
-        return $this->files->put($cachePath, $content);
+        $this->writeCache($data);
     }
 
     /**
@@ -186,9 +187,10 @@ class LocalRepository extends Repository
 
         $merged = $cache->merge($module);
 
-        $content = $merged->toJson(JSON_PRETTY_PRINT);
+        //
+        $data = $merged->toArray();
 
-        return $this->files->put($cachePath, $content);
+        $this->writeCache($data);
     }
 
     /**
@@ -277,16 +279,35 @@ class LocalRepository extends Repository
         $cachePath = $this->getCachePath();
 
         if (! $this->files->exists($cachePath)) {
-            $content = json_encode(array(), JSON_PRETTY_PRINT);
+            $data = array();
 
-            $this->files->put($cachePath, $content);
+            $this->writeCache($data);
 
             $this->optimize();
 
-            return collect(json_decode($content, true));
+            return collect($data);
         }
 
-        return collect(array_values(json_decode($this->files->get($cachePath), true)));
+        //
+        $data = $this->files->getRequire($cachePath);
+
+        return collect(array_values($data));
+    }
+
+    /**
+     * Write the service cache file to disk.
+     *
+     * @param  array  $data
+     * @return void
+     */
+    public function writeCache($data)
+    {
+        $cachePath = $this->getCachePath();
+
+        //
+        $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
+
+        $this->files->put($cachePath, $content);
     }
 
     /**
@@ -296,6 +317,8 @@ class LocalRepository extends Repository
      */
     protected function getCachePath()
     {
-        return storage_path('modules.json');
+        $cachePath = APPDIR .'Boot/Cache/Modules.php';
+
+        return str_replace('/', DS, $cachePath);
     }
 }

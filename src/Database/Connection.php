@@ -448,6 +448,7 @@ class Connection implements ConnectionInterface
      * @return mixed
      *
      * @throws \Exception
+     * @throws \Throwable
      */
     public function transaction(Closure $callback)
     {
@@ -456,8 +457,7 @@ class Connection implements ConnectionInterface
         // We'll simply execute the given callback within a try / catch block
         // and if we catch any exception we can rollback the transaction
         // so that none of the changes are persisted to the database.
-        try
-        {
+        try {
             $result = $callback($this);
 
             $this->commit();
@@ -467,6 +467,11 @@ class Connection implements ConnectionInterface
         // up in the database. Then we'll re-throw the exception so it can
         // be handled how the developer sees fit for their applications.
         catch (\Exception $e) {
+            $this->rollBack();
+
+           throw $e;
+        }
+        catch (\Throwable $e) {
             $this->rollBack();
 
             throw $e;
@@ -574,10 +579,10 @@ class Connection implements ConnectionInterface
         // Here we will run this query. If an exception occurs we'll determine if it was
         // caused by a connection that has been lost. If that is the cause, we'll try
         // to re-establish connection and re-run the query with a fresh connection.
-        try
-        {
+        try {
             $result = $this->runQueryCallback($query, $bindings, $callback);
-        } catch (QueryException $e) {
+        }
+        catch (QueryException $e) {
             $result = $this->tryAgainIfCausedByLostConnection(
                 $e, $query, $bindings, $callback
             );
@@ -608,8 +613,7 @@ class Connection implements ConnectionInterface
         // To execute the statement, we'll simply call the callback, which will actually
         // run the SQL against the PDO connection. Then we can calculate the time it
         // took to execute and log the query SQL, bindings and time in our memory.
-        try
-        {
+        try {
             $result = $callback($this, $query, $bindings);
         }
 

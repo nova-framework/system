@@ -75,7 +75,7 @@ class Query
      *
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     public function paginate($perPage = null, $columns = array('*'))
     {
@@ -94,10 +94,10 @@ class Query
     /**
      * Get a paginator for a grouped statement.
      *
-     * @param  \Pagination\Environment  $paginator
+     * @param  \Nova\Pagination\Environment  $paginator
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     protected function groupedPaginate($paginator, $perPage, $columns)
     {
@@ -109,10 +109,10 @@ class Query
     /**
      * Get a paginator for an ungrouped statement.
      *
-     * @param  \Pagination\Environment  $paginator
+     * @param  \Nova\Pagination\Environment  $paginator
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     protected function ungroupedPaginate($paginator, $perPage, $columns)
     {
@@ -135,7 +135,7 @@ class Query
      *
      * @param  int    $perPage
      * @param  array  $columns
-     * @return \Pagination\Paginator
+     * @return \Nova\Pagination\Paginator
      */
     public function simplePaginate($perPage = null, $columns = array('*'))
     {

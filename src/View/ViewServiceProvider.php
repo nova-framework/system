@@ -57,7 +57,7 @@ class ViewServiceProvider extends ServiceProvider
     /**
      * Register the PHP engine implementation.
      *
-     * @param  \View\Engines\EngineResolver  $resolver
+     * @param  \Nova\View\Engines\EngineResolver  $resolver
      * @return void
      */
     public function registerPhpEngine($resolver)
@@ -127,7 +127,7 @@ class ViewServiceProvider extends ServiceProvider
     /**
      * Determine if the application session has errors.
      *
-     * @param  \Foundation\Application  $app
+     * @param  \Nova\Foundation\Application  $app
      * @return bool
      */
     public function sessionHasErrors($app)
