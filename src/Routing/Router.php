@@ -62,7 +62,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     /**
      * The asset file dispatcher instance.
      *
-     * @var \Nova\Routing\FileDispatcher
+     * @var \Nova\Routing\Assets\DispatcherInterface
      */
     protected $fileDispatcher;
 
