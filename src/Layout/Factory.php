@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\Template;
+namespace Nova\Layout;
 
 use Nova\Config\Config;
 use Nova\Foundation\Application;
 use Nova\Language\LanguageManager;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
-use Nova\Template\Template;
+use Nova\Layout\Layout;
 use Nova\View\Factory as ViewFactory;
 use Nova\View\ViewFinderInterface;
 use Nova\View\View;
@@ -29,7 +29,7 @@ class Factory
     protected $finder;
 
     /**
-     * Create new Template Factory instance.
+     * Create new Layout Factory instance.
      *
      * @param $factory The View Factory instance.
      * @return void
@@ -60,7 +60,7 @@ class Factory
         // Get the View Engine instance.
         $engine = $factory->getEngineFromPath($path);
 
-        return new Template($factory, $engine, $view, $path, $this->parseData($data));
+        return new Layout($factory, $engine, $view, $path, $this->parseData($data));
     }
 
     /**
