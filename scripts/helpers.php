@@ -4,7 +4,6 @@ use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
 
-
 if (! function_exists('site_url'))
 {
     /**
@@ -29,9 +28,21 @@ if (! function_exists('resource_url'))
      */
     function resource_url($path, $module = null)
     {
-        $basePath = ! is_null($module) ? sprintf('modules/%s', snake_case($module)) : '';
+        $basePath = '';
 
-        $path = sprintf('%s/assets/%s', $basePath, ltrim($path, '/'));
+        if (! is_null($module)) {
+            $basePath = 'modules/';
+
+            if (Str::length($module) > 3) {
+                $basePath .= Str::snake($module, '-');
+            } else {
+                $basePath .= Str::lower($module);
+            }
+
+            $basePath .= '/';
+        }
+
+        $path = $basePath .'assets/' .ltrim($path, '/');
 
         return url($path);
     }
@@ -51,7 +62,31 @@ if (! function_exists('template_url'))
 
         $template = $template ?: $config['app']['template'];
 
-        $path = sprintf('templates/%s/assets/%s', snake_case($template), ltrim($path, '/'));
+        if ('adminlte' == Str::lower($template)) {
+            $template = 'adminlte';
+        } else if (Str::length($template) > 3) {
+            $template = Str::snake($template, '-');
+        } else {
+            $template = Str::lower($template);
+        }
+
+        $path = sprintf('templates/%s/assets/%s', $template, ltrim($path, '/'));
+
+        return url($path);
+    }
+}
+
+if (! function_exists('vendor_url'))
+{
+    /**
+     * Vendor URL helper
+     * @param string $path
+     * @param string $vendor
+     * @return string
+     */
+    function vendor_url($path, $vendor)
+    {
+        $path = sprintf('vendor/%s/%s', $vendor, $path);
 
         return url($path);
     }

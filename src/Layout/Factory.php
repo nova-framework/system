@@ -1,11 +1,13 @@
 <?php
 
-namespace Nova\Template;
+namespace Nova\Layout;
 
 use Nova\Config\Config;
 use Nova\Foundation\Application;
+use Nova\Language\LanguageManager;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
-use Nova\Template\Template;
+use Nova\Layout\Layout;
+use Nova\View\Factory as ViewFactory;
 use Nova\View\ViewFinderInterface;
 use Nova\View\View;
 
@@ -13,7 +15,7 @@ use Nova\View\View;
 class Factory
 {
     /**
-     * The View Factory instance.
+     * The Application instance.
      *
      * @var \Nova\Foundation\Application
      */
@@ -26,9 +28,8 @@ class Factory
      */
     protected $finder;
 
-
     /**
-     * Create new Template Factory instance.
+     * Create new Layout Factory instance.
      *
      * @param $factory The View Factory instance.
      * @return void
@@ -44,34 +45,22 @@ class Factory
      * Create a View instance
      *
      * @param string $view
-     * @param array|string $data
-     * @param string $custom
+     * @param array $data
+     * @param string|null $template
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $template = null)
+    public function make($view, array $data = array(), $template = null)
     {
-        if (is_string($data)) {
-            if (! empty($data) && ($template === null)) {
-                // The Module name given as second parameter; adjust the information.
-                $template = $data;
-            }
-
-            $data = array();
-        }
+        // Get the View Factory instance.
+        $factory = $this->getViewFactory();
 
         // Get the View file path.
         $path = $this->find($view, $template);
 
-        // Get the parsed data.
-        $data = $this->parseData($data);
-
-        // Get the View Factory instance.
-        $factory = $this->getViewFactory();
-
         // Get the View Engine instance.
         $engine = $factory->getEngineFromPath($path);
 
-        return new Template($factory, $engine, $view, $path, $data);
+        return new Layout($factory, $engine, $view, $path, $this->parseData($data));
     }
 
     /**
@@ -139,7 +128,6 @@ class Factory
         throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
     }
 
-
     /**
      * Return the current View Factory instance.
      *
@@ -153,7 +141,7 @@ class Factory
     /**
      * Return the current Language instance.
      *
-     * @return \Nova\Language\Language
+     * @return \Language\Language
      */
     protected function getLanguage()
     {
@@ -161,5 +149,4 @@ class Factory
 
         return $languages->instance();
     }
-
 }

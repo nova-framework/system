@@ -2,10 +2,13 @@
 
 namespace Nova\View;
 
+use Nova\Config\Config;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\View;
 use Nova\View\ViewFinderInterface;
+
+use Closure;
 
 
 class Factory
@@ -13,14 +16,14 @@ class Factory
     /**
      * The Engines Resolver instance.
      *
-     * @var \View\Engines\EngineResolver
+     * @var \Nova\View\Engines\EngineResolver
      */
     protected $engines;
 
     /**
      * The view finder implementation.
      *
-     * @var \View\ViewFinderInterface
+     * @var \Nova\View\ViewFinderInterface
      */
     protected $finder;
 
@@ -55,31 +58,31 @@ class Factory
      * Create a View instance
      *
      * @param string $path
-     * @param array|string $data
+     * @param array $data
      * @param string|null $module
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $module = null)
+    public function make($view, array $data = array(), $module = null)
     {
-        if (is_string($data)) {
-            if (! empty($data) && ($module === null)) {
-                // The Module name given as second parameter; adjust the information.
-                $module = $data;
-            }
-
-            $data = array();
-        }
-
         // Get the View file path.
         $path = $this->find($view, $module);
 
         // Get the View Engine instance.
         $engine = $this->getEngineFromPath($path);
 
-        // Get the parsed data.
-        $data = $this->parseData($data);
+        return new View($this, $engine, $view, $path, $this->parseData($data));
+    }
 
-        return new View($this, $engine, $view, $path, $data);
+    /**
+     * Create a View instance and return its rendered content.
+     *
+     * @return string
+     */
+    public function fetch($view, $data = array(), $module = null, Closure $callback = null)
+    {
+        $instance = $this->make($view, $data, $module);
+
+        return $instance->render($callback);
     }
 
     /**
@@ -152,7 +155,7 @@ class Factory
      * Get the appropriate View Engine for the given path.
      *
      * @param  string  $path
-     * @return \View\Engines\EngineInterface
+     * @return \Nova\View\Engines\EngineInterface
      */
     public function getEngineFromPath($path)
     {
@@ -213,7 +216,7 @@ class Factory
     /**
      * Get the engine resolver instance.
      *
-     * @return \View\Engines\EngineResolver
+     * @return \Nova\View\Engines\EngineResolver
      */
     public function getEngineResolver()
     {
@@ -223,7 +226,7 @@ class Factory
     /**
      * Get the View Finder instance.
      *
-     * @return \View\ViewFinderInterface
+     * @return \Nova\View\ViewFinderInterface
      */
     public function getFinder()
     {
@@ -250,15 +253,14 @@ class Factory
     protected function find($view, $module = null)
     {
         if (! is_null($module)) {
-            $path = "Modules/$module/Views/$view";
+            $modulesPath = Config::get('modules.path', APPDIR .'Modules');
+
+            $path = str_replace('/', DS, $modulesPath ."/$module/Views/$view");
         } else {
-            $path = "Views/$view";
+            $path = APPDIR .str_replace('/', DS, "Views/$view");
         }
 
-        // Make the path absolute and adjust the directory separator.
-        $path = str_replace('/', DS, APPDIR .$path);
-
-        //
+        // Try to find the View file.
         $filePath = $this->finder->find($path);
 
         if (! is_null($filePath)) return $filePath;

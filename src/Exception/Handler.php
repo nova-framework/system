@@ -2,6 +2,9 @@
 
 namespace Nova\Exception;
 
+use Nova\Exception\PlainDisplayer;
+use Nova\Exception\WhoopsDisplayer;
+use Nova\Exception\ExceptionDisplayerInterface;
 use Nova\Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -151,10 +154,6 @@ class Handler
      */
     public function handleException($exception)
     {
-        if (! $exception instanceof Exception) {
-            $exception = new FatalThrowableError($exception);
-        }
-
         $response = $this->callCustomHandlers($exception);
 
         // If one of the custom error handlers returned a response, we will send that
@@ -237,8 +236,7 @@ class Handler
             // If this exception handler does not handle the given exception, we will just
             // go the next one. A handler may type-hint an exception that it handles so
             //  we can have more granularity on the error handling for the developer.
-            if (! $this->handlesException($handler, $exception))
-            {
+            if (! $this->handlesException($handler, $exception)) {
                 continue;
             } else if ($exception instanceof HttpExceptionInterface) {
                 $code = $exception->getStatusCode();
@@ -247,8 +245,7 @@ class Handler
             // If the exception doesn't implement the HttpExceptionInterface, we will just
             // use the generic 500 error code for a server side error. If it implements
             // the HttpException interfaces we'll grab the error code from the class.
-            else
-            {
+            else {
                 $code = 500;
             }
 
@@ -259,8 +256,10 @@ class Handler
             {
                 $response = $handler($exception, $code, $fromConsole);
             }
-            catch (\Exception $e)
-            {
+            catch (\Exception $e) {
+                $response = $this->formatException($e);
+            }
+            catch (\Throwable $e) {
                 $response = $this->formatException($e);
             }
 
@@ -282,6 +281,10 @@ class Handler
     protected function displayException($exception)
     {
         $displayer = $this->debug ? $this->debugDisplayer : $this->plainDisplayer;
+
+        if (! $exception instanceof \Exception) {
+            $exception = new FatalThrowableError($exception);
+        }
 
         return $displayer->display($exception);
     }

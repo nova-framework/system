@@ -61,7 +61,17 @@ class ControllerInspector
      */
     public function isRoutable(ReflectionMethod $method)
     {
-        if ($method->class == 'Nova\Routing\Controller') return false;
+        //if ($method->class == 'Nova\Routing\Controller') return false;
+
+        switch ($method->class) {
+            case 'Routing\Controller':
+            case 'App\Core\Controller':
+            case 'App\Core\BackendController':
+                return false;
+
+            default:
+                break;
+        }
 
         return starts_with($method->name, $this->verbs);
     }
@@ -125,7 +135,7 @@ class ControllerInspector
      */
     public function addUriWildcards($uri)
     {
-        return $uri.'/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}';
+        return $uri .'/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}';
     }
 
 }

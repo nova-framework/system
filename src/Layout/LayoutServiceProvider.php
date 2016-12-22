@@ -1,13 +1,13 @@
 <?php
 
-namespace Nova\Template;
+namespace Nova\Layout;
 
-use Nova\Template\Factory;
+use Nova\Layout\Factory;
 use Nova\Support\ServiceProvider;
 use Nova\View\Engines\EngineResolver;
 
 
-class TemplateServiceProvider extends ServiceProvider
+class LayoutServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.
@@ -23,7 +23,7 @@ class TemplateServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('template', function($app)
+        $this->app->bindShared('layout', function($app)
         {
             return new Factory($app, $app['view.finder']);
         });
@@ -36,6 +36,6 @@ class TemplateServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('template');
+        return array('layout');
     }
 }

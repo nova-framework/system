@@ -33,7 +33,7 @@ class FileViewFinder implements ViewFinderInterface
     /**
      * Create a new file view loader instance.
      *
-     * @param  \Filesystem\Filesystem  $files
+     * @param  \Nova\Filesystem\Filesystem  $files
      * @param  array  $extensions
      * @return void
      */
