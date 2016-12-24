@@ -15,7 +15,7 @@
             "name": "Virgil-Adrian Teaca",
             "email": "virgil@giulianaeassociati.com",
             "homepage": "http://giulianaeassociati.com",
-            "role": "Developer"            
+            "role": "Developer"
         }
     ],
     "require": {
@@ -36,7 +36,7 @@
         "symfony/translation": "^3.1",
         "symfony/var-dumper": "^3.1",
         "stack/builder": "^1.0",
-        "doctrine/inflector": "1.0.*",
+        "doctrine/inflector": "1.1.*",
         "patchwork/utf8": "~1.2",
         "nesbot/carbon": "^1.21",
         "swiftmailer/swiftmailer": "^5.4",
