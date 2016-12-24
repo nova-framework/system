@@ -191,7 +191,7 @@ if (! function_exists('app_path'))
      */
     function app_path($path = '')
     {
-        return app('path') .($path ? DS .$path : $path);
+        return app('path') .(! empty($path) ? DS .$path : $path);
     }
 }
 
@@ -205,7 +205,7 @@ if (! function_exists('base_path'))
      */
     function base_path($path = '')
     {
-        return app()->make('path.base') .($path ? DS .$path : $path);
+        return app()->make('path.base') .(! empty($path) ? DS .$path : $path);
     }
 }
 
@@ -219,7 +219,7 @@ if (! function_exists('storage_path'))
      */
     function storage_path($path = '')
     {
-        return app('path.storage') .($path ? DS .$path : $path);
+        return app('path.storage') .(! empty($path) ? DS .$path : $path);
     }
 }
 
@@ -233,7 +233,7 @@ if (! function_exists('public_path'))
      */
     function public_path($path = '')
     {
-        return app()->make('path.public') .($path ? DS .$path : $path);
+        return app()->make('path.public') .(! empty($path) ? DS .$path : $path);
     }
 }
 
