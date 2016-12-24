@@ -3,7 +3,7 @@
 namespace Nova\Support\Facades;
 
 use Nova\Support\Facades\Facade;
-use Nova\Support\Facades\Template;
+use Nova\Support\Facades\Layout;
 use Nova\Support\MessageBag;
 
 
@@ -139,7 +139,7 @@ class Session extends Facade
         }
 
         // Fetch the associated Template Fragment and return the result.
-        return Template::make('message', compact('type', 'message'))->render();
+        return Layout::make('message', compact('type', 'message'))->render();
     }
 
     /**
