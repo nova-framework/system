@@ -8,6 +8,9 @@
 
 namespace Nova\Helpers;
 
+use Config;
+
+
 /**
  * Collection of useful methods.
  */
@@ -57,10 +60,10 @@ class Tags
         $string = str_replace('[year]', date('Y'), $string);
 
         // Name of website.
-        $string = str_replace('[sitetitle]', SITE_TITLE, $string);
+        $string = str_replace('[sitetitle]', Config::get('app.name'), $string);
 
         // Site email address.
-        $string = str_replace('[siteemail]', SITE_EMAIL, $string);
+        $string = str_replace('[siteemail]', Config::get('app.email'), $string);
 
         // Feedburner subscribe form.
         $string = preg_replace_callback("(\[feedburner(.*?)])is", function ($matches) {
