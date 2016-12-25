@@ -5,7 +5,7 @@ namespace Nova\Support\Facades;
 use Nova\Http\JsonResponse;
 use Nova\Http\Response as HttpResponse;
 use Nova\Support\Contracts\ArrayableInterface;
-use Nova\Support\Facades\Template;
+use Nova\Support\Facades\Layout;
 use Nova\Support\Facades\View;
 
 use Str;
@@ -123,7 +123,7 @@ class Response
      */
     public static function error($status, array $data = array(), $headers = array())
     {
-        $view = Template::make('default')
+        $view = Layout::make('default')
             ->shares('title', 'Error ' .$status)
             ->nest('content', 'Error/' .$status, $data);
 
