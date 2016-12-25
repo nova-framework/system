@@ -57,10 +57,10 @@ class Tags
         $string = str_replace('[year]', date('Y'), $string);
 
         // Name of website.
-        $string = str_replace('[sitetitle]', SITETITLE, $string);
+        $string = str_replace('[sitetitle]', SITE_TITLE, $string);
 
         // Site email address.
-        $string = str_replace('[siteemail]', SITEEMAIL, $string);
+        $string = str_replace('[siteemail]', SITE_EMAIL, $string);
 
         // Feedburner subscribe form.
         $string = preg_replace_callback("(\[feedburner(.*?)])is", function ($matches) {
