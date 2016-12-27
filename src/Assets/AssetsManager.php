@@ -302,13 +302,12 @@ class AssetsManager
 
         $lifeTime = $this->config->get('assets.cache.lifeTime', 1440);
 
-        // The life time is specified on minutes; transform in seconds.
-        $lifeTime *= 60;
+        // Retrieve the file timestamp.
+        $lastModified = $this->files->lastModified($path);
 
-        // Calculate the expiration's timestamp.
-        $timestamp = time() - $lifeTime;
+        if ($lastModified > (time() - ($lifeTime * 60))) return true;
 
-        return (filemtime($path) > $timestamp);
+        return false;
     }
 
     protected function compress($buffer)
