@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing\Assets;
+namespace Nova\Assets;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
