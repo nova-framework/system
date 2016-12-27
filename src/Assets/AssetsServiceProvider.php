@@ -46,9 +46,9 @@ class AssetsServiceProvider extends ServiceProvider
      */
     public function registerManager()
     {
-        $this->app->bindShared('assets', function()
+        $this->app->bindShared('assets', function($app)
         {
-            return new AssetsManager();
+            return new AssetsManager($app);
         });
     }
 
