@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Routing\Assets;
+namespace Nova\Assets;
 
 use Nova\Config\Config;
 use Nova\Http\Response;
-use Nova\Routing\Assets\DispatcherInterface;
+use Nova\Assets\DispatcherInterface;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -52,14 +52,14 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function __construct()
     {
-        $paths = Config::get('routing.assets.paths', array());
+        $paths = Config::get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
 
         //
-        $this->compress = Config::get('routing.assets.compress', true);
+        $this->compress = Config::get('assets.compress', true);
 
-        $this->cacheControl = Config::get('routing.assets.cache', array());
+        $this->cacheControl = Config::get('assets.cache', array());
     }
 
     /**
@@ -127,13 +127,8 @@ class DefaultDispatcher implements DispatcherInterface
             return null;
         }
 
-        // Create a Response for the current Asset File path.
-        $response = $this->serve($filePath, $request);
-
-        // Prepare the Response instance.
-        $response->prepare($request);
-
-        return $response;
+        // Create a Response for the current Asset File path and return it.
+        return $this->serve($filePath, $request);
     }
 
     /**

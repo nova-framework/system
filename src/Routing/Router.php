@@ -60,13 +60,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected $controllerDispatcher;
 
     /**
-     * The asset file dispatcher instance.
-     *
-     * @var \Nova\Routing\Assets\DispatcherInterface
-     */
-    protected $fileDispatcher;
-
-    /**
      * The controller inspector instance.
      *
      * @var \Nova\Routing\ControllerInspector
@@ -986,11 +979,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         $this->currentRequest = $request;
 
-        // First, we will supose that URI is associated with an Asset File.
-        $response = $this->dispatchToFile($request);
-
-        if (! is_null($response)) return $response;
-
         // If no response was returned from the before filter, we will call the proper
         // route instance to get the response. If no route is found a response will
         // still get returned based on why no routes were found for this request.
@@ -1039,19 +1027,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->callRouteAfter($route, $request, $response);
 
         return $response;
-    }
-
-    /**
-     * Dispatch the request to a asset file and return the response.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function dispatchToFile(Request $request)
-    {
-        $fileDispatcher = $this->getFileDispatcher();
-
-        return $fileDispatcher->dispatch($request);
     }
 
     /**
@@ -1701,18 +1676,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function setControllerDispatcher(ControllerDispatcher $dispatcher)
     {
         $this->controllerDispatcher = $dispatcher;
-    }
-
-    /**
-     * Get the controller dispatcher instance.
-     *
-     * @return \Nova\Routing\ControllerDispatcher
-     */
-    public function getFileDispatcher()
-    {
-        if (isset($this->fileDispatcher)) return $this->fileDispatcher;
-
-        return $this->fileDispatcher = $this->container->make('Nova\Routing\Assets\DispatcherInterface');
     }
 
     /**
