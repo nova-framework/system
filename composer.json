@@ -43,7 +43,8 @@
         "monolog/monolog": "^1.19",
         "filp/whoops": "^2.1",
         "predis/predis": "0.8.*",
-        "guzzlehttp/guzzle": "^4.0"
+        "guzzlehttp/guzzle": "^4.0",
+        "tedivm/jshrink": "~1.0"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
