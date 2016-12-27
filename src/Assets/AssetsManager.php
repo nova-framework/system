@@ -10,6 +10,12 @@ use JShrink\Minifier as JShrink;
 class AssetsManager
 {
     /**
+     * The valid Vendor paths.
+     * @var array
+     */
+    protected $paths = array();
+
+    /**
      * The Nova Config Repository instance
      *
      * @var \Nova\Config\Repository
@@ -64,6 +70,11 @@ class AssetsManager
         $basePath = str_replace('/', DS, $this->baseUri);
 
         $this->basePath = PUBLICDIR .$basePath .DS;
+
+        //
+        $paths = $this->config->get('assets.paths', array());
+
+        $this->paths = $this->parsePaths($paths);
     }
 
     /**
@@ -158,13 +169,29 @@ class AssetsManager
 
     protected function updateCacheFile($name, $type, array $files)
     {
-        $path = $this->getFileName($name, $type);
+        $path = $this->getCachePath($name, $type);
 
         if (! $this->validCacheFile($path)) {
             $content = '';
 
             foreach ($files as $file) {
-                $content .= file_get_contents($file);
+                $filePath = $this->getFilePath($file);
+
+                if (is_null($filePath)) {
+                    // Invalid Asset URL specified?
+                    continue;
+                }
+
+                // Get the assets file contents.
+                $data = file_get_contents($filePath);
+
+                if ($type == 'css') {
+                    $basePath = dirname(dirname($file)) .'/';
+
+                    $content .= str_replace('url(../', 'url(' .$basePath, $data);
+                } else if ($type == 'js') {
+                    $content .= $data;
+                }
             }
 
             // Minify the collected content.
@@ -245,7 +272,82 @@ class AssetsManager
         return $buffer;
     }
 
-    protected function getFileName($name, $type)
+    public function getFileUri($file)
+    {
+         return parse_url($file, PHP_URL_PATH);
+    }
+
+    public function getFilePath($file)
+    {
+        $uri = $this->getFileUri($file);
+
+        if (preg_match('#^/(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $baseName = strtolower($matches[1]);
+
+            //
+            $folder = $matches[2];
+
+            if (($folder == 'adminlte') && ($baseName == 'templates')) {
+                // The Asset path is on the AdminLTE Template.
+                $folder = 'AdminLTE';
+            } else if (strlen($folder) > 3) {
+                // A standard Template or Module name.
+                $folder = studly_case($folder);
+            } else {
+                // A short Template or Module name.
+                $folder = strtoupper($folder);
+            }
+
+            $path = str_replace('/', DS, $matches[3]);
+
+            // Calculate the base path.
+            if ($baseName == 'modules') {
+                $basePath = Config::get('modules.path', APPDIR .'Modules');
+            } else {
+                $basePath = APPDIR .'Templates';
+            }
+
+            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
+        } else if (preg_match('#^/(assets|vendor)/(.*)$#i', $uri, $matches)) {
+            $baseName = strtolower($matches[1]);
+
+            //
+            $path = $matches[2];
+
+            if (($baseName == 'vendor') && ! starts_with($path, $this->paths)) {
+                // The current URI is not a valid Asset File path on Vendor.
+                return null;
+            }
+
+            $filePath = ROOTDIR .$baseName .DS .str_replace('/', DS, $path);
+        } else {
+            // The current URI is not a valid Asset File path.
+            return null;
+        }
+
+        return $filePath;
+    }
+
+    protected function parsePaths(array $paths)
+    {
+        $result = array();
+
+        foreach ($paths as $vendor => $value) {
+            $values = is_array($value) ? $value : array($value);
+
+            $values = array_map(function($value) use ($vendor)
+            {
+                return $vendor .'/' .$value .'/';
+
+            }, $values);
+
+            $result = array_merge($result, $values);
+        }
+
+        return array_unique($result);
+    }
+
+    protected function getCachePath($name, $type)
     {
         return $this->basePath .$type .DS .$name .'.' .$type;
     }
