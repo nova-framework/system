@@ -63,21 +63,21 @@ class AssetsManager
 
         $this->files = $app['files'];
 
-        //
+        // Prepare the base URI (for cache files).
         $this->baseUri = $this->config->get('assets.cache.baseUri', 'cache');
 
-        //
+        // Prepare the base path (for cache files).
         $basePath = str_replace('/', DS, $this->baseUri);
 
         $this->basePath = PUBLICDIR .$basePath .DS;
 
-        //
+        // Prepare the valid vendor paths.
         $paths = $this->config->get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
     }
 
-    public function getFilePath($uri)
+    public function getPath($uri)
     {
         if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
@@ -169,17 +169,8 @@ class AssetsManager
     {
         $result = '';
 
-        // Adjust the files parameter.
-        $files = is_array($files) ? $files : array($files);
-
-        // Prepare the current template.
-        $template = sprintf("%s\n", static::$templates[$type]);
-
         foreach ($files as $file) {
-            if (empty($file)) continue;
-
-            // Append the processed resource string to the result.
-            $result .= sprintf($template, $file);
+            $result .= $this->render($file, $type);
         }
 
         if ($fetch) {
@@ -187,8 +178,19 @@ class AssetsManager
             return $result;
         }
 
-        // Output the resulted string (and return null).
-        echo $result;
+        // Output the resulted string if it is not empty.
+        if (! empty($result)) {
+            echo $result;
+        }
+    }
+
+    protected function render($file, $type)
+    {
+        if (! empty($file) && isset(static::$templates[$type])) {
+            $template = static::$templates[$type];
+
+            return sprintf($template, $file) ."\n";
+        }
     }
 
     protected function processFiles($files, $type, $cached)
@@ -257,9 +259,9 @@ class AssetsManager
             $content = '';
 
             foreach ($files as $file) {
-                $uri = $this->getFileUri($file);
+                $uri = $this->parseUri($file);
 
-                $filePath = $this->getFilePath($uri);
+                $filePath = $this->getPath($uri);
 
                 if (is_null($filePath)) {
                     // Invalid Asset URL specified?
@@ -309,16 +311,6 @@ class AssetsManager
         return (filemtime($path) > $timestamp);
     }
 
-    protected function getFileUri($file)
-    {
-         return trim(parse_url($file, PHP_URL_PATH), '/');
-    }
-
-    protected function getCachePath($name, $type)
-    {
-        return $this->basePath .$type .DS .$name .'.' .$type;
-    }
-
     protected function compress($buffer)
     {
         // Remove comments.
@@ -352,6 +344,18 @@ class AssetsManager
         }
 
         return array_unique($result);
+    }
+
+    protected function getCachePath($name, $type)
+    {
+        return $this->basePath .$type .DS .$name .'.' .$type;
+    }
+
+    protected function parseUri($file)
+    {
+        $uri = parse_url($file, PHP_URL_PATH);
+
+        return str_replace(array('//', '../'), '/', ltrim($uri, '/'));
     }
 
 }
