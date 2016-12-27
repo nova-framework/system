@@ -77,6 +77,55 @@ class AssetsManager
         $this->paths = $this->parsePaths($paths);
     }
 
+    public function getFilePath($uri)
+    {
+        if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $baseName = strtolower($matches[1]);
+
+            //
+            $folder = $matches[2];
+
+            if (($folder == 'adminlte') && ($baseName == 'templates')) {
+                // The Asset path is on the AdminLTE Template.
+                $folder = 'AdminLTE';
+            } else if (strlen($folder) > 3) {
+                // A standard Template or Module name.
+                $folder = studly_case($folder);
+            } else {
+                // A short Template or Module name.
+                $folder = strtoupper($folder);
+            }
+
+            $path = str_replace('/', DS, $matches[3]);
+
+            // Calculate the base path.
+            if ($baseName == 'modules') {
+                $basePath = $this->config->get('modules.path', APPDIR .'Modules');
+            } else {
+                $basePath = APPDIR .'Templates';
+            }
+
+            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
+        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
+            $baseName = strtolower($matches[1]);
+
+            //
+            $path = $matches[2];
+
+            if (($baseName == 'vendor') && ! starts_with($path, $this->paths)) {
+                // The current URI is not a valid Asset File path on Vendor.
+                return null;
+            }
+
+            $filePath = ROOTDIR .$baseName .DS .str_replace('/', DS, $path);
+        } else {
+            // The current URI is not a valid Asset File path.
+            return null;
+        }
+
+        return $filePath;
+    }
+
     /**
      * Load js scripts.
      *
@@ -107,6 +156,39 @@ class AssetsManager
         $files = $this->processFiles($data, $type, $cached);
 
         return $this->resource($files, $type, $fetch);
+    }
+
+    /**
+     * Common templates for assets.
+     *
+     * @param string|array $files
+     * @param string       $mode
+     * @param bool         $fetch
+     */
+    protected function resource(array $files, $type, $fetch)
+    {
+        $result = '';
+
+        // Adjust the files parameter.
+        $files = is_array($files) ? $files : array($files);
+
+        // Prepare the current template.
+        $template = sprintf("%s\n", static::$templates[$type]);
+
+        foreach ($files as $file) {
+            if (empty($file)) continue;
+
+            // Append the processed resource string to the result.
+            $result .= sprintf($template, $file);
+        }
+
+        if ($fetch) {
+            // Return the resulted string, with no output.
+            return $result;
+        }
+
+        // Output the resulted string (and return null).
+        echo $result;
     }
 
     protected function processFiles($files, $type, $cached)
@@ -175,7 +257,9 @@ class AssetsManager
             $content = '';
 
             foreach ($files as $file) {
-                $filePath = $this->getFilePath($file);
+                $uri = $this->getFileUri($file);
+
+                $filePath = $this->getFilePath($uri);
 
                 if (is_null($filePath)) {
                     // Invalid Asset URL specified?
@@ -225,37 +309,14 @@ class AssetsManager
         return (filemtime($path) > $timestamp);
     }
 
-    /**
-     * Common templates for assets.
-     *
-     * @param string|array $files
-     * @param string       $mode
-     * @param bool         $fetch
-     */
-    protected function resource(array $files, $type, $fetch)
+    protected function getFileUri($file)
     {
-        $result = '';
+         return trim(parse_url($file, PHP_URL_PATH), '/');
+    }
 
-        // Adjust the files parameter.
-        $files = is_array($files) ? $files : array($files);
-
-        // Prepare the current template.
-        $template = sprintf("%s\n", static::$templates[$type]);
-
-        foreach ($files as $file) {
-            if (empty($file)) continue;
-
-            // Append the processed resource string to the result.
-            $result .= sprintf($template, $file);
-        }
-
-        if ($fetch) {
-            // Return the resulted string, with no output.
-            return $result;
-        }
-
-        // Output the resulted string (and return null).
-        echo $result;
+    protected function getCachePath($name, $type)
+    {
+        return $this->basePath .$type .DS .$name .'.' .$type;
     }
 
     protected function compress($buffer)
@@ -272,62 +333,6 @@ class AssetsManager
         $buffer = preg_replace(array('(;( )+)','(( )+;)'), ';', $buffer);
 
         return $buffer;
-    }
-
-    public function getFileUri($file)
-    {
-         return parse_url($file, PHP_URL_PATH);
-    }
-
-    public function getFilePath($file)
-    {
-        $uri = $this->getFileUri($file);
-
-        if (preg_match('#^/(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
-
-            //
-            $folder = $matches[2];
-
-            if (($folder == 'adminlte') && ($baseName == 'templates')) {
-                // The Asset path is on the AdminLTE Template.
-                $folder = 'AdminLTE';
-            } else if (strlen($folder) > 3) {
-                // A standard Template or Module name.
-                $folder = studly_case($folder);
-            } else {
-                // A short Template or Module name.
-                $folder = strtoupper($folder);
-            }
-
-            $path = str_replace('/', DS, $matches[3]);
-
-            // Calculate the base path.
-            if ($baseName == 'modules') {
-                $basePath = Config::get('modules.path', APPDIR .'Modules');
-            } else {
-                $basePath = APPDIR .'Templates';
-            }
-
-            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
-        } else if (preg_match('#^/(assets|vendor)/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
-
-            //
-            $path = $matches[2];
-
-            if (($baseName == 'vendor') && ! starts_with($path, $this->paths)) {
-                // The current URI is not a valid Asset File path on Vendor.
-                return null;
-            }
-
-            $filePath = ROOTDIR .$baseName .DS .str_replace('/', DS, $path);
-        } else {
-            // The current URI is not a valid Asset File path.
-            return null;
-        }
-
-        return $filePath;
     }
 
     protected function parsePaths(array $paths)
@@ -347,11 +352,6 @@ class AssetsManager
         }
 
         return array_unique($result);
-    }
-
-    protected function getCachePath($name, $type)
-    {
-        return $this->basePath .$type .DS .$name .'.' .$type;
     }
 
 }
