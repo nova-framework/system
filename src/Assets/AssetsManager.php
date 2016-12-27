@@ -1,17 +1,9 @@
 <?php
-namespace Nova\Helpers;
 
-/**
- * Assets static helper.
- *
- * @author Virgil-Adrian Teaca
- * @author volter9
- * @author QsmaPL
- * @version 3.0
- */
+namespace Nova\Assets;
 
 
-class Assets
+class AssetsManager
 {
     /**
      * @var array Asset templates
@@ -22,13 +14,45 @@ class Assets
     );
 
     /**
+     * Create a new Assets Manager instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Load js scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $fetch Wheter or not will be returned the result.
+     */
+    public function js($files, $fetch = false)
+    {
+        return $this->resource($files, 'js', $fetch);
+    }
+
+    /**
+     * Load css scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $fetch Wheter or not will be returned the result.
+     */
+    public function css($files, $fetch = false)
+    {
+        return $this->resource($files, 'css', $fetch);
+    }
+
+    /**
      * Common templates for assets.
      *
      * @param string|array $files
      * @param string       $mode
      * @param bool         $fetch
      */
-    protected static function resource($files, $mode, $fetch)
+    protected function resource($files, $mode, $fetch)
     {
         $result = '';
 
@@ -36,7 +60,7 @@ class Assets
         $files = is_array($files) ? $files : array($files);
 
         // Prepare the current template.
-        $template = sprintf("%s\n", self::$templates[$mode]);
+        $template = sprintf("%s\n", static::$templates[$mode]);
 
         foreach ($files as $file) {
             if (empty($file)) continue;
@@ -54,25 +78,4 @@ class Assets
         echo $result;
     }
 
-    /**
-     * Load js scripts.
-     *
-     * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
-     */
-    public static function js($files, $fetch = false)
-    {
-        return static::resource($files, 'js', $fetch);
-    }
-
-    /**
-     * Load css scripts.
-     *
-     * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
-     */
-    public static function css($files, $fetch = false)
-    {
-        return static::resource($files, 'css', $fetch);
-    }
 }

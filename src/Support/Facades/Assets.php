@@ -1,0 +1,20 @@
+<?php
+
+namespace Nova\Support\Facades;
+
+use Nova\Support\Facades\Facade;
+
+
+/**
+ * @see \Nova\Auth\AuthManager
+ * @see \Nova\Auth\Guard
+ */
+class Assets extends Facade
+{
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor() { return 'assets'; }
+}

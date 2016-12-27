@@ -2,6 +2,7 @@
 
 namespace Nova\Assets;
 
+use Nova\Assets\Assets\Manager;
 use Nova\Config\Config;
 use Nova\Support\ServiceProvider;
 
@@ -16,6 +17,8 @@ class AssetsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerDispatcher();
+
+        $this->registerManager();
     }
 
     /**
@@ -34,6 +37,19 @@ class AssetsServiceProvider extends ServiceProvider
 
         // Bind the calculated class name to the Assets Dispatcher Interface.
         $this->app->bind('Nova\Assets\DispatcherInterface', $className);
+    }
+
+    /**
+     * Register the Assets Manager.
+     *
+     * @return void
+     */
+    public function registerManager()
+    {
+        $this->app->bindShared('assets', function()
+        {
+            return new AssetsManager();
+        });
     }
 
 }
