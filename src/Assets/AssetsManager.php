@@ -64,7 +64,7 @@ class AssetsManager
         $this->files = $app['files'];
 
         //
-        $this->baseUri = $this->config->get('assets.cache.baseUri', 'assets/cache');
+        $this->baseUri = $this->config->get('assets.cache.baseUri', 'cache');
 
         //
         $basePath = str_replace('/', DS, $this->baseUri);
@@ -186,9 +186,11 @@ class AssetsManager
                 $data = file_get_contents($filePath);
 
                 if ($type == 'css') {
-                    $basePath = dirname(dirname($file)) .'/';
+                    $basePath = dirname($file);
 
-                    $content .= str_replace('url(../', 'url(' .$basePath, $data);
+                    $replaces = array('url(' .dirname(dirname($basePath)) .'/', 'url(' .dirname($basePath) .'/');
+
+                    $content .= str_replace(array('url(../../', 'url(../'), $replaces, $data);
                 } else if ($type == 'js') {
                     $content .= $data;
                 }
