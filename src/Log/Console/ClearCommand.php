@@ -54,11 +54,6 @@ class ClearCommand extends Command
         $this->files->put($path, "\n");
 
         //
-        $path = $this->nova['path.storage'] .DS .'Logs' .DS .'messages.log';
-
-        $this->files->put($path, "\n");
-
-        //
         $this->info('The Application logs was cleared!');
     }
 
