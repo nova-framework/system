@@ -84,10 +84,13 @@ class AssetsManager
      */
     public function cleanup()
     {
-        $pattern = $this->basePath .'cache-*';
+        $search = $this->basePath .'cache-*';
 
-        $paths = $this->files->glob($pattern);
+        $paths = $this->files->glob($search);
 
+        // Errors checking.
+        if ($paths === false) return;
+        
         foreach ($paths as $path) {
             if ($this->validate($path)) continue;
 
