@@ -127,7 +127,7 @@ class AssetsManager
     }
 
     /**
-     * Load js scripts.
+     * Load JS scripts.
      *
      * @param string|array $files The paths to resource files.
      * @param bool         $cached Wheter or not the caching is active.
@@ -138,7 +138,7 @@ class AssetsManager
     }
 
     /**
-     * Load css scripts.
+     * Load CSS scripts.
      *
      * @param string|array $files The paths to resource files.
      * @param bool         $cached Wheter or not the caching is active.
@@ -149,25 +149,15 @@ class AssetsManager
     }
 
     /**
-     * Fetch js scripts.
+     * Fetch CSS or JS scripts.
      *
+     * @param string       $type The resource's type.
      * @param string|array $files The paths to resource files.
      * @param bool         $cached Wheter or not the caching is active.
      */
-    public function fetchJs($files, $cached = true)
+    public function fetch($type, $files, $cached = true)
     {
-        return $this->resource($files, $cached, 'js', true);
-    }
-
-    /**
-     * Fetch css scripts.
-     *
-     * @param string|array $files The paths to resource files.
-     * @param bool         $cached Wheter or not the caching is active.
-     */
-    public function fetchCss($files, $cached = true)
-    {
-        return $this->resource($files, $cached, 'css', true);
+        return $this->resource($files, $cached, $type, true);
     }
 
     /**
@@ -290,10 +280,12 @@ class AssetsManager
             $content = file_get_contents($filePath);
 
             if ($type == 'css') {
-                $baseUrl = dirname(dirname($file));
+                $baseUrl = dirname($file);
 
                 // Adjust the relative URLs on the CSS.
-                $content = preg_replace('/(\.\.\/)+/i', $baseUrl, $content);
+                $content = preg_replace('/url\((?:[\"\\\'])?([^\\\'\"\)]+)(?:[\"\\\'])?\)/i', 'url("' .$baseUrl .'/$1")', $content);
+
+                $content = str_replace($baseUrl .'/../', dirname($baseUrl) .'/', $content);
 
                 // Minify the CSS content and append it to result.
                 $result .= static::compress($content);
@@ -368,6 +360,30 @@ class AssetsManager
         $uri = parse_url($file, PHP_URL_PATH);
 
         return str_replace(array('//', '../'), '/', ltrim($uri, '/'));
+    }
+
+    /**
+     * Magic Method for handling dynamic functions.
+     *
+     * @param  string  $method
+     * @param  array   $params
+     * @return mixed|void
+     *
+     * @throws \BadMethodCallException
+     */
+    public function __call($method, $params)
+    {
+        // Add the support for the dynamic fetchX Methods.
+        if (starts_with($method, 'fetch')) {
+            $type = lcfirst(substr($method, 5));
+
+            // Prepend the type to parameters.
+            array_unshift($params, $type);
+
+            return call_user_func_array(array($this, 'fetch'), $params);
+        }
+
+        throw new \BadMethodCallException("Method [$method] does not exist on " .get_class($this));
     }
 
 }
