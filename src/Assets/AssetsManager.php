@@ -89,13 +89,15 @@ class AssetsManager
         $paths = $this->files->glob($search);
 
         // Errors checking.
-        if ($paths === false) return;
+        if ($paths === false) return false;
 
         foreach ($paths as $path) {
             if ($this->validate($path)) continue;
 
             $this->files->delete($path);
         }
+
+        return true;
     }
 
     public function getFilePath($uri)
