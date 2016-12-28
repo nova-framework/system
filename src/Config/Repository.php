@@ -114,9 +114,7 @@ class Repository implements \ArrayAccess
     {
         $segments = explode('.', $key);
 
-        $group = $segments[0];
-
-        unset($segments[0]);
+        $group = array_shift($segments);
 
         $segments = implode('.', $segments);
 
