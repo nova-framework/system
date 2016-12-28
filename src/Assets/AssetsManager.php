@@ -82,12 +82,14 @@ class AssetsManager
 
     public function cleanup()
     {
-        $files = $this->files->glob($this->basePath .DS .'cache-*');
+        $pattern = $this->basePath .'cache-*';
 
-        foreach ($files as $file) {
-            if (! $this->validate($file)) {
-                $this->files->delete($file);
-            }
+        $paths = $this->files->glob($pattern);
+
+        foreach ($paths as $path) {
+            if ($this->validate($path)) continue;
+
+            $this->files->delete($path);
         }
     }
 
