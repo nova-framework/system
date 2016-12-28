@@ -9,6 +9,17 @@ use Nova\Support\ServiceProvider;
 
 class AssetsServiceProvider extends ServiceProvider
 {
+
+    /**
+     * Bootstrap the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->app['assets']->cleanup();
+    }
+
     /**
      * Register the service provider.
      *
