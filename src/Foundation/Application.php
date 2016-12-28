@@ -223,12 +223,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         // Start the Exception Handling.
         $this['exception']->register($this->environment());
 
-        //$this['exception']->setDebug($this['config']['app.debug']);
-
-        // This way is possible to start early the Exception Handler.
-        $debug = (ENVIRONMENT == 'development');
-
-        $this['exception']->setDebug($debug);
+        $this['exception']->setDebug($this['config']['app.debug']);
     }
 
     /**

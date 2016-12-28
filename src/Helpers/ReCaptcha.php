@@ -31,7 +31,7 @@ class ReCaptcha
 
     public function __construct()
     {
-        $this->config = Config::get('recaptcha', array());
+        $this->config = Config::get('reCaptcha', array());
     }
 
     /**
