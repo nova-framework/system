@@ -4,6 +4,7 @@ namespace Nova\Module\Repositories;
 
 use Nova\Helpers\Inflector;
 use Nova\Module\Repositories\Repository;
+use Nova\Support\Collection;
 
 
 class LocalRepository extends Repository
@@ -44,9 +45,7 @@ class LocalRepository extends Repository
         });
 
         //
-        $data = $modules->toArray();
-
-        $this->writeCache($data);
+        $this->writeCache($modules);
     }
 
     /**
@@ -171,8 +170,7 @@ class LocalRepository extends Repository
     {
         list($slug, $key) = explode('::', $property);
 
-        $cachePath = $this->getCachePath();
-
+        //
         $cache = $this->getCache();
 
         $module = $this->where('slug', $slug);
@@ -188,9 +186,7 @@ class LocalRepository extends Repository
         $merged = $cache->merge($module);
 
         //
-        $data = $merged->toArray();
-
-        $this->writeCache($data);
+        $this->writeCache($merged);
     }
 
     /**
@@ -279,30 +275,37 @@ class LocalRepository extends Repository
         $cachePath = $this->getCachePath();
 
         if (! $this->files->exists($cachePath)) {
-            $data = array();
+            $data = collect();
 
             $this->writeCache($data);
 
             $this->optimize();
 
-            return collect($data);
+            return $data;
         }
 
         //
         $data = $this->files->getRequire($cachePath);
 
-        return collect(array_values($data));
+        return collect($data);
     }
 
     /**
      * Write the service cache file to disk.
      *
-     * @param  array  $data
+     * @param  array  $modules
      * @return void
      */
-    public function writeCache($data)
+    public function writeCache($modules)
     {
         $cachePath = $this->getCachePath();
+
+        //
+        $data = array();
+
+        foreach ($modules->all() as $key => $module) {
+            $data[$key] = ($module instanceof Collection) ? $module->all() : $module;
+        }
 
         //
         $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
