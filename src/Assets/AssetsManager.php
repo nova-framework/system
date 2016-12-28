@@ -77,7 +77,7 @@ class AssetsManager
         $this->paths = $this->parsePaths($paths);
     }
 
-    public function getPath($uri)
+    public function getFilePath($uri)
     {
         if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
@@ -130,32 +130,44 @@ class AssetsManager
      * Load js scripts.
      *
      * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
+     * @param bool         $cached Wheter or not the caching is active.
      */
-    public function js($data, $fetch = false, $cached = true)
+    public function js($files, $cached = true)
     {
-        $type = 'js';
-
-        // Process the given data.
-        $files = $this->processFiles($data, $type, $cached);
-
-        return $this->resource($files, $type, $fetch);
+        return $this->resource($files, $cached, 'js');
     }
 
     /**
      * Load css scripts.
      *
      * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
+     * @param bool         $cached Wheter or not the caching is active.
      */
-    public function css($data, $fetch = false, $cached = true)
+    public function css($files, $cached = true)
     {
-        $type = 'css';
+        return $this->resource($files, $cached, 'css');
+    }
 
-        // Process the given data.
-        $files = $this->processFiles($data, $type, $cached);
+    /**
+     * Fetch js scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $cached Wheter or not the caching is active.
+     */
+    public function fetchJs($files, $cached = true)
+    {
+        return $this->resource($files, $cached, 'js', true);
+    }
 
-        return $this->resource($files, $type, $fetch);
+    /**
+     * Fetch css scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $cached Wheter or not the caching is active.
+     */
+    public function fetchCss($files, $cached = true)
+    {
+        return $this->resource($files, $cached, 'css', true);
     }
 
     /**
@@ -165,8 +177,11 @@ class AssetsManager
      * @param string       $mode
      * @param bool         $fetch
      */
-    protected function resource(array $files, $type, $fetch)
+    protected function resource(array $data, $cached, $type, $fetch = false)
     {
+        $files = $this->processFiles($data, $type, $cached);
+
+        //
         $result = '';
 
         foreach ($files as $file) {
@@ -255,43 +270,41 @@ class AssetsManager
     {
         $path = $this->getCachePath($name, $type);
 
-        if (! $this->validCacheFile($path)) {
-            $content = '';
-
-            foreach ($files as $file) {
-                $uri = $this->parseUri($file);
-
-                $filePath = $this->getPath($uri);
-
-                if (is_null($filePath)) {
-                    // Invalid Asset URL specified?
-                    continue;
-                }
-
-                // Get the assets file contents.
-                $data = file_get_contents($filePath);
-
-                if ($type == 'css') {
-                    $basePath = dirname($file);
-
-                    $replaces = array('url(' .dirname(dirname($basePath)) .'/', 'url(' .dirname($basePath) .'/');
-
-                    $content .= str_replace(array('url(../../', 'url(../'), $replaces, $data);
-                } else if ($type == 'js') {
-                    $content .= $data;
-                }
-            }
-
-            // Minify the collected content.
-            if ($type == 'css') {
-                $content = $this->compress($content);
-            } else if ($type == 'js') {
-                $content = JShrink::minify($content);
-            }
-
-            // Save the content to cache file.
-            $this->files->put($path, $content);
+        if ($this->validCacheFile($path)) {
+            return;
         }
+
+        $result = '';
+
+        foreach ($files as $file) {
+            $uri = $this->parseUri($file);
+
+            $filePath = $this->getFilePath($uri);
+
+            if (is_null($filePath)) {
+                // Invalid Asset URL specified?
+                continue;
+            }
+
+            // Get the assets file contents.
+            $content = file_get_contents($filePath);
+
+            if ($type == 'css') {
+                $baseUrl = dirname(dirname($file));
+
+                // Adjust the relative URLs on the CSS.
+                $content = preg_replace('/(\.\.\/)+/i', $baseUrl, $content);
+
+                // Minify the CSS content and append it to result.
+                $result .= static::compress($content);
+            } else if ($type == 'js') {
+                // Minify the javascript content and append it to result.
+                $result .= JShrink::minify($content);
+            }
+        }
+
+        // Save the content to cache file.
+        $this->files->put($path, $result);
     }
 
     protected function validCacheFile($path)
@@ -310,7 +323,7 @@ class AssetsManager
         return false;
     }
 
-    protected function compress($buffer)
+    protected static function compress($buffer)
     {
         // Remove comments.
         $buffer = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
