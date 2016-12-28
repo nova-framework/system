@@ -86,7 +86,7 @@ class AssetsManager
     {
         $search = $this->basePath .'cache-*';
 
-        $paths = $this->files->glob($earch);
+        $paths = $this->files->glob($search);
 
         // Errors checking.
         if ($paths === false) return;
