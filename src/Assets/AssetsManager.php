@@ -75,6 +75,20 @@ class AssetsManager
         $paths = $this->config->get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
+
+        // Cleanup the cache directory.
+        $this->cleanup();
+    }
+
+    public function cleanup()
+    {
+        $files = $this->files->glob($this->basePath .DS .'cache-*');
+
+        foreach ($files as $file) {
+            if (! $this->validate($file)) {
+                $this->files->delete($file);
+            }
+        }
     }
 
     public function getFilePath($uri)
@@ -222,14 +236,11 @@ class AssetsManager
         list ($result, $files) = $this->parseFiles($files);
 
         if (! empty($files)) {
-            // Create a unique name for the cache file.
-            $name = sha1(serialize($files));
-
             // Update the processed cache file.
-            $this->updateCacheFile($name, $type, $files);
+            $fileName = $this->updateCache($type, $files);
 
             // Push the cache file URI to the result.
-            $uri = $this->baseUri .'/' .$type .'/' .$name .'.' .$type;
+            $uri = $this->baseUri .'/' .$fileName;
 
             array_push($result, site_url($uri));
         }
@@ -256,50 +267,66 @@ class AssetsManager
         return array($remote, $local);
     }
 
-    protected function updateCacheFile($name, $type, array $files)
+    protected function updateCache($type, array $files)
     {
-        $path = $this->getCachePath($name, $type);
+        $last = 0;
 
-        if ($this->validCacheFile($path)) {
-            return;
-        }
-
-        $result = '';
+        $assets = array();
 
         foreach ($files as $file) {
-            $uri = $this->parseUri($file);
+            $uri = $this->assetUri($file);
 
-            $filePath = $this->getFilePath($uri);
+            $path = $this->getFilePath($uri);
 
-            if (is_null($filePath)) {
-                // Invalid Asset URL specified?
-                continue;
-            }
+            if (is_null($path)) continue;
 
-            // Get the assets file contents.
-            $content = file_get_contents($filePath);
+            if (is_readable($path)) {
+                $assets[$file] = $path;
 
-            if ($type == 'css') {
-                $baseUrl = dirname($file);
+                //
+                $lastModified = $this->files->lastModified($path);
 
-                // Adjust the relative URLs on the CSS.
-                $content = preg_replace('/url\((?:[\"\\\'])?([^\\\'\"\)]+)(?:[\"\\\'])?\)/i', 'url("' .$baseUrl .'/$1")', $content);
-
-                $content = str_replace($baseUrl .'/../', dirname($baseUrl) .'/', $content);
-
-                // Minify the CSS content and append it to result.
-                $result .= static::compress($content);
-            } else if ($type == 'js') {
-                // Minify the javascript content and append it to result.
-                $result .= JShrink::minify($content);
+                $last = max($last, $lastModified);
             }
         }
 
-        // Save the content to cache file.
-        $this->files->put($path, $result);
+        $fileName = "cache-{$last}-" . md5(serialize($assets)) . ".{$type}";
+
+        $filePath = $this->basePath .$fileName;
+
+        if (! $this->validate($filePath)) {
+            $chunks = array();
+
+            foreach ($assets as $file => $path) {
+                // Get the assets file contents.
+                $content = file_get_contents($path);
+
+                if ($type == 'css') {
+                    $baseUrl = dirname($file);
+
+                    // Adjust the relative URLs on the CSS.
+                    $content = preg_replace('/url\((?:[\"\\\'])?([^\\\'\"\)]+)(?:[\"\\\'])?\)/i', 'url("' .$baseUrl .'/$1")', $content);
+
+                    $content = str_replace($baseUrl .'/../', dirname($baseUrl) .'/', $content);
+
+                    // Minify the CSS content and append it to result.
+                    $chunks[] = static::compress($content);
+                } else if ($type == 'js') {
+                    // Minify the javascript content and append it to result.
+                    $chunks[] = JShrink::minify($content);
+                }
+            }
+
+            // Save the chunks on specified cache file.
+            $content = implode("\n", $chunks);
+
+            $this->files->put($filePath, $content);
+        }
+
+        return $fileName;
     }
 
-    protected function validCacheFile($path)
+    protected function validate($path)
     {
         if (! is_readable($path)) {
             return false;
@@ -350,12 +377,7 @@ class AssetsManager
         return array_unique($result);
     }
 
-    protected function getCachePath($name, $type)
-    {
-        return $this->basePath .$type .DS .$name .'.' .$type;
-    }
-
-    protected function parseUri($file)
+    protected function assetUri($file)
     {
         $uri = parse_url($file, PHP_URL_PATH);
 
