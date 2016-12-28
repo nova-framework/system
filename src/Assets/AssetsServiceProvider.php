@@ -43,7 +43,7 @@ class AssetsServiceProvider extends ServiceProvider
         if ($driver == 'custom') {
             $className = Config::get('assets.dispatcher');
         } else {
-            $className = 'Nova\Assets\\' .ucfirst($driver) .'Dispatcher';
+            $className = 'Nova\Assets\Dispatch\\' .ucfirst($driver) .'Dispatcher';
         }
 
         // Bind the calculated class name to the Assets Dispatcher Interface.
