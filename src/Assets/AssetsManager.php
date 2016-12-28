@@ -241,10 +241,10 @@ class AssetsManager
 
         if (! empty($files)) {
             // Update the processed cache file.
-            $fileName = $this->updateCache($type, $files);
+            $cacheFile = $this->cache($type, $files);
 
             // Push the cache file URI to the result.
-            $uri = $this->baseUri .'/' .$fileName;
+            $uri = $this->baseUri .'/' .$cacheFile;
 
             array_push($result, site_url($uri));
         }
@@ -271,7 +271,7 @@ class AssetsManager
         return array($remote, $local);
     }
 
-    protected function updateCache($type, array $files)
+    protected function cache($type, array $files)
     {
         $last = 0;
 
