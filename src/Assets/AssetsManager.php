@@ -75,11 +75,13 @@ class AssetsManager
         $paths = $this->config->get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
-
-        // Cleanup the cache directory.
-        $this->cleanup();
     }
 
+    /**
+     * Cleanup the Assets Cache directory.
+     *
+     * @return void
+     */
     public function cleanup()
     {
         $pattern = $this->basePath .'cache-*';
