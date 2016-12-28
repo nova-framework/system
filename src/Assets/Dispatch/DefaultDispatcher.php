@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Assets;
+namespace Nova\Assets\Dispatch;
 
 use Nova\Config\Config;
 use Nova\Http\Response;
