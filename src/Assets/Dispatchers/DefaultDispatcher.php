@@ -2,9 +2,9 @@
 
 namespace Nova\Assets\Dispatchers;
 
-use Nova\Config\Config;
 use Nova\Http\Response;
 use Nova\Assets\DispatcherInterface;
+use Nova\Support\Facades\Config;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;

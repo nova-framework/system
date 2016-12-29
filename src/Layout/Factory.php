@@ -2,11 +2,11 @@
 
 namespace Nova\Layout;
 
-use Nova\Config\Config;
 use Nova\Foundation\Application;
 use Nova\Language\LanguageManager;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Layout\Layout;
+use Nova\Support\Facades\Config;
 use Nova\View\Factory as ViewFactory;
 use Nova\View\ViewFinderInterface;
 use Nova\View\View;

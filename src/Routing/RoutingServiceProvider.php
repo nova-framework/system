@@ -2,10 +2,10 @@
 
 namespace Nova\Routing;
 
-use Nova\Config\Config;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
+use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
 
 
