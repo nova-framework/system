@@ -8,8 +8,8 @@
 
 namespace Nova\Helpers;
 
-use Nova\Config\Config;
 use Nova\Helpers\Number;
+use Nova\Support\Facades\Config;
 use Nova\Support\Facades\DB;
 use Nova\Support\Facades\Request;
 

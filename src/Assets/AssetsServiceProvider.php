@@ -3,7 +3,7 @@
 namespace Nova\Assets;
 
 use Nova\Assets\Assets\Manager;
-use Nova\Config\Config;
+use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
 
 

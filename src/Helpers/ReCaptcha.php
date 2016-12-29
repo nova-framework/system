@@ -8,8 +8,7 @@
 
 namespace Nova\Helpers;
 
-use Nova\Config\Config;
-
+use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Request as HttpRequest;
 
 
