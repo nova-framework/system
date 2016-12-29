@@ -3,7 +3,6 @@
 namespace Nova\Assets;
 
 use Nova\Assets\Assets\Manager;
-use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
 
 
@@ -37,11 +36,13 @@ class AssetsServiceProvider extends ServiceProvider
      */
     public function registerDispatcher()
     {
-        // NOTE: When this method is executed, the Config Store is not yet available.
-        $driver = Config::get('assets.driver', 'default');
+        $config = $this->app['config'];
+
+        //
+        $driver = $config->get('assets.driver', 'default');
 
         if ($driver == 'custom') {
-            $className = Config::get('assets.dispatcher');
+            $className = $config->get('assets.dispatcher');
         } else {
             $className = 'Nova\Assets\Dispatchers\\' .ucfirst($driver) .'Dispatcher';
         }
