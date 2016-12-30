@@ -25,6 +25,13 @@ class Model
     protected $connection = null;
 
     /**
+     * The Database Connection instance.
+     *
+     * @var string
+     */
+    protected $db = null;
+
+    /**
      * The table associated with the Model.
      *
      * @var string
@@ -61,7 +68,12 @@ class Model
      */
     public function __construct($connection = null)
     {
-        $this->connection = $connection;
+        if (! is_null($connection)) {
+            $this->connection = $connection;
+        }
+
+        // Setup the Database Connection instance.
+        $this->db = $this->getConnection();
     }
 
     /**
@@ -147,18 +159,6 @@ class Model
      *
      * @return string
      */
-    public static function getTableName()
-    {
-        $model = new static();
-
-        return $model->getTable();
-    }
-
-    /**
-     * Get the Table for the Model.
-     *
-     * @return string
-     */
     public function getTable()
     {
         if (isset($this->table)) return $this->table;
@@ -226,6 +226,9 @@ class Model
     public function setConnection($name)
     {
         $this->connection = $name;
+
+        // Setup the Database Connection instance.
+        $this->db = $this->getConnection();
 
         return $this;
     }
@@ -311,30 +314,6 @@ class Model
     public function newBuilder($query)
     {
         return new Builder($query);
-    }
-
-    /**
-     * Dynamically retrieve attributes on the Model.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        if ($key == 'db') {
-            return $this->getConnection();
-        }
-    }
-
-    /**
-     * Determine if an attribute exists on the Model.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return ($key == 'db');
     }
 
     /**
