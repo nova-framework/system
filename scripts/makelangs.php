@@ -103,14 +103,13 @@ foreach($workPaths as $workPath => $workDomain) {
         $messages = array_flip($messages);
 
         foreach($languages as $language) {
-            $langFile = BASEPATH .$workPath.'/Language/'.ucfirst($language).'/messages.php';
+            $langFile = BASEPATH .$workPath.'/Language/'.strtoupper($language).'/messages.php';
 
             if(is_readable($langFile)) {
                 $oldData = include($langFile);
 
                 $oldData = is_array($oldData) ? $oldData : array();
-            }
-            else {
+            } else {
                 $oldData = array();
             }
 
