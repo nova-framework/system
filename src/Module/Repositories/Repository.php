@@ -73,7 +73,7 @@ abstract class Repository implements RepositoryInterface
             return;
         }
 
-        $module = Str::slug($slug);
+        $module = Inflector::tableize($slug);
 
         $path = $this->getManifestPath($module);
 
