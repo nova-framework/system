@@ -117,7 +117,7 @@ class ModuleMigrateCommand extends Command
         }
 
         if ($this->option('seed')) {
-            $this->call('module:seed', ['module' => $slug, '--force' => true]);
+            $this->call('module:seed', ['slug' => $slug, '--force' => true]);
         }
     }
 
