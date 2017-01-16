@@ -333,7 +333,7 @@ return array (
         $languages = $this->nova['config']['languages'];
 
         foreach (array_keys($languages) as $code) {
-            $paths[] = 'Language' .DS .ucfirst($code);
+            $paths[] = 'Language' .DS .strtoupper($code);
         }
 
         return $paths;
