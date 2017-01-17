@@ -253,11 +253,11 @@ class Factory
     protected function find($view, $module = null)
     {
         if (! is_null($module)) {
-            $modulesPath = Config::get('modules.path', APPDIR .'Modules');
+            $modulesPath = Config::get('modules.path', APPPATH .'Modules');
 
             $path = str_replace('/', DS, $modulesPath ."/$module/Views/$view");
         } else {
-            $path = APPDIR .str_replace('/', DS, "Views/$view");
+            $path = APPPATH .str_replace('/', DS, "Views/$view");
         }
 
         // Try to find the View file.

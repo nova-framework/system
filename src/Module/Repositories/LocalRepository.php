@@ -320,7 +320,7 @@ class LocalRepository extends Repository
      */
     protected function getCachePath()
     {
-        $cachePath = APPDIR .'Boot/Cache/Modules.php';
+        $cachePath = APPPATH .'Boot/Cache/Modules.php';
 
         return str_replace('/', DS, $cachePath);
     }

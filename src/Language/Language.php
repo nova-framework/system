@@ -88,15 +88,15 @@ class Language
         }
 
         if ($pathName == 'Nova') {
-            $basePath = SYSTEMDIR;
+            $basePath = SYSPATH;
         } else if ($pathName == 'Shared') {
-            $basePath = ROOTDIR .'shared' .DS;
-        } else if (is_dir(APPDIR .'Modules' .DS .$pathName)) {
-            $basePath = APPDIR .'Modules/' .$pathName .DS;
-        } else if (is_dir(APPDIR .'Templates' .DS .$pathName)) {
-            $basePath = APPDIR .'Templates/' .$pathName .DS;
+            $basePath = BASEPATH .'shared' .DS;
+        } else if (is_dir(APPPATH .'Modules' .DS .$pathName)) {
+            $basePath = APPPATH .'Modules/' .$pathName .DS;
+        } else if (is_dir(APPPATH .'Templates' .DS .$pathName)) {
+            $basePath = APPPATH .'Templates/' .$pathName .DS;
         } else {
-            $basePath = APPDIR;
+            $basePath = APPPATH;
         }
 
         $filePath = $basePath .'Language' .DS .strtoupper($code) .DS .'messages.php';

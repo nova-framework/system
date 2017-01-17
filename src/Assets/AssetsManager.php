@@ -69,7 +69,7 @@ class AssetsManager
         // Prepare the base path (for cache files).
         $basePath = str_replace('/', DS, $this->baseUri);
 
-        $this->basePath = PUBLICDIR .$basePath .DS;
+        $this->basePath = WEBPATH .$basePath .DS;
 
         // Prepare the valid vendor paths.
         $paths = $this->config->get('assets.paths', array());
@@ -123,9 +123,9 @@ class AssetsManager
 
             // Calculate the base path.
             if ($baseName == 'modules') {
-                $basePath = $this->config->get('modules.path', APPDIR .'Modules');
+                $basePath = $this->config->get('modules.path', APPPATH .'Modules');
             } else {
-                $basePath = APPDIR .'Templates';
+                $basePath = APPPATH .'Templates';
             }
 
             $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
@@ -140,7 +140,7 @@ class AssetsManager
                 return null;
             }
 
-            $filePath = ROOTDIR .$baseName .DS .str_replace('/', DS, $path);
+            $filePath = BASEPATH .$baseName .DS .str_replace('/', DS, $path);
         } else {
             // The current URI is not a valid Asset File path.
             return null;

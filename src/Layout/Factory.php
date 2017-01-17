@@ -107,7 +107,7 @@ class Factory
         $path = sprintf('Templates/%s/%s', $template, $view);
 
         // Make the path absolute and adjust the directory separator.
-        $path = str_replace('/', DS, APPDIR .$path);
+        $path = str_replace('/', DS, APPPATH .$path);
 
         // Find the View file depending on the Language direction.
         $language = $this->getLanguage();

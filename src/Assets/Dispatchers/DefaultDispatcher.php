@@ -104,9 +104,9 @@ class DefaultDispatcher implements DispatcherInterface
 
             // Calculate the base path.
             if ($baseName == 'modules') {
-                $basePath = Config::get('modules.path', APPDIR .'Modules');
+                $basePath = Config::get('modules.path', APPPATH .'Modules');
             } else {
-                $basePath = APPDIR .'Templates';
+                $basePath = APPPATH .'Templates';
             }
 
             $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
@@ -121,7 +121,7 @@ class DefaultDispatcher implements DispatcherInterface
                 return null;
             }
 
-            $filePath = ROOTDIR .$baseName .DS .str_replace('/', DS, $path);
+            $filePath = BASEPATH .$baseName .DS .str_replace('/', DS, $path);
         } else {
             // The current URI is not a valid Asset File path.
             return null;
