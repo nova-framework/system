@@ -196,7 +196,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function parseSlug($slug)
     {
-        return Str::slug($slug);
+        return Inflector::tableize($slug);
     }
 
     /**

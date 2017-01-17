@@ -123,7 +123,7 @@ class MakeModuleCommand extends Command
      */
     public function fire()
     {
-        $this->container['slug'] = Str::slug($this->argument('slug'));
+        $this->container['slug'] = Inflector::tableize($this->argument('slug'));
 
         //
         $slug = $this->container['slug'];
