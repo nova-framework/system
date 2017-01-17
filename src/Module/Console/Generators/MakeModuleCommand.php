@@ -4,6 +4,7 @@ namespace Nova\Module\Console\Generators;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
+use Nova\Helpers\Inflector;
 use Nova\Module\ModuleRepository;
 use Nova\Support\Str;
 
