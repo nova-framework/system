@@ -93,6 +93,8 @@ class View implements ArrayAccess, Renderable
      */
     public function renderContents()
     {
+        $this->factory->callComposer($this);
+
         return $this->engine->get($this->path, $this->gatherData());
     }
 

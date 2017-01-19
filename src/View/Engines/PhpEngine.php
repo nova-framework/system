@@ -9,15 +9,6 @@ use Exception;
 
 class PhpEngine implements EngineInterface
 {
-    /**
-     * Create a new PhpEngine instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
 
     /**
      * Get the evaluated contents of the View.

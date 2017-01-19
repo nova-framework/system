@@ -2,7 +2,9 @@
 
 namespace Nova\View;
 
+use Nova\View\Compilers\TemplateCompiler;
 use Nova\View\Engines\EngineResolver;
+use Nova\View\Engines\CompilerEngine;
 use Nova\View\Engines\PhpEngine;
 use Nova\View\Factory;
 use Nova\View\FileViewFinder;
@@ -42,13 +44,15 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function registerEngineResolver()
     {
-        $me = $this;
-
-        $this->app->bindShared('view.engine.resolver', function($app) use ($me)
+        $this->app->bindShared('view.engine.resolver', function($app)
         {
             $resolver = new EngineResolver();
 
-            $me->registerPhpEngine($resolver);
+            foreach (array('php', 'template') as $engine) {
+                $method = 'register'.ucfirst($engine).'Engine';
+
+                call_user_func(array($this, $method), $resolver);
+            }
 
             return $resolver;
         });
@@ -69,6 +73,32 @@ class ViewServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the Template engine implementation.
+     *
+     * @param  \Nova\View\Engines\EngineResolver  $resolver
+     * @return void
+     */
+    public function registerTemplateEngine($resolver)
+    {
+        $app = $this->app;
+
+        // The Compiler engine requires an instance of the CompilerInterface, which in
+        // this case will be the Template compiler, so we'll first create the compiler
+        // instance to pass into the engine so it can compile the views properly.
+        $app->bindShared('template.compiler', function($app)
+        {
+            $cachePath = $app['path.storage'] .DS .'Views';
+
+            return new TemplateCompiler($app['files'], $cachePath);
+        });
+
+        $resolver->register('template', function() use ($app)
+        {
+            return new CompilerEngine($app['template.compiler'], $app['files']);
+        });
+    }
+
+    /**
      * Register the View Factory.
      *
      * @return void
@@ -77,9 +107,19 @@ class ViewServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('view', function($app)
         {
+            // Next we need to grab the engine resolver instance that will be used by the
+            // environment. The resolver will be used by an environment to get each of
+            // the various engine implementations such as plain PHP or Template engine.
             $resolver = $app['view.engine.resolver'];
 
-            $factory = new Factory($resolver, $app['view.finder']);
+            $finder = $app['view.finder'];
+
+            $factory = new Factory($resolver, $finder, $app['events']);
+
+            // We will also set the container instance on this view environment since the
+            // view composers may be classes registered in the container, which allows
+            // for great testable, flexible composers for the application developer.
+            $factory->setContainer($app);
 
             $factory->share('app', $app);
 
