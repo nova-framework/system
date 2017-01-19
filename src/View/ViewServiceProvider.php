@@ -35,6 +35,8 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerFactory();
 
         $this->registerSessionBinder();
+
+        $this->registerCommands();
     }
 
     /**
@@ -165,6 +167,23 @@ class ViewServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the view related console commands.
+     *
+     * @return void
+     */
+    public function registerCommands()
+    {
+        $this->app->bindShared('command.view.clear', function($app)
+        {
+            $cachePath = $app['path.storage'] .DS .'Views';
+
+            return new Console\ClearCommand($app['files'], $cachePath);
+        });
+
+        $this->commands('command.view.clear');
+    }
+
+    /**
      * Determine if the application session has errors.
      *
      * @param  \Nova\Foundation\Application  $app
@@ -186,6 +205,6 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('view', 'view.finder', 'view.engine.resolver');
+        return array('view', 'view.finder', 'view.engine.resolver', 'command.view.clear');
     }
 }
