@@ -3,6 +3,9 @@
 namespace Nova\Cache;
 
 use Nova\Filesystem\Filesystem;
+use Nova\Support\Arr;
+
+use Carbon\Carbon;
 
 
 class FileStore implements StoreInterface
@@ -43,7 +46,7 @@ class FileStore implements StoreInterface
      */
     public function get($key)
     {
-        return array_get($this->getPayload($key), 'data');
+        return Arr::get($this->getPayload($key), 'data');
     }
 
     /**
@@ -84,7 +87,7 @@ class FileStore implements StoreInterface
         // Next, we'll extract the number of minutes that are remaining for a cache
         // so that we can properly retain the time for things like the increment
         // operation that may be performed on the cache. We'll round this out.
-        $time = ceil(($expire - time()) / 60);
+        $time = ($expire - Carbon::now()->getTimestamp()) / 60;
 
         return compact('data', 'time');
     }
@@ -114,11 +117,8 @@ class FileStore implements StoreInterface
      */
     protected function createCacheDirectory($path)
     {
-        try
-        {
+        if (! $this->files->exists(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0777, true, true);
-        } catch (\Exception $e) {
-            //
         }
     }
 
@@ -202,7 +202,7 @@ class FileStore implements StoreInterface
      */
     protected function path($key)
     {
-        $parts = array_slice(str_split($hash = md5($key), 2), 0, 2);
+        $parts = array_slice(str_split($hash = sha1($key), 2), 0, 2);
 
         return $this->directory .DS .join(DS, $parts) .DS .$hash;
     }
@@ -215,9 +215,13 @@ class FileStore implements StoreInterface
      */
     protected function expiration($minutes)
     {
-        if ($minutes === 0) return 9999999999;
+        $time = Carbon::now()->getTimestamp() + (int) ($minutes * 60);
 
-        return time() + ($minutes * 60);
+        if ($minutes === 0 || $time > 9999999999) {
+            return 9999999999;
+        }
+
+        return (int) $time;
     }
 
     /**
