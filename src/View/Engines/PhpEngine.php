@@ -41,6 +41,7 @@ class PhpEngine implements EngineInterface
             ${$__variable} = $__value;
         }
 
+        // Housekeeping...
         unset($__variable, $__value);
 
         // We'll evaluate the contents of the view inside a try/catch block so we can
