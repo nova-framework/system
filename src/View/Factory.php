@@ -91,13 +91,15 @@ class Factory
      */
     public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
+        $module = $module ?: 'App';
+
         // Get the View file path.
         $path = $this->find($view, $module);
 
         // Prepare the View data.
         $data = array_merge($mergeData, $this->parseData($data));
 
-        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $view, $path, $data));
+        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), "Views/$module::$view", $path, $data));
 
         return $view;
     }
@@ -535,18 +537,18 @@ class Factory
     /**
      * Find the view file.
      *
-     * @param    string      $view
-     * @param    string|null $module
+     * @param    string  $view
+     * @param    string  $domain
      * @return    string
      */
-    protected function find($view, $module = null)
+    protected function find($view, $domain)
     {
-        if (! is_null($module)) {
+        if ($domain == 'App') {
+            $path = APPPATH .str_replace('/', DS, "Views/$view");
+        } else {
             $modulesPath = Config::get('modules.path', APPPATH .'Modules');
 
-            $path = str_replace('/', DS, $modulesPath ."/$module/Views/$view");
-        } else {
-            $path = APPPATH .str_replace('/', DS, "Views/$view");
+            $path = str_replace('/', DS, $modulesPath ."/$domain/Views/$view");
         }
 
         // Try to find the View file.
@@ -554,6 +556,6 @@ class Factory
 
         if (! is_null($filePath)) return $filePath;
 
-        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .($module ?: 'App')."'.", 1);
+        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .$domain ."'.", 1);
     }
 }

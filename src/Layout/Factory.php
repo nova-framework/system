@@ -54,13 +54,16 @@ class Factory
         // Get the View Factory instance.
         $factory = $this->getViewFactory();
 
+        // Calculate the current Template name.
+        $template = $template ?: Config::get('app.template');
+
         // Get the View file path.
         $path = $this->find($view, $template);
 
         // Get the View Engine instance.
         $engine = $factory->getEngineFromPath($path);
 
-        return new Layout($factory, $engine, $view, $path, $this->parseData($data));
+        return new Layout($factory, $engine, "Templates/$template::$view", $path, $this->parseData($data));
     }
 
     /**
@@ -98,11 +101,8 @@ class Factory
      * @param    string     $template
      * @return    string
      */
-    protected function find($view, $template = null)
+    protected function find($view, $template)
     {
-        // Calculate the current Template name.
-        $template = $template ?: Config::get('app.template');
-
         // Calculate the search path.
         $path = sprintf('Templates/%s/%s', $template, $view);
 
