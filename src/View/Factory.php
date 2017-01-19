@@ -114,13 +114,13 @@ class Factory
     public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
         if (is_array($module)) {
-            // The mergeData was passed as the third parameter?
+            // Was passed merging data as the third parameter?
             $mergeData = array_merge($mergeData, $module);
 
-            $domain = 'App';
-        } else {
-            $domain = $module ?: 'App';
+            $module = null;
         }
+
+        $domain = $module ?: 'App';
 
         // Get the View file path.
         $path = $this->find($view, $domain);
