@@ -76,12 +76,14 @@ class Factory
         // Get the View file path.
         $path = $this->find($view, $template);
 
-        // Normalize the View name.
+        // Normalize the Layout name.
         $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
 
-        return new Layout($this->views, $name, $path, $this->parseData($data));
-    }
+        //
+        $this->views->callCreator($layout = new Layout($this->views, $name, $path, $this->parseData($data)));
 
+        return $layout;
+    }
 
     /**
      * Add an alias for a view.
