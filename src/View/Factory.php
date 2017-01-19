@@ -114,7 +114,7 @@ class Factory
     public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
         if (is_array($module)) {
-            // Was passed merging data as the third parameter?
+            // Was passed data for merging as the third parameter?
             $mergeData = array_merge($mergeData, $module);
 
             $module = null;
@@ -125,10 +125,13 @@ class Factory
         // Get the View file path.
         $path = $this->find($view, $domain);
 
+        // Normalize the View name.
+        $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
+
         // Prepare the View data.
         $data = array_merge($mergeData, $this->parseData($data));
 
-        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), "Views/$domain::$view", $path, $data));
+        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
 
         return $view;
     }

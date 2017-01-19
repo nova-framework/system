@@ -60,10 +60,13 @@ class Factory
         // Get the View file path.
         $path = $this->find($view, $template);
 
+        // Normalize the View name.
+        $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
+
         // Get the View Engine instance.
         $engine = $factory->getEngineFromPath($path);
 
-        return new Layout($factory, $engine, "Templates/$template::$view", $path, $this->parseData($data));
+        return new Layout($factory, $engine, $name, $path, $this->parseData($data));
     }
 
     /**
