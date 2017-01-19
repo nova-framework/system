@@ -49,7 +49,7 @@ class ViewServiceProvider extends ServiceProvider
             $resolver = new EngineResolver();
 
             foreach (array('php', 'template') as $engine) {
-                $method = 'register'.ucfirst($engine).'Engine';
+                $method = 'register' .ucfirst($engine) .'Engine';
 
                 call_user_func(array($this, $method), $resolver);
             }

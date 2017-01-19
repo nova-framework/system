@@ -570,7 +570,9 @@ class Factory
      */
     public function flushSectionsIfDoneRendering()
     {
-        if ($this->doneRendering()) $this->flushSections();
+        if ($this->doneRendering()) {
+            $this->flushSections();
+        }
     }
 
     /**

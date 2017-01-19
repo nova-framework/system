@@ -2,6 +2,8 @@
 
 namespace Nova\View\Compilers;
 
+use Nova\Support\Arr;
+use Nova\Support\Str;
 use Nova\View\Compilers\Compiler;
 use Nova\View\Compilers\CompilerInterface;
 
@@ -59,6 +61,20 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected $footer = array();
 
     /**
+     * Placeholder to temporary mark the position of verbatim blocks.
+     *
+     * @var string
+     */
+    protected $verbatimPlaceholder = '@__verbatim__@';
+
+    /**
+     * Array to temporary store the verbatim blocks found in the template.
+     *
+     * @var array
+     */
+    protected $verbatimBlocks = [];
+
+    /**
      * Counter to keep track of nested forelse statements.
      *
      * @var int
@@ -74,8 +90,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function compile($path = null)
     {
-        $this->footer = array();
-
         if (! is_null($path)) {
             $this->setPath($path);
         }
@@ -118,10 +132,20 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $result = '';
 
+        if (strpos($value, '@verbatim') !== false) {
+            $value = $this->storeVerbatimBlocks($value);
+        }
+
+        $this->footer = array();
+
         // Here we will loop through all of the tokens returned by the Zend lexer and parse each one into the corresponding valid PHP.
         // We will then have this template as the correctly rendered PHP that can be rendered natively.
         foreach (token_get_all($value) as $token) {
             $result .= is_array($token) ? $this->parseToken($token) : $token;
+        }
+
+        if (! empty($this->verbatimBlocks)) {
+            $result = $this->restoreVerbatimBlocks($result);
         }
 
         // If there are any footer lines that need to get added to a template we will add them here at the end of the template.
@@ -129,6 +153,40 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         if (count($this->footer) > 0) {
             $result = ltrim($result, PHP_EOL) .PHP_EOL .implode(PHP_EOL, array_reverse($this->footer));
         }
+
+        return $result;
+    }
+
+    /**
+     * Store the verbatim blocks and replace them with a temporary placeholder.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function storeVerbatimBlocks($value)
+    {
+        return preg_replace_callback('/(?<!@)@verbatim(.*?)@endverbatim/s', function ($matches) {
+            $this->verbatimBlocks[] = $matches[1];
+
+            return $this->verbatimPlaceholder;
+        }, $value);
+    }
+
+    /**
+     * Replace the raw placeholders with the original code stored in the raw blocks.
+     *
+     * @param  string  $result
+     * @return string
+     */
+    protected function restoreVerbatimBlocks($result)
+    {
+        $result = preg_replace_callback('/' .preg_quote($this->verbatimPlaceholder) .'/', function ()
+        {
+            return array_shift($this->verbatimBlocks);
+
+        }, $result);
+
+        $this->verbatimBlocks = [];
 
         return $result;
     }
@@ -210,7 +268,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         $callback = function($match)
         {
             if (method_exists($this, $method = 'compile' .ucfirst($match[1]))) {
-                $match[0] = call_user_func(array($this, $method), array_get($match, 3));
+                $match[0] = call_user_func(array($this, $method), Arr::get($match, 3));
             }
 
             return isset($match[3]) ? $match[0] : $match[0] .$match[2];
@@ -415,6 +473,28 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the break statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileBreak($expression)
+    {
+        return $expression ? "<?php if{$expression} break; ?>" : '<?php break; ?>';
+    }
+
+    /**
+     * Compile the continue statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileContinue($expression)
+    {
+        return $expression ? "<?php if{$expression} continue; ?>" : '<?php continue; ?>';
+    }
+
+    /**
      * Compile the forelse statements into valid PHP.
      *
      * @param  string  $expression
@@ -460,6 +540,17 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         $empty = '$__empty_' . $this->forelseCounter--;
 
         return "<?php endforeach; if ({$empty}): ?>";
+    }
+
+    /**
+     * Compile the has section statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileHasSection($expression)
+    {
+        return "<?php if (! empty(trim(\$__env->yieldContent{$expression}))): ?>";
     }
 
     /**
@@ -529,6 +620,39 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the raw PHP statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compilePhp($expression)
+    {
+        return ! empty($expression) ? "<?php {$expression}; ?>" : '<?php ';
+    }
+
+    /**
+     * Compile end-php statement into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndphp($expression)
+    {
+        return ' ?>';
+    }
+
+    /**
+     * Compile the unset statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileUnset($expression)
+    {
+        return "<?php unset{$expression}; ?>";
+    }
+
+    /**
      * Compile the extends statements into valid PHP.
      *
      * @param  string  $expression
@@ -536,9 +660,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function compileExtends($expression)
     {
-        if (starts_with($expression, '(')) {
-            $expression = substr($expression, 1, -1);
-        }
+        $expression = $this->stripParentheses($expression);
 
         $data = "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
 
@@ -555,12 +677,11 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function compileInclude($expression)
     {
-        if (starts_with($expression, '(')) {
-            $expression = substr($expression, 1, -1);
-        }
+        $expression = $this->stripParentheses($expression);
 
         return "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
     }
+
 
     /**
      * Compile the stack statements into the content
@@ -593,6 +714,21 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected function compileEndpush($expression)
     {
         return "<?php \$__env->appendSection(); ?>";
+    }
+
+    /**
+     * Strip the parentheses from the given expression.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    public function stripParentheses($expression)
+    {
+        if (Str::startsWith($expression, '(')) {
+            $expression = substr($expression, 1, -1);
+        }
+
+        return $expression;
     }
 
     /**
