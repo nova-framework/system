@@ -31,6 +31,9 @@ class PhpEngine implements EngineInterface
      */
     protected function evaluatePath($__path, $__data)
     {
+        $obLevel = ob_get_level();
+
+        //
         ob_start();
 
         // Extract the rendering variables.
@@ -47,10 +50,10 @@ class PhpEngine implements EngineInterface
             include $__path;
         }
         catch (\Exception $e) {
-            $this->handleViewException($e);
+            $this->handleViewException($e, $obLevel);
         }
         catch (\Throwable $e) {
-            $this->handleViewException($e);
+            $this->handleViewException($e, $obLevel);
         }
 
         return ltrim(ob_get_clean());
@@ -60,13 +63,16 @@ class PhpEngine implements EngineInterface
      * Handle a View Exception.
      *
      * @param  \Exception  $e
+     * @param  int  $obLevel
      * @return void
      *
      * @throws $e
      */
-    protected function handleViewException($e)
+    protected function handleViewException($e, $obLevel)
     {
-        ob_get_clean();
+        while (ob_get_level() > $obLevel) {
+            ob_end_clean();
+        }
 
         throw $e;
     }

@@ -52,6 +52,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected $escapedTags = array('{{{', '}}}');
 
     /**
+     * Array of footer lines to be added to template.
+     *
+     * @var array
+     */
+    protected $footer = array();
+
+    /**
      * Counter to keep track of nested forelse statements.
      *
      * @var int
@@ -67,6 +74,8 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function compile($path = null)
     {
+        $this->footer = array();
+
         if (! is_null($path)) {
             $this->setPath($path);
         }
@@ -113,6 +122,12 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         // We will then have this template as the correctly rendered PHP that can be rendered natively.
         foreach (token_get_all($value) as $token) {
             $result .= is_array($token) ? $this->parseToken($token) : $token;
+        }
+
+        // If there are any footer lines that need to get added to a template we will add them here at the end of the template.
+        // This gets used mainly for the template inheritance via the extends keyword that should be appended.
+        if (count($this->footer) > 0) {
+            $result = ltrim($result, PHP_EOL) .PHP_EOL .implode(PHP_EOL, array_reverse($this->footer));
         }
 
         return $result;
@@ -264,6 +279,84 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected function compileEach($expression)
     {
         return "<?php echo \$__env->renderEach{$expression}; ?>";
+    }
+
+    /**
+     * Compile the yield statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileYield($expression)
+    {
+        return "<?php echo \$__env->yieldContent{$expression}; ?>";
+    }
+
+    /**
+     * Compile the show statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileShow($expression)
+    {
+        return "<?php echo \$__env->yieldSection(); ?>";
+    }
+
+    /**
+     * Compile the section statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileSection($expression)
+    {
+        return "<?php \$__env->startSection{$expression}; ?>";
+    }
+
+    /**
+     * Compile the append statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileAppend($expression)
+    {
+        return "<?php \$__env->appendSection(); ?>";
+    }
+
+    /**
+     * Compile the end-section statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndsection($expression)
+    {
+        return "<?php \$__env->stopSection(); ?>";
+    }
+
+
+    /**
+     * Compile the stop statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileStop($expression)
+    {
+        return "<?php \$__env->stopSection(); ?>";
+    }
+
+    /**
+     * Compile the overwrite statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileOverwrite($expression)
+    {
+        return "<?php \$__env->stopSection(true); ?>";
     }
 
     /**
@@ -436,6 +529,25 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the extends statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileExtends($expression)
+    {
+        if (starts_with($expression, '(')) {
+            $expression = substr($expression, 1, -1);
+        }
+
+        $data = "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+
+        $this->footer[] = $data;
+
+        return '';
+    }
+
+    /**
      * Compile the include statements into valid PHP.
      *
      * @param  string  $expression
@@ -448,6 +560,39 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         }
 
         return "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+    }
+
+    /**
+     * Compile the stack statements into the content
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileStack($expression)
+    {
+        return "<?php echo \$__env->yieldContent{$expression}; ?>";
+    }
+
+    /**
+     * Compile the push statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compilePush($expression)
+    {
+        return "<?php \$__env->startSection{$expression}; ?>";
+    }
+
+    /**
+     * Compile the endpush statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndpush($expression)
+    {
+        return "<?php \$__env->appendSection(); ?>";
     }
 
     /**
