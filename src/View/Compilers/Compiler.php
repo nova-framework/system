@@ -45,7 +45,7 @@ abstract class Compiler
     */
     public function getCompiledPath($path)
     {
-        return $this->cachePath .DS .md5($path);
+        return $this->cachePath .DS .sha1($path) .'.php';
     }
 
     /**
