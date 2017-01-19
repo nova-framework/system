@@ -62,19 +62,23 @@ class FileViewFinder implements ViewFinderInterface
     /**
      * Find the given view in the list of paths.
      *
-     * @param  string  $name
-     * @param  array   $paths
+     * @param  string  $path
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    protected function findViewFile($name)
+    protected function findViewFile($path)
     {
-        foreach ($this->getPossibleViewFiles($name) as $file) {
+        foreach ($this->getPossibleViewFiles($path) as $file) {
             if ($this->files->exists($file)) {
                 return $file;
             }
         }
+
+        // 
+        $name = str_replace(BASEPATH, '', $path);
+
+        throw new \InvalidArgumentException("View [$name] not found.");
     }
 
     /**

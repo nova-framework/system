@@ -2,7 +2,7 @@
 
 namespace Nova\Layout;
 
-use Nova\Layout\Factory;
+use Nova\Layout\Factory as LayoutFactory;
 use Nova\Support\ServiceProvider;
 use Nova\View\Engines\EngineResolver;
 
@@ -25,7 +25,11 @@ class LayoutServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('layout', function($app)
         {
-            return new Factory($app, $app['view.finder']);
+            $factory = $app['view'];
+
+            $finder = $app['view.finder'];
+
+            return new LayoutFactory($factory, $finder, $app['language']);
         });
     }
 

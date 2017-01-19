@@ -49,6 +49,20 @@ class Factory
     protected $shared = array();
 
     /**
+     * Array of registered view name aliases.
+     *
+     * @var array
+     */
+    protected $aliases = array();
+
+    /**
+     * All of the registered view names.
+     *
+     * @var array
+     */
+    protected $names = array();
+
+    /**
      * The extension to Engine bindings.
      *
      * @var array
@@ -109,10 +123,13 @@ class Factory
      * @param array $data
      * @param array|string|null $module
      * @param array $mergeData
+     *
      * @return \Nova\View\View
      */
     public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
+        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
+
         if (is_array($module)) {
             // Was passed data for merging as the third parameter?
             $mergeData = array_merge($mergeData, $module);
@@ -157,6 +174,42 @@ class Factory
     protected function parseData($data)
     {
         return ($data instanceof Arrayable) ? $data->toArray() : $data;
+    }
+
+    /**
+     * Get the evaluated view contents for a named view.
+     *
+     * @param  string  $view
+     * @param  mixed   $data
+     * @return \Nova\View\View
+     */
+    public function of($view, $data = array())
+    {
+        return $this->make($this->names[$view], $data);
+    }
+
+    /**
+     * Register a named view.
+     *
+     * @param  string  $view
+     * @param  string  $name
+     * @return void
+     */
+    public function name($view, $name)
+    {
+        $this->names[$name] = $view;
+    }
+
+    /**
+     * Add an alias for a view.
+     *
+     * @param  string  $view
+     * @param  string  $alias
+     * @return void
+     */
+    public function alias($view, $alias)
+    {
+        $this->aliases[$alias] = $view;
     }
 
     /**
@@ -744,6 +797,16 @@ class Factory
     }
 
     /**
+     * Get all of the registered named views in environment.
+     *
+     * @return array
+     */
+    public function getNames()
+    {
+        return $this->names;
+    }
+
+    /**
      * Find the view file.
      *
      * @param    string  $view
@@ -757,7 +820,7 @@ class Factory
         } else {
             $modulesPath = Config::get('modules.path', APPPATH .'Modules');
 
-            $path = str_replace('/', DS, $modulesPath ."/$domain/Views/$view");
+            $path = $modulesPath .DS .str_replace('/', DS, "$domain/Views/$view");
         }
 
         // Try to find the View file.

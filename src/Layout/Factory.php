@@ -17,9 +17,9 @@ class Factory
     /**
      * The Application instance.
      *
-     * @var \Nova\Foundation\Application
+     * @var \Nova\View\Factory
      */
-    protected $app;
+    protected $views;
 
     /**
      * The view finder implementation.
@@ -29,16 +29,33 @@ class Factory
     protected $finder;
 
     /**
+     * The Application instance.
+     *
+     * @var \Nova\Language\LanguageManager
+     */
+    protected $language;
+
+    /**
+     * Array of registered view name aliases.
+     *
+     * @var array
+     */
+    protected $aliases = array();
+
+
+    /**
      * Create new Layout Factory instance.
      *
      * @param $factory The View Factory instance.
      * @return void
      */
-    function __construct(Application $app, ViewFinderInterface $finder)
+    function __construct(ViewFactory $views, ViewFinderInterface $finder, LanguageManager $language)
     {
-        $this->app = $app;
+        $this->views = $views;
 
         $this->finder = $finder;
+
+        $this->language = $language;
     }
 
     /**
@@ -51,8 +68,7 @@ class Factory
      */
     public function make($view, array $data = array(), $template = null)
     {
-        // Get the View Factory instance.
-        $factory = $this->getViewFactory();
+        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
         $template = $template ?: Config::get('app.template');
@@ -63,10 +79,20 @@ class Factory
         // Normalize the View name.
         $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
 
-        // Get the View Engine instance.
-        $engine = $factory->getEngineFromPath($path);
+        return new Layout($this->views, $name, $path, $this->parseData($data));
+    }
 
-        return new Layout($factory, $engine, $name, $path, $this->parseData($data));
+
+    /**
+     * Add an alias for a view.
+     *
+     * @param  string  $view
+     * @param  string  $alias
+     * @return void
+     */
+    public function alias($view, $alias)
+    {
+        $this->aliases[$alias] = $view;
     }
 
     /**
@@ -110,10 +136,10 @@ class Factory
         $path = sprintf('Templates/%s/%s', $template, $view);
 
         // Make the path absolute and adjust the directory separator.
-        $path = str_replace('/', DS, APPPATH .$path);
+        $path = APPPATH .str_replace('/', DS, $path);
 
         // Find the View file depending on the Language direction.
-        $language = $this->getLanguage();
+        $language = $this->getCurrentLanguage();
 
         if ($language->direction() == 'rtl') {
             // Search for the View file used on the RTL languages.
@@ -132,24 +158,12 @@ class Factory
     }
 
     /**
-     * Return the current View Factory instance.
-     *
-     * @return \Nova\View\Factory
-     */
-    protected function getViewFactory()
-    {
-        return $this->app['view'];
-    }
-
-    /**
      * Return the current Language instance.
      *
      * @return \Language\Language
      */
-    protected function getLanguage()
+    protected function getCurrentLanguage()
     {
-        $languages = $this->app['language'];
-
-        return $languages->instance();
+        return $this->language->instance();
     }
 }
