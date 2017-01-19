@@ -2,11 +2,12 @@
 
 namespace Nova\Layout;
 
-use Nova\Foundation\Application;
 use Nova\Language\LanguageManager;
+use Nova\Layout\Layout;
+
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Facades\Config;
-use Nova\Layout\Layout;
+
 use Nova\View\Factory as ViewFactory;
 use Nova\View\ViewFinderInterface;
 use Nova\View\View;
@@ -14,6 +15,13 @@ use Nova\View\View;
 
 class Factory
 {
+    /**
+     * Array of registered view name aliases.
+     *
+     * @var array
+     */
+    protected $aliases = array();
+
     /**
      * The Application instance.
      *
@@ -35,18 +43,10 @@ class Factory
      */
     protected $language;
 
-    /**
-     * Array of registered view name aliases.
-     *
-     * @var array
-     */
-    protected $aliases = array();
-
 
     /**
      * Create new Layout Factory instance.
      *
-     * @param $factory The View Factory instance.
      * @return void
      */
     function __construct(ViewFactory $views, ViewFinderInterface $finder, LanguageManager $language)
@@ -64,11 +64,15 @@ class Factory
      * @param string $view
      * @param array $data
      * @param string|null $template
+     *
      * @return \Nova\View\View
      */
     public function make($view, array $data = array(), $template = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
+
+        // Get the View Factory instance.
+        $factory = $this->getViewFactory();
 
         // Calculate the current Template name.
         $template = $template ?: Config::get('app.template');
@@ -79,8 +83,10 @@ class Factory
         // Normalize the Layout name.
         $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
 
-        //
-        $this->views->callCreator($layout = new Layout($this->views, $name, $path, $this->parseData($data)));
+        // Prepare the View data.
+        $data = $this->parseData($data);
+
+        $factory->callCreator($layout = new Layout($factory, $factory->getEngineFromPath($path), $name, $path, $data));
 
         return $layout;
     }
@@ -157,6 +163,16 @@ class Factory
         if (! is_null($filePath)) return $filePath;
 
         throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
+    }
+
+    /**
+     * Return the View Factory instance.
+     *
+     * @return \Nova\View\Factory
+     */
+    protected function getViewFactory()
+    {
+        return $this->views;
     }
 
     /**
