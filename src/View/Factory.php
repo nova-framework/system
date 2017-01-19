@@ -89,13 +89,13 @@ class Factory
      * @param string|null $module
      * @return \Nova\View\View
      */
-    public function make($view, array $data = array(), $module = null)
+    public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
         // Get the View file path.
         $path = $this->find($view, $module);
 
-        // Parse the View data.
-        $data = $this->parseData($data);
+        // Prepare the View data.
+        $data = array_merge($mergeData, $this->parseData($data));
 
         $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $view, $path, $data));
 
