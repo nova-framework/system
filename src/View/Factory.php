@@ -126,6 +126,110 @@ class Factory
     }
 
     /**
+     * Check if the view file exists.
+     *
+     * @param    string     $view
+     * @return    bool
+     */
+    public function exists($view, $module = null)
+    {
+        try {
+            $this->find($view, $module);
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the rendered contents of a partial from a loop.
+     *
+     * @param  string  $view
+     * @param  array   $data
+     * @param  string  $iterator
+     * @param  string  $empty
+     * @param  string|null  $module
+     * @return string
+     */
+    public function renderEach($view, $data, $iterator, $empty = null, $module = null)
+    {
+        $empty = ! empty($empty) ? $empty : 'raw|';
+
+        //
+        $result = '';
+
+        // If is actually data in the array, we will loop through the data and append
+        // an instance of the partial view to the final result HTML passing in the
+        // iterated value of this data array, allowing the views to access them.
+        if (count($data) > 0) {
+            foreach ($data as $key => $value) {
+                $data = array('key' => $key, $iterator => $value);
+
+                $result .= $this->make($view, $data, $module)->render();
+            }
+        }
+
+        // If there is no data in the array, we will render the contents of the empty
+        // view. Alternatively, the "empty view" could be a raw string that begins
+        // with "raw|" for convenience and to let this know that it is a string.
+        else if (! starts_with($empty, 'raw|')) {
+            $result = $this->make($empty, array(), $module)->render();
+        } else {
+            $result = substr($empty, 4);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the appropriate View Engine for the given path.
+     *
+     * @param  string  $path
+     * @return \Nova\View\Engines\EngineInterface
+     */
+    public function getEngineFromPath($path)
+    {
+        $extension = $this->getExtension($path);
+
+        $engine = $this->extensions[$extension];
+
+        return $this->engines->resolve($engine);
+    }
+
+    /**
+     * Get the extension used by the view file.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    protected function getExtension($path)
+    {
+        $extensions = array_keys($this->extensions);
+
+        return array_first($extensions, function($key, $value) use ($path)
+        {
+            return ends_with($path, $value);
+        });
+    }
+
+    /**
+     * Add a piece of shared data to the Factory.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+    public function share($key, $value = null)
+    {
+        if (! is_array($key)) return $this->shared[$key] = $value;
+
+        foreach ($key as $innerKey => $innerValue) {
+            $this->share($innerKey, $innerValue);
+        }
+    }
+
+    /**
      * Register a view creator event.
      *
      * @param  array|string     $views
@@ -304,92 +408,6 @@ class Factory
     }
 
     /**
-     * Add a piece of shared data to the Factory.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
-     */
-    public function share($key, $value = null)
-    {
-        if (! is_array($key)) return $this->shared[$key] = $value;
-
-        foreach ($key as $innerKey => $innerValue) {
-            $this->share($innerKey, $innerValue);
-        }
-    }
-
-    /**
-     * Get an item from the shared data.
-     *
-     * @param  string  $key
-     * @param  mixed   $default
-     * @return mixed
-     */
-    public function shared($key, $default = null)
-    {
-        return array_get($this->shared, $key, $default);
-    }
-
-    /**
-     * Get all of the shared data for the Factory.
-     *
-     * @return array
-     */
-    public function getShared()
-    {
-        return $this->shared;
-    }
-
-    /**
-     * Check if the view file exists.
-     *
-     * @param    string     $view
-     * @return    bool
-     */
-    public function exists($view, $module = null)
-    {
-        try {
-            $this->find($view, $module);
-        } catch (\InvalidArgumentException $e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Get the appropriate View Engine for the given path.
-     *
-     * @param  string  $path
-     * @return \Nova\View\Engines\EngineInterface
-     */
-    public function getEngineFromPath($path)
-    {
-        $extension = $this->getExtension($path);
-
-        $engine = $this->extensions[$extension];
-
-        return $this->engines->resolve($engine);
-    }
-
-    /**
-     * Get the extension used by the view file.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    protected function getExtension($path)
-    {
-        $extensions = array_keys($this->extensions);
-
-        return array_first($extensions, function($key, $value) use ($path)
-        {
-            return ends_with($path, $value);
-        });
-    }
-
-    /**
      * Register a valid view extension and its engine.
      *
      * @param  string   $extension
@@ -490,6 +508,28 @@ class Factory
     public function setContainer(Container $container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Get an item from the shared data.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    public function shared($key, $default = null)
+    {
+        return array_get($this->shared, $key, $default);
+    }
+
+    /**
+     * Get all of the shared data for the Factory.
+     *
+     * @return array
+     */
+    public function getShared()
+    {
+        return $this->shared;
     }
 
     /**

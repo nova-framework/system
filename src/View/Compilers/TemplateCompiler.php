@@ -256,6 +256,17 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the each statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEach($expression)
+    {
+        return "<?php echo \$__env->renderEach{$expression}; ?>";
+    }
+
+    /**
      * Compile the unless statements into valid PHP.
      *
      * @param  string  $expression
