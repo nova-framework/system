@@ -107,20 +107,28 @@ class Factory
      *
      * @param string $path
      * @param array $data
-     * @param string|null $module
+     * @param array|string|null $module
+     * @param array $mergeData
      * @return \Nova\View\View
      */
     public function make($view, array $data = array(), $module = null, array $mergeData = array())
     {
-        $module = $module ?: 'App';
+        if (is_array($module)) {
+            // The mergeData was passed as the third parameter?
+            $mergeData = array_merge($mergeData, $module);
+
+            $domain = 'App';
+        } else {
+            $domain = $module ?: 'App';
+        }
 
         // Get the View file path.
-        $path = $this->find($view, $module);
+        $path = $this->find($view, $domain);
 
         // Prepare the View data.
         $data = array_merge($mergeData, $this->parseData($data));
 
-        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), "Views/$module::$view", $path, $data));
+        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), "Views/$domain::$view", $path, $data));
 
         return $view;
     }
@@ -729,7 +737,7 @@ class Factory
     {
         return $this->sections;
     }
-    
+
     /**
      * Find the view file.
      *
