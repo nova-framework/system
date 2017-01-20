@@ -7,6 +7,7 @@ use Nova\Events\Dispatcher;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Facades\Config;
 use Nova\View\Engines\EngineResolver;
+use Nova\View\Layout;
 use Nova\View\View;
 use Nova\View\ViewFinderInterface;
 
@@ -140,7 +141,7 @@ class Factory
         $domain = $module ?: 'App';
 
         // Get the View file path.
-        $path = $this->find($view, $domain);
+        $path = $this->findViewFile($view, $domain);
 
         // Normalize the View name.
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
@@ -151,6 +152,36 @@ class Factory
         $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
 
         return $view;
+    }
+
+    /**
+     * Create a Layout instance
+     *
+     * @param string $view
+     * @param array $data
+     * @param string|null $template
+     *
+     * @return \Nova\View\Layout
+     */
+    public function makeLayout($view, array $data = array(), $template = null)
+    {
+        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
+
+        // Calculate the current Template name.
+        $template = $template ?: Config::get('app.template');
+
+        // Get the View file path.
+        $path = $this->findLayoutFile($view, $template);
+
+        // Normalize the Layout name.
+        $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
+
+        // Prepare the View data.
+        $data = $this->parseData($data);
+
+        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path, $data));
+
+        return $layout;
     }
 
     /**
@@ -813,7 +844,7 @@ class Factory
      * @param    string  $domain
      * @return    string
      */
-    protected function find($view, $domain)
+    protected function findViewFile($view, $domain)
     {
         if ($domain == 'App') {
             $path = APPPATH .str_replace('/', DS, "Views/$view");
@@ -829,5 +860,49 @@ class Factory
         if (! is_null($filePath)) return $filePath;
 
         throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .$domain ."'.", 1);
+    }
+
+    /**
+     * Find the View file.
+     *
+     * @param    string     $view
+     * @param    string     $template
+     * @return    string
+     */
+    protected function findLayoutFile($view, $template)
+    {
+        // Calculate the search path.
+        $path = sprintf('Templates/%s/%s', $template, $view);
+
+        // Make the path absolute and adjust the directory separator.
+        $path = APPPATH .str_replace('/', DS, $path);
+
+        // Find the View file depending on the Language direction.
+        $language = $this->getCurrentLanguage();
+
+        if ($language->direction() == 'rtl') {
+            // Search for the View file used on the RTL languages.
+            $filePath = $this->finder->find($path .'-rtl');
+        } else {
+            $filePath = null;
+        }
+
+        if (is_null($filePath)) {
+            $filePath = $this->finder->find($path);
+        }
+
+        if (! is_null($filePath)) return $filePath;
+
+        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
+    }
+
+    /**
+     * Return the current Language instance.
+     *
+     * @return \Language\Language
+     */
+    protected function getCurrentLanguage()
+    {
+        return $this->container['language']->instance();
     }
 }
