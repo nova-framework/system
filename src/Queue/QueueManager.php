@@ -41,7 +41,7 @@ class QueueManager
      */
     public function looping($callback)
     {
-        $this->app['events']->listen('Nova.queue.looping', $callback);
+        $this->app['events']->listen('nova.queue.looping', $callback);
     }
 
     /**
@@ -52,7 +52,7 @@ class QueueManager
      */
     public function failing($callback)
     {
-        $this->app['events']->listen('Nova.queue.failed', $callback);
+        $this->app['events']->listen('nova.queue.failed', $callback);
     }
 
     /**
@@ -63,7 +63,7 @@ class QueueManager
      */
     public function stopping($callback)
     {
-        $this->app['events']->listen('Nova.queue.stopping', $callback);
+        $this->app['events']->listen('nova.queue.stopping', $callback);
     }
 
     /**

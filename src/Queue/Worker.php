@@ -254,7 +254,7 @@ class Worker
         if ($this->events) {
             $data = json_decode($job->getRawBody(), true);
 
-            $this->events->fire('Nova.queue.failed', array($connection, $job, $data));
+            $this->events->fire('nova.queue.failed', array($connection, $job, $data));
         }
     }
 
