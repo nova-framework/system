@@ -8,21 +8,22 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeModelCommand extends Command
+class MakePolicyCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:model';
+    protected $name = 'make:policy';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Create a new ORM Model";
+    protected $description = 'Create a new Policy class';
+
 
     /**
      * Create a new command creator command.
@@ -46,7 +47,7 @@ class MakeModelCommand extends Command
     {
         $path = $this->getPath();
 
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'model.stub');
+        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'policy.stub');
 
         //
         $file = $path .DS .$this->input->getArgument('name').'.php';
@@ -66,9 +67,9 @@ class MakeModelCommand extends Command
         if (! $this->files->exists($file)) {
             $this->files->put($file, $this->formatStub($stub));
 
-            $this->info('Model created successfully.');
+            $this->info('Policy created successfully.');
         } else {
-            $this->error('Model already exists!');
+            $this->error('Policy already exists!');
         }
     }
 
@@ -94,9 +95,9 @@ class MakeModelCommand extends Command
     protected function addNamespace($stub)
     {
         if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Models\\'.$namespace.';', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Policies\\'.$namespace.';', $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Models;', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Policies;', $stub);
         }
     }
 
@@ -110,7 +111,7 @@ class MakeModelCommand extends Command
         $path = $this->input->getOption('path');
 
         if (is_null($path)) {
-            return $this->nova['path'] .DS .'Models';
+            return $this->nova['path'] .DS .'Policies';
         } else {
             return $this->nova['path.base'] .DS .$path;
         }
@@ -124,7 +125,7 @@ class MakeModelCommand extends Command
     protected function getArguments()
     {
         return array(
-            array('name', InputArgument::REQUIRED, 'The name of the Model.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Policy.'),
         );
     }
 
@@ -136,9 +137,8 @@ class MakeModelCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the Model should be stored.', null),
-            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The Model namespace.', null),
+            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the Policy should be stored.', null),
+            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The Policy namespace.', null),
         );
     }
-
 }
