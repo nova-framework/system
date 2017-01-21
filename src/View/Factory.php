@@ -127,17 +127,11 @@ class Factory
      *
      * @return \Nova\View\View
      */
-    public function make($view, array $data = array(), $module = null, array $mergeData = array())
+    public function make($view, array $data = array(), $module = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
-        if (is_array($module)) {
-            // Was passed data for merging as the third parameter?
-            $mergeData = array_merge($mergeData, $module);
-
-            $module = null;
-        }
-
+        // Get the View's domain.
         $domain = $module ?: 'App';
 
         // Get the View file path.
@@ -147,7 +141,7 @@ class Factory
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
 
         // Prepare the View data.
-        $data = array_merge($mergeData, $this->parseData($data));
+        $data = $this->parseData($data);
 
         $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
 
