@@ -21,7 +21,7 @@
     "require": {
         "php": ">=5.5.0",
         "classpreloader/classpreloader": "^3.0",
-        "jeremeamia/superclosure": "~1.0.1",
+        "jeremeamia/superclosure": "~2.2",
         "paragonie/random_compat": "~1.4",
         "psy/psysh": "0.7.*",
         "symfony/browser-kit": "3.1.*",
