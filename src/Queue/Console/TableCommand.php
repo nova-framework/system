@@ -3,25 +3,27 @@
 namespace Nova\Queue\Console;
 
 use Nova\Console\Command;
+use Nova\Foundation\Composer;
 use Nova\Filesystem\Filesystem;
 
+use Nova\Support\Str;
 
-class FailedTableCommand extends Command
+
+class TableCommand extends Command
 {
-
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'queue:failed-table';
+    protected $name = 'queue:table';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a migration for the failed queue jobs database table';
+    protected $description = 'Create a migration for the queue jobs database table';
 
     /**
      * The filesystem instance.
@@ -30,10 +32,12 @@ class FailedTableCommand extends Command
      */
     protected $files;
 
+
     /**
-     * Create a new session table command instance.
+     * Create a new queue job table command instance.
      *
      * @param  \Nova\Filesystem\Filesystem  $files
+     * @param  \Nova\Foundation\Composer    $composer
      * @return void
      */
     public function __construct(Filesystem $files)
@@ -50,11 +54,19 @@ class FailedTableCommand extends Command
      */
     public function fire()
     {
-        $fullPath = $this->createBaseMigration();
+        $table = $this->nova['config']['queue.connections.database.table'];
 
-        $stubPath = __DIR__ .DS .'stubs' .DS .'failed_jobs.stub';
+        $tableClassName = Str::studly($table);
 
-        $this->files->put($fullPath, $this->files->get($stubPath));
+        $fullPath = $this->createBaseMigration($table);
+
+        $stubPath = __DIR__ .DS . 'stubs' .DS .'jobs.stub';
+
+        $stub = str_replace(
+            ['{{table}}', '{{tableClassName}}'], [$table, $tableClassName], $this->files->get($stubPath)
+        );
+
+        $this->files->put($fullPath, $stub);
 
         $this->info('Migration created successfully!');
     }
@@ -62,15 +74,15 @@ class FailedTableCommand extends Command
     /**
      * Create a base migration file for the table.
      *
+     * @param  string  $table
      * @return string
      */
-    protected function createBaseMigration()
+    protected function createBaseMigration($table = 'jobs')
     {
-        $name = 'create_failed_jobs_table';
+        $name = 'create_'.$table.'_table';
 
         $path = $this->nova['path'] .DS .'Database' .DS .'Migrations';
 
         return $this->nova['migration.creator']->create($name, $path);
     }
-
 }

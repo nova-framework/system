@@ -74,7 +74,7 @@ class QueueServiceProvider extends ServiceProvider
      */
     protected function registerWorker()
     {
-        $this->registerWorkCommand();
+        $this->registerWork();
 
         $this->registerRestartCommand();
 

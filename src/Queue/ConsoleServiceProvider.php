@@ -7,10 +7,12 @@ use Nova\Queue\Console\ListFailedCommand;
 use Nova\Queue\Console\FlushFailedCommand;
 use Nova\Queue\Console\FailedTableCommand;
 use Nova\Queue\Console\ForgetFailedCommand;
+use Nova\Queue\Console\TableCommand;
+
 use Nova\Support\ServiceProvider;
 
 
-class FailConsoleServiceProvider extends ServiceProvider
+class ConsoleServiceProvider extends ServiceProvider
 {
 
     /**
@@ -27,6 +29,10 @@ class FailConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('command.queue.table', function ($app) {
+            return new TableCommand($app['files']);
+        });
+
         $this->app->bindShared('command.queue.failed', function()
         {
             return new ListFailedCommand;
@@ -53,7 +59,8 @@ class FailConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands(
-            'command.queue.failed', 'command.queue.retry', 'command.queue.forget', 'command.queue.flush', 'command.queue.failed-table'
+            'command.queue.table', 'command.queue.failed', 'command.queue.retry',
+            'command.queue.forget', 'command.queue.flush', 'command.queue.failed-table'
         );
     }
 
@@ -65,7 +72,8 @@ class FailConsoleServiceProvider extends ServiceProvider
     public function provides()
     {
         return array(
-            'command.queue.failed', 'command.queue.retry', 'command.queue.forget', 'command.queue.flush', 'command.queue.failed-table',
+            'command.queue.table', 'command.queue.failed', 'command.queue.retry',
+            'command.queue.forget', 'command.queue.flush', 'command.queue.failed-table',
         );
     }
 
