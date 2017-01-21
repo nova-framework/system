@@ -1,9 +1,9 @@
-<?php 
+<?php
 
 namespace Nova\Support\Facades;
 
 /**
- * @see \Illuminate\View\Compilers\TemplateCompiler
+ * @see \Nova\View\Compilers\TemplateCompiler
  */
 class Template extends Facade
 {
@@ -15,7 +15,7 @@ class Template extends Facade
      */
     protected static function getFacadeAccessor()
     {
-	return static::$app['view']->getEngineResolver()->resolve('template')->getCompiler();
+    return static::$app['view']->getEngineResolver()->resolve('template')->getCompiler();
     }
 
 }
