@@ -122,8 +122,7 @@ class Factory
      *
      * @param string $path
      * @param array $data
-     * @param array|string|null $module
-     * @param array $mergeData
+     * @param string|null $module
      *
      * @return \Nova\View\View
      */
