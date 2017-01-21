@@ -160,7 +160,7 @@ class Factory
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $template = $template ?: Config::get('app.template');
+        $template = $template ?: $this->container['config']->get('app.template');
 
         // Get the View file path.
         $path = $this->findLayoutFile($view, $template);
@@ -838,7 +838,7 @@ class Factory
         if ($domain == 'App') {
             $path = APPPATH .str_replace('/', DS, "Views/$view");
         } else {
-            $modulesPath = Config::get('modules.path', APPPATH .'Modules');
+            $modulesPath = $this->container['config']->get('modules.path', APPPATH .'Modules');
 
             $path = $modulesPath .DS .str_replace('/', DS, "$domain/Views/$view");
         }
