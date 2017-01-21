@@ -14,6 +14,7 @@ use Nova\Queue\Connectors\IronConnector;
 use Nova\Queue\Connectors\RedisConnector;
 use Nova\Queue\Connectors\BeanstalkdConnector;
 use Nova\Queue\Failed\DatabaseFailedJobProvider;
+use Nova\Queue\Failed\NullFailedJobProvider;
 use Nova\Queue\NovaQueueClosure;
 
 use Nova\Support\ServiceProvider;
@@ -307,7 +308,11 @@ class QueueServiceProvider extends ServiceProvider
         {
             $config = $app['config']['queue.failed'];
 
-            return new DatabaseFailedJobProvider($app['db'], $config['database'], $config['table']);
+            if (isset($config['table'])) {
+                return new DatabaseFailedJobProvider($app['db'], $config['database'], $config['table']);
+            } else {
+                return new NullFailedJobProvider();
+            }
         });
     }
 
