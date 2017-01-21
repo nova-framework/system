@@ -64,9 +64,9 @@ trait AuthorizesRequestsTrait
             return $gate->authorize($ability, $arguments);
         }
         catch (UnauthorizedException $e) {
-            throw $this->createGateUnauthorizedException(
-                $ability, $arguments, $e->getMessage(), $e
-            );
+            $exception = $this->createGateUnauthorizedException($ability, $arguments, $e->getMessage(), $e);
+
+            throw $exception;
         }
     }
 
@@ -79,13 +79,43 @@ trait AuthorizesRequestsTrait
      */
     protected function parseAbilityAndArguments($ability, $arguments)
     {
-        if (is_string($ability)) {
+        if (is_string($ability) && (strpos($ability, '\\') === false)) {
             return array($ability, $arguments);
         }
 
         list(,, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 
-        return array($caller['function'], $ability);
+        return array($this->normalizeGuessedAbilityName($caller['function']), $ability);
+    }
+
+    /**
+     * Normalize the ability name that has been guessed from the method name.
+     *
+     * @param  string  $ability
+     * @return string
+     */
+    protected function normalizeGuessedAbilityName($ability)
+    {
+        $map = $this->resourceAbilityMap();
+
+        return isset($map[$ability]) ? $map[$ability] : $ability;
+    }
+
+    /**
+     * Get the map of resource methods to ability names.
+     *
+     * @return array
+     */
+    protected function resourceAbilityMap()
+    {
+        return array(
+            'show'    => 'view',
+            'create'  => 'create',
+            'store'   => 'create',
+            'edit'    => 'update',
+            'update'  => 'update',
+            'destroy' => 'delete',
+        );
     }
 
     /**
@@ -103,4 +133,5 @@ trait AuthorizesRequestsTrait
 
         return new HttpException(403, $message, $previousException);
     }
+
 }
