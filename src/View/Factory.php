@@ -152,11 +152,10 @@ class Factory
      *
      * @param string $view
      * @param string|null $template
-     * @param array $data
      *
      * @return \Nova\View\Layout
      */
-    public function makeLayout($view, array $data = array(), $template = null)
+    public function makeLayout($view, $template = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
@@ -169,10 +168,7 @@ class Factory
         // Normalize the Layout name.
         $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
 
-        // Get the parsed View data.
-        $data = $this->parseData($data);
-
-        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path, $data));
+        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
 
         return $layout;
     }
