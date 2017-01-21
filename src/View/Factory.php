@@ -120,12 +120,12 @@ class Factory
      * Create a View instance
      *
      * @param string $path
-     * @param array $data
+     * @param mixed $data
      * @param string|null $module
      *
      * @return \Nova\View\View
      */
-    public function make($view, array $data = array(), $module = null)
+    public function make($view, $data = array(), $module = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
