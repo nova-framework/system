@@ -5,7 +5,6 @@ namespace Nova\View;
 use Nova\Container\Container;
 use Nova\Events\Dispatcher;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
-use Nova\Support\Facades\Config;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\Layout;
 use Nova\View\View;
