@@ -151,8 +151,8 @@ class Factory
      * Create a Layout instance
      *
      * @param string $view
-     * @param array $data
      * @param string|null $template
+     * @param array $data
      *
      * @return \Nova\View\Layout
      */
