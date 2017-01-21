@@ -4,7 +4,8 @@ namespace Nova\Queue;
 
 use Nova\Container\Container;
 use Nova\Encryption\Encrypter;
-use Nova\Support\SerializableClosure;
+
+use SuperClosure\Serializer;
 
 use Closure;
 use DateTime;
@@ -71,7 +72,7 @@ abstract class Queue
      */
     protected function createClosurePayload($job, $data)
     {
-        $closure = $this->crypt->encrypt(serialize(new SerializableClosure($job)));
+        $closure = $this->crypt->encrypt((new Serializer)->serialize($job));
 
         return array('job' => 'NovaQueueClosure', 'data' => compact('closure'));
     }

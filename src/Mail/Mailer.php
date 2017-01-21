@@ -7,6 +7,8 @@ use Nova\View\Factory;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
 
+use SuperClosure\Serializer;
+
 use Swift_Mailer;
 use Swift_Message;
 
@@ -226,7 +228,7 @@ class Mailer
     {
         if ( ! $callback instanceof Closure) return $callback;
 
-        return serialize(new SerializableClosure($callback));
+        return (new Serializer)->serialize($callback);
     }
 
     /**

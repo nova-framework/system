@@ -2,15 +2,10 @@
 
 namespace Nova\Mail;
 
-use Nova\Mail\Transport\LogTransport;
-use Nova\Mail\Transport\MailgunTransport;
-use Nova\Mail\Transport\MandrillTransport;
+use Nova\Mail\TransportManager;
 use Nova\Support\ServiceProvider;
 
 use Swift_Mailer;
-use Swift_SmtpTransport as SmtpTransport;
-use Swift_MailTransport as MailTransport;
-use Swift_SendmailTransport as SendmailTransport;
 
 
 class MailServiceProvider extends ServiceProvider
@@ -100,7 +95,7 @@ class MailServiceProvider extends ServiceProvider
         // override this transporter instances during app start-up if necessary.
         $this->app['swift.mailer'] = $this->app->share(function($app)
         {
-            return new Swift_Mailer($app['swift.transport']);
+            return new Swift_Mailer($app['swift.transport']->driver());
         });
     }
 
@@ -114,136 +109,9 @@ class MailServiceProvider extends ServiceProvider
      */
     protected function registerSwiftTransport($config)
     {
-        switch ($config['driver'])
+        $this->app['swift.transport'] = $this->app->share(function($app)
         {
-            case 'smtp':
-                return $this->registerSmtpTransport($config);
-
-            case 'sendmail':
-                return $this->registerSendmailTransport($config);
-
-            case 'mail':
-                return $this->registerMailTransport($config);
-
-            case 'mailgun':
-                return $this->registerMailgunTransport($config);
-
-            case 'mandrill':
-                return $this->registerMandrillTransport($config);
-
-            case 'log':
-                return $this->registerLogTransport($config);
-
-            default:
-                throw new \InvalidArgumentException('Invalid mail driver.');
-        }
-    }
-
-    /**
-     * Register the SMTP Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerSmtpTransport($config)
-    {
-        $this->app['swift.transport'] = $this->app->share(function($app) use ($config)
-        {
-            extract($config);
-
-            // The Swift SMTP transport instance will allow us to use any SMTP backend
-            // for delivering mail such as Sendgrid, Amazon SES, or a custom server
-            // a developer has available. We will just pass this configured host.
-            $transport = SmtpTransport::newInstance($host, $port);
-
-            if (isset($encryption)) {
-                $transport->setEncryption($encryption);
-            }
-
-            // Once we have the transport we will check for the presence of a username
-            // and password. If we have it we will set the credentials on the Swift
-            // transporter instance so that we'll properly authenticate delivery.
-            if (isset($username)) {
-                $transport->setUsername($username);
-
-                $transport->setPassword($password);
-            }
-
-            return $transport;
-        });
-    }
-
-    /**
-     * Register the Sendmail Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerSendmailTransport($config)
-    {
-        $this->app['swift.transport'] = $this->app->share(function($app) use ($config)
-        {
-            return SendmailTransport::newInstance($config['sendmail']);
-        });
-    }
-
-    /**
-     * Register the Mail Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerMailTransport($config)
-    {
-        $this->app['swift.transport'] = $this->app->share(function()
-        {
-            return MailTransport::newInstance();
-        });
-    }
-
-    /**
-     * Register the Mailgun Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerMailgunTransport($config)
-    {
-        $mailgun = $this->app['config']->get('services.mailgun', array());
-
-        $this->app->bindShared('swift.transport', function() use ($mailgun)
-        {
-            return new MailgunTransport($mailgun['secret'], $mailgun['domain']);
-        });
-    }
-
-    /**
-     * Register the Mandrill Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerMandrillTransport($config)
-    {
-        $mandrill = $this->app['config']->get('services.mandrill', array());
-
-        $this->app->bindShared('swift.transport', function() use ($mandrill)
-        {
-            return new MandrillTransport($mandrill['secret']);
-        });
-    }
-
-    /**
-     * Register the "Log" Swift Transport instance.
-     *
-     * @param  array  $config
-     * @return void
-     */
-    protected function registerLogTransport($config)
-    {
-        $this->app->bindShared('swift.transport', function($app)
-        {
-            return new LogTransport($app->make('Psr\Log\LoggerInterface'));
+            return new TransportManager($app);
         });
     }
 

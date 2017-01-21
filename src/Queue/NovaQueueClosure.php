@@ -2,7 +2,9 @@
 
 use Nova\Encryption\Encrypter;
 
-class NovaQueueClosure {
+
+class NovaQueueClosure
+{
 
     /**
      * The encrypter instance.
