@@ -5,6 +5,7 @@ namespace Nova\Module\Providers;
 use Nova\Module\Console\Generators\MakeModuleCommand;
 use Nova\Module\Console\Generators\MakeControllerCommand;
 use Nova\Module\Console\Generators\MakeModelCommand;
+use Nova\Module\Console\Generators\MakePolicyCommand;
 use Nova\Module\Console\Generators\MakeMigrationCommand;
 use Nova\Module\Console\Generators\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
@@ -25,7 +26,7 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeController', 'MakeModel', 'MakeMigration', 'MakeSeeder');
+        $commands = array('MakeModule', 'MakeController', 'MakeModel', 'MakePolicy', 'MakeMigration', 'MakeSeeder');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
@@ -66,6 +67,18 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module.model');
+    }
+
+    /**
+     * Register the make:module:policy command.
+     */
+    private function registerMakePolicyCommand()
+    {
+        $this->app->bindShared('command.make.module.policy', function ($app) {
+            return new MakePolicyCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.policy');
     }
 
     /**
