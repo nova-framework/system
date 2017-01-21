@@ -83,9 +83,9 @@ trait AuthorizesRequestsTrait
             return array($ability, $arguments);
         }
 
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+        list(,, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 
-        return array($backtrace[2]['function'], $ability);
+        return array($caller['function'], $ability);
     }
 
     /**
