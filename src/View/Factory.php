@@ -140,7 +140,7 @@ class Factory
         // Normalize the View name.
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
 
-        // Prepare the View data.
+        // Get the parsed View data.
         $data = $this->parseData($data);
 
         $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
@@ -170,7 +170,7 @@ class Factory
         // Normalize the Layout name.
         $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
 
-        // Prepare the View data.
+        // Get the parsed View data.
         $data = $this->parseData($data);
 
         $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path, $data));

@@ -1113,7 +1113,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
-            'layout'         => 'Nova\Layout\Factory',
             'view'           => 'Nova\View\Factory',
         );
 
