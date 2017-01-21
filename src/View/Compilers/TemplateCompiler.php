@@ -508,6 +508,28 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the can statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileCan($expression)
+    {
+        return "<?php if (app('Nova\\Auth\\Access\\GateInterface')->check{$expression}): ?>";
+    }
+
+    /**
+     * Compile the cannot statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileCannot($expression)
+    {
+        return "<?php if (app('Nova\\Auth\\Access\\GateInterface')->denies{$expression}): ?>";
+    }
+
+    /**
      * Compile the if statements into valid PHP.
      *
      * @param  string  $expression
@@ -597,6 +619,28 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         return "<?php endforeach; ?>";
     }
 
+    /**
+     * Compile the end-can statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndcan($expression)
+    {
+        return '<?php endif; ?>';
+    }
+
+    /**
+     * Compile the end-cannot statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndcannot($expression)
+    {
+        return '<?php endif; ?>';
+    }
+    
     /**
      * Compile the end-if statements into valid PHP.
      *
