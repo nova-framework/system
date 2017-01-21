@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Queue\SyncQueue;
+use Nova\Queue\Queues\SyncQueue;
 
 
 class SyncConnector implements ConnectorInterface

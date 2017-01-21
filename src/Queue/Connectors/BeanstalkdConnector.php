@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Queue\BeanstalkdQueue;
+use Nova\Queue\Queues\BeanstalkdQueue;
 
 use Pheanstalk_Pheanstalk as Pheanstalk;
 use Pheanstalk_PheanstalkInterface as PheanstalkInterface;

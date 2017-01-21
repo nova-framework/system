@@ -7,6 +7,8 @@ use Nova\Queue\Console\ListenCommand;
 use Nova\Queue\Console\RestartCommand;
 use Nova\Queue\Connectors\SqsConnector;
 use Nova\Queue\Console\SubscribeCommand;
+use Nova\Queue\Connectors\DatabaseConnector;
+use Nova\Queue\Connectors\NullConnector;
 use Nova\Queue\Connectors\SyncConnector;
 use Nova\Queue\Connectors\IronConnector;
 use Nova\Queue\Connectors\RedisConnector;
@@ -64,6 +66,10 @@ class QueueServiceProvider extends ServiceProvider
             $this->registerConnectors($manager);
 
             return $manager;
+        });
+
+        $this->app->singleton('queue.connection', function ($app) {
+            return $app['queue']->connection();
         });
     }
 
@@ -167,10 +173,23 @@ class QueueServiceProvider extends ServiceProvider
      */
     public function registerConnectors($manager)
     {
-        foreach (array('Sync', 'Beanstalkd', 'Redis', 'Sqs', 'Iron') as $connector)
+        foreach (array('Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs', 'Iron') as $connector)
         {
             $this->{"register{$connector}Connector"}($manager);
         }
+    }
+
+    /**
+     * Register the Null queue connector.
+     *
+     * @param  \Illuminate\Queue\QueueManager  $manager
+     * @return void
+     */
+    protected function registerNullConnector($manager)
+    {
+        $manager->addConnector('null', function () {
+            return new NullConnector();
+        });
     }
 
     /**
@@ -183,7 +202,20 @@ class QueueServiceProvider extends ServiceProvider
     {
         $manager->addConnector('sync', function()
         {
-            return new SyncConnector;
+            return new SyncConnector();
+        });
+    }
+
+    /**
+     * Register the database queue connector.
+     *
+     * @param  \Nova\Queue\QueueManager  $manager
+     * @return void
+     */
+    protected function registerDatabaseConnector($manager)
+    {
+        $manager->addConnector('database', function () {
+            return new DatabaseConnector($this->app['db']);
         });
     }
 
@@ -197,7 +229,7 @@ class QueueServiceProvider extends ServiceProvider
     {
         $manager->addConnector('beanstalkd', function()
         {
-            return new BeanstalkdConnector;
+            return new BeanstalkdConnector();
         });
     }
 
@@ -227,7 +259,7 @@ class QueueServiceProvider extends ServiceProvider
     {
         $manager->addConnector('sqs', function()
         {
-            return new SqsConnector;
+            return new SqsConnector();
         });
     }
 
@@ -258,8 +290,7 @@ class QueueServiceProvider extends ServiceProvider
     {
         $this->app->rebinding('request', function($app, $request)
         {
-            if ($app['queue']->connected('iron'))
-            {
+            if ($app['queue']->connected('iron')) {
                 $app['queue']->connection('iron')->setRequest($request);
             }
         });
@@ -303,7 +334,7 @@ class QueueServiceProvider extends ServiceProvider
         return array(
             'queue', 'queue.worker', 'queue.listener', 'queue.failer',
             'command.queue.work', 'command.queue.listen', 'command.queue.restart',
-            'command.queue.subscribe',
+            'command.queue.subscribe', 'queue.connection',
         );
     }
 

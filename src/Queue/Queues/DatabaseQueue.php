@@ -1,10 +1,11 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
 
 use Nova\Database\Query\Expression;
 use Nova\Database\Connection;
 use Nova\Queue\Jobs\DatabaseJob;
+use Nova\Queue\Queue;
 use Nova\Queue\QueueInterface;
 
 use Carbon\Carbon;
@@ -119,7 +120,7 @@ class DatabaseQueue extends Queue implements QueueInterface
             );
         }, (array) $jobs);
 
-        return $this->database->table($this->table)->insert($records);
+        return $this->getQuery()->insert($records);
     }
 
     /**
@@ -150,7 +151,7 @@ class DatabaseQueue extends Queue implements QueueInterface
             $this->getQueue($queue), $payload, $this->getAvailableAt($delay), $attempts
         );
 
-        return $this->database->table($this->table)->insertGetId($attributes);
+        return $this->getQuery()->insertGetId($attributes);
     }
 
     /**
@@ -190,15 +191,17 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $expired = Carbon::now()->subSeconds($this->expire)->getTimestamp();
 
-        $this->database->table($this->table)
-                    ->where('queue', $this->getQueue($queue))
-                    ->where('reserved', 1)
-                    ->where('reserved_at', '<=', $expired)
-                    ->update([
-                        'reserved' => 0,
-                        'reserved_at' => null,
-                        'attempts' => new Expression('attempts + 1'),
-                    ]);
+        $data = array(
+            'reserved' => 0,
+            'reserved_at' => null,
+            'attempts'    => new Expression('attempts + 1'),
+        );
+
+        $this->getQuery()
+            ->where('queue', $this->getQueue($queue))
+            ->where('reserved', 1)
+            ->where('reserved_at', '<=', $expired)
+            ->update($data);
     }
 
     /**
@@ -211,13 +214,13 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $this->database->beginTransaction();
 
-        $job = $this->database->table($this->table)
-                    ->lockForUpdate()
-                    ->where('queue', $this->getQueue($queue))
-                    ->where('reserved', 0)
-                    ->where('available_at', '<=', $this->getTime())
-                    ->orderBy('id', 'asc')
-                    ->first();
+        $job = $this->getQuery()
+            ->lockForUpdate()
+            ->where('queue', $this->getQueue($queue))
+            ->where('reserved', 0)
+            ->where('available_at', '<=', $this->getTime())
+            ->orderBy('id', 'asc')
+            ->first();
 
         return $job ? (object) $job : null;
     }
@@ -230,7 +233,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function markJobAsReserved($id)
     {
-        $this->database->table($this->table)->where('id', $id)->update(array(
+        $this->getQuery()->where('id', $id)->update(array(
             'reserved' => 1, 'reserved_at' => $this->getTime(),
         ));
     }
@@ -244,7 +247,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     public function deleteReserved($queue, $id)
     {
-        $this->database->table($this->table)->where('id', $id)->delete();
+        $this->getQuery()->where('id', $id)->delete();
     }
 
     /**
@@ -304,6 +307,16 @@ class DatabaseQueue extends Queue implements QueueInterface
     }
 
     /**
+     * Get a QueryBuilder instance for the used table.
+     *
+     * @return \Nova\Database\Query\Builder
+     */
+    protected function getQuery()
+    {
+        return $this->database->table($this->table);
+    }
+
+    /**
      * Get the expiration time in seconds.
      *
      * @return int|null
@@ -323,4 +336,5 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $this->expire = $seconds;
     }
+
 }

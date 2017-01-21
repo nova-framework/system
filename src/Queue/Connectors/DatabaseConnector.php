@@ -3,7 +3,7 @@
 namespace Nova\Queue\Connectors;
 
 use Nova\Database\ConnectionResolverInterface;
-use Nova\Queue\DatabaseQueue;
+use Nova\Queue\Queues\DatabaseQueue;
 use Nova\Support\Arr;
 
 

@@ -1,10 +1,13 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
 
 use Nova\Http\Request;
 use Nova\Http\Response;
+
 use Nova\Queue\Jobs\IronJob;
+use Nova\Queue\Queue;
+use Nova\Queue\QueueInterface;
 
 use IronMQ;
 

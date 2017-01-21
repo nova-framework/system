@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Queue\NullQueue;
+use Nova\Queue\Queues\NullQueue;
 
 
 class NullConnector implements ConnectorInterface

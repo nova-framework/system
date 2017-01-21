@@ -1,6 +1,10 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
+
+use Nova\Queue\Jobs\SyncJob;
+use Nova\Queue\Queue;
+use Nova\Queue\QueueInterface;
 
 
 class SyncQueue extends Queue implements QueueInterface
@@ -65,7 +69,7 @@ class SyncQueue extends Queue implements QueueInterface
      */
     protected function resolveJob($job, $data)
     {
-        return new Jobs\SyncJob($this->container, $job, $data);
+        return new SyncJob($this->container, $job, $data);
     }
 
 }

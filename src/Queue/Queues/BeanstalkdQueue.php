@@ -1,8 +1,10 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\BeanstalkdJob;
+use Nova\Queue\Queue;
+use Nova\Queue\QueueInterface;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;

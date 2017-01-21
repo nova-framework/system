@@ -1,9 +1,12 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
+
+use Nova\Queue\Jobs\RedisJob;
+use Nova\Queue\Queue;
+use Nova\Queue\QueueInterface;
 
 use Nova\Redis\Database;
-use Nova\Queue\Jobs\RedisJob;
 
 
 class RedisQueue extends Queue implements QueueInterface

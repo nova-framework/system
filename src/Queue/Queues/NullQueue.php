@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Queue;
+namespace Nova\Queue\Queues;
 
 use Nova\Queue\QueueInterface;
 
