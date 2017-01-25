@@ -15,6 +15,13 @@ use Closure;
 abstract class Controller
 {
     /**
+     * The currently called Method.
+     *
+     * @var mixed
+     */
+    private $method = null;
+
+    /**
      * The currently used Layout.
      *
      * @var mixed
@@ -223,7 +230,7 @@ abstract class Controller
      *
      * @return void
      */
-    protected function setupLayout() {}
+    protected function before() {}
 
     /**
      * Execute an action on the controller.
@@ -234,7 +241,10 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
-        $this->setupLayout();
+        $this->method = $method;
+
+        // Setup the Layout.
+        $this->before();
 
         // Execute the requested Method with the given arguments.
         $response = call_user_func_array(array($this, $method), $parameters);
@@ -277,6 +287,16 @@ abstract class Controller
     public function missingMethod($parameters = array())
     {
         throw new NotFoundHttpException("Controller method not found.");
+    }
+
+    /**
+     * Returns the currently called Method.
+     *
+     * @return string|null
+     */
+    public function getMethod()
+    {
+        return $this->method;
     }
 
     /**

@@ -1752,7 +1752,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function newQueryWithoutScopes()
     {
-        $builder = $this->newORMBuilder(
+        $builder = $this->newBuilder(
             $this->newBaseQueryBuilder()
         );
 
@@ -1798,7 +1798,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      * @param  \Nova\Database\Query\Builder $query
      * @return \Nova\Database\ORM\Builder|static
      */
-    public function newORMBuilder($query)
+    public function newBuilder($query)
     {
         return new Builder($query);
     }

@@ -783,9 +783,9 @@ class Builder
             // constraints have been specified for the eager load and we'll just put
             // an empty Closure with the loader so that we can treat all the same.
             if (is_numeric($name)) {
-                $f = function() {};
+                $func = function() {};
 
-                list($name, $constraints) = array($constraints, $f);
+                list($name, $constraints) = array($constraints, $func);
             }
 
             // We need to separate out any nested includes. Which allows the developers
@@ -816,7 +816,9 @@ class Builder
         foreach (explode('.', $name) as $segment) {
             $progress[] = $segment;
 
-            if (! isset($results[$last = implode('.', $progress)])) {
+            $last = implode('.', $progress);
+
+            if (! isset($results[$last])) {
                 $results[$last] = function() {};
             }
         }
