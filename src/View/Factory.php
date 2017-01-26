@@ -859,24 +859,25 @@ class Factory
      */
     protected function findLayoutFile($view, $template)
     {
-        // Calculate the search path.
-        $path = sprintf('Templates/%s/%s', $template, $view);
-
-        // Make the path absolute and adjust the directory separator.
-        $path = APPPATH .str_replace('/', DS, $path);
+        // Calculate the base for search path.
+        $path = sprintf('Templates/%s/Layouts', $template);
 
         // Find the View file depending on the Language direction.
         $language = $this->getCurrentLanguage();
 
         if ($language->direction() == 'rtl') {
             // Search for the View file used on the RTL languages.
-            $filePath = $this->finder->find($path .'-rtl');
+            $viewPath = APPPATH .str_replace('/', DS, $path .'/RTL/' .$view);
+
+            $filePath = $this->finder->find($viewPath);
         } else {
             $filePath = null;
         }
 
         if (is_null($filePath)) {
-            $filePath = $this->finder->find($path);
+            $viewPath = APPPATH .str_replace('/', DS, $path .'/' .$view);
+
+            $filePath = $this->finder->find($viewPath);
         }
 
         if (! is_null($filePath)) return $filePath;

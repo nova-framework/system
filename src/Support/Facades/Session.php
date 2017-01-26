@@ -139,7 +139,7 @@ class Session extends Facade
         }
 
         // Fetch the associated Template Fragment and return the result.
-        return View::makeLayout('message')->with(compact('type', 'message'))->render();
+        return View::makeLayout('Message')->with(compact('type', 'message'))->render();
     }
 
     /**
