@@ -859,28 +859,31 @@ class Factory
      */
     protected function findLayoutFile($view, $template)
     {
-        // Calculate the base for search path.
-        $path = sprintf('Templates/%s/Layouts', $template);
+        $view = str_replace('/', DS, $view);
 
-        // Find the View file depending on the Language direction.
+        // Calculate the base path to the Layout files.
+        $basePath = APPPATH .'Templates' .DS .$template .DS .'Layouts';
+
+        // Find the Layout file depending on the Language direction.
         $language = $this->getCurrentLanguage();
 
         if ($language->direction() == 'rtl') {
-            // Search for the View file used on the RTL languages.
-            $viewPath = APPPATH .str_replace('/', DS, $path .'/RTL/' .$view);
+            // Search for the Layout file used on the RTL languages.
+            $viewPath = $basePath .DS .'RTL' .DS .$view;
 
-            $filePath = $this->finder->find($viewPath);
+            $path = $this->finder->find($viewPath);
         } else {
-            $filePath = null;
+            $path = null;
         }
 
-        if (is_null($filePath)) {
-            $viewPath = APPPATH .str_replace('/', DS, $path .'/' .$view);
+        if (is_null($path)) {
+            // Search for the (main) Layout file.
+            $viewPath = $basePath .DS .$view;
 
-            $filePath = $this->finder->find($viewPath);
+            $path = $this->finder->find($viewPath);
         }
 
-        if (! is_null($filePath)) return $filePath;
+        if (! is_null($path)) return $path;
 
         throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
     }
