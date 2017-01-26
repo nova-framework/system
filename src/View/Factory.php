@@ -835,19 +835,21 @@ class Factory
     protected function findViewFile($view, $domain)
     {
         if ($domain == 'App') {
-            $path = APPPATH .str_replace('/', DS, "Views/$view");
+            $viewPath = APPPATH .str_replace('/', DS, "Views/$view");
         } else {
-            $modulesPath = $this->container['config']->get('modules.path', APPPATH .'Modules');
+            $basePath = $this->getModulesPath();
 
-            $path = $modulesPath .DS .str_replace('/', DS, "$domain/Views/$view");
+            $viewPath = $basePath .DS .str_replace('/', DS, "$domain/Views/$view");
         }
 
         // Try to find the View file.
-        $filePath = $this->finder->find($path);
+        $path = $this->finder->find($viewPath);
 
-        if (! is_null($filePath)) return $filePath;
+        if (is_null($path)) {
+            throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .$domain ."'.", 1);
+        }
 
-        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .$domain ."'.", 1);
+        return $path;
     }
 
     /**
@@ -883,9 +885,23 @@ class Factory
             $path = $this->finder->find($viewPath);
         }
 
-        if (! is_null($path)) return $path;
+        if (is_null($path)) {
+            throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
+        }
 
-        throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
+        return $path;
+    }
+
+    /**
+     * Return the current Modules path.
+     *
+     * @return string
+     */
+    protected function getModulesPath()
+    {
+        $config = $this->container['config'];
+
+        return $config->get('modules.path', APPPATH .'Modules');
     }
 
     /**
@@ -895,6 +911,9 @@ class Factory
      */
     protected function getCurrentLanguage()
     {
-        return $this->container['language']->instance();
+        $language = $this->container['language'];
+
+        return $language->instance();
     }
+
 }
