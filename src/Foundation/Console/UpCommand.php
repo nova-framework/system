@@ -28,7 +28,9 @@ class UpCommand extends Command
      */
     public function fire()
     {
-        @unlink($this->nova['config']['app.manifest'].'/down');
+        $config = $this->nova['config'];
+
+        @unlink($config['path.storage'] .DS .'Framework' .DS .'down');
 
         $this->info('Application is now live.');
     }

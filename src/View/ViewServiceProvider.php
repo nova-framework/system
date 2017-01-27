@@ -89,7 +89,7 @@ class ViewServiceProvider extends ServiceProvider
         // instance to pass into the engine so it can compile the views properly.
         $app->bindShared('template.compiler', function($app)
         {
-            $cachePath = $app['path.storage'] .DS .'Views';
+            $cachePath = $app['path.storage'] .DS .'Framework' .DS .'Views';
 
             return new TemplateCompiler($app['files'], $cachePath);
         });
@@ -175,7 +175,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.view.clear', function($app)
         {
-            $cachePath = $app['path.storage'] .DS .'Views';
+            $cachePath = $app['path.storage'] .DS .'Framework' .DS. 'Views';
 
             return new Console\ClearCommand($app['files'], $cachePath);
         });
