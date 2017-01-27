@@ -117,8 +117,7 @@ class Container implements ArrayAccess
         // If the given types are actually an array, we will assume an alias is being
         // defined and will grab this "real" abstract class name and register this
         // alias with the container so that it can be used as a shortcut for it.
-        if (is_array($abstract))
-        {
+        if (is_array($abstract)) {
             list($abstract, $alias) = $this->extractAlias($abstract);
 
             $this->alias($abstract, $alias);
@@ -129,16 +128,14 @@ class Container implements ArrayAccess
         // without being forced to state their classes in both of the parameter.
         $this->dropStaleInstances($abstract);
 
-        if (is_null($concrete))
-        {
+        if (is_null($concrete)) {
             $concrete = $abstract;
         }
 
         // If the factory is not a Closure, it means it is just a class name which is
         // is bound into this container to the abstract type and we will just wrap
         // it up inside a Closure to make things more convenient when extending.
-        if (! $concrete instanceof Closure)
-        {
+        if (! $concrete instanceof Closure) {
             $concrete = $this->getClosure($abstract, $concrete);
         }
 
@@ -180,8 +177,7 @@ class Container implements ArrayAccess
      */
     public function bindIf($abstract, $concrete = null, $shared = false)
     {
-        if (! $this->bound($abstract))
-        {
+        if (! $this->bound($abstract)) {
             $this->bind($abstract, $concrete, $shared);
         }
     }
@@ -213,8 +209,7 @@ class Container implements ArrayAccess
             // and return it back to these consumers of the method as an instance.
             static $object;
 
-            if (is_null($object))
-            {
+            if (is_null($object)) {
                 $object = $closure($container);
             }
 
@@ -245,19 +240,15 @@ class Container implements ArrayAccess
      */
     public function extend($abstract, Closure $closure)
     {
-        if (! isset($this->bindings[$abstract]))
-        {
+        if (! isset($this->bindings[$abstract])) {
             throw new \InvalidArgumentException("Type {$abstract} is not bound.");
         }
 
-        if (isset($this->instances[$abstract]))
-        {
+        if (isset($this->instances[$abstract])) {
             $this->instances[$abstract] = $closure($this->instances[$abstract], $this);
 
             $this->rebound($abstract);
-        }
-        else
-        {
+        } else {
             $extender = $this->getExtender($abstract, $closure);
 
             $this->bind($abstract, $extender, $this->isShared($abstract));
@@ -296,8 +287,7 @@ class Container implements ArrayAccess
         // First, we will extract the alias from the abstract if it is an array so we
         // are using the correct name when binding the type. If we get an alias it
         // will be registered with the container so we can resolve it out later.
-        if (is_array($abstract))
-        {
+        if (is_array($abstract)) {
             list($abstract, $alias) = $this->extractAlias($abstract);
 
             $this->alias($abstract, $alias);
@@ -312,8 +302,7 @@ class Container implements ArrayAccess
 
         $this->instances[$abstract] = $instance;
 
-        if ($bound)
-        {
+        if ($bound) {
             $this->rebound($abstract);
         }
     }
@@ -381,8 +370,7 @@ class Container implements ArrayAccess
     {
         $instance = $this->make($abstract);
 
-        foreach ($this->getReboundCallbacks($abstract) as $callback)
-        {
+        foreach ($this->getReboundCallbacks($abstract) as $callback) {
             call_user_func($callback, $this, $instance);
         }
     }
@@ -395,8 +383,7 @@ class Container implements ArrayAccess
      */
     protected function getReboundCallbacks($abstract)
     {
-        if (isset($this->reboundCallbacks[$abstract]))
-        {
+        if (isset($this->reboundCallbacks[$abstract])) {
             return $this->reboundCallbacks[$abstract];
         }
 
@@ -410,7 +397,7 @@ class Container implements ArrayAccess
      * @param  array  $parameters
      * @return \Closure
      */
-    public function wrap(Closure $callback, array $parameters = [])
+    public function wrap(Closure $callback, array $parameters = array())
     {
         return function () use ($callback, $parameters) {
             return $this->call($callback, $parameters);
@@ -425,7 +412,7 @@ class Container implements ArrayAccess
      * @param  string|null  $defaultMethod
      * @return mixed
      */
-    public function call($callback, array $parameters = [], $defaultMethod = null)
+    public function call($callback, array $parameters = array(), $defaultMethod = null)
     {
         if ($this->isCallableWithAtSign($callback) || $defaultMethod) {
             return $this->callClass($callback, $parameters, $defaultMethod);
@@ -458,9 +445,9 @@ class Container implements ArrayAccess
      * @param  array  $parameters
      * @return array
      */
-    protected function getMethodDependencies($callback, array $parameters = [])
+    protected function getMethodDependencies($callback, array $parameters = array())
     {
-        $dependencies = [];
+        $dependencies = array();
 
         foreach ($this->getCallReflector($callback)->getParameters() as $key => $parameter) {
             $this->addDependencyForCallParameter($parameter, $parameters, $dependencies);
@@ -502,9 +489,9 @@ class Container implements ArrayAccess
             $dependencies[] = $parameters[$parameter->name];
 
             unset($parameters[$parameter->name]);
-        } elseif ($parameter->getClass()) {
+        } else if ($parameter->getClass()) {
             $dependencies[] = $this->make($parameter->getClass()->name);
-        } elseif ($parameter->isDefaultValueAvailable()) {
+        } else if ($parameter->isDefaultValueAvailable()) {
             $dependencies[] = $parameter->getDefaultValue();
         }
     }
@@ -517,14 +504,14 @@ class Container implements ArrayAccess
      * @param  string|null  $defaultMethod
      * @return mixed
      */
-    protected function callClass($target, array $parameters = [], $defaultMethod = null)
+    protected function callClass($target, array $parameters = array(), $defaultMethod = null)
     {
         $segments = explode('@', $target);
 
         // If the listener has an @ sign, we will assume it is being used to delimit
         // the class name from the handle method name. This allows for handlers
         // to run multiple handler methods in a single class for convenience.
-        $method = count($segments) == 2 ? $segments[1] : $defaultMethod;
+        $method = (count($segments) == 2) ? $segments[1] : $defaultMethod;
 
         if (is_null($method)) {
             throw new InvalidArgumentException('Method not provided.');
@@ -565,8 +552,7 @@ class Container implements ArrayAccess
         // If the requested type is registered as a singleton we'll want to cache off
         // the instances in "memory" so we can return it later without creating an
         // entirely new instance of an object on each subsequent request for it.
-        if ($this->isShared($abstract))
-        {
+        if ($this->isShared($abstract)) {
             $this->instances[$abstract] = $object;
         }
 
@@ -675,23 +661,17 @@ class Container implements ArrayAccess
     {
         $dependencies = array();
 
-        foreach ($parameters as $parameter)
-        {
+        foreach ($parameters as $parameter) {
             $dependency = $parameter->getClass();
 
             // If the class is null, it means the dependency is a string or some other
             // primitive type which we can not resolve since it is not a class and
             // we will just bomb out with an error since we have no-where to go.
-            if (array_key_exists($parameter->name, $primitives))
-            {
+            if (array_key_exists($parameter->name, $primitives)) {
                 $dependencies[] = $primitives[$parameter->name];
-            }
-            elseif (is_null($dependency))
-            {
+            } else if (is_null($dependency)) {
                 $dependencies[] = $this->resolveNonClass($parameter);
-            }
-            else
-            {
+            } else {
                 $dependencies[] = $this->resolveClass($parameter);
             }
         }
@@ -709,8 +689,7 @@ class Container implements ArrayAccess
      */
     protected function resolveNonClass(ReflectionParameter $parameter)
     {
-        if ($parameter->isDefaultValueAvailable())
-        {
+        if ($parameter->isDefaultValueAvailable()) {
             return $parameter->getDefaultValue();
         }
 
@@ -729,18 +708,15 @@ class Container implements ArrayAccess
      */
     protected function resolveClass(ReflectionParameter $parameter)
     {
-        try
-        {
+        try {
             return $this->make($parameter->getClass()->name);
         }
 
         // If we can not resolve the class instance, we will check to see if the value
         // is optional, and if it is we will return the optional parameter value as
         // the value of the dependency, similarly to how we do this with scalars.
-        catch (BindingResolutionException $e)
-        {
-            if ($parameter->isOptional())
-            {
+        catch (BindingResolutionException $e) {
+            if ($parameter->isOptional()) {
                 return $parameter->getDefaultValue();
             }
 
@@ -757,10 +733,8 @@ class Container implements ArrayAccess
      */
     protected function keyParametersByArgument(array $dependencies, array $parameters)
     {
-        foreach ($parameters as $key => $value)
-        {
-            if (is_numeric($key))
-            {
+        foreach ($parameters as $key => $value) {
+            if (is_numeric($key)) {
                 unset($parameters[$key]);
 
                 $parameters[$dependencies[$key]->name] = $value;
@@ -802,8 +776,7 @@ class Container implements ArrayAccess
      */
     protected function fireResolvingCallbacks($abstract, $object)
     {
-        if (isset($this->resolvingCallbacks[$abstract]))
-        {
+        if (isset($this->resolvingCallbacks[$abstract])) {
             $this->fireCallbackArray($object, $this->resolvingCallbacks[$abstract]);
         }
 
@@ -818,8 +791,7 @@ class Container implements ArrayAccess
      */
     protected function fireCallbackArray($object, array $callbacks)
     {
-        foreach ($callbacks as $callback)
-        {
+        foreach ($callbacks as $callback) {
             call_user_func($callback, $object, $this);
         }
     }
@@ -832,12 +804,9 @@ class Container implements ArrayAccess
      */
     public function isShared($abstract)
     {
-        if (isset($this->bindings[$abstract]['shared']))
-        {
+        if (isset($this->bindings[$abstract]['shared'])) {
             $shared = $this->bindings[$abstract]['shared'];
-        }
-        else
-        {
+        } else {
             $shared = false;
         }
 
@@ -943,8 +912,7 @@ class Container implements ArrayAccess
         // If the value is not a Closure, we will make it one. This simply gives
         // more "drop-in" replacement functionality for the Pimple which this
         // container's simplest functions are base modeled and built after.
-        if (! $value instanceof Closure)
-        {
+        if (! $value instanceof Closure) {
             $value = function() use ($value)
             {
                 return $value;
