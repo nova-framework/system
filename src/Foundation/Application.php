@@ -1161,8 +1161,10 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'view'              => 'Nova\View\Factory',
         );
 
-        foreach ($aliases as $key => $alias) {
-            $this->alias($key, $alias);
+        foreach ($aliases as $key => $aliases) {
+            foreach ((array) $aliases as $alias) {
+                $this->alias($key, $alias);
+            }
         }
     }
 
