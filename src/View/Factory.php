@@ -839,9 +839,9 @@ class Factory
             $viewPath = APPPATH .'Templates' .DS .$template .DS .'Override' .DS;
 
             if ($domain == 'App') {
-                $viewPath .= 'App' .DS;
+                $viewPath .= 'Views' .DS;
             } else {
-                $viewPath .= 'Modules' .DS .$domain .DS;
+                $viewPath .= 'Modules' .DS .$domain .DS .'Views' .DS;
             }
 
             $viewPath .= str_replace('/', DS, $view);
