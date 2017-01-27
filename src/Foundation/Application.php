@@ -116,7 +116,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     protected $namespace = null;
 
-    
+
     /**
      * Create a new Nova application instance.
      *
@@ -130,6 +130,16 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         $this->registerBaseServiceProviders();
 
         $this->registerBaseMiddlewares();
+    }
+
+    /**
+     * Get the version number of the application.
+     *
+     * @return string
+     */
+    public function version()
+    {
+        return static::VERSION;
     }
 
     /**
@@ -340,7 +350,9 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         // If the application has already booted, we will call this boot method on
         // the provider class so it has an opportunity to do its boot logic and
         // will be ready for any usage by the developer's application logics.
-        if ($this->booted) $provider->boot();
+        if ($this->booted) {
+            $this->bootProvider($provider);
+        }
 
         return $provider;
     }
@@ -443,7 +455,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         if (! $this->booted) {
             $this->booting(function() use ($instance)
             {
-                $instance->boot();
+                $this->bootProvider($instance);
             });
         }
     }
