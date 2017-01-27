@@ -46,6 +46,7 @@ class MakeModuleCommand extends Command
         'Database/Seeds/',
         'Events/',
         'Language/',
+        'Listeners/',
         'Models/',
         'Policies/',
         'Providers/',
