@@ -182,12 +182,21 @@ class Dispatcher
      */
     public function fire($event, $payload = array(), $halt = false)
     {
+        // When the given "event" is actually an object we will assume it is an event
+        // object and use the class as the event name and this event itself as the
+        // payload to the handler, which makes object based events quite simple.
+        if (is_object($event)) {
+            list($payload, $event) = array(array($event), get_class($event));
+        }
+
         $responses = array();
 
         // If an array is not given to us as the payload, we will turn it into one so
         // we can easily use call_user_func_array on the listeners, passing in the
         // payload to each of them so that they receive each of these arguments.
-        if (! is_array($payload)) $payload = array($payload);
+        if (! is_array($payload)) {
+            $payload = array($payload);
+        }
 
         $this->firing[] = $event;
 
@@ -206,7 +215,9 @@ class Dispatcher
             // If a boolean false is returned from a listener, we will stop propagating
             // the event to any further listeners down in the chain, else we keep on
             // looping through the listeners and firing every one in our sequence.
-            if ($response === false) break;
+            if ($response === false) {
+                break;
+            }
 
             $responses[] = $response;
         }

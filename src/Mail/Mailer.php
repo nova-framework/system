@@ -6,6 +6,7 @@ use Nova\Log\Writer;
 use Nova\View\Factory;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
+use Nova\Queue\QueueManager;
 
 use SuperClosure\Serializer;
 
