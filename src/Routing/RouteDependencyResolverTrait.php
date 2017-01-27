@@ -90,37 +90,6 @@ trait RouteDependencyResolverTrait
     }
 
     /**
-     * Determine if the given type-hinted class is an implict ORM Model binding.
-     *
-     * Must not already be resolved in the parameter list by an explicit model binding.
-     *
-     * @param  \ReflectionClass  $class
-     * @param  array  $parameters
-     * @return bool
-     */
-    protected function vacantModelParameter(ReflectionClass $class, array $parameters)
-    {
-        return $class->isSubclassOf(Model::class) &&
-             ! $this->alreadyInParameters($class->name, $parameters);
-    }
-
-    /**
-     * Extract an implicit model binding's key out of the parameter list.
-     *
-     * @param  \ReflectionParameter  $parameter
-     * @param  array  $originalParameters
-     *
-     * @return mixed
-     */
-    protected function extractModelIdentifier(ReflectionParameter $parameter, array $originalParameters)
-    {
-        return Arr::first($originalParameters, function ($parameterKey) use ($parameter)
-        {
-            return ($parameterKey === $parameter->name);
-        });
-    }
-
-    /**
      * Determine if an object of the given class is in a list of parameters.
      *
      * @param  string  $class
