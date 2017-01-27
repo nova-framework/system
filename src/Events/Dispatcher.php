@@ -182,6 +182,8 @@ class Dispatcher
      */
     public function fire($event, $payload = array(), $halt = false)
     {
+        $responses = array();
+
         // When the given "event" is actually an object we will assume it is an event
         // object and use the class as the event name and this event itself as the
         // payload to the handler, which makes object based events quite simple.
@@ -196,9 +198,6 @@ class Dispatcher
             $payload = array($payload);
         }
 
-        $responses = array();
-
-        //
         $this->firing[] = $event;
 
         foreach ($this->getListeners($event) as $listener) {
