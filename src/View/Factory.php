@@ -125,7 +125,7 @@ class Factory
      *
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $module = null)
+    public function make($view, $data = array(), $module = null, $template = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
@@ -133,7 +133,7 @@ class Factory
         $domain = $module ?: 'App';
 
         // Get the View file path.
-        $path = $this->findViewFile($view, $domain);
+        $path = $this->findViewFile($view, $domain, $template);
 
         // Normalize the View name.
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
@@ -830,9 +830,10 @@ class Factory
      *
      * @param    string  $view
      * @param    string  $domain
+     * @param    string  $template
      * @return    string
      */
-    protected function findViewFile($view, $domain)
+    protected function findViewFile($view, $domain, $template)
     {
         if ($domain == 'App') {
             $viewPath = APPPATH .str_replace('/', DS, "Views/$view");

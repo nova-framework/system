@@ -172,8 +172,7 @@ if (! function_exists('app'))
      */
     function app($make = null)
     {
-        if (! is_null($make))
-        {
+        if (! is_null($make)) {
             return app()->make($make);
         }
 
@@ -191,7 +190,13 @@ if (! function_exists('app_path'))
      */
     function app_path($path = '')
     {
-        return app('path') .(! empty($path) ? DS .$path : $path);
+        $result = app()->make('path');
+
+        if (! empty($path)) {
+            $result .= DS .str_replace('/', DS, $path);
+        }
+
+        return realpath($result);
     }
 }
 
@@ -205,7 +210,13 @@ if (! function_exists('base_path'))
      */
     function base_path($path = '')
     {
-        return app()->make('path.base') .(! empty($path) ? DS .$path : $path);
+        $result = app()->make('path.base');
+
+        if (! empty($path)) {
+            $result .= DS .str_replace('/', DS, $path);
+        }
+
+        return realpath($result);
     }
 }
 
@@ -219,7 +230,13 @@ if (! function_exists('storage_path'))
      */
     function storage_path($path = '')
     {
-        return app('path.storage') .(! empty($path) ? DS .$path : $path);
+        $result = app()->make('path.storage');
+
+        if (! empty($path)) {
+            $result .= DS .str_replace('/', DS, $path);
+        }
+
+        return realpath($result);
     }
 }
 
@@ -233,7 +250,13 @@ if (! function_exists('public_path'))
      */
     function public_path($path = '')
     {
-        return app()->make('path.public') .(! empty($path) ? DS .$path : $path);
+        $result = app()->make('path.public');
+
+        if (! empty($path)) {
+            $result .= DS .str_replace('/', DS, $path);
+        }
+
+        return realpath($result);
     }
 }
 
