@@ -3,8 +3,10 @@
 namespace Nova\Events;
 
 use Nova\Container\Container;
+use Nova\Events\DispatcherInterface;
 
-class Dispatcher
+
+class Dispatcher implements DispatcherInterface
 {
     /**
      * The IoC container instance.
