@@ -833,8 +833,30 @@ class Factory
      * @param    string  $template
      * @return    string
      */
-    protected function findViewFile($view, $domain, $template)
+    protected function findViewFile($view, $domain, $template = null)
     {
+        if (! is_null($template)) {
+            $viewPath = APPPATH .'Templates' .DS .$template .DS .'Override' .DS;
+
+            if ($domain == 'App') {
+                $viewPath .= 'App' .DS;
+            } else {
+                $viewPath .= 'Modules' .DS .$domain .DS;
+            }
+
+            $viewPath .= str_replace('/', DS, $view);
+
+            // Try to find the View file on the override locations.
+            try {
+                return $this->finder->find($viewPath);
+            }
+            catch (\InvalidArgumentException $e) {
+                // Do nothing.
+            }
+        }
+
+        // Try to find the View file on the base locations.
+
         if ($domain == 'App') {
             $viewPath = APPPATH .str_replace('/', DS, "Views/$view");
         } else {
@@ -843,14 +865,7 @@ class Factory
             $viewPath = $basePath .DS .str_replace('/', DS, "$domain/Views/$view");
         }
 
-        // Try to find the View file.
-        $path = $this->finder->find($viewPath);
-
-        if (is_null($path)) {
-            throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on domain '" .$domain ."'.", 1);
-        }
-
-        return $path;
+        return $this->finder->find($viewPath);
     }
 
     /**
