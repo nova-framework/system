@@ -12,6 +12,7 @@ use Nova\Config\FileLoader;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Facades\Facade;
+use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;
 use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
@@ -573,11 +574,29 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function boot()
     {
-        if ($this->booted) return;
+        if ($this->booted) {
+            return;
+        }
 
-        array_walk($this->serviceProviders, function($p) { $p->boot(); });
+        array_walk($this->serviceProviders, function($provider)
+        {
+            $this->bootProvider($provider);
+        });
 
         $this->bootApplication();
+    }
+
+    /**
+     * Boot the given service provider.
+     *
+     * @param  \Nova\Support\ServiceProvider  $provider
+     * @return mixed
+     */
+    protected function bootProvider(ServiceProvider $provider)
+    {
+        if (method_exists($provider, 'boot')) {
+            return $this->call(array($provider, 'boot'));
+        }
     }
 
     /**

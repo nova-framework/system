@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Contracts\Auth\Access;
+namespace Nova\Auth\Access;
 
 interface GateInterface
 {

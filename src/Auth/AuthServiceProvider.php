@@ -88,7 +88,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('auth', 'auth.driver');
+        return array('auth', 'auth.driver', 'Nova\Auth\UserInterface', 'Nova\Auth\Access\GateInterface');
     }
 
 }

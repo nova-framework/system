@@ -355,7 +355,7 @@ class Gate implements GateInterface
             return isset($this->policies[$class]);
         }
 
-        return (is_string($argument) && isset($this->policies[$argument));
+        return (is_string($argument) && isset($this->policies[$argument]));
     }
 
     /**

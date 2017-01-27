@@ -5,6 +5,7 @@ namespace Nova\Container;
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionParameter;
 
 
@@ -403,6 +404,136 @@ class Container implements ArrayAccess
     }
 
     /**
+     * Wrap the given closure such that its dependencies will be injected when executed.
+     *
+     * @param  \Closure  $callback
+     * @param  array  $parameters
+     * @return \Closure
+     */
+    public function wrap(Closure $callback, array $parameters = [])
+    {
+        return function () use ($callback, $parameters) {
+            return $this->call($callback, $parameters);
+        };
+    }
+
+    /**
+     * Call the given Closure / class@method and inject its dependencies.
+     *
+     * @param  callable|string  $callback
+     * @param  array  $parameters
+     * @param  string|null  $defaultMethod
+     * @return mixed
+     */
+    public function call($callback, array $parameters = [], $defaultMethod = null)
+    {
+        if ($this->isCallableWithAtSign($callback) || $defaultMethod) {
+            return $this->callClass($callback, $parameters, $defaultMethod);
+        }
+
+        $dependencies = $this->getMethodDependencies($callback, $parameters);
+
+        return call_user_func_array($callback, $dependencies);
+    }
+
+    /**
+     * Determine if the given string is in Class@method syntax.
+     *
+     * @param  mixed  $callback
+     * @return bool
+     */
+    protected function isCallableWithAtSign($callback)
+    {
+        if (! is_string($callback)) {
+            return false;
+        }
+
+        return strpos($callback, '@') !== false;
+    }
+
+    /**
+     * Get all dependencies for a given method.
+     *
+     * @param  callable|string  $callback
+     * @param  array  $parameters
+     * @return array
+     */
+    protected function getMethodDependencies($callback, array $parameters = [])
+    {
+        $dependencies = [];
+
+        foreach ($this->getCallReflector($callback)->getParameters() as $key => $parameter) {
+            $this->addDependencyForCallParameter($parameter, $parameters, $dependencies);
+        }
+
+        return array_merge($dependencies, $parameters);
+    }
+
+    /**
+     * Get the proper reflection instance for the given callback.
+     *
+     * @param  callable|string  $callback
+     * @return \ReflectionFunctionAbstract
+     */
+    protected function getCallReflector($callback)
+    {
+        if (is_string($callback) && strpos($callback, '::') !== false) {
+            $callback = explode('::', $callback);
+        }
+
+        if (is_array($callback)) {
+            return new ReflectionMethod($callback[0], $callback[1]);
+        }
+
+        return new ReflectionFunction($callback);
+    }
+
+    /**
+     * Get the dependency for the given call parameter.
+     *
+     * @param  \ReflectionParameter  $parameter
+     * @param  array  $parameters
+     * @param  array  $dependencies
+     * @return mixed
+     */
+    protected function addDependencyForCallParameter(ReflectionParameter $parameter, array &$parameters, &$dependencies)
+    {
+        if (array_key_exists($parameter->name, $parameters)) {
+            $dependencies[] = $parameters[$parameter->name];
+
+            unset($parameters[$parameter->name]);
+        } elseif ($parameter->getClass()) {
+            $dependencies[] = $this->make($parameter->getClass()->name);
+        } elseif ($parameter->isDefaultValueAvailable()) {
+            $dependencies[] = $parameter->getDefaultValue();
+        }
+    }
+
+    /**
+     * Call a string reference to a class using Class@method syntax.
+     *
+     * @param  string  $target
+     * @param  array  $parameters
+     * @param  string|null  $defaultMethod
+     * @return mixed
+     */
+    protected function callClass($target, array $parameters = [], $defaultMethod = null)
+    {
+        $segments = explode('@', $target);
+
+        // If the listener has an @ sign, we will assume it is being used to delimit
+        // the class name from the handle method name. This allows for handlers
+        // to run multiple handler methods in a single class for convenience.
+        $method = count($segments) == 2 ? $segments[1] : $defaultMethod;
+
+        if (is_null($method)) {
+            throw new InvalidArgumentException('Method not provided.');
+        }
+
+        return $this->call([$this->make($segments[0]), $method], $parameters);
+    }
+
+    /**
      * Resolve the given type from the container.
      *
      * @param  string  $abstract
@@ -416,8 +547,7 @@ class Container implements ArrayAccess
         // If an instance of the type is currently being managed as a singleton we'll
         // just return an existing instance instead of instantiating new instances
         // so the developer can keep using the same objects instance every time.
-        if (isset($this->instances[$abstract]))
-        {
+        if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
         }
 
@@ -426,12 +556,9 @@ class Container implements ArrayAccess
         // We're ready to instantiate an instance of the concrete type registered for
         // the binding. This will instantiate the types, as well as resolve any of
         // its "nested" dependencies recursively until all have gotten resolved.
-        if ($this->isBuildable($concrete, $abstract))
-        {
+        if ($this->isBuildable($concrete, $abstract)) {
             $object = $this->build($concrete, $parameters);
-        }
-        else
-        {
+        } else {
             $object = $this->make($concrete, $parameters);
         }
 
@@ -461,10 +588,8 @@ class Container implements ArrayAccess
         // If we don't have a registered resolver or concrete for the type, we'll just
         // assume each type is a concrete name and will attempt to resolve it as is
         // since the container should be able to resolve concretes automatically.
-        if (! isset($this->bindings[$abstract]))
-        {
-            if ($this->missingLeadingSlash($abstract) && isset($this->bindings['\\'.$abstract]))
-            {
+        if (! isset($this->bindings[$abstract])) {
+            if ($this->missingLeadingSlash($abstract) && isset($this->bindings['\\'.$abstract])) {
                 $abstract = '\\'.$abstract;
             }
 
@@ -499,8 +624,7 @@ class Container implements ArrayAccess
         // If the concrete type is actually a Closure, we will just execute it and
         // hand back the results of the functions, which allows functions to be
         // used as resolvers for more fine-tuned resolution of these objects.
-        if ($concrete instanceof Closure)
-        {
+        if ($concrete instanceof Closure) {
             return $concrete($this, $parameters);
         }
 
@@ -509,8 +633,7 @@ class Container implements ArrayAccess
         // If the type is not instantiable, the developer is attempting to resolve
         // an abstract type such as an Interface of Abstract Class and there is
         // no binding registered for the abstractions so we need to bail out.
-        if (! $reflector->isInstantiable())
-        {
+        if (! $reflector->isInstantiable()) {
             $message = "Target [$concrete] is not instantiable.";
 
             throw new BindingResolutionException($message);
@@ -521,8 +644,7 @@ class Container implements ArrayAccess
         // If there are no constructors, that means there are no dependencies then
         // we can just resolve the instances of the objects right away, without
         // resolving any other types or dependencies out of these containers.
-        if (is_null($constructor))
-        {
+        if (is_null($constructor)) {
             return new $concrete;
         }
 
@@ -731,7 +853,7 @@ class Container implements ArrayAccess
      */
     protected function isBuildable($concrete, $abstract)
     {
-        return $concrete === $abstract || $concrete instanceof Closure;
+        return ($concrete === $abstract) || ($concrete instanceof Closure);
     }
 
     /**
