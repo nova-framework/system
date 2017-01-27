@@ -973,6 +973,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         $route = $this->findRoute($request);
 
+        $request->setRouteResolver(function() use ($route)
+        {
+            return $route;
+        });
+   
         $this->events->fire('router.matched', array($route, $request));
 
         // Once we have successfully matched the incoming request to a given route we

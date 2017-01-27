@@ -27,6 +27,8 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerUserResolver();
 
         $this->registerAccessGate();
+
+        $this->registerRequestRebindHandler();
     }
 
     /**
@@ -75,6 +77,22 @@ class AuthServiceProvider extends ServiceProvider
         $this->app->singleton('Nova\Auth\Access\GateInterface', function ($app)
         {
             return new Gate($app, function() use ($app)
+            {
+                return $app['auth']->user();
+            });
+        });
+    }
+
+    /**
+     * Register a resolver for the authenticated user.
+     *
+     * @return void
+     */
+    protected function registerRequestRebindHandler()
+    {
+        $this->app->rebinding('request', function($app, $request)
+        {
+            $request->setUserResolver(function() use ($app)
             {
                 return $app['auth']->user();
             });

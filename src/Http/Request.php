@@ -5,10 +5,12 @@ namespace Nova\Http;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
+use ArrayAccess;
+use Closure;
 use SplFileInfo;
 
 
-class Request extends SymfonyRequest
+class Request extends SymfonyRequest implements ArrayAccess
 {
     /**
      * The decoded JSON content for the request.
@@ -18,11 +20,38 @@ class Request extends SymfonyRequest
     protected $json;
 
     /**
+     * The user resolver callback.
+     *
+     * @var \Closure
+     */
+    protected $userResolver;
+
+    /**
+     * The route resolver callback.
+     *
+     * @var \Closure
+     */
+    protected $routeResolver;
+
+    /**
      * The Nova session store implementation.
      *
      * @var \Nova\Session\Store
      */
     protected $sessionStore;
+
+
+    /**
+     * Create a new Illuminate HTTP request from server variables.
+     *
+     * @return static
+     */
+    public static function capture()
+    {
+        static::enableHttpMethodParameterOverride();
+
+        return static::createFromBase(SymfonyRequest::createFromGlobals());
+    }
 
     /**
      * Return the Request instance.
@@ -606,4 +635,154 @@ class Request extends SymfonyRequest
         return $this->getSession();
     }
 
+    /**
+     * Get the user making the request.
+     *
+     * @return mixed
+     */
+    public function user()
+    {
+        return call_user_func($this->getUserResolver());
+    }
+
+    /**
+     * Get the route handling the request.
+     *
+     * @param string|null $param
+     *
+     * @return \Nova\Routing\Route|object|string
+     */
+    public function route($param = null)
+    {
+        $route = call_user_func($this->getRouteResolver());
+
+        if (is_null($route) || is_null($param)) {
+            return $route;
+        } else {
+            return $route->parameter($param);
+        }
+    }
+
+    /**
+     * Get the user resolver callback.
+     *
+     * @return \Closure
+     */
+    public function getUserResolver()
+    {
+        return $this->userResolver ?: function() {
+            //
+        };
+    }
+
+    /**
+     * Set the user resolver callback.
+     *
+     * @param  \Closure  $callback
+     * @return $this
+     */
+    public function setUserResolver(Closure $callback)
+    {
+        $this->userResolver = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Get the route resolver callback.
+     *
+     * @return \Closure
+     */
+    public function getRouteResolver()
+    {
+        return $this->routeResolver ?: function() {
+            //
+        };
+    }
+
+    /**
+     * Set the route resolver callback.
+     *
+     * @param  \Closure  $callback
+     * @return $this
+     */
+    public function setRouteResolver(Closure $callback)
+    {
+        $this->routeResolver = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the given offset exists.
+     *
+     * @param  string  $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return array_key_exists($offset, $this->all());
+    }
+
+    /**
+     * Get the value at the given offset.
+     *
+     * @param  string  $offset
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return Arr::get($this->all(), $offset);
+    }
+
+    /**
+     * Set the value at the given offset.
+     *
+     * @param  string  $offset
+     * @param  mixed  $value
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        return $this->getInputSource()->set($offset, $value);
+    }
+
+    /**
+     * Remove the value at the given offset.
+     *
+     * @param  string  $offset
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->getInputSource()->remove($offset);
+    }
+
+    /**
+     * Check if an input element is set on the request.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        return ! is_null($this->__get($key));
+    }
+
+    /**
+     * Get an input element from the request.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        $all = $this->all();
+
+        if (array_key_exists($key, $all)) {
+            return $all[$key];
+        } else {
+            return $this->route($key);
+        }
+    }
 }
