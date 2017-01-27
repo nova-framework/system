@@ -205,6 +205,6 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('view', 'view.finder', 'view.engine.resolver', 'command.view.clear');
+        return array('view', 'view.finder', 'view.engine.resolver', 'template', 'template.compiler', 'command.view.clear');
     }
 }
