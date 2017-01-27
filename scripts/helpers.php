@@ -3,18 +3,22 @@
 use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
+use Nova\View\Expression;
+
 
 if (! function_exists('site_url'))
 {
     /**
-     * Site URL helper
-     * @param string $path
-     * @param null|string $language
+     * Generate a url for the application.
+     *
+     * @param  string  $path
+     * @param  mixed   $parameters
+     * @param  bool    $secure
      * @return string
      */
-    function site_url($path = '/')
+    function site_url($path = null, $parameters = array(), $secure = null)
     {
-        return url($path);
+        return app('url')->to($path, $parameters, $secure);
     }
 }
 
@@ -144,6 +148,24 @@ if (! function_exists('collect'))
     function collect($value = null)
     {
         return Collection::make($value);
+    }
+}
+
+if (! function_exists('abort')) {
+    /**
+     * Throw an HttpException with the given data.
+     *
+     * @param  int     $code
+     * @param  string  $message
+     * @param  array   $headers
+     * @return void
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    function abort($code, $message = '', array $headers = array())
+    {
+        return app()->abort($code, $message, $headers);
     }
 }
 
@@ -626,6 +648,46 @@ if (! function_exists('class_uses_recursive'))
     }
 }
 
+if (! function_exists('cookie'))
+{
+    /**
+     * Create a new cookie instance.
+     *
+     * @param  string  $name
+     * @param  string  $value
+     * @param  int     $minutes
+     * @param  string  $path
+     * @param  string  $domain
+     * @param  bool    $secure
+     * @param  bool    $httpOnly
+     *
+     * @return \Symfony\Component\HttpFoundation\Cookie
+     */
+    function cookie($name = null, $value = null, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true)
+    {
+        $cookie = app('cookie');
+
+        if (is_null($name)) {
+            return $cookie;
+        }
+
+        return $cookie->make($name, $value, $minutes, $path, $domain, $secure, $httpOnly);
+    }
+}
+
+if (! function_exists('csrf_field'))
+{
+    /**
+     * Generate a CSRF token form field.
+     *
+     * @return string
+     */
+    function csrf_field()
+    {
+        return new Expression('<input type="hidden" name="_token" value="' .csrf_token() .'">');
+    }
+}
+
 if (! function_exists('csrf_token'))
 {
     /**
@@ -726,6 +788,64 @@ if (! function_exists('ends_with'))
     }
 }
 
+if (! function_exists('env'))
+{
+    /**
+     * Gets the value of an environment variable. Supports boolean, empty and null.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    function env($key, $default = null)
+    {
+        $value = getenv($key);
+
+        if ($value === false) {
+            return value($default);
+        }
+
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+
+            case 'false':
+            case '(false)':
+                return false;
+
+            case 'empty':
+            case '(empty)':
+                return '';
+
+            case 'null':
+            case '(null)':
+                return null;
+        }
+
+        if ((strlen($value) > 1) && Str::startsWith($value, '"') && Str::endsWith($value, '"')) {
+            return substr($value, 1, -1);
+        }
+
+        return $value;
+    }
+}
+
+if (! function_exists('event')) {
+    /**
+     * Fire an event and call the listeners.
+     *
+     * @param  string|object  $event
+     * @param  mixed  $payload
+     * @param  bool  $halt
+     * @return array|null
+     */
+    function event($event, $payload = [], $halt = false)
+    {
+        return app('events')->fire($event, $payload, $halt);
+    }
+}
+
 if (! function_exists('head'))
 {
     /**
@@ -819,6 +939,20 @@ if (! function_exists('link_to_action'))
     function link_to_action($action, $title = null, $parameters = array(), $attributes = array())
     {
         return app('html')->linkAction($action, $title, $parameters, $attributes);
+    }
+}
+
+if (! function_exists('method_field'))
+{
+    /**
+     * Generate a form field to spoof the HTTP verb used by forms.
+     *
+     * @param  string  $method
+     * @return string
+     */
+    function method_field($method)
+    {
+        return new Expression('<input type="hidden" name="_method" value="' .$method .'">');
     }
 }
 
@@ -1133,6 +1267,29 @@ if (! function_exists('value'))
     function value($value)
     {
         return $value instanceof Closure ? $value() : $value;
+    }
+}
+
+if (! function_exists('view'))
+{
+    /**
+     * Get the evaluated view contents for the given view.
+     *
+     * @param  string  $view
+     * @param  array   $data
+     * @param  string  $module
+     * @param  string  $template
+     * @return \Nova\View\View|\Nova\View\Factory
+     */
+    function view($view = null, $data = array(), $module = null, $template = null)
+    {
+        $factory = app('view');
+
+        if (func_num_args() === 0) {
+            return $factory;
+        }
+
+        return $factory->make($view, $data, $module, $template);
     }
 }
 
