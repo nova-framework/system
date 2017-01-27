@@ -2,8 +2,6 @@
 
 namespace Nova\Foundation;
 
-use Closure;
-
 use Stack\Builder;
 
 use Nova\Http\Request;
@@ -28,6 +26,9 @@ use Nova\Support\Contracts\ResponsePreparerInterface;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+use Closure;
+use RuntimeException;
 
 
 class Application extends Container implements HttpKernelInterface, TerminableInterface, ResponsePreparerInterface
@@ -1193,11 +1194,16 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             return $this->namespace;
         }
 
-        $composer = json_decode(file_get_contents(base_path('composer.json')), true);
+        $filePath = base_path('composer.json');
+
+        $composer = json_decode(file_get_contents($filePath), true);
+
+        //
+        $appPath = realpath(app_path());
 
         foreach ((array) data_get($composer, 'autoload.psr-4') as $namespace => $path) {
             foreach ((array) $path as $pathChoice) {
-                if (realpath(app_path()) == realpath(base_path().'/'.$pathChoice)) {
+                if ($appPath == realpath(base_path() .DS .$pathChoice)) {
                     return $this->namespace = $namespace;
                 }
             }
