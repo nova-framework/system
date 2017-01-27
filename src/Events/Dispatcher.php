@@ -319,7 +319,10 @@ class Dispatcher
     {
         list($class, $method) = $this->parseClassCallable($listener);
 
-        return array($container->make($class), $method);
+        // Create a specified class instance.
+        $instance = $container->make($class);
+
+        return array($instance, $method);
     }
 
     /**
