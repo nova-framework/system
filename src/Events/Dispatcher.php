@@ -297,14 +297,7 @@ class Dispatcher
 
         return function() use ($listener, $container)
         {
-            // If the listener has an @ sign, we will assume it is being used to delimit
-            // the class name from the handle method name. This allows for handlers
-            // to run multiple handler methods in a single class for convenience.
-            $segments = explode('@', $listener);
-
-            $method = count($segments) == 2 ? $segments[1] : 'handle';
-
-            $callable = array($container->make($segments[0]), $method);
+            $callable = $this->createClassCallable($listener, $container);
 
             // We will make a callable of the listener instance and a method that should
             // be called on that instance, then we will pass in the arguments that we
@@ -313,6 +306,38 @@ class Dispatcher
 
             return call_user_func_array($callable, $data);
         };
+    }
+
+    /**
+     * Create the class based event callable.
+     *
+     * @param  string  $listener
+     * @param  \Illuminate\Container\Container  $container
+     * @return callable
+     */
+    protected function createClassCallable($listener, $container)
+    {
+        list($class, $method) = $this->parseClassCallable($listener);
+
+        return array($container->make($class), $method);
+    }
+
+    /**
+     * Parse the class listener into class and method.
+     *
+     * @param  string  $listener
+     * @return array
+     */
+    protected function parseClassCallable($listener)
+    {
+        // If the listener has an @ sign, we will assume it is being used to delimit
+        // the class name from the handle method name. This allows for handlers
+        // to run multiple handler methods in a single class for convenience.
+        $segments = explode('@', $listener);
+
+        $method = (count($segments) == 2) ? $segments[1] : 'handle';
+
+        return [$segments[0], $method];
     }
 
     /**
