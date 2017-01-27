@@ -110,6 +110,14 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     protected static $requestClass = 'Nova\Http\Request';
 
     /**
+     * The application namespace.
+     *
+     * @var string
+     */
+    protected $namespace = null;
+
+    
+    /**
      * Create a new Nova application instance.
      *
      * @param  \Nova\Http\Request  $request
@@ -1141,6 +1149,44 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         foreach ($aliases as $key => $alias) {
             $this->alias($key, $alias);
         }
+    }
+
+    /**
+     * Flush the container of all bindings and resolved instances.
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        parent::flush();
+
+        $this->loadedProviders = array();
+    }
+
+    /**
+     * Get the application namespace.
+     *
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
+    public function getNamespace()
+    {
+        if (! is_null($this->namespace)) {
+            return $this->namespace;
+        }
+
+        $composer = json_decode(file_get_contents(base_path('composer.json')), true);
+
+        foreach ((array) data_get($composer, 'autoload.psr-4') as $namespace => $path) {
+            foreach ((array) $path as $pathChoice) {
+                if (realpath(app_path()) == realpath(base_path().'/'.$pathChoice)) {
+                    return $this->namespace = $namespace;
+                }
+            }
+        }
+
+        throw new RuntimeException('Unable to detect application namespace.');
     }
 
 }
