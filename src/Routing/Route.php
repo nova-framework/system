@@ -2,17 +2,25 @@
 
 namespace Nova\Routing;
 
+use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
+use Nova\Routing\RouteDependencyResolverTrait;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route as SymfonyRoute;
+
+use Closure;
+use ReflectionFunction;
 
 
 class Route
 {
+    use RouteDependencyResolverTrait;
+
     /**
      * The URI pattern the route responds to.
      *
@@ -70,6 +78,13 @@ class Route
     protected $compiled;
 
     /**
+     * The container instance used by the route.
+     *
+     * @var \Nova\Container\Container
+     */
+    protected $container;
+
+    /**
      * The validators used by the routes.
      *
      * @var array
@@ -104,13 +119,92 @@ class Route
     /**
      * Run the route action and return the response.
      *
+     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    public function run()
+    public function run(Request $request)
     {
-        $parameters = array_filter($this->parameters(), function($p) { return isset($p); });
+        $this->container = $this->container ?: new Container();
 
-        return call_user_func_array($this->action['uses'], $parameters);
+        try {
+            if (! is_string($this->action['uses'])) {
+                return $this->runCallable($request);
+            }
+
+            if ($this->customDispatcherIsBound()) {
+                return $this->runWithCustomDispatcher($request);
+            }
+
+            return $this->runController($request);
+        }
+        catch (HttpResponseException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    /**
+     * Run the route action and return the response.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return mixed
+     */
+    protected function runCallable(Request $request)
+    {
+        $callable = $this->action['uses'];
+
+        $parameters = $this->resolveMethodDependencies(
+            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
+        );
+
+        return call_user_func_array($callable, $parameters);
+    }
+
+    /**
+     * Run the route action and return the response.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return mixed
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    protected function runController(Request $request)
+    {
+        list($class, $method) = explode('@', $this->action['uses']);
+
+        $parameters = $this->resolveClassMethodDependencies(
+            $this->parametersWithoutNulls(), $class, $method
+        );
+
+        if (! method_exists($instance = $this->container->make($class), $method)) {
+            throw new NotFoundHttpException;
+        }
+
+        return call_user_func_array(array($instance, $method), $parameters);
+    }
+
+    /**
+     * Determine if a custom route dispatcher is bound in the container.
+     *
+     * @return bool
+     */
+    protected function customDispatcherIsBound()
+    {
+        return $this->container->bound('framework.route.dispatcher');
+    }
+
+    /**
+     * Send the request and route to a custom dispatcher for handling.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return mixed
+     */
+    protected function runWithCustomDispatcher(Request $request)
+    {
+        list($class, $method) = explode('@', $this->action['uses']);
+
+        $dispatcher = $this->container->make('framework.route.dispatcher');
+
+        return $dispatcher->dispatch($this, $request, $class, $method);
     }
 
     /**
@@ -802,4 +896,27 @@ class Route
         return $this->compiled;
     }
 
+    /**
+     * Set the container instance on the route.
+     *
+     * @param  \Nova\Container\Container  $container
+     * @return $this
+     */
+    public function setContainer(Container $container)
+    {
+        $this->container = $container;
+
+        return $this;
+    }
+
+    /**
+     * Dynamically access route parameters.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        return $this->parameter($key);
+    }
 }

@@ -23,6 +23,7 @@ class ControllerServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Console support.
         $this->registerGenerator();
 
         $this->commands('command.controller.make');

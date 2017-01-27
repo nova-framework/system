@@ -53,13 +53,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected $currentRequest;
 
     /**
-     * The controller dispatcher instance.
-     *
-     * @var \Nova\Routing\ControllerDispatcher
-     */
-    protected $controllerDispatcher;
-
-    /**
      * The controller inspector instance.
      *
      * @var \Nova\Routing\ControllerInspector
@@ -846,7 +839,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function newRoute($methods, $uri, $action)
     {
-        return new Route($methods, $uri, $action);
+        return (new Route($methods, $uri, $action))->setContainer($this->container);
     }
 
     /**
@@ -896,7 +889,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function routingToController($action)
     {
-        if ($action instanceof Closure) return false;
+        if ($action instanceof Closure) {
+            return false;
+        }
 
         return is_string($action) || is_string(array_get($action, 'uses'));
     }
@@ -923,37 +918,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // IoC container instance and call the appropriate methods on the class.
         $action['controller'] = $action['uses'];
 
-        $closure = $this->getClassClosure($action['uses']);
-
-        return array_set($action, 'uses', $closure);
-    }
-
-    /**
-     * Get the Closure for a controller based action.
-     *
-     * @param  string  $controller
-     * @return \Closure
-     */
-    protected function getClassClosure($controller)
-    {
-        // Here we'll get an instance of this controller dispatcher and hand it off to
-        // the Closure so it will be used to resolve the class instances out of our
-        // IoC container instance and call the appropriate methods on the class.
-        $d = $this->getControllerDispatcher();
-
-        return function() use ($d, $controller)
-        {
-            $route = $this->current();
-
-            $request = $this->getCurrentRequest();
-
-            // Now we can split the controller and method out of the action string so that we
-            // can call them appropriately on the class. This controller and method are in
-            // in the Class@method format and we need to explode them out then use them.
-            list($class, $method) = explode('@', $controller);
-
-            return $d->dispatch($route, $request, $class, $method);
-        };
+        return $action;
     }
 
     /**
@@ -1651,31 +1616,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getRoutes()
     {
         return $this->routes;
-    }
-
-    /**
-     * Get the controller dispatcher instance.
-     *
-     * @return \Nova\Routing\ControllerDispatcher
-     */
-    public function getControllerDispatcher()
-    {
-        if (is_null($this->controllerDispatcher)) {
-            $this->controllerDispatcher = new ControllerDispatcher($this, $this->container);
-        }
-
-        return $this->controllerDispatcher;
-    }
-
-    /**
-     * Set the controller dispatcher instance.
-     *
-     * @param  \Nova\Routing\ControllerDispatcher  $dispatcher
-     * @return void
-     */
-    public function setControllerDispatcher(ControllerDispatcher $dispatcher)
-    {
-        $this->controllerDispatcher = $dispatcher;
     }
 
     /**

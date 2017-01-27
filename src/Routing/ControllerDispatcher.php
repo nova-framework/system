@@ -2,12 +2,17 @@
 
 namespace Nova\Routing;
 
-use Closure;
-use Nova\Http\Request;
 use Nova\Container\Container;
+use Nova\Http\Request;
+use Nova\Routing\RouteDependencyResolverTrait;
+
+use Closure;
+
 
 class ControllerDispatcher
 {
+    use RouteDependencyResolverTrait;
+    
     /**
      * The routing filterer implementation.
      *
@@ -29,8 +34,7 @@ class ControllerDispatcher
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(RouteFiltererInterface $filterer,
-                                Container $container = null)
+    public function __construct(RouteFiltererInterface $filterer, Container $container = null)
     {
         $this->filterer = $filterer;
         $this->container = $container;
@@ -89,7 +93,9 @@ class ControllerDispatcher
      */
     protected function call($instance, $route, $method)
     {
-        $parameters = $route->parametersWithoutNulls();
+        $parameters = $this->resolveClassMethodDependencies(
+            $route->parametersWithoutNulls(), $instance, $method
+        );
 
         return $instance->callAction($method, $parameters);
     }
