@@ -106,7 +106,7 @@ class DefaultDispatcher implements DispatcherInterface
             if ($baseName == 'modules') {
                 $basePath = Config::get('modules.path', APPPATH .'Modules');
             } else {
-                $basePath = APPPATH .'Templates';
+                $basePath = Config::get('view.templates.path', BASEPATH .'themes');
             }
 
             $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
