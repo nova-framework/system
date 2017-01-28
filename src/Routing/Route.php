@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Container\Container;
 use Nova\Http\Request;
+use Nova\Http\Exception\HttpResponseException;
 use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
