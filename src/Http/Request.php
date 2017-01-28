@@ -42,7 +42,7 @@ class Request extends SymfonyRequest implements ArrayAccess
 
 
     /**
-     * Create a new Illuminate HTTP request from server variables.
+     * Create a new Nova HTTP request from server variables.
      *
      * @return static
      */
