@@ -835,20 +835,20 @@ class Factory
      */
     protected function findViewFile($view, $domain, $template = null)
     {
-        if (! is_null($template)) {
-            $viewPath = APPPATH .'Templates' .DS .$template .DS .'Override' .DS;
+        $viewPath = str_replace('/', DS, "Views/$view");
 
-            if ($domain == 'App') {
-                $viewPath .= 'Views' .DS;
-            } else {
-                $viewPath .= 'Modules' .DS .$domain .DS .'Views' .DS;
+        if (! is_null($template)) {
+            $basePath = $this->getTemplatePath($template) .DS .'Override';
+
+            if ($domain != 'App') {
+                $basePath .= DS .'Modules' .DS .$domain;
             }
 
-            $viewPath .= str_replace('/', DS, $view);
+            $path = $basePath .DS .$viewPath;
 
             // Try to find the View file on the override locations.
             try {
-                return $this->finder->find($viewPath);
+                return $this->finder->find($path);
             }
             catch (\InvalidArgumentException $e) {
                 // Do nothing.
@@ -858,14 +858,12 @@ class Factory
         // Try to find the View file on the base locations.
 
         if ($domain == 'App') {
-            $viewPath = APPPATH .str_replace('/', DS, "Views/$view");
+            $path = APPPATH .$viewPath;
         } else {
-            $basePath = $this->getModulesPath();
-
-            $viewPath = $basePath .DS .str_replace('/', DS, "$domain/Views/$view");
+            $path = $this->getModulePath($domain) .DS .$viewPath;
         }
 
-        return $this->finder->find($viewPath);
+        return $this->finder->find($path);
     }
 
     /**
@@ -877,35 +875,30 @@ class Factory
      */
     protected function findLayoutFile($view, $template)
     {
-        $view = str_replace('/', DS, $view);
+        $viewPath = str_replace('/', DS, $view);
 
         // Calculate the base path to the Layout files.
-        $basePath = APPPATH .'Templates' .DS .$template .DS .'Layouts';
+        $basePath = $this->getTemplatePath($template) .DS .'Layouts';
 
         // Find the Layout file depending on the Language direction.
         $language = $this->getCurrentLanguage();
 
         if ($language->direction() == 'rtl') {
             // Search for the Layout file used on the RTL languages.
-            $viewPath = $basePath .DS .'RTL' .DS .$view;
+            $path = $basePath .DS .'RTL' .DS .$viewPath;
 
-            $path = $this->finder->find($viewPath);
-        } else {
-            $path = null;
+            try {
+                return $this->finder->find($path);
+            }
+            catch (\InvalidArgumentException $e) {
+                // Do nothing.
+            }
         }
 
-        if (is_null($path)) {
-            // Search for the (main) Layout file.
-            $viewPath = $basePath .DS .$view;
+        // Search for the (main) Layout file.
+        $path = $basePath .DS .$viewPath;
 
-            $path = $this->finder->find($viewPath);
-        }
-
-        if (is_null($path)) {
-            throw new \InvalidArgumentException("Unable to load the view '" .$view ."' on template '" .$template ."'.", 1);
-        }
-
-        return $path;
+        return $this->finder->find($path);
     }
 
     /**
@@ -913,11 +906,27 @@ class Factory
      *
      * @return string
      */
-    protected function getModulesPath()
+    protected function getModulePath($module)
     {
         $config = $this->container['config'];
 
-        return $config->get('modules.path', APPPATH .'Modules');
+        $basePath = $config->get('modules.path', APPPATH .'Modules');
+
+        return $basePath .DS .$module;
+    }
+
+    /**
+     * Return the current Modules path.
+     *
+     * @return string
+     */
+    protected function getTemplatePath($template)
+    {
+        $config = $this->container['config'];
+
+        $basePath = $config->get('view.templates.path', BASEPATH .'themes');
+
+        return $basePath .DS .$template;
     }
 
     /**
