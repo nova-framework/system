@@ -10,6 +10,7 @@ namespace Nova\Language;
 
 use Nova\Helpers\Inflector;
 use Nova\Language\LanguageManager;
+use Nova\Support\Facades\Config;
 
 use MessageFormatter;
 
@@ -87,14 +88,17 @@ class Language
             $pathName = Inflector::classify($domain);
         }
 
+        $modules   = Config::get('modules.path', BASEPATH .'modules');
+        $templates = Config::get('view.templates.path', BASEPATH .'themes');
+
         if ($pathName == 'Nova') {
             $basePath = SYSPATH;
         } else if ($pathName == 'Shared') {
             $basePath = BASEPATH .'shared' .DS;
-        } else if (is_dir(APPPATH .'Modules' .DS .$pathName)) {
-            $basePath = APPPATH .'Modules/' .$pathName .DS;
-        } else if (is_dir(APPPATH .'Templates' .DS .$pathName)) {
-            $basePath = APPPATH .'Templates/' .$pathName .DS;
+        } else if (is_dir($modules .DS .$pathName)) {
+            $basePath = $modules .DS .$pathName .DS;
+        } else if (is_dir($templates .DS .$pathName)) {
+            $basePath = $templates .DS .$pathName .DS;
         } else {
             $basePath = APPPATH;
         }
