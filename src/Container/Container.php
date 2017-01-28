@@ -5,6 +5,7 @@ namespace Nova\Container;
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionParameter;
 
@@ -748,12 +749,89 @@ class Container implements ArrayAccess
      * Register a new resolving callback.
      *
      * @param  string    $abstract
+     * @param  \Closure|null  $callback
+     * @return void
+     */
+    public function resolving($abstract, Closure $callback = null)
+    {
+        if (($callback === null) && $abstract instanceof Closure) {
+            $this->resolvingCallback($abstract);
+        } else {
+            $this->resolvingCallbacks[$abstract][] = $callback;
+        }
+    }
+
+    /**
+     * Register a new after resolving callback for all types.
+     *
+     * @param  string   $abstract
+     * @param  \Closure|null $callback
+     * @return void
+     */
+    public function afterResolving($abstract, Closure $callback = null)
+    {
+        if ($abstract instanceof Closure && $callback === null) {
+            $this->afterResolvingCallback($abstract);
+        } else {
+            $this->afterResolvingCallbacks[$abstract][] = $callback;
+        }
+    }
+
+    /**
+     * Register a new resolving callback by type of its first argument.
+     *
      * @param  \Closure  $callback
      * @return void
      */
-    public function resolving($abstract, Closure $callback)
+    protected function resolvingCallback(Closure $callback)
     {
-        $this->resolvingCallbacks[$abstract][] = $callback;
+        $abstract = $this->getFunctionHint($callback);
+
+        if ($abstract) {
+            $this->resolvingCallbacks[$abstract][] = $callback;
+        } else {
+            $this->globalResolvingCallbacks[] = $callback;
+        }
+    }
+
+    /**
+     * Register a new after resolving callback by type of its first argument.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    protected function afterResolvingCallback(Closure $callback)
+    {
+        $abstract = $this->getFunctionHint($callback);
+
+        if ($abstract) {
+            $this->afterResolvingCallbacks[$abstract][] = $callback;
+        } else {
+            $this->globalAfterResolvingCallbacks[] = $callback;
+        }
+    }
+    
+    /**
+     * Get the type hint for this closure's first argument.
+     *
+     * @param  \Closure  $callback
+     * @return mixed
+     */
+    protected function getFunctionHint(Closure $callback)
+    {
+        $function = new ReflectionFunction($callback);
+
+        if ($function->getNumberOfParameters() == 0) {
+            return;
+        }
+
+        $expected = $function->getParameters()[0];
+
+        if (! $expected->getClass()) {
+            return;
+        }
+
+        return $expected->getClass()->name;
     }
 
     /**
