@@ -30,7 +30,7 @@ class UpCommand extends Command
     {
         $config = $this->nova['config'];
 
-        @unlink($config['path.storage'] .DS .'Framework' .DS .'down');
+        @unlink($config['path.storage'] .DS .'framework' .DS .'down');
 
         $this->info('Application is now live.');
     }
