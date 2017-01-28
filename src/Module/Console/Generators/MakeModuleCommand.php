@@ -50,6 +50,7 @@ class MakeModuleCommand extends Command
         'Models/',
         'Policies/',
         'Providers/',
+        'Requests/',
         'Views/',
     );
 
