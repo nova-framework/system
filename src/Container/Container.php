@@ -778,6 +778,17 @@ class Container implements ArrayAccess
     }
 
     /**
+     * Register a new resolving callback for all types.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public function resolvingAny(Closure $callback)
+    {
+        $this->globalResolvingCallbacks[] = $callback;
+    }
+
+    /**
      * Register a new resolving callback by type of its first argument.
      *
      * @param  \Closure  $callback
@@ -810,7 +821,7 @@ class Container implements ArrayAccess
             $this->globalAfterResolvingCallbacks[] = $callback;
         }
     }
-    
+
     /**
      * Get the type hint for this closure's first argument.
      *
@@ -832,17 +843,6 @@ class Container implements ArrayAccess
         }
 
         return $expected->getClass()->name;
-    }
-
-    /**
-     * Register a new resolving callback for all types.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function resolvingAny(Closure $callback)
-    {
-        $this->globalResolvingCallbacks[] = $callback;
     }
 
     /**
