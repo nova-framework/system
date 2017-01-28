@@ -88,17 +88,18 @@ class Language
             $pathName = Inflector::classify($domain);
         }
 
-        $modules   = Config::get('modules.path', BASEPATH .'modules');
-        $templates = Config::get('view.templates.path', BASEPATH .'themes');
+        $modulesPath = Config::get('modules.path', BASEPATH .'modules');
+
+        $templatesPath = Config::get('view.templates.path', BASEPATH .'themes');
 
         if ($pathName == 'Nova') {
             $basePath = SYSPATH;
         } else if ($pathName == 'Shared') {
             $basePath = BASEPATH .'shared' .DS;
-        } else if (is_dir($modules .DS .$pathName)) {
-            $basePath = $modules .DS .$pathName .DS;
-        } else if (is_dir($templates .DS .$pathName)) {
-            $basePath = $templates .DS .$pathName .DS;
+        } else if (is_dir($modulesPath .DS .$pathName)) {
+            $basePath = $modulesPath .DS .$pathName .DS;
+        } else if (is_dir($templatesPath .DS .$pathName)) {
+            $basePath = $templatesPath .DS .$pathName .DS;
         } else {
             $basePath = APPPATH;
         }
