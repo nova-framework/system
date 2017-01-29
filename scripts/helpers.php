@@ -74,7 +74,7 @@ if (! function_exists('template_url'))
             $template = Str::lower($template);
         }
 
-        $path = sprintf('templates/%s/assets/%s', $template, ltrim($path, '/'));
+        $path = sprintf('themes/%s/assets/%s', $template, ltrim($path, '/'));
 
         return url($path);
     }

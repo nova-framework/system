@@ -83,13 +83,13 @@ class DefaultDispatcher implements DispatcherInterface
         // Calculate the Asset File path, looking for a valid one.
         $uri = $request->path();
 
-        if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+        if (preg_match('#^(themes|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 
             //
             $folder = $matches[2];
 
-            if (($folder == 'adminlte') && ($baseName == 'templates')) {
+            if (($folder == 'adminlte') && ($baseName == 'themes')) {
                 // The Asset path is on the AdminLTE Template.
                 $folder = 'AdminLTE';
             } else if (strlen($folder) > 3) {
