@@ -11,6 +11,7 @@ use Nova\View\View;
 use Nova\View\ViewFinderInterface;
 
 use Closure;
+use InvalidArgumentException;
 
 
 class Factory
@@ -129,13 +130,12 @@ class Factory
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
-        // Get the View's domain.
-        $domain = $module ?: 'App';
-
         // Get the View file path.
-        $path = $this->findViewFile($view, $domain, $template);
+        $path = $this->findViewFile($view, $module, $template);
 
         // Normalize the View name.
+        $domain = $module ?: 'App';
+
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
 
         // Get the parsed View data.
@@ -241,7 +241,7 @@ class Factory
     {
         try {
             $this->find($view, $module);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return false;
         }
 
@@ -826,29 +826,32 @@ class Factory
     }
 
     /**
-     * Find the view file.
+     * Find the View file.
      *
      * @param    string  $view
-     * @param    string  $domain
+     * @param    string  $module
      * @param    string  $template
+     *
      * @return    string
      */
-    protected function findViewFile($view, $domain, $template = null)
+    protected function findViewFile($view, $module, $template = null)
     {
+        $viewPath = str_replace('/', DS, $view);
+
         if (! is_null($template)) {
             // Try to find the View file on the override locations.
-            $basePath = $this->getTemplatePath($template) .DS .'Override' .DS;
+            $basePath = $this->getTemplatePath($template) .'Override' .DS;
 
-            if ($domain != 'App') {
-                $basePath .= 'Modules' .DS .$domain .DS;
+            if (! is_null($module)) {
+                $basePath .= 'Modules' .DS .$module .DS;
             }
 
-            $path = $basePath .str_replace('/', DS, "Views/$view");
+            $path = $basePath .$viewPath;
 
             try {
                 return $this->finder->find($path);
             }
-            catch (\InvalidArgumentException $e) {
+            catch (InvalidArgumentException $e) {
                 // Do nothing.
             }
         }
@@ -856,20 +859,23 @@ class Factory
         // Try to find the View file on the base locations.
         $viewPath = str_replace('/', DS, "Views/$view");
 
-        if ($domain == 'App') {
-            $path = APPPATH .$viewPath;
+        if (! is_null($module)) {
+            $basePath = $this->getModulePath($module);
         } else {
-            $path = $this->getModulePath($domain) .DS .$viewPath;
+            $basePath = APPPATH;
         }
+
+        $path = $basePath .$viewPath;
 
         return $this->finder->find($path);
     }
 
     /**
-     * Find the View file.
+     * Find the Layout file.
      *
      * @param    string     $view
      * @param    string     $template
+     *
      * @return    string
      */
     protected function findLayoutFile($view, $template)
@@ -877,7 +883,7 @@ class Factory
         $viewPath = str_replace('/', DS, $view);
 
         // Calculate the base path to the Layout files.
-        $basePath = $this->getTemplatePath($template) .DS .'Layouts';
+        $basePath = $this->getTemplatePath($template) .'Layouts';
 
         // Find the Layout file depending on the Language direction.
         $language = $this->getCurrentLanguage();
@@ -909,9 +915,9 @@ class Factory
     {
         $config = $this->container['config'];
 
-        $basePath = $config->get('modules.path', APPPATH .'Modules');
+        $basePath = $config->get('modules.path', BASEPATH .'modules');
 
-        return $basePath .DS .$module;
+        return $basePath .DS .$module .DS;
     }
 
     /**
@@ -925,7 +931,7 @@ class Factory
 
         $basePath = $config->get('view.templates.path', BASEPATH .'themes');
 
-        return $basePath .DS .$template;
+        return $basePath .DS .$template .DS;
     }
 
     /**
