@@ -49,7 +49,7 @@ class ClearCommand extends Command
      */
     public function fire()
     {
-        $path = $this->nova['path.storage'] .DS .'Logs' .DS .'error.log';
+        $path = $this->nova['path.storage'] .DS .'logs' .DS .'error.log';
 
         $this->files->put($path, "\n");
 
