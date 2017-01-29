@@ -28,11 +28,11 @@ class ClearCompiledCommand extends Command
      */
     public function fire()
     {
-        if (file_exists($path = $this->nova['path'] .DS .str_replace('/', DS, 'Boot/Compiled.php'))) {
+        if (file_exists($path = $this->nova['path'] .DS .'Boot' .DS .'Compiled.php')) {
             @unlink($path);
         }
 
-        if (file_exists($path = $this->nova['path'] .DS .str_replace('/', DS, 'Boot/Cache/Services.php'))) {
+        if (file_exists($path = $this->nova['config']['app.manifest'] .DS .'services.php')) {
             @unlink($path);
         }
     }
