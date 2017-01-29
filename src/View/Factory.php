@@ -835,18 +835,16 @@ class Factory
      */
     protected function findViewFile($view, $domain, $template = null)
     {
-        $viewPath = str_replace('/', DS, "Views/$view");
-
         if (! is_null($template)) {
-            $basePath = $this->getTemplatePath($template) .DS .'Override';
+            // Try to find the View file on the override locations.
+            $basePath = $this->getTemplatePath($template) .DS .'Override' .DS;
 
             if ($domain != 'App') {
-                $basePath .= DS .'Modules' .DS .$domain;
+                $basePath .= 'Modules' .DS .$domain .DS;
             }
 
-            $path = $basePath .DS .$viewPath;
+            $path = $basePath .str_replace('/', DS, "Views/$view");
 
-            // Try to find the View file on the override locations.
             try {
                 return $this->finder->find($path);
             }
@@ -856,6 +854,7 @@ class Factory
         }
 
         // Try to find the View file on the base locations.
+        $viewPath = str_replace('/', DS, "Views/$view");
 
         if ($domain == 'App') {
             $path = APPPATH .$viewPath;
