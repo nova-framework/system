@@ -769,6 +769,56 @@ class Builder
     }
 
     /**
+     * Prevent the specified relations from being eager loaded.
+     *
+     * @param  mixed  $relations
+     * @return $this
+     */
+    public function without($relations)
+    {
+        if (is_string($relations)) $relations = func_get_args();
+
+        $this->eagerLoad = array_diff_key($this->eagerLoad, array_flip($relations));
+
+        return $this;
+    }
+
+    /**
+     * Add subselect queries to count the relations.
+     *
+     * @param  mixed  $relations
+     * @return $this
+     */
+    public function withCount($relations)
+    {
+        if (is_string($relations)) $relations = func_get_args();
+
+        // If no columns are set, add the default * columns.
+        if (is_null($this->query->columns)) {
+            $this->query->select($this->query->from .'.*');
+        }
+
+        $relations = $this->parseRelations($relations);
+
+        foreach ($relations as $name => $constraints) {
+            // First determine the count query for the given relationship,
+            // then run the constraints callback to get the final query.
+            // This query will be added as subSelect query.
+            $relation = $this->getHasRelationQuery($name);
+
+            $query = $relation->getRelationCountQuery($relation->getRelated()->newQuery(), $this);
+
+            call_user_func($constraints, $query);
+
+            $asColumn = snake_case($name) .'_count';
+
+            $this->selectSub($query->getQuery(), $asColumn);
+        }
+
+        return $this;
+    }
+
+    /**
      * Parse a list of relations into individuals.
      *
      * @param  array  $relations
@@ -943,7 +993,7 @@ class Builder
             array_unshift($parameters, $this);
 
             return call_user_func_array($this->macros[$method], $parameters);
-        } else if (method_exists($this->model, $scope = 'scope'.ucfirst($method))) {
+        } else if (method_exists($this->model, $scope = 'scope' .ucfirst($method))) {
             return $this->callScope($scope, $parameters);
         }
 

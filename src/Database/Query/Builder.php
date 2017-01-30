@@ -250,6 +250,38 @@ class Builder
     }
 
     /**
+     * Add a subselect expression to the query.
+     *
+     * @param  \Closure|\Nova\Database\Query\Builder|string $query
+     * @param  string  $as
+     * @return \Nova\Database\Query\Builder|static
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function selectSub($query, $as)
+    {
+        if ($query instanceof Closure) {
+            $callback = $query;
+
+            $callback($query = $this->newQuery());
+        }
+
+        if ($query instanceof self) {
+            $bindings = $query->getBindings();
+
+            $query = $query->toSql();
+        } else if (is_string($query)) {
+            $bindings = array();
+        } else {
+            throw new \InvalidArgumentException();
+        }
+
+        $expression = new Expression('('. $query .') as '.$this->grammar->wrap($as), $bindings);
+
+        return $this->addSelect($expression);
+    }
+
+    /**
      * Add a new select column to the query.
      *
      * @param  mixed  $column
