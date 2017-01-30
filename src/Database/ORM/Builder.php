@@ -5,6 +5,7 @@ namespace Nova\Database\ORM;
 use Nova\Database\Query\Expression;
 use Nova\Database\ORM\Relations\Relation;
 use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Support\Str;
 
 use Closure;
 
@@ -801,16 +802,32 @@ class Builder
         $relations = $this->parseRelations($relations);
 
         foreach ($relations as $name => $constraints) {
-            // First determine the count query for the given relationship,
-            // then run the constraints callback to get the final query.
-            // This query will be added as subSelect query.
+            // First we will determine if the name has been aliased using an "as" clause on the name
+            // and if it has we will extract the actual relationship name and the desired name of
+            // the resulting column. This allows multiple counts on the same relationship name.
+            $segments = explode(' ', $name);
+
+            if ((count($segments) == 3) && (Str::lower($segments[1]) == 'as')) {
+                list($name, $alias) = array($segments[0], $segments[2]);
+            } else {
+                unset($alias);
+            }
+
             $relation = $this->getHasRelationQuery($name);
 
+            // Here we will get the relationship count query and prepare to add it to the main query
+            // as a sub-select. First, we'll get the "has" query and use that to get the relation
+            // count query. We will normalize the relation name then append _count as the name.
             $query = $relation->getRelationCountQuery($relation->getRelated()->newQuery(), $this);
 
             call_user_func($constraints, $query);
 
-            $asColumn = snake_case($name) .'_count';
+            $this->mergeWheresToHas($query, $relation);
+
+            // Finally we will add the proper result column alias to the query and run the subselect
+            // statement against the query builder. Then we will return the builder instance back
+            // to the developer for further constraint chaining that needs to take place on it.
+            $asColumn = snake_case($alias ?: $name) .'_count';
 
             $this->selectSub($query->getQuery(), $asColumn);
         }
