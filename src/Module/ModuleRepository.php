@@ -88,7 +88,7 @@ class ModuleRepository implements RepositoryInterface
         //
         $namespace = $this->resolveNamespace($properties);
 
-        $namespace = $this->repository->getNamespace() .'\\{$namespace}\\Widgets';
+        $namespace = $this->repository->getNamespace() ."\\{$namespace}\\Widgets";
 
         $widgets->register($namespace);
     }

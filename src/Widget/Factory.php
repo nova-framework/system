@@ -91,11 +91,9 @@ class Factory
      */
     protected function determineNamespace($className)
     {
-        if (count($this->namespaces) > 0) {
-            foreach ($this->namespaces as $namespace) {
-                if (class_exists($namespace .'\\' .$className)) {
-                    return $namespace;
-                }
+        foreach ($this->namespaces as $namespace) {
+            if (class_exists($namespace .'\\' .$className)) {
+                return $namespace;
             }
         }
 
@@ -120,6 +118,11 @@ class Factory
         }
 
         return $flattened;
+    }
+
+    public function getNamespaces()
+    {
+        return $this->namespaces;
     }
 
     /**
