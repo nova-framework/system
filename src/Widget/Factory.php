@@ -51,9 +51,9 @@ class Factory
      *
      * @return \Nova\Widget\Widget
      */
-    public function make($signature)
+    public function make($signature, array $parameters = array())
     {
-        $className = Str::studly($signature, array $parameters = array());
+        $className = Str::studly($signature);
 
         $namespace = $this->determineNamespace($className);
 
