@@ -236,7 +236,7 @@ class Builder
 
         return $this;
     }
-    
+
     /**
      * Add a new "raw" select expression to the query.
      *
@@ -247,12 +247,14 @@ class Builder
     public function selectRaw($expression, array $bindings = array())
     {
         $this->addSelect(new Expression($expression));
+        
         if ($bindings) {
             $this->addBinding($bindings, 'select');
         }
+
         return $this;
     }
-    
+
     /**
      * Add a subselect expression to the query.
      *
