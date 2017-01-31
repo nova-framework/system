@@ -284,17 +284,6 @@ class Builder
     }
 
     /**
-     * Add a new "raw" select expression to the query.
-     *
-     * @param  string  $expression
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function selectRaw($expression)
-    {
-        return $this->select(new Expression($expression));
-    }
-
-    /**
      * Add a new select column to the query.
      *
      * @param  mixed  $column
