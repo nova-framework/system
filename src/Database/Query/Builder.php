@@ -237,7 +237,6 @@ class Builder
         return $this;
     }
     
-    
     /**
      * Add a new "raw" select expression to the query.
      *
