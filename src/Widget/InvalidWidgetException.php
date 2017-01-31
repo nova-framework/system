@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Widget\Exceptions;
+namespace Nova\Widget;
 
 use Exception;
 

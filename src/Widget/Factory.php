@@ -4,7 +4,7 @@ namespace Nova\Widget;
 
 use Nova\Foundation\Application;
 use Nova\Support\Str;
-use Nova\Widget\Exceptions\InvalidWidgetException;
+use Nova\Widget\InvalidWidgetException;
 
 
 class Factory
@@ -41,6 +41,46 @@ class Factory
         if (! array_key_exists($namespace, $this->namespaces)) {
             $this->namespaces[] = $namespace;
         }
+    }
+
+    /**
+     * Create a new Widget instance.
+     *
+     * @param  string  $signature
+     *
+     * @return \Nova\Widget\Widget
+     */
+    public function make($signature)
+    {
+        $className = Str::studly($signature);
+
+        $namespace = $this->determineNamespace($className);
+
+        $widgetClass = $namespace .'\\' .$className;
+
+        return $this->app->make($widgetClass);
+    }
+
+    /**
+     * Handle a Widget instance.
+     *
+     * @param  \Nova\Widget\Widget $widget
+     * @param array $parameters
+     *
+     * @return mixed
+     * @throws \Nova\Widget\InvalidWidgetException
+     */
+    public function handle($widget, array $parameters = array())
+    {
+        $parameters = $this->flattenParameters($parameters);
+
+        if (! $widget instanceof Widget) {
+            throw new InvalidWidgetException();
+        }
+
+        $widget->registerParameters($parameters);
+
+        return $widget->handle();
     }
 
     /**
@@ -91,22 +131,8 @@ class Factory
      */
     public function __call($signature, $parameters)
     {
-        $parameters = $this->flattenParameters($parameters);
+        $widget = $this->make($signature);
 
-        $className = Str::studly($signature);
-
-        $namespace = $this->determineNamespace($className);
-
-        $widgetClass = $namespace .'\\' .$className;
-
-        $widget = $this->app->make($widgetClass);
-
-        if (! $widget instanceof Widget) {
-            throw new InvalidWidgetException();
-        }
-
-        $widget->registerParameters($parameters);
-
-        return $widget->handle();
+        return $this->handle($widget, $parameters);
     }
 }
