@@ -52,6 +52,7 @@ class MakeModuleCommand extends Command
         'Providers/',
         'Requests/',
         'Views/',
+        'Widgets/',
     );
 
     /**

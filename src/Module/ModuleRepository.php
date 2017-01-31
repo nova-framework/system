@@ -44,6 +44,8 @@ class ModuleRepository implements RepositoryInterface
         $modules->each(function ($properties) {
             $this->registerServiceProvider($properties);
 
+            $this->registerWidgetsNamespace($properties);
+
             $this->autoloadFiles($properties);
         });
     }
@@ -68,6 +70,27 @@ class ModuleRepository implements RepositoryInterface
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
         }
+    }
+
+    /**
+     * Register the Module Service Provider.
+     *
+     * @param string $properties
+     *
+     * @return string
+     *
+     * @throws \Nova\Module\FileMissingException
+     */
+    protected function registerWidgetsNamespace($properties)
+    {
+        $widgets = $this->app['widgets'];
+
+        //
+        $namespace = $this->resolveNamespace($properties);
+
+        $namespace = $this->repository->getNamespace() .'\\{$namespace}\\Widgets';
+
+        $widgets->register($namespace);
     }
 
     /**
