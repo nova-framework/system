@@ -242,11 +242,18 @@ class Builder
      * Add a new "raw" select expression to the query.
      *
      * @param  string  $expression
+     * @param  array   $bindings
      * @return \Nova\Database\Query\Builder|static
      */
-    public function selectRaw($expression)
+    public function selectRaw($expression, array $bindings = array())
     {
-        return $this->select(new Expression($expression));
+        $this->addSelect(new Expression($expression));
+
+        if ($bindings) {
+            $this->addBinding($bindings, 'select');
+        }
+
+        return $this;
     }
 
     /**
@@ -276,9 +283,7 @@ class Builder
             throw new \InvalidArgumentException();
         }
 
-        $expression = new Expression('('. $query .') as '.$this->grammar->wrap($as), $bindings);
-
-        return $this->addSelect($expression);
+        return $this->selectRaw('('. $query .') as '.$this->grammar->wrap($as), $bindings);
     }
 
     /**
