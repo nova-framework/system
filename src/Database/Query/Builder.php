@@ -242,11 +242,45 @@ class Builder
      * Add a new "raw" select expression to the query.
      *
      * @param  string  $expression
+     * @param  array   $bindings
      * @return \Nova\Database\Query\Builder|static
      */
-    public function selectRaw($expression)
+    public function selectRaw($expression, array $bindings = array())
     {
-        return $this->select(new Expression($expression));
+        $this->addSelect(new Expression($expression));
+        
+        if ($bindings) {
+            $this->addBinding($bindings, 'select');
+        }
+        
+        return $this;
+    }
+    
+    
+    /**
+     * Add a subselect expression to the query.
+     *
+     * @param  \Closure|\Nova\Database\Query\Builder|string $query
+     * @param  string  $as
+     * @return \Nova\Database\Query\Builder|static
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function selectSub($query, $as)
+    {
+        if ($query instanceof Closure) {
+            $callback = $query;
+            $callback($query = $this->newQuery());
+        }
+        if ($query instanceof self) {
+            $bindings = $query->getBindings();
+            $query = $query->toSql();
+        } else if (is_string($query)) {
+            $bindings = array();
+        } else {
+            throw new \InvalidArgumentException();
+        }
+        return $this->selectRaw('('. $query .') as '.$this->grammar->wrap($as), $bindings);
     }
 
     /**
