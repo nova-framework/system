@@ -47,18 +47,23 @@ class Factory
      * Create a new Widget instance.
      *
      * @param  string  $signature
+     * @param array $parameters
      *
      * @return \Nova\Widget\Widget
      */
     public function make($signature)
     {
-        $className = Str::studly($signature);
+        $className = Str::studly($signature, array $parameters = array());
 
         $namespace = $this->determineNamespace($className);
 
         $widgetClass = $namespace .'\\' .$className;
 
-        return $this->app->make($widgetClass);
+        $widget = $this->app->make($widgetClass);
+
+        $widget->registerParameters($parameters);
+
+        return $widget;
     }
 
     /**
@@ -120,6 +125,11 @@ class Factory
         return $flattened;
     }
 
+    /**
+     * Returns the defined namespaces.
+     *
+     * @return array
+     */
     public function getNamespaces()
     {
         return $this->namespaces;
