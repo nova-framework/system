@@ -5,6 +5,7 @@ namespace Nova\Assets\Dispatchers;
 use Nova\Http\Response;
 use Nova\Assets\DispatcherInterface;
 use Nova\Support\Facades\Config;
+use Nova\Support\Facades\Module;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -87,29 +88,33 @@ class DefaultDispatcher implements DispatcherInterface
             $baseName = strtolower($matches[1]);
 
             //
-            $folder = $matches[2];
+            $moduleName = $matches[2];
 
-            if (($folder == 'adminlte') && ($baseName == 'themes')) {
+            if (($moduleName == 'adminlte') && ($baseName == 'themes')) {
                 // The Asset path is on the AdminLTE Template.
-                $folder = 'AdminLTE';
-            } else if (strlen($folder) > 3) {
+                $moduleName = 'AdminLTE';
+            } else if (strlen($moduleName) > 3) {
                 // A standard Template or Module name.
-                $folder = Str::studly($folder);
+                $moduleName = Str::studly($moduleName);
             } else {
                 // A short Template or Module name.
-                $folder = strtoupper($folder);
+                $moduleName = strtoupper($moduleName);
             }
 
             $path = str_replace('/', DS, $matches[3]);
 
             // Calculate the base path.
             if ($baseName == 'modules') {
-                $basePath = Config::get('modules.path', APPPATH .'Modules');
+                $module = Module::where('basename', $moduleName);
+
+                if (is_null($module)) return null;
+
+                $basePath = Module::resolveAssetsPath($module);
             } else {
                 $basePath = Config::get('view.templates.path', BASEPATH .'themes');
             }
 
-            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
+            $filePath = $basePath .DS .$moduleName .DS .'Assets' .DS .$path;
         } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 

@@ -9,44 +9,6 @@ use Nova\Support\Collection;
 
 class LocalRepository extends Repository
 {
-    /**
-     * Update cached repository of module information.
-     *
-     * @return bool
-     */
-    public function optimize()
-    {
-        $cachePath = $this->getCachePath();
-        $cache     = $this->getCache();
-        $basenames = $this->getAllBasenames();
-
-        $modules = collect();
-
-        $basenames->each(function ($module) use ($modules, $cache) {
-            $basename = collect(array('basename' => $module));
-
-            $temp = $basename->merge(collect($cache->get($module)));
-
-            $manifest = $temp->merge(collect($this->getManifest($module)));
-
-            $modules->put($module, $manifest);
-        });
-
-        $modules->each(function ($module) {
-            if (! $module->has('enabled')) {
-                $module->put('enabled', $this->config->get('modules.enabled', true));
-            }
-
-            if (! $module->has('order')) {
-                $module->put('order', 9001);
-            }
-
-            return $module;
-        });
-
-        //
-        $this->writeCache($modules);
-    }
 
     /**
      * Get all modules.
@@ -261,6 +223,54 @@ class LocalRepository extends Repository
         return $this->set($slug .'::enabled', false);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Optimization Methods
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    /**
+     * Update cached repository of module information.
+     *
+     * @return bool
+     */
+    public function optimize()
+    {
+        $cachePath = $this->getCachePath();
+        $cache     = $this->getCache();
+        $items     = $this->getAllModules();
+
+        $modules = collect();
+
+        $items->each(function ($item) use ($modules, $cache) {
+            $module = $item['basename'];
+
+            $collection = collect($item);
+
+            $temp = $collection->merge(collect($cache->get($module)));
+
+            $manifest = $temp->merge(collect($this->getManifest($item)));
+
+            $modules->put($module, $manifest);
+        });
+
+        $modules->each(function ($module) {
+            if (! $module->has('enabled')) {
+                $module->put('enabled', $this->config->get('modules.enabled', true));
+            }
+
+            if (! $module->has('order')) {
+                $module->put('order', 9001);
+            }
+
+            return $module;
+        });
+
+        //
+        $this->writeCache($modules);
+    }
+
     /**
      * Get the contents of the cache file.
      *
@@ -280,8 +290,6 @@ class LocalRepository extends Repository
             $this->writeCache($data);
 
             $this->optimize();
-
-            return $data;
         }
 
         //

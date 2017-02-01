@@ -895,7 +895,7 @@ class Factory
             try {
                 return $this->finder->find($path);
             }
-            catch (\InvalidArgumentException $e) {
+            catch (InvalidArgumentException $e) {
                 // Do nothing.
             }
         }
@@ -911,13 +911,17 @@ class Factory
      *
      * @return string
      */
-    protected function getModulePath($module)
+    protected function getModulePath($name)
     {
-        $config = $this->container['config'];
+        $modules = $this->container['modules'];
 
-        $basePath = $config->get('modules.path', BASEPATH .'modules');
+        $module = $modules->where('basename', $name);
 
-        return $basePath .DS .$module .DS;
+        if (! is_null($module)) {
+            return $modules->resolveFilesPath($module);
+        }
+
+        throw new InvalidArgumentException("Module not found [$module]");
     }
 
     /**

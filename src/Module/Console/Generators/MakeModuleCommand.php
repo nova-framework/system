@@ -5,7 +5,7 @@ namespace Nova\Module\Console\Generators;
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
 use Nova\Helpers\Inflector;
-use Nova\Module\ModuleRepository;
+use Nova\Module\ModuleManager;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -90,7 +90,7 @@ class MakeModuleCommand extends Command
     /**
      * The modules instance.
      *
-     * @var \Nova\Module\ModuleRepository
+     * @var \Nova\Module\ModuleManager
      */
     protected $module;
 
@@ -112,9 +112,9 @@ class MakeModuleCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \>Nova\Module\ModuleRepository    $module
+     * @param \>Nova\Module\ModuleManager    $module
      */
-    public function __construct(Filesystem $files, ModuleRepository $module)
+    public function __construct(Filesystem $files, ModuleManager $module)
     {
         parent::__construct();
 

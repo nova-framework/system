@@ -74,11 +74,11 @@ interface RepositoryInterface
     /**
      * Returns the modules defined manifest properties.
      *
-     * @param string $slug
+     * @param array $module
      *
      * @return Collection
      */
-    public function getManifest($slug);
+    public function getManifest(array $module);
 
     /**
      * Returns the given module property.

@@ -4,7 +4,7 @@ namespace Nova\Module\Console\Commands;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Module\ModuleRepository;
+use Nova\Module\ModuleManager;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,16 +29,16 @@ class ModuleSeedCommand extends Command
     protected $description = 'Seed the database with records for a specific or all modules';
 
     /**
-     * @var \Nova\Module\ModuleRepository
+     * @var \Nova\Module\ModuleManager
      */
     protected $module;
 
     /**
      * Create a new command instance.
      *
-     * @param \Nova\Module\ModuleRepository $module
+     * @param \Nova\Module\ModuleManager $module
      */
-    public function __construct(ModuleRepository $module)
+    public function __construct(ModuleManager $module)
     {
         parent::__construct();
 
