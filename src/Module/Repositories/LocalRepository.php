@@ -241,6 +241,7 @@ class LocalRepository extends Repository
         $cache     = $this->getCache();
         $items     = $this->getAllModules();
 
+        //
         $modules = collect();
 
         $items->each(function ($item) use ($modules, $cache) {
@@ -256,6 +257,8 @@ class LocalRepository extends Repository
         });
 
         $modules->each(function ($module) {
+            $module->put('id', crc32($module->get('slug')));
+
             if (! $module->has('enabled')) {
                 $module->put('enabled', $this->config->get('modules.enabled', true));
             }
@@ -285,9 +288,7 @@ class LocalRepository extends Repository
         $cachePath = $this->getCachePath();
 
         if (! $this->files->exists($cachePath)) {
-            $data = collect();
-
-            $this->writeCache($data);
+            $this->createCache();
 
             $this->optimize();
         }
@@ -296,6 +297,22 @@ class LocalRepository extends Repository
         $data = $this->files->getRequire($cachePath);
 
         return collect($data);
+    }
+
+    /**
+     * Create an empty instance of the cache file.
+     *
+     * @return Collection
+     */
+    private function createCache()
+    {
+        $cachePath = $this->getCachePath();
+
+        $collection = collect();
+
+        $this->writeCache($collection);
+
+        return $collection;
     }
 
     /**

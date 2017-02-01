@@ -88,33 +88,35 @@ class DefaultDispatcher implements DispatcherInterface
             $baseName = strtolower($matches[1]);
 
             //
-            $moduleName = $matches[2];
+            $pathName = $matches[2];
 
-            if (($moduleName == 'adminlte') && ($baseName == 'themes')) {
+            if (($pathName == 'adminlte') && ($baseName == 'themes')) {
                 // The Asset path is on the AdminLTE Template.
-                $moduleName = 'AdminLTE';
-            } else if (strlen($moduleName) > 3) {
+                $pathName = 'AdminLTE';
+            } else if (strlen($pathName) > 3) {
                 // A standard Template or Module name.
-                $moduleName = Str::studly($moduleName);
+                $pathName = Str::studly($pathName);
             } else {
                 // A short Template or Module name.
-                $moduleName = strtoupper($moduleName);
+                $pathName = strtoupper($pathName);
             }
 
             $path = str_replace('/', DS, $matches[3]);
 
             // Calculate the base path.
             if ($baseName == 'modules') {
-                $module = Module::where('basename', $moduleName);
+                $module = Module::where('basename', $pathName);
 
                 if (is_null($module)) return null;
 
                 $basePath = Module::resolveAssetsPath($module);
+
+                $filePath = $basePath .DS .$path;
             } else {
                 $basePath = Config::get('view.templates.path', BASEPATH .'themes');
-            }
 
-            $filePath = $basePath .DS .$moduleName .DS .'Assets' .DS .$path;
+                $filePath = $basePath .DS .$pathName .DS .'Assets' .DS .$path;
+            }
         } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 

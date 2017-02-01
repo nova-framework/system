@@ -45,7 +45,8 @@ abstract class Repository implements RepositoryInterface
     public function __construct(Config $config, Filesystem $files)
     {
         $this->config = $config;
-        $this->files  = $files;
+
+        $this->files = $files;
     }
 
     /**
@@ -67,7 +68,9 @@ abstract class Repository implements RepositoryInterface
             }
 
             $modules = $collection->map(function ($item, $key) {
-                $local = ! starts_with(str_replace(BASEPATH, '', $item), 'vendor');
+                $path = str_replace(BASEPATH, '', $item);
+
+                $local = ! starts_with($path, 'vendor');
 
                 return array('basename' => $key, 'path' => $item, 'local' => $local);
             });
@@ -100,10 +103,10 @@ abstract class Repository implements RepositoryInterface
             return collect(json_decode($contents, true));
         }
 
-        return $this->getPackageManifest($module);
+        return $this->getManifestFromPackage($module);
     }
 
-    protected function getPackageManifest(array $module)
+    protected function getManifestFromPackage(array $module)
     {
         $path = $module['path'] .'composer.json';
 
@@ -151,6 +154,7 @@ abstract class Repository implements RepositoryInterface
 
         $version = array_get($data, 'version_normalized', 'v1.0.0');
 
+        //
         if ($version == '9999999-dev') return __d('nova', 'development');
 
         return ltrim($version, 'v');
