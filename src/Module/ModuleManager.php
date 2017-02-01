@@ -64,9 +64,7 @@ class ModuleManager
     {
         $namespace = $this->resolveNamespace($properties);
 
-        $file = $this->repository->getPath() .DS .$namespace .DS .'Providers' .DS .$namespace .'ServiceProvider.php';
-
-        $serviceProvider = $this->repository->getNamespace() ."\\{$namespace}\\Providers\\{$namespace}ServiceProvider";
+        $serviceProvider = "{$namespace}\\Providers\\{$namespace}ServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
@@ -107,7 +105,7 @@ class ModuleManager
             $files = $properties['autoload'];
         }
 
-        $basePath = $this->resolveFilesPath($properties);
+        $basePath = $this->resolveClassesPath($properties);
 
         foreach ($files as $file) {
             $path = $basePath .$file;
@@ -125,7 +123,7 @@ class ModuleManager
     {
         if (isset($properties['namespace'])) return $properties['namespace'];
 
-        return Inflector::classify($properties['slug']);
+        throw new LogicException('Namespace not found');
     }
 
     /**
@@ -133,7 +131,7 @@ class ModuleManager
      *
      * @param array $properties
      */
-    public function resolveFilesPath($properties)
+    public function resolveClassesPath($properties)
     {
         $path = $properties['path'];
 

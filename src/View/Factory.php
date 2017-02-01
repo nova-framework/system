@@ -918,7 +918,7 @@ class Factory
         $module = $modules->where('basename', $name);
 
         if (! is_null($module)) {
-            return $modules->resolveFilesPath($module);
+            return $modules->resolveClassesPath($module);
         }
 
         throw new InvalidArgumentException("Module not found [$module]");
