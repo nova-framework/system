@@ -726,7 +726,7 @@ class Builder
 
         return $this;
     }
-    
+
     /**
      * Prevent the specified relations from being eager loaded.
      *
@@ -760,16 +760,26 @@ class Builder
         $relations = $this->parseRelations($relations);
 
         foreach ($relations as $name => $constraints) {
-            // First determine the count query for the given relationship,
-            // then run the constraints callback to get the final query.
-            // This query will be added as subSelect query.
+            $segments = explode(' ', $name);
+
+            if ((count($segments) == 3) && (Str::lower($segments[1]) == 'as')) {
+                list($name, $alias) = array($segments[0], $segments[2]);
+            } else {
+                unset($alias);
+            }
+
             $relation = $this->getHasRelationQuery($name);
 
+            // Here we will get the relationship count query and prepare to add it to the main query
+            // as a sub-select. First, we'll get the "has" query and use that to get the relation
+            // count query. We will normalize the relation name then append _count as the name.
             $query = $relation->getRelationCountQuery($relation->getRelated()->newQuery(), $this);
 
             call_user_func($constraints, $query);
 
-            $asColumn = snake_case($name) .'_count';
+            $this->mergeWheresToHas($query, $relation);
+
+            $asColumn = snake_case(isset($alias) ? $alias : $name) .'_count';
 
             $this->selectSub($query->getQuery(), $asColumn);
         }
