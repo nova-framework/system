@@ -109,9 +109,7 @@ class DefaultDispatcher implements DispatcherInterface
 
                 if ($module->isEmpty()) return null;
 
-                $basePath = Module::resolveAssetsPath($module);
-
-                $filePath = $basePath .DS .$path;
+                $filePath = Module::resolveAssetPath($module, $path);
             } else {
                 $basePath = Config::get('view.templates.path', BASEPATH .'themes');
 

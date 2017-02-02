@@ -130,6 +130,8 @@ class ModuleManager
      * Resolve the correct module files path.
      *
      * @param array $properties
+     *
+     * @return string
      */
     public function resolveClassPath($properties)
     {
@@ -145,17 +147,22 @@ class ModuleManager
     /**
      * Resolve the correct module files path.
      *
-     * @param array $properties
+     * @param array  $properties
+     * @param string $path
+     *
+     * @return string
      */
-    public function resolveAssetsPath($properties)
+    public function resolveAssetPath($properties, $path)
     {
-        $path = $properties['path'];
+        $basePath = $properties['path'];
 
         if ($properties['local'] === false) {
-            return $path .'assets';
+            $basePath .= 'assets';
+        } else {
+            $basePath .= 'Assets';
         }
 
-        return $path .'Assets';
+        return $basePath .DS .$path;
     }
 
     /**
