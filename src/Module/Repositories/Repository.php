@@ -56,33 +56,64 @@ abstract class Repository implements RepositoryInterface
      */
     protected function getAllModules()
     {
+        // Retrieve the Composer's Module information.
         $path = base_path('vendor/nova-modules.php');
+
+        $modules = collect();
 
         try {
             $data = $this->files->getRequire($path);
 
             if (isset($data['modules']) && is_array($data['modules'])) {
-                $collection = collect($data['modules']);
-            } else {
-                throw new InvalidArgumentException('Invalid modules data');
+                $modules = collect($data['modules']);
             }
-
-            $modules = $collection->map(function ($item, $key) {
-                $path = str_replace(BASEPATH, '', $item);
-
-                $local = ! starts_with($path, 'vendor');
-
-                return array('basename' => $key, 'path' => $item, 'local' => $local);
-            });
-
-            return $modules;
         }
         catch (FileNotFoundException $e) {
-            return collect(array());
+            // Do nothing.
+        }
+
+        // Retrieve the local Modules information.
+        $path = $this->getPath();
+
+        try {
+            $paths = collect($this->files->directories($path));
+
+            $paths->each(function ($path) use ($modules) {
+                $module = basename($path);
+
+                if (! $modules->has($module)) {
+                    $modules->put($module, $paths .DS);
+                }
+            });
         }
         catch (InvalidArgumentException $e) {
-            return collect(array());
+            // Do nothing.
         }
+
+        // Process the retrieved information to generate their records.
+        $items = $modules->map(function ($item, $key) {
+            $local = ! starts_with(str_replace(BASEPATH, '', $item), 'vendor');
+
+            return array('basename' => $key, 'path' => $item, 'local' => $local);
+        });
+
+        return $items->sortBy('basename');
+    }
+
+    protected function getLocalModules()
+    {
+        $path = $this->getPath();
+
+        $collection = collect($this->files->directories($path));
+
+        //
+        $modules = collect();
+
+        $collection->each(function ($item) use ($modules) {
+            $modules->put(basename($item), $item .DS);
+        });
+
+        return $modules;
     }
 
     /**
