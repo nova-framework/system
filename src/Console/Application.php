@@ -65,7 +65,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        $path = $this->nova['path'] .'/Boot/Forge.php';
+        $path = $this->nova['path'] .DS .'Boot' .DS .'Forge.php';
 
         if (file_exists($path)) {
             require $path;

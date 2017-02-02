@@ -36,7 +36,7 @@ trait MigrationTrait
         $modules = $this->nova['modules'];
 
         //
-        $path = $modules->getModulePath($module);
+        $path = $modules->getClassPath($module);
 
         return $path .'Database' .DS .'Migrations' .DS;
     }
