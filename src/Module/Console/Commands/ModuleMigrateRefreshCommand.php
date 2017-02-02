@@ -63,6 +63,7 @@ class ModuleMigrateRefreshCommand extends Command
         $this->call('module:migrate:reset', array(
             'slug'       => $slug,
             '--database' => $this->option('database'),
+            '--force'    => $this->option('force'),
             '--pretend'  => $this->option('pretend'),
         ));
 
