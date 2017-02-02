@@ -2,6 +2,8 @@
 
 namespace Nova\Module\Console;
 
+use InvalidArgumentException;
+
 
 trait MigrationTrait
 {
@@ -27,16 +29,19 @@ trait MigrationTrait
     /**
      * Get migration directory path.
      *
-     * @param string $module
+     * @param string $slug
      *
      * @return string
+     * @throws \InvalidArgumentException
      */
-    protected function getMigrationPath($module)
+    protected function getMigrationPath($slug)
     {
         $modules = $this->nova['modules'];
 
         //
-        $path = $modules->getClassPath($module);
+        $module = $modules->where('slug', $slug);
+
+        $path = $modules->resolveClassPath($module);
 
         return $path .'Database' .DS .'Migrations' .DS;
     }

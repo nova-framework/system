@@ -917,7 +917,7 @@ class Factory
 
         $module = $modules->where('basename', $name);
 
-        if (! is_null($module)) {
+        if (! $module->isEmpty()) {
             return $modules->resolveClassPath($module);
         }
 

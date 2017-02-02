@@ -107,7 +107,7 @@ class DefaultDispatcher implements DispatcherInterface
             if ($baseName == 'modules') {
                 $module = Module::where('basename', $pathName);
 
-                if (is_null($module)) return null;
+                if ($module->isEmpty()) return null;
 
                 $basePath = Module::resolveAssetsPath($module);
 
