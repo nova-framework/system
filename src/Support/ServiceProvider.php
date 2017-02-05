@@ -8,6 +8,8 @@
 
 namespace Nova\Support;
 
+use ReflectionClass;
+
 
 abstract class ServiceProvider
 {
@@ -43,6 +45,89 @@ abstract class ServiceProvider
      * @return void
      */
     abstract public function register();
+
+    /**
+     * Register the package's component namespaces.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @param  string  $path
+     * @return void
+     */
+    public function package($package, $namespace = null, $path = null)
+    {
+        $namespace = $this->getPackageNamespace($package, $namespace);
+
+        // In this method we will register the configuration package for the package
+        // so that the configuration options cleanly cascade into the application
+        // folder to make the developers lives much easier in maintaining them.
+        $path = $path ?: $this->guessPackagePath();
+
+        $config = $path .DS .'config';
+
+        if ($this->app['files']->isDirectory($config)) {
+            $this->app['config']->package($package, $config, $namespace);
+        }
+    }
+
+    /**
+     * Guess the package path for the provider.
+     *
+     * @return string
+     */
+    public function guessPackagePath()
+    {
+        $reflection = new ReflectionClass($this);
+
+        $path = $reflection->getFileName();
+
+        return realpath(dirname($path) .'/../../');
+    }
+
+    /**
+     * Guess the package namespace for the provider.
+     *
+     * @return string
+     */
+    public function guessPackageNamespace()
+    {
+        // Retrieve the Composer's Module information.
+        $filePath = base_path('vendor/nova-modules.php');
+
+        //
+        $modules = array();
+
+        try {
+            $data = $this->app['files']->getRequire($filePath);
+
+            if (isset($data['modules']) && is_array($data['modules'])) {
+                $modules = array_flip($data['modules']);
+            }
+        }
+        catch (FileNotFoundException $e) {
+            // Do nothing.
+        }
+
+        $path = $this->guessPackagePath() .DS;
+
+        return isset($modules[$path]) ? $modules[$path] : null;
+    }
+
+    /**
+     * Determine the namespace for a package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageNamespace($package, $namespace)
+    {
+        if (is_null($namespace)) {
+            list($vendor, $namespace) = explode('/', $package);
+        }
+
+        return $namespace;
+    }
 
     /**
      * Register the package's custom Forge commands.

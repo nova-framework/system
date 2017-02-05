@@ -126,12 +126,12 @@ class Factory
      *
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $module = null, $template = null)
+    public function make($view, $data = array(), $module = null, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Get the View file path.
-        $path = $this->findViewFile($view, $module, $template);
+        $path = $this->findViewFile($view, $module, $theme);
 
         // Normalize the View name.
         $domain = $module ?: 'App';
@@ -150,22 +150,22 @@ class Factory
      * Create a Layout instance
      *
      * @param string $view
-     * @param string|null $template
+     * @param string|null $theme
      *
      * @return \Nova\View\Layout
      */
-    public function makeLayout($view, $template = null)
+    public function makeLayout($view, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $template = $template ?: $this->container['config']->get('app.template');
+        $theme = $theme ?: $this->container['config']->get('app.theme');
 
         // Get the View file path.
-        $path = $this->findLayoutFile($view, $template);
+        $path = $this->findLayoutFile($view, $theme);
 
         // Normalize the Layout name.
-        $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
+        $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
 
         $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
 
@@ -830,17 +830,17 @@ class Factory
      *
      * @param    string  $view
      * @param    string  $module
-     * @param    string  $template
+     * @param    string  $theme
      *
      * @return    string
      */
-    protected function findViewFile($view, $module, $template = null)
+    protected function findViewFile($view, $module, $theme = null)
     {
         $viewPath = str_replace('/', DS, $view);
 
-        if (! is_null($template)) {
+        if (! is_null($theme)) {
             // Try to find the View file on the override locations.
-            $basePath = $this->getTemplatePath($template) .'Override' .DS;
+            $basePath = $this->getThemePath($theme) .'Override' .DS;
 
             if (! is_null($module)) {
                 $basePath .= 'Modules' .DS .$module .DS;
@@ -874,16 +874,16 @@ class Factory
      * Find the Layout file.
      *
      * @param    string     $view
-     * @param    string     $template
+     * @param    string     $theme
      *
      * @return    string
      */
-    protected function findLayoutFile($view, $template)
+    protected function findLayoutFile($view, $theme)
     {
         $viewPath = str_replace('/', DS, $view);
 
         // Calculate the base path to the Layout files.
-        $basePath = $this->getTemplatePath($template) .'Layouts';
+        $basePath = $this->getThemePath($theme) .'Layouts';
 
         // Find the Layout file depending on the Language direction.
         $language = $this->getCurrentLanguage();
@@ -929,13 +929,13 @@ class Factory
      *
      * @return string
      */
-    protected function getTemplatePath($template)
+    protected function getThemePath($theme)
     {
         $config = $this->container['config'];
 
         $basePath = $config->get('view.templates.path', BASEPATH .'themes');
 
-        return $basePath .DS .$template .DS;
+        return $basePath .DS .$theme .DS;
     }
 
     /**
