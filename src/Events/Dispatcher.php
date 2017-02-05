@@ -184,8 +184,11 @@ class Dispatcher
     {
         $responses = array();
 
-        //
-        if (! is_array($payload)) $payload = array($payload);
+        if (is_object($event)) {
+            list($payload, $event) = array(array($event), get_class($event));
+        } else if (! is_array($payload)) {
+            $payload = array($payload);
+        }
 
         $this->firing[] = $event;
 
