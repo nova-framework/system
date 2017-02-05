@@ -52,7 +52,7 @@ if (! function_exists('resource_url'))
     }
 }
 
-if (! function_exists('template_url'))
+if (! function_exists('theme_url'))
 {
     /**
      * Theme URL helper
