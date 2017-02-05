@@ -159,7 +159,7 @@ class Factory
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $theme = $theme ?: $this->container['config']->get('app.theme');
+        $theme = $theme ?: $this->getDefaultTheme();
 
         // Get the View file path.
         $path = $this->findLayoutFile($view, $theme);
@@ -936,6 +936,18 @@ class Factory
         $basePath = $config->get('view.templates.path', BASEPATH .'themes');
 
         return $basePath .DS .$theme .DS;
+    }
+
+    /**
+     * Return the default Theme, configured on Application.
+     *
+     * @return string
+     */
+    protected function getDefaultTheme()
+    {
+        $config = $this->container['config'];
+
+        return $config->get('app.theme', 'Default');
     }
 
     /**
