@@ -41,4 +41,14 @@ interface LoaderInterface
      */
     public function getNamespaces();
 
+    /**
+     * Apply any cascades to an array of package options.
+     *
+     * @param  string  $environment
+     * @param  string  $package
+     * @param  string  $group
+     * @param  array   $items
+     * @return array
+     */
+    public function cascadePackage($environment, $package, $group, $items);
 }

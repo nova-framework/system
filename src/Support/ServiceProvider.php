@@ -8,6 +8,8 @@
 
 namespace Nova\Support;
 
+use Nova\Helpers\Inflector;
+
 use ReflectionClass;
 
 
@@ -63,7 +65,7 @@ abstract class ServiceProvider
         // folder to make the developers lives much easier in maintaining them.
         $path = $path ?: $this->guessPackagePath();
 
-        $config = $path .DS .'config';
+        $config = $path .DS .'Config';
 
         if ($this->app['files']->isDirectory($config)) {
             $this->app['config']->package($package, $config, $namespace);
@@ -81,7 +83,7 @@ abstract class ServiceProvider
 
         $path = $reflection->getFileName();
 
-        return realpath(dirname($path) .'/../../');
+        return realpath(dirname($path) .'/../');
     }
 
     /**

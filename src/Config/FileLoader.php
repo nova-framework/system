@@ -3,6 +3,7 @@
 namespace Nova\Config;
 
 use Nova\Filesystem\Filesystem;
+use Nova\Helpers\Inflector;
 
 
 class FileLoader implements LoaderInterface
@@ -117,7 +118,7 @@ class FileLoader implements LoaderInterface
      */
     public function exists($group, $namespace = null)
     {
-        $key = $group.$namespace;
+        $key = $group .$namespace;
 
         //
         $group = ucfirst($group);
@@ -146,6 +147,61 @@ class FileLoader implements LoaderInterface
         $exists = $this->files->exists($file);
 
         return $this->exists[$key] = $exists;
+    }
+
+    /**
+     * Apply any cascades to an array of Package options.
+     *
+     * @param  string  $env
+     * @param  string  $package
+     * @param  string  $group
+     * @param  array   $items
+     * @return array
+     */
+    public function cascadePackage($env, $package, $group, $items)
+    {
+        $package = Inflector::classify(str_replace('-', '_', $package));
+
+        $group = ucfirst($group);
+
+        // First we will look for a configuration file in the packages configuration
+        // folder. If it exists, we will load it and merge it with these original
+        // options so that we will easily "cascade" a package's configurations.
+        $file = str_replace('/', DS, "Packages/{$package}/{$group}.php");
+
+        if ($this->files->exists($path = $this->defaultPath .DS .$file)) {
+            $items = array_merge(
+                $items, $this->getRequire($path)
+            );
+        }
+
+        // Once we have merged the regular package configuration we need to look for
+        // an environment specific configuration file. If one exists, we will get
+        // the contents and merge them on top of this array of options we have.
+        $path = $this->getPackagePath($env, $package, $group);
+
+        if ($this->files->exists($path)) {
+            $items = array_merge(
+                $items, $this->getRequire($path)
+            );
+        }
+
+        return $items;
+    }
+
+    /**
+     * Get the Package path for an environment and group.
+     *
+     * @param  string  $env
+     * @param  string  $package
+     * @param  string  $group
+     * @return string
+     */
+    protected function getPackagePath($env, $package, $group)
+    {
+        $file = str_replace('/', DS, "Packages/{$package}/{$env}/{$group}.php");
+
+        return $this->defaultPath .DS .$file;
     }
 
     /**
