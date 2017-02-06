@@ -144,7 +144,7 @@ class MakeModuleCommand extends Command
         $this->container['name']      = Str::studly($slug);
         $this->container['namespace'] = Str::studly($slug);
 
-        $this->container['version']     = '1.0';
+        $this->container['version']     = '1.0.0';
         $this->container['description'] = 'This is the description for the ' .$this->container['name'] .' module.';
         $this->container['license']     = 'MIT';
         $this->container['author']      = 'John Doe';
