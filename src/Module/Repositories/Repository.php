@@ -82,7 +82,22 @@ abstract class Repository implements RepositoryInterface
                 $module = basename($path);
 
                 if (! $modules->has($module)) {
-                    $modules->put($module, $paths .DS);
+                    // Determine the local Package version.
+                    $filePath = $path .DS .'module.json';
+
+                    if (is_readable($filePath)) {
+                        $properties = json_decode(file_get_contents($filePath), true);
+
+                        $version = $properties['version'];
+                    } else {
+                        $version = '0.0.0';
+                    }
+
+                    $modules->put($module, array(
+                        'path'     => $path .DS,
+                        'version'  => $version,
+                        'location' => 'local',
+                    ));
                 }
             });
         }
@@ -91,10 +106,10 @@ abstract class Repository implements RepositoryInterface
         }
 
         // Process the retrieved information to generate their records.
-        $items = $modules->map(function ($item, $key) {
-            $local = ! starts_with(str_replace(BASEPATH, '', $item), 'vendor');
+        $items = $modules->map(function ($properties, $key) {
+            $properties['basename'] = $key;
 
-            return array('basename' => $key, 'path' => $item, 'local' => $local);
+            return $properties;
         });
 
         return $items->sortBy('basename');
@@ -109,8 +124,23 @@ abstract class Repository implements RepositoryInterface
         //
         $modules = collect();
 
-        $collection->each(function ($item) use ($modules) {
-            $modules->put(basename($item), $item .DS);
+        $collection->each(function ($path) use ($modules) {
+            // Determine the local Package version.
+            $filePath = $path .DS .'module.json';
+
+            if (is_readable($filePath)) {
+                $properties = json_decode(file_get_contents($filePath), true);
+
+                $version = $properties['version'];
+            } else {
+                $version = '0.0.0';
+            }
+
+            $modules->put($module, array(
+                'path'     => $path .DS,
+                'version'  => $version,
+                'location' => 'local',
+            ));
         });
 
         return $modules;
@@ -125,7 +155,7 @@ abstract class Repository implements RepositoryInterface
      */
     public function getManifest(array $module)
     {
-        if ($module['local'] === true) {
+        if ($module['location'] === 'local') {
             // A local Module; retrieve the Manifest from its module.json
             $path = $module['path'] .'module.json';
 
@@ -143,52 +173,89 @@ abstract class Repository implements RepositoryInterface
 
         $contents = $this->files->get($path);
 
-        $data = json_decode($contents, true);
+        $composer = json_decode($contents, true);
 
         //
+        $package = array_get($composer, 'name');
+
         $name = array_get($module, 'basename');
 
-        if ($data['type'] !== 'nova-module') {
-            throw new LogicException("The Composer package [$name] is not a Nova module");
+        if ($composer['type'] !== 'nova-module') {
+            throw new LogicException("The Composer Package [$package] is not a Nova module");
         }
 
         $slug = Inflector::tableize(str_replace('/', '_', $name));
 
-        $version = $this->getPackageVersion($data['name']);
+        $version = $this->getComposerPackageVersion($package);
 
         $properties = array(
             'name'        => $name,
             'version'     => $version,
-            'description' => array_get($data, 'description'),
-            'homepage'    => array_get($data, 'homepage'),
-            'authors'     => array_get($data, 'authors'),
-            'license'     => array_get($data, 'license'),
+            'description' => array_get($composer, 'description'),
+            'homepage'    => array_get($composer, 'homepage'),
+            'authors'     => array_get($composer, 'authors'),
+            'license'     => array_get($composer, 'license'),
             'namespace'   => str_replace('/', '\\', $name),
-            'slug'        => array_get($data, 'extra.slug', $slug),
-            'order'       => array_get($data, 'extra.order', 9001),
+            'slug'        => array_get($composer, 'extra.slug', $slug),
+            'order'       => array_get($composer, 'extra.order', 9001),
         );
+
+        // Parse the optional AUTOLOAD entry.
+        $autoload = array_get($composer, 'extra.autoload');
+
+        if (! is_null($autoload) && is_array($autoload)) {
+            $properties['autoload'] = $autoload;
+        }
 
         return collect($properties);
     }
 
-    protected function getPackageVersion($name)
+    /**
+     * Get the name for a Package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageName($package)
     {
-        if (! isset($this->installed)) {
-            $path = base_path('vendor/composer/installed.json');
-
-            $contents = $this->files->get($path);
-
-            $this->installed = collect(json_decode($contents, true));
+        if (strpos($package, '/') === false) {
+            return $package;
         }
 
-        $data = $this->installed->where('name', $name)->first();
+        list($vendor, $namespace) = explode('/', $package);
 
-        $version = array_get($data, 'version_normalized', 'v1.0.0');
+        return $namespace;
+    }
 
-        //
-        if ($version == '9999999-dev') return __d('nova', 'development');
+    protected function getComposerPackageVersion($package)
+    {
+        $packages = $this->getInstalledComposerPackages();
+
+        $properties = $packages->where('name', $package)->first();
+
+        $version = array_get($properties, 'version_normalized', 'v1.0.0');
+
+        if ($version == '9999999-dev') {
+            return __d('nova', 'development');
+        }
 
         return ltrim($version, 'v');
+    }
+
+    protected function getInstalledComposerPackages()
+    {
+        if (isset($this->installed)) return $this->installed;
+
+        $path = base_path('vendor/composer/installed.json');
+
+        if ($this->files->exists($path)) {
+            $contents = $this->files->get($path);
+
+            return $this->installed = collect(json_decode($contents, true));
+        }
+
+        throw new LogicException("The Composer file [$path] does not exists");
     }
 
     /**

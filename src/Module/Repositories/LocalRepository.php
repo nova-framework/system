@@ -329,7 +329,11 @@ class LocalRepository extends Repository
         $data = array();
 
         foreach ($modules->all() as $key => $module) {
-            $data[$key] = ($module instanceof Collection) ? $module->all() : $module;
+             $properties = ($module instanceof Collection) ? $module->all() : $module;
+
+             ksort($properties);
+
+             $data[$key] = $properties;
         }
 
         //

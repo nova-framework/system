@@ -100,15 +100,17 @@ class ModuleManager
     protected function autoloadFiles($properties)
     {
         if (isset($properties['autoload']) && is_array($properties['autoload'])) {
-            $files = $properties['autoload'];
+            $autoload = $properties['autoload'];
+
+            if (empty($autoload)) return;
         } else {
-            $files = array('Config.php', 'Events.php', 'Filters.php', 'Routes.php', 'Bootstrap.php');
+            $autoload = array('config', 'events', 'filters', 'routes', 'bootstrap');
         }
 
         $basePath = $this->resolveClassPath($properties);
 
-        foreach ($files as $file) {
-            $path = $basePath .$file;
+        foreach ($autoload as $name) {
+            $path = $basePath .ucfirst($name) .'.php';
 
             if (is_readable($path)) require $path;
         }
@@ -137,7 +139,7 @@ class ModuleManager
     {
         $path = $properties['path'];
 
-        if ($properties['local'] === false) {
+        if ($properties['location'] === 'vendor') {
             $path .= 'src' .DS;
         }
 
@@ -156,7 +158,7 @@ class ModuleManager
     {
         $basePath = $properties['path'];
 
-        if ($properties['local'] === false) {
+        if ($properties['location'] === 'vendor') {
             $basePath .= 'assets';
         } else {
             $basePath .= 'Assets';
