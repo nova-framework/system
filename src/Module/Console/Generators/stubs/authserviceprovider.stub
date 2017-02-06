@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}\{{namespace}}\Providers;
+namespace {{path}}{{namespace}}\Providers;
 
 use Nova\Auth\Access\GateInterface as Gate;
 use Nova\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -14,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = array(
-        '{{path}}\{{namespace}}\Models\SomeModel' => '{{path}}\{{namespace}}\Policies\ModelPolicy',
+        '{{path}}{{namespace}}\Models\SomeModel' => '{{path}}{{namespace}}\Policies\ModelPolicy',
     );
 
 

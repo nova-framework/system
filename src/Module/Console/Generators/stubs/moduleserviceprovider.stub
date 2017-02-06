@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}\{{namespace}}\Providers;
+namespace {{path}}{{namespace}}\Providers;
 
 use Nova\Support\ServiceProvider;
 
@@ -35,9 +35,9 @@ class {{namespace}}ServiceProvider extends ServiceProvider
     public function register()
     {
         // Register additional Service Providers.
-        $this->app->register('{{path}}\{{namespace}}\Providers\AuthServiceProvider');
-        $this->app->register('{{path}}\{{namespace}}\Providers\EventServiceProvider');
-        $this->app->register('{{path}}\{{namespace}}\Providers\RouteServiceProvider');
+        $this->app->register('{{path}}{{namespace}}\Providers\AuthServiceProvider');
+        $this->app->register('{{path}}{{namespace}}\Providers\EventServiceProvider');
+        $this->app->register('{{path}}{{namespace}}\Providers\RouteServiceProvider');
     }
 
 }
