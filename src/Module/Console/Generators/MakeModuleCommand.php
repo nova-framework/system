@@ -402,9 +402,10 @@ return array (
             '{{path}}'
         );
 
+        // Prepare the (namespace) path.
         $path = $this->module->getNamespace();
 
-        if (! empty($path)) $path .= .'\\';
+        if (! empty($path)) $path .= '\\';
 
         $replaces = array(
             $this->container['slug'],
