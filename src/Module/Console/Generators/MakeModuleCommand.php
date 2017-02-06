@@ -36,6 +36,7 @@ class MakeModuleCommand extends Command
      */
     protected $moduleFolders = array(
         'Assets/',
+        'Config/',
         'Assets/css/',
         'Assets/images/',
         'Assets/js/',

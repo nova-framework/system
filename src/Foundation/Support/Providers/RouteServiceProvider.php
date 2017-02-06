@@ -9,6 +9,14 @@ use Nova\Support\ServiceProvider;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
+     * The Controller namespace for the application.
+     *
+     * @var string|null
+     */
+    protected $namespace;
+
+
+    /**
      * Bootstrap any application services.
      *
      * @return void
@@ -40,7 +48,14 @@ class RouteServiceProvider extends ServiceProvider
     {
         $router = $this->app['router'];
 
-        return require $path;
+        if (is_null($this->namespace)) {
+            return require $path;
+        }
+
+        $router->group(array('namespace' => $this->namespace), function (Router $router) use ($path)
+        {
+            require $path;
+        });
     }
 
     /**
