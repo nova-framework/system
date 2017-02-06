@@ -23,7 +23,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $subscribe = array();
 
-    
+
     /**
      * Register the application's event listeners.
      *
@@ -41,6 +41,19 @@ class EventServiceProvider extends ServiceProvider
         foreach ($this->subscribe as $subscriber) {
             $events->subscribe($subscriber);
         }
+    }
+
+    /**
+     * Load the standard Events file for the application.
+     *
+     * @param  string  $path
+     * @return mixed
+     */
+    protected function loadEventsFrom($path)
+    {
+        $events = $this->app['events'];
+
+        return require $path;
     }
 
     /**

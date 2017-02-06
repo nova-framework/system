@@ -30,11 +30,6 @@ abstract class Repository implements RepositoryInterface
      */
     protected $path;
 
-    /**
-     * @var \Nova\Support\Collection|null;
-     */
-    protected $installed;
-
 
     /**
      * Constructor method.
@@ -115,37 +110,6 @@ abstract class Repository implements RepositoryInterface
         return $items->sortBy('basename');
     }
 
-    protected function getLocalModules()
-    {
-        $path = $this->getPath();
-
-        $collection = collect($this->files->directories($path));
-
-        //
-        $modules = collect();
-
-        $collection->each(function ($path) use ($modules) {
-            // Determine the local Package version.
-            $filePath = $path .DS .'module.json';
-
-            if (is_readable($filePath)) {
-                $properties = json_decode(file_get_contents($filePath), true);
-
-                $version = $properties['version'];
-            } else {
-                $version = '0.0.0';
-            }
-
-            $modules->put($module, array(
-                'path'     => $path .DS,
-                'version'  => $version,
-                'location' => 'local',
-            ));
-        });
-
-        return $modules;
-    }
-
     /**
      * Get a module's manifest contents.
      *
@@ -186,7 +150,7 @@ abstract class Repository implements RepositoryInterface
 
         $slug = Inflector::tableize(str_replace('/', '_', $name));
 
-        $version = $this->getComposerPackageVersion($package);
+        $version = ltrim($module['version'], 'v');
 
         $properties = array(
             'name'        => $name,
@@ -199,13 +163,6 @@ abstract class Repository implements RepositoryInterface
             'slug'        => array_get($composer, 'extra.slug', $slug),
             'order'       => array_get($composer, 'extra.order', 9001),
         );
-
-        // Parse the optional AUTOLOAD entry.
-        $autoload = array_get($composer, 'extra.autoload');
-
-        if (! is_null($autoload) && is_array($autoload)) {
-            $properties['autoload'] = $autoload;
-        }
 
         return collect($properties);
     }
@@ -226,36 +183,6 @@ abstract class Repository implements RepositoryInterface
         list($vendor, $namespace) = explode('/', $package);
 
         return $namespace;
-    }
-
-    protected function getComposerPackageVersion($package)
-    {
-        $packages = $this->getInstalledComposerPackages();
-
-        $properties = $packages->where('name', $package)->first();
-
-        $version = array_get($properties, 'version_normalized', 'v1.0.0');
-
-        if ($version == '9999999-dev') {
-            return __d('nova', 'development');
-        }
-
-        return ltrim($version, 'v');
-    }
-
-    protected function getInstalledComposerPackages()
-    {
-        if (isset($this->installed)) return $this->installed;
-
-        $path = base_path('vendor/composer/installed.json');
-
-        if ($this->files->exists($path)) {
-            $contents = $this->files->get($path);
-
-            return $this->installed = collect(json_decode($contents, true));
-        }
-
-        throw new LogicException("The Composer file [$path] does not exists");
     }
 
     /**

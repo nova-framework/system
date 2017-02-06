@@ -46,8 +46,6 @@ class ModuleManager
             $this->registerServiceProvider($properties);
 
             $this->registerWidgetsNamespace($properties);
-
-            $this->autoloadFiles($properties);
         });
     }
 
@@ -90,30 +88,6 @@ class ModuleManager
         $namespace = $this->repository->getNamespace() ."\\{$namespace}\\Widgets";
 
         $widgets->register($namespace);
-    }
-
-    /**
-     * Autoload custom module files.
-     *
-     * @param array $properties
-     */
-    protected function autoloadFiles($properties)
-    {
-        if (isset($properties['autoload']) && is_array($properties['autoload'])) {
-            $autoload = $properties['autoload'];
-
-            if (empty($autoload)) return;
-        } else {
-            $autoload = array('config', 'events', 'filters', 'routes', 'bootstrap');
-        }
-
-        $basePath = $this->resolveClassPath($properties);
-
-        foreach ($autoload as $name) {
-            $path = $basePath .ucfirst($name) .'.php';
-
-            if (is_readable($path)) require $path;
-        }
     }
 
     /**

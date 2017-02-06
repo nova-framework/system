@@ -21,7 +21,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(Router $router)
     {
         $this->loadRoutes();
     }
@@ -33,13 +33,15 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function loadRoutes()
     {
+        if (! method_exists($this, 'map')) return;
+
         $router = $this->app['router'];
 
         call_user_func_array(array($this, 'map'), array($router));
     }
 
     /**
-     * Load the standard routes file for the application.
+     * Load the standard Routes file for the application.
      *
      * @param  string  $path
      * @return mixed
@@ -56,6 +58,21 @@ class RouteServiceProvider extends ServiceProvider
         {
             require $path;
         });
+    }
+
+    /**
+     * Load the standard Route Filters file for the application.
+     *
+     * @param  string  $path
+     * @return mixed
+     */
+    protected function loadFiltersFrom($path)
+    {
+        $app = $this->app;
+
+        $router = $app['router'];
+
+        return require $path;
     }
 
     /**
