@@ -61,10 +61,10 @@ class MakeModuleCommand extends Command
      * @var array
      */
     protected $moduleFiles = array(
+        'Config/Config.php',
         'Database/Seeds/{{namespace}}DatabaseSeeder.php',
         'Providers/{{namespace}}ServiceProvider.php',
         'Bootstrap.php',
-        'Config.php',
         'Events.php',
         'Filters.php',
         'Routes.php',
@@ -77,10 +77,10 @@ class MakeModuleCommand extends Command
      * @var array
      */
     protected $moduleStubs = array(
+        'config',
         'seeder',
         'moduleserviceprovider',
         'bootstrap',
-        'config',
         'events',
         'filters',
         'routes',
