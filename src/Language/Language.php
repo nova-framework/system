@@ -83,8 +83,6 @@ class Language
         }
 
         //
-        $templates = Config::get('view.templates.path', BASEPATH .'themes');
-
         $module = Module::where('basename', $pathName);
 
         if ($pathName == 'Nova') {
@@ -93,8 +91,6 @@ class Language
             $basePath = BASEPATH .'shared' .DS;
         } else if (! $module->isEmpty()) {
             $basePath = Module::resolveClassPath($module);
-        } else if (is_dir($templates .DS .$pathName)) {
-            $basePath = $templates .DS .$pathName .DS;
         } else {
             $basePath = APPPATH;
         }

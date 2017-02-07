@@ -52,34 +52,6 @@ if (! function_exists('resource_url'))
     }
 }
 
-if (! function_exists('theme_url'))
-{
-    /**
-     * Theme URL helper
-     * @param string $path
-     * @param string $theme
-     * @return string
-     */
-    function theme_url($path, $theme = null)
-    {
-        $config = app('config');
-
-        $theme = $theme ?: $config['app']['theme'];
-
-        if ('adminlte' == Str::lower($theme)) {
-            $theme = 'adminlte';
-        } else if (Str::length($theme) > 3) {
-            $theme = Str::snake($theme, '-');
-        } else {
-            $theme = Str::lower($theme);
-        }
-
-        $path = sprintf('themes/%s/assets/%s', $theme, ltrim($path, '/'));
-
-        return url($path);
-    }
-}
-
 if (! function_exists('vendor_url'))
 {
     /**

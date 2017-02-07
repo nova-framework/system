@@ -84,16 +84,13 @@ class DefaultDispatcher implements DispatcherInterface
         // Calculate the Asset File path, looking for a valid one.
         $uri = $request->path();
 
-        if (preg_match('#^(themes|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 
             //
-            $pathName = $matches[2];
+            $pathName = $matches[1];
 
-            if (($pathName == 'adminlte') && ($baseName == 'themes')) {
-                // The Asset path is on the AdminLTE Template.
-                $pathName = 'AdminLTE';
-            } else if (strlen($pathName) > 3) {
+            if (strlen($pathName) > 3) {
                 // A standard Template or Module name.
                 $pathName = Str::studly($pathName);
             } else {
@@ -101,20 +98,14 @@ class DefaultDispatcher implements DispatcherInterface
                 $pathName = strtoupper($pathName);
             }
 
-            $path = str_replace('/', DS, $matches[3]);
+            $path = str_replace('/', DS, $matches[2]);
 
             // Calculate the base path.
-            if ($baseName == 'modules') {
-                $module = Module::where('basename', $pathName);
+            $module = Module::where('basename', $pathName);
 
-                if ($module->isEmpty()) return null;
+            if ($module->isEmpty()) return null;
 
-                $filePath = Module::resolveAssetPath($module, $path);
-            } else {
-                $basePath = Config::get('view.templates.path', BASEPATH .'themes');
-
-                $filePath = $basePath .DS .$pathName .DS .'Assets' .DS .$path;
-            }
+            $filePath = Module::resolveAssetPath($module, $path);
         } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 

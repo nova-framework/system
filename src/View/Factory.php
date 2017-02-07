@@ -98,6 +98,27 @@ class Factory
      */
     protected $renderCount = 0;
 
+    /**
+     *  Cached information about Modules.
+     *
+     * @var array
+     */
+    protected $module = array();
+
+    /**
+     * Cached information about the default Theme.
+     *
+     * @var string|null
+     */
+    protected $defaultTheme;
+
+    /**
+     * Cached information about the current Language.
+     *
+     * @var \Nova\Language\Language
+     */
+    protected $language;
+
 
     /**
      * Create new View Factory instance.
@@ -123,6 +144,7 @@ class Factory
      * @param string $path
      * @param mixed $data
      * @param string|null $module
+     * @param string|null $theme
      *
      * @return \Nova\View\View
      */
@@ -150,22 +172,22 @@ class Factory
      * Create a Layout instance
      *
      * @param string $view
-     * @param string|null $theme
+     * @param string|null $module
      *
      * @return \Nova\View\Layout
      */
-    public function makeLayout($view, $theme = null)
+    public function makeLayout($view, $module = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $theme = $theme ?: $this->getDefaultTheme();
+        $module = $module ?: $this->getDefaultTheme();
 
         // Get the View file path.
-        $path = $this->findLayoutFile($view, $theme);
+        $path = $this->findLayoutFile($view, $module);
 
         // Normalize the Layout name.
-        $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
+        $name = 'Layout/' .$module .'::' .str_replace('/', '.', $view);
 
         $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
 
@@ -840,7 +862,7 @@ class Factory
 
         if (! is_null($theme)) {
             // Try to find the View file on the override locations.
-            $basePath = $this->getThemePath($theme) .'Override' .DS;
+            $basePath = $this->getModulePath($theme) .'Overrides' .DS;
 
             if (! is_null($module)) {
                 $basePath .= 'Modules' .DS .$module .DS;
@@ -874,19 +896,19 @@ class Factory
      * Find the Layout file.
      *
      * @param    string     $view
-     * @param    string     $theme
+     * @param    string     $module
      *
      * @return    string
      */
-    protected function findLayoutFile($view, $theme)
+    protected function findLayoutFile($view, $module)
     {
         $viewPath = str_replace('/', DS, $view);
 
         // Calculate the base path to the Layout files.
-        $basePath = $this->getThemePath($theme) .'Layouts';
+        $basePath = $this->getModulePath($module) .'Layouts';
 
         // Find the Layout file depending on the Language direction.
-        $language = $this->getCurrentLanguage();
+        $language = $this->getLanguage();
 
         if ($language->direction() == 'rtl') {
             // Search for the Layout file used on the RTL languages.
@@ -913,29 +935,19 @@ class Factory
      */
     protected function getModulePath($name)
     {
+        if (isset($this->modules[$name])) {
+            return $this->modules[$name];
+        }
+
         $modules = $this->container['modules'];
 
         $module = $modules->where('basename', $name);
 
         if (! $module->isEmpty()) {
-            return $modules->resolveClassPath($module);
+            return $this->modules[$name] = $modules->resolveClassPath($module);
         }
 
-        throw new InvalidArgumentException("Module not found [$module]");
-    }
-
-    /**
-     * Return the current Modules path.
-     *
-     * @return string
-     */
-    protected function getThemePath($theme)
-    {
-        $config = $this->container['config'];
-
-        $basePath = $config->get('view.templates.path', BASEPATH .'themes');
-
-        return $basePath .DS .$theme .DS;
+        throw new InvalidArgumentException("Module not found [$name]");
     }
 
     /**
@@ -945,9 +957,13 @@ class Factory
      */
     protected function getDefaultTheme()
     {
+        if (isset($this->defaultTheme)) {
+            return $this->defaultTheme;
+        }
+
         $config = $this->container['config'];
 
-        return $config->get('app.theme', 'Default');
+        return $this->defaultTheme = $config->get('app.theme', 'Default');
     }
 
     /**
@@ -955,11 +971,15 @@ class Factory
      *
      * @return \Language\Language
      */
-    protected function getCurrentLanguage()
+    protected function getLanguage()
     {
+        if (isset($this->language)) {
+            return $this->language;
+        }
+
         $language = $this->container['language'];
 
-        return $language->instance();
+        return $this->language = $language->instance();
     }
 
 }
