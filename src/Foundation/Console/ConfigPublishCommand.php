@@ -64,27 +64,9 @@ class ConfigPublishCommand extends Command
 
         if (! $proceed) return;
 
-        if (! is_null($path = $this->getPath())) {
-            $this->config->publish($package, $path);
-        } else {
-            $this->config->publishPackage($package);
-        }
+        $this->config->publishPackage($package);
 
         $this->output->writeln('<info>Configuration published for package:</info> '.$package);
-    }
-
-    /**
-     * Get the specified path to the files.
-     *
-     * @return string
-     */
-    protected function getPath()
-    {
-        $path = $this->input->getOption('path');
-
-        if (! is_null($path)) {
-            return $this->nova['path.base'] .DS .$path;
-        }
     }
 
     /**
@@ -95,7 +77,7 @@ class ConfigPublishCommand extends Command
     protected function getArguments()
     {
         return array(
-            array('package', InputArgument::REQUIRED, 'The name of the package being published.'),
+            array('package', InputArgument::REQUIRED, 'The configuration namespace of the package being published.'),
         );
     }
 
@@ -107,7 +89,6 @@ class ConfigPublishCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path to the configuration files.', null),
             array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when the file already exists.'),
         );
     }

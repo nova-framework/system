@@ -44,9 +44,7 @@ class PublisherServiceProvider extends ServiceProvider
             // Once we have created the configuration publisher, we will set the default
             // package path on the object so that it knows where to find the packages
             // that are installed for the application and can move them to the app.
-            $publisher = new ConfigPublisher($app['files'], $path);
-
-            $publisher->setPackagePath($app['path.base'] .DS .'vendor');
+            $publisher = new ConfigPublisher($app['files'], $app['config'], $path);
 
             return $publisher;
         });

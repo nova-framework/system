@@ -2,17 +2,26 @@
 
 namespace Nova\Foundation;
 
+use Nova\Config\Repository as Config;
 use Nova\Filesystem\Filesystem;
+use Nova\Helpers\Inflector;
 
 
 class ConfigPublisher
 {
     /**
-     * The filesystem instance.
+     * The Filesystem instance.
      *
      * @var \Nova\Filesystem\Filesystem
      */
     protected $files;
+
+    /**
+     * The Config Repository instance.
+     *
+     * @var \Nova\Config\Repository
+     */
+    protected $config;
 
     /**
      * The destination of the config files.
@@ -20,13 +29,6 @@ class ConfigPublisher
      * @var string
      */
     protected $publishPath;
-
-    /**
-     * The path to the application's packages.
-     *
-     * @var string
-     */
-    protected $packagePath;
 
 
     /**
@@ -36,9 +38,11 @@ class ConfigPublisher
      * @param  string  $publishPath
      * @return void
      */
-    public function __construct(Filesystem $files, $publishPath)
+    public function __construct(Filesystem $files, Config $config, $publishPath)
     {
         $this->files = $files;
+
+        $this->config = $config;
 
         $this->publishPath = $publishPath;
     }
@@ -66,14 +70,12 @@ class ConfigPublisher
      * @param  string  $packagePath
      * @return bool
      */
-    public function publishPackage($package, $packagePath = null)
+    public function publishPackage($package)
     {
         // First we will figure out the source of the package's configuration location
         // which we do by convention. Once we have that we will move the files over
         // to the "main" configuration directory for this particular application.
-        $path = $packagePath ?: $this->packagePath;
-
-        $source = $this->getSource($package, $path);
+        $source = $this->getSource($package);
 
         return $this->publish($package, $source);
     }
@@ -82,16 +84,17 @@ class ConfigPublisher
      * Get the source configuration directory to publish.
      *
      * @param  string  $package
-     * @param  string  $packagePath
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    protected function getSource($package, $packagePath)
+    protected function getSource($package)
     {
-        $source = $packagePath .str_replace('/', DS, "/{$package}/src/Config");
+        $namespaces = $this->config->getNamespaces();
 
-        if (! $this->files->isDirectory($source)) {
+        $source = isset($namespaces[$package]) ? $namespaces[$package] : null;
+
+        if (is_null($source) || ! $this->files->isDirectory($source)) {
             throw new \InvalidArgumentException("Configuration not found.");
         }
 
@@ -132,18 +135,15 @@ class ConfigPublisher
      */
     public function getDestinationPath($package)
     {
-        return $this->publishPath .str_replace('/', DS, "/Packages/{$package}");
-    }
+        $packages = $this->config->getPackages();
 
-    /**
-     * Set the default package path.
-     *
-     * @param  string  $packagePath
-     * @return void
-     */
-    public function setPackagePath($packagePath)
-    {
-        $this->packagePath = $packagePath;
+        $namespace = isset($packages[$package]) ? $packages[$package] : null;
+
+        if (is_null($namespace)) {
+            throw new \InvalidArgumentException("Configuration not found.");
+        }
+
+        return $this->publishPath .str_replace('/', DS, "/Packages/{$namespace}");
     }
 
 }

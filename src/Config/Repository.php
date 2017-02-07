@@ -190,7 +190,7 @@ class Repository extends NamespacedItemResolver implements ArrayAccess
         // If the namespace is registered as a package, we will just assume the group
         // is equal to the namespace since all packages cascade in this way having
         // a single file per package, otherwise we'll just parse them as normal.
-        if (in_array($namespace, $this->packages)) {
+        if (array_key_exists($namespace, $this->packages)) {
             return $this->parsePackageSegments($key, $namespace, $item);
         }
 
@@ -231,7 +231,7 @@ class Repository extends NamespacedItemResolver implements ArrayAccess
     {
         $namespace = $this->getPackageNamespace($package, $namespace);
 
-        $this->packages[] = $namespace;
+        $this->packages[$namespace] = $package;
 
         // First we will simply register the namespace with the repository so that it
         // can be loaded. Once we have done that we'll register an after namespace
@@ -352,6 +352,16 @@ class Repository extends NamespacedItemResolver implements ArrayAccess
     public function getAfterLoadCallbacks()
     {
         return $this->afterLoad;
+    }
+
+    /**
+     * Get the current configuration packages.
+     *
+     * @return string
+     */
+    public function getPackages()
+    {
+        return $this->packages;
     }
 
     /**

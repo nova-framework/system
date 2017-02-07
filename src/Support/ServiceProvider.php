@@ -65,6 +65,7 @@ abstract class ServiceProvider
         // folder to make the developers lives much easier in maintaining them.
         $path = $path ?: $this->guessPackagePath();
 
+        // Determine the Package Configuration path.
         $config = $path .DS .'Config';
 
         if ($this->app['files']->isDirectory($config)) {
@@ -87,35 +88,6 @@ abstract class ServiceProvider
     }
 
     /**
-     * Guess the package namespace for the provider.
-     *
-     * @return string
-     */
-    public function guessPackageNamespace()
-    {
-        // Retrieve the Composer's Module information.
-        $filePath = base_path('vendor/nova-modules.php');
-
-        //
-        $modules = array();
-
-        try {
-            $data = $this->app['files']->getRequire($filePath);
-
-            if (isset($data['modules']) && is_array($data['modules'])) {
-                $modules = array_flip($data['modules']);
-            }
-        }
-        catch (FileNotFoundException $e) {
-            // Do nothing.
-        }
-
-        $path = $this->guessPackagePath() .DS;
-
-        return isset($modules[$path]) ? $modules[$path] : null;
-    }
-
-    /**
      * Determine the namespace for a package.
      *
      * @param  string  $package
@@ -126,6 +98,8 @@ abstract class ServiceProvider
     {
         if (is_null($namespace)) {
             list($vendor, $namespace) = explode('/', $package);
+
+            return Inflector::tableize($namespace);
         }
 
         return $namespace;

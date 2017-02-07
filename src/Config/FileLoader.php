@@ -160,8 +160,6 @@ class FileLoader implements LoaderInterface
      */
     public function cascadePackage($env, $package, $group, $items)
     {
-        $package = Inflector::classify(str_replace('-', '_', $package));
-
         $group = ucfirst($group);
 
         // First we will look for a configuration file in the packages configuration
