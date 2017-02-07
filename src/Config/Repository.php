@@ -213,7 +213,7 @@ class Repository extends NamespacedItemResolver implements ArrayAccess
         // assume that we should implicitly use the config file matching the name
         // of the namespace. Generally packages should use one type or another.
         if (! $this->loader->exists($itemSegments[0], $namespace)) {
-            return array($namespace, 'Config', $item);
+            return array($namespace, 'config', $item);
         }
 
         return parent::parseNamespacedSegments($key);
