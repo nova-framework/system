@@ -402,11 +402,6 @@ return array (
             '{{path}}'
         );
 
-        // Prepare the (namespace) path.
-        $path = $this->module->getNamespace();
-
-        if (! empty($path)) $path .= '\\';
-
         $replaces = array(
             $this->container['slug'],
             $this->container['name'],
@@ -417,7 +412,7 @@ return array (
             $this->container['email'],
             $this->container['homepage'],
             $this->container['license'],
-            $path,
+            $this->module->getNamespace(),
         );
 
         return str_replace($searches, $replaces, $content);

@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}{{namespace}};
+namespace {{path}}\{{namespace}};
 
 use Nova\Database\ORM\Model;
 
