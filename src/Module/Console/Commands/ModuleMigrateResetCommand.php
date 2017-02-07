@@ -85,6 +85,8 @@ class ModuleMigrateResetCommand extends Command
             $modules = $this->module->enabled()->reverse();
 
             foreach ($modules as $module) {
+                $this->comment('Resetting the migrations of Module: ' .$module['name']);
+
                 $this->reset($module['slug']);
             }
         }

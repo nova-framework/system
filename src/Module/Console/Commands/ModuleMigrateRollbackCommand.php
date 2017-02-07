@@ -67,6 +67,8 @@ class ModuleMigrateRollbackCommand extends Command
         }
 
         foreach ($this->module->all() as $module) {
+            $this->comment('Rollback the last migration from Module: ' .$module['name']);
+
             $this->rollback($module['slug']);
         }
     }

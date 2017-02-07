@@ -85,6 +85,8 @@ class ModuleMigrateCommand extends Command
             }
 
             foreach ($modules as $module) {
+                $this->comment('Migrating the Module: ' .$module['name']);
+
                 $this->migrate($module['slug']);
             }
         }
