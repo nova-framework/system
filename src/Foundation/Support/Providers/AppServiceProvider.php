@@ -7,7 +7,6 @@ use Nova\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-
     /**
      * Bootstrap the Application
      */
@@ -18,4 +17,11 @@ class AppServiceProvider extends ServiceProvider
         return require $path;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function register()
+    {
+        //
+    }
 }
