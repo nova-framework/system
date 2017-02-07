@@ -2,6 +2,7 @@
 
 use Nova\Support\Arr;
 use Nova\Support\Collection;
+use Nova\Support\Module;
 use Nova\Support\Str;
 use Nova\View\Expression;
 
@@ -93,6 +94,37 @@ if (! function_exists('vendor_url'))
         $path = sprintf('vendor/%s/%s', $vendor, $path);
 
         return url($path);
+    }
+}
+
+if (! function_exists('module_path'))
+{
+    /**
+     * Return the path to the given module file.
+     *
+     * @param string $module
+     * @param string $path
+     *
+     * @return string
+     */
+    function module_path($module, $path = '')
+    {
+        $modules = app('modules');
+
+        //
+        $properties = $modules->where('basename', $module);
+
+        if (! $properties->isEmpty()) {
+            $result = $modules->resolveClassPath($properties);
+        } else {
+            throw new InvalidArgumentException("Module not found [$module]");
+        }
+
+        if (! empty($path)) {
+            $result .= str_replace('/', DS, $path);
+        }
+
+        return realpath($result);
     }
 }
 
