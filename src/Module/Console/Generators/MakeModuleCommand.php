@@ -64,9 +64,9 @@ class MakeModuleCommand extends Command
     protected $moduleFiles = array(
         'Config/Config.php',
         'Database/Seeds/{{namespace}}DatabaseSeeder.php',
-        'Providers/{{namespace}}ServiceProvider.php',
         'Providers/AuthServiceProvider.php',
         'Providers/EventServiceProvider.php',
+        'Providers/ModuleServiceProvider.php',
         'Providers/RouteServiceProvider.php',
         'Bootstrap.php',
         'Events.php',
@@ -83,9 +83,9 @@ class MakeModuleCommand extends Command
     protected $moduleStubs = array(
         'config',
         'seeder',
-        'moduleserviceprovider',
         'authserviceprovider',
         'eventserviceprovider',
+        'moduleserviceprovider',
         'routeserviceprovider',
         'bootstrap',
         'events',

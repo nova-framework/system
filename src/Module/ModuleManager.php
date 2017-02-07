@@ -62,7 +62,7 @@ class ModuleManager
     {
         $namespace = $this->resolveNamespace($properties);
 
-        $serviceProvider = "{$namespace}\\Providers\\{$namespace}ServiceProvider";
+        $serviceProvider = "{$namespace}\\Providers\\ModuleServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
