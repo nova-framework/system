@@ -8,6 +8,14 @@ use Nova\Support\ServiceProvider;
 class ModuleServiceProvider extends ServiceProvider
 {
     /**
+     * The provider class names.
+     *
+     * @var array
+     */
+    protected $providers = array();
+
+
+    /**
      * Bootstrap any application services.
      *
      * @return void
@@ -17,24 +25,10 @@ class ModuleServiceProvider extends ServiceProvider
         //
     }
 
-    /**
-     * Load the standard config file for the module.
-     *
-     * @return void
-     */
-    protected function loadConfig()
+    protected function bootstrapFrom($path)
     {
-        //
-    }
+        $app = $this->app;
 
-    /**
-     * Load the standard config file for the module.
-     *
-     * @param  string  $path
-     * @return mixed
-     */
-    protected function loadConfigFrom($path)
-    {
         return require $path;
     }
 
@@ -45,7 +39,9 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        foreach ($this->providers as $provider) {
+            $this->app->register($provider);
+        }
     }
 
 }
