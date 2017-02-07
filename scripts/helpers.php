@@ -2,7 +2,6 @@
 
 use Nova\Support\Arr;
 use Nova\Support\Collection;
-use Nova\Support\Module;
 use Nova\Support\Str;
 use Nova\View\Expression;
 
