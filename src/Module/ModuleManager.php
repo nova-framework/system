@@ -6,6 +6,8 @@ use Nova\Helpers\Inflector;
 use Nova\Foundation\Application;
 use Nova\Module\RepositoryInterface;
 
+use LogicException;
+
 
 class ModuleManager
 {
