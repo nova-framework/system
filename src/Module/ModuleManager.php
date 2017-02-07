@@ -77,11 +77,17 @@ class ModuleManager
      * @param string $properties
      *
      * @return string
-     *
-     * @throws \Nova\Module\FileMissingException
      */
     protected function registerWidgetsNamespace($properties)
     {
+        $basePath = $this->resolveClassPath($properties);
+
+        // Determine the Widgets location for the requested Module.
+        $path = $basePath .'Widgets';
+
+        if (! is_dir($path)) return;
+
+        // Retrieve the Widgets Manager instance.
         $widgets = $this->app['widgets'];
 
         //
