@@ -74,7 +74,7 @@ abstract class Repository implements RepositoryInterface
             $paths = collect($this->files->directories($path));
 
             $paths->each(function ($path) use ($modules) {
-                $module = basename($path);
+                $module = 'Modules/' .basename($path);
 
                 if (! $modules->has($module)) {
                     // Determine the local Package version.
@@ -102,7 +102,9 @@ abstract class Repository implements RepositoryInterface
 
         // Process the retrieved information to generate their records.
         $items = $modules->map(function ($properties, $key) {
-            $properties['basename'] = $key;
+            $properties['name'] = $key;
+
+            $properties['basename'] = basename($key);
 
             return $properties;
         });
@@ -142,7 +144,7 @@ abstract class Repository implements RepositoryInterface
         //
         $package = array_get($composer, 'name');
 
-        $name = array_get($module, 'basename');
+        $name = array_get($module, 'name');
 
         if ($composer['type'] !== 'nova-module') {
             throw new LogicException("The Composer Package [$package] is not a Nova module");

@@ -85,7 +85,7 @@ class ModuleManager
         //
         $namespace = $this->resolveNamespace($properties);
 
-        $namespace = $this->repository->getNamespace() ."\\{$namespace}\\Widgets";
+        $namespace = "{$namespace}\\Widgets";
 
         $widgets->register($namespace);
     }
