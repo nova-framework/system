@@ -51,9 +51,11 @@ class Language
 
 
     /**
-     * Language constructor.
+     * Create an new Language instance.
+     *
      * @param string $domain
      * @param string $code
+     * @param string $path
      */
     public function __construct(LanguageManager $manager, $domain, $code)
     {
@@ -75,35 +77,24 @@ class Language
 
         $this->domain = $domain;
 
-        //
-        if (strtolower($domain) == 'adminlte') {
-            $pathName = 'AdminLTE';
+        // Determine the current Language file path.
+        $namespaces = $manager->getNamespaces();
+
+        if (array_key_exists($domain, $namespaces)) {
+            $basePath = $namespaces[$domain];
         } else {
-            $pathName = Inflector::classify($domain);
+            // When the Domain does not exists, fallback to the App's path.
+            $basePath = $namespaces['app'];
         }
 
         //
-        $module = Module::where('basename', $pathName);
-
-        if ($pathName == 'Nova') {
-            $basePath = SYSPATH;
-        } else if ($pathName == 'Shared') {
-            $basePath = BASEPATH .'shared' .DS;
-        } else if (! $module->isEmpty()) {
-            $basePath = Module::resolveClassPath($module);
-        } else {
-            $basePath = APPPATH;
-        }
-
-        $filePath = $basePath .'Language' .DS .strtoupper($code) .DS .'messages.php';
+        $filePath = $basePath .DS .strtoupper($code) .DS .'messages.php';
 
         // Check if the language file is readable.
-        if (! is_readable($filePath)) {
-            return;
-        }
+        if (! is_readable($filePath)) return;
 
         // Get the Domain's messages from the Language file.
-        $messages = include($filePath);
+        $messages = require $filePath;
 
         // A final consistency check.
         if (is_array($messages) && ! empty($messages)) {

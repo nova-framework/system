@@ -69,6 +69,15 @@ class ModuleManager
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
         }
+
+        // Determine the Package Widgets path.
+        $path = $this->resolveClassPath($properties) .'Widgets';
+
+        $hasWidgets = array_get($properties, 'has-widgets', true);
+
+        if ($hasWidgets && $this->app['files']->isDirectory($path)) {
+            $this->registerWidgetsNamespace($properties);
+        }
     }
 
     /**
@@ -80,18 +89,11 @@ class ModuleManager
      */
     protected function registerWidgetsNamespace($properties)
     {
-        // Register the Widgets namespace only when is requested.
-        if (array_get($properties, 'has-widgets', true) === false) return;
-
-        // Retrieve the Widgets Manager instance.
-        $widgets = $this->app['widgets'];
-
-        //
         $namespace = $this->resolveNamespace($properties);
 
         $namespace = "{$namespace}\\Widgets";
 
-        $widgets->register($namespace);
+        $this->app['widgets']->register($namespace);
     }
 
     /**

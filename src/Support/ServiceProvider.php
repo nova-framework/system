@@ -71,6 +71,13 @@ abstract class ServiceProvider
         if ($this->app['files']->isDirectory($config)) {
             $this->app['config']->package($package, $config, $namespace);
         }
+
+        // Determine the Package Language path.
+        $language = $path .DS .'Language';
+
+        if ($this->app['files']->isDirectory($language)) {
+            $this->app['language']->package($package, $language, $namespace);
+        }
     }
 
     /**
