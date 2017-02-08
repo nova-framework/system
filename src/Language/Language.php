@@ -8,10 +8,7 @@
 
 namespace Nova\Language;
 
-use Nova\Helpers\Inflector;
 use Nova\Language\LanguageManager;
-use Nova\Support\Facades\Config;
-use Nova\Support\Facades\Module;
 
 use MessageFormatter;
 
