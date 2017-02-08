@@ -3,6 +3,7 @@
 namespace Nova\Assets;
 
 use Nova\Foundation\Application;
+use Nova\Support\Facades\Module;
 
 use JShrink\Minifier as JShrink;
 
@@ -108,10 +109,7 @@ class AssetsManager
             //
             $folder = $matches[2];
 
-            if (($folder == 'adminlte') && ($baseName == 'templates')) {
-                // The Asset path is on the AdminLTE Template.
-                $folder = 'AdminLTE';
-            } else if (strlen($folder) > 3) {
+            if (strlen($folder) > 3) {
                 // A standard Template or Module name.
                 $folder = studly_case($folder);
             } else {
@@ -122,13 +120,11 @@ class AssetsManager
             $path = str_replace('/', DS, $matches[3]);
 
             // Calculate the base path.
-            if ($baseName == 'modules') {
-                $basePath = $this->config->get('modules.path', APPPATH .'Modules');
-            } else {
-                $basePath = APPPATH .'Templates';
-            }
+            $module = Module::where('basename', $pathName);
 
-            $filePath = $basePath .DS .$folder .DS .'Assets' .DS .$path;
+            if ($module->isEmpty()) return null;
+
+            $filePath = Module::resolveAssetPath($module, $path);
         } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
             $baseName = strtolower($matches[1]);
 
