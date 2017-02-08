@@ -83,9 +83,7 @@ class LanguageManager
         $id = $locale .'/' .$domain;
 
         // Returns the Language domain instance, if it already exists.
-        if (isset($this->instances[$id])) {
-            return $this->instances[$id];
-        }
+        if (isset($this->instances[$id])) return $this->instances[$id];
 
         return $this->instances[$id] = new Language($this, $domain, $locale);
     }
