@@ -164,6 +164,8 @@ abstract class Repository implements RepositoryInterface
             'namespace'   => str_replace('/', '\\', $name),
             'slug'        => array_get($composer, 'extra.slug', $slug),
             'order'       => array_get($composer, 'extra.order', 9001),
+            'has-layouts' => array_get($composer, 'extra.has-layouts', false),
+            'has-widgets' => array_get($composer, 'extra.has-widgets', true),
         );
 
         return collect($properties);

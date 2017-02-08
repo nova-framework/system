@@ -80,12 +80,8 @@ class ModuleManager
      */
     protected function registerWidgetsNamespace($properties)
     {
-        $basePath = $this->resolveClassPath($properties);
-
-        // Determine the Widgets location for the requested Module.
-        $path = $basePath .'Widgets';
-
-        if (! is_dir($path)) return;
+        // Register the Widgets namespace only when is requested.
+        if (array_get($properties, 'has-widgets', true) === false) return;
 
         // Retrieve the Widgets Manager instance.
         $widgets = $this->app['widgets'];

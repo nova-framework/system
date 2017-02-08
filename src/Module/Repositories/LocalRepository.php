@@ -267,6 +267,16 @@ class LocalRepository extends Repository
                 $module->put('order', 9001);
             }
 
+            // Setup the options, if they does not exists.
+
+            if (! $module->has('has-layouts')) {
+                $module->put('has-layouts', false);
+            }
+
+            if (! $module->has('has-widgets')) {
+                $module->put('has-widgets', true);
+            }
+
             return $module;
         });
 
