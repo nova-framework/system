@@ -107,6 +107,7 @@ class MakeCommand extends CommandGenerator
 
         if ($this->module->exists($slug)) {
             $this->modulePath = $this->module->getPath();
+
             $this->moduleInfo = collect($this->module->where('slug', $slug));
 
             $this->container['slug'] = $slug;
@@ -127,6 +128,8 @@ class MakeCommand extends CommandGenerator
     {
         foreach ($this->listFiles as $key => $file) {
             $filePath = $this->makeFilePath($this->listFolders[$key], $this->container['name']);
+
+            echo var_export($filePath) ."\n";
 
             $this->resolveByPath($filePath);
 
@@ -241,7 +244,7 @@ class MakeCommand extends CommandGenerator
         $name = ltrim($name, '\/');
         $name = rtrim($name, '\/');
 
-        return $this->modulePath .DS .$this->moduleInfo->get('namespace') .DS .$folder .DS .$name;
+        return $this->modulePath .DS .$this->moduleInfo->get('basename') .DS .$folder .DS .$name;
     }
 
     /**
