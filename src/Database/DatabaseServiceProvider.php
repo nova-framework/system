@@ -11,7 +11,7 @@ namespace Nova\Database;
 use Nova\Database\ORM\Model;
 use Nova\Database\ConnectionFactory;
 use Nova\Database\DatabaseManager;
-use Nova\Database\Model as BasicModel;
+use Nova\Database\Classic\Model as ClassicModel;
 use Nova\Support\ServiceProvider;
 
 
@@ -33,8 +33,8 @@ class DatabaseServiceProvider extends ServiceProvider
 
         Model::setEventDispatcher($events);
 
-        // Setup the (basic) Model.
-        BasicModel::setConnectionResolver($db);
+        // Setup the classic Model.
+        ClassicModel::setConnectionResolver($db);
     }
 
     /**

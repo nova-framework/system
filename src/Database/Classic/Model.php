@@ -1,17 +1,17 @@
 <?php
 /**
- * Model - A simple Database Model.
+ * Model - A classic Database Model.
  *
  * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
+ * @version 4.0
  */
 
-namespace Nova\Database;
+namespace Nova\Database\Classic;
 
 use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
 use Nova\Database\Query\Builder as QueryBuilder;
-use Nova\Database\Query as Builder;
+use Nova\Database\Classic\Builder;
 use Nova\Support\Str;
 
 
@@ -84,8 +84,7 @@ class Model
      */
     public function all($columns = array('*'))
     {
-        return $this->newQuery()
-            ->get($columns);
+        return $this->newQuery()->get($columns);
     }
 
     /**
@@ -97,8 +96,7 @@ class Model
      */
     public function find($id, $columns = array('*'))
     {
-        return $this->newQuery()
-            ->find($id, $columns);
+        return $this->newQuery()->find($id, $columns);
     }
 
     /**
@@ -110,8 +108,7 @@ class Model
      */
     public function findMany($ids, $columns = array('*'))
     {
-        return $this->newQuery()
-            ->findMany($ids, $columns);
+        return $this->newQuery()->findMany($ids, $columns);
     }
 
     /**
@@ -122,8 +119,7 @@ class Model
      */
     public function insert(array $values)
     {
-        return $this->newQuery()
-            ->insertGetId($values);
+        return $this->newQuery()->insertGetId($values);
     }
 
     /**
