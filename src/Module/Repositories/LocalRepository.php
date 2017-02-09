@@ -3,7 +3,7 @@
 namespace Nova\Module\Repositories;
 
 use Nova\Helpers\Inflector;
-use Nova\Module\Repositories\Repository;
+use Nova\Module\Repository;
 use Nova\Support\Collection;
 
 

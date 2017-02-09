@@ -34,7 +34,7 @@ class ModuleServiceProvider extends ServiceProvider
 
         //
         $this->app->bindShared('modules', function ($app) {
-            $repository = $app->make('Nova\Module\Contracts\RepositoryInterface');
+            $repository = $app->make('Nova\Module\RepositoryInterface');
 
             return new ModuleManager($app, $repository);
         });
