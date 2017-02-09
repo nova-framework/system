@@ -4,7 +4,7 @@ namespace Nova\Module;
 
 use Nova\Helpers\Inflector;
 use Nova\Foundation\Application;
-use Nova\Module\Contracts\RepositoryInterface;
+use Nova\Module\Repositories\RepositoryInterface;
 
 use LogicException;
 
