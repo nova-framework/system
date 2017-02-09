@@ -77,25 +77,22 @@ class Language
         // Determine the current Language file path.
         $namespaces = $manager->getNamespaces();
 
-        if (array_key_exists($domain, $namespaces)) {
-            $basePath = $namespaces[$domain];
-        } else {
-            // When the Domain does not exists, fallback to the App's path.
-            $basePath = $namespaces['app'];
-        }
-
-        //
-        $filePath = $basePath .DS .strtoupper($code) .DS .'messages.php';
-
         // Check if the language file is readable.
-        if (! is_readable($filePath)) return;
+        if (! array_key_exists($domain, $namespaces)) return;
 
-        // Get the Domain's messages from the Language file.
-        $messages = require $filePath;
+        // Determine the Language(s) path.
+        $basePath = $namespaces[$domain] .'Language' .DS;
 
-        // A final consistency check.
-        if (is_array($messages) && ! empty($messages)) {
-            $this->messages = $messages;
+        $filePath = $basePath .strtoupper($code) .DS .'messages.php';
+
+        if (is_readable($filePath)) {
+            // The requested language file exists; retrieve the messages from it.
+            $messages = require $filePath;
+
+            // A final consistency check of the messages, before setting them.
+            if (is_array($messages) && ! empty($messages)) {
+                $this->messages = $messages;
+            }
         }
     }
 
