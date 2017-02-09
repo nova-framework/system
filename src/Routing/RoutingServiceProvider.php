@@ -19,23 +19,11 @@ class RoutingServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $config = $this->app['config'];
-
-        // Register the Assets Dispatcher.
-        $driver = $config->get('assets.driver', 'default');
-
-        if ($driver == 'custom') {
-            $className = $config->get('assets.dispatcher');
-        } else {
-            $className = 'Nova\Routing\Assets\Dispatchers\\' .ucfirst($driver) .'Dispatcher';
-        }
-
-        // Bind the calculated class name to the Assets Dispatcher Interface.
-        $this->app->bind('Nova\Routing\Assets\DispatcherInterface', $className);
+        $this->registerAssetDispatcher();
     }
 
     /**
-     * Register the service provider.
+     * Register the Service Provider.
      *
      * @return void
      */
@@ -143,4 +131,26 @@ class RoutingServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Register the Assets Dispatcher.
+     *
+     * @return void
+     */
+    protected function registerAssetDispatcher()
+    {
+        $config = $this->app['config'];
+
+        // Retrieve the configured Assets Dispatcher driver.
+        $driver = $config->get('assets.driver', 'default');
+
+        if ($driver == 'custom') {
+            $className = $config->get('assets.dispatcher');
+        } else {
+            $className = 'Nova\Routing\Assets\Dispatchers\\' .ucfirst($driver) .'Dispatcher';
+        }
+
+        // Bind the calculated class name to the Assets Dispatcher Interface.
+        $this->app->bind('Nova\Routing\Assets\DispatcherInterface', $className);
+    }
+    
 }
