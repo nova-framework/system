@@ -146,7 +146,7 @@ class AssetManager
      * @param  string  $uri
      * @return string|null
      */
-    public function resolvePath($uri)
+    public function dispatch($uri)
     {
         foreach ($this->routes as $pattern => $callback) {
             if (preg_match('#^' .$pattern .'$#i', $uri, $matches)) {
@@ -394,7 +394,7 @@ class AssetManager
         foreach ($files as $file) {
             $uri = $this->assetUri($file);
 
-            $path = $this->resolvePath($uri);
+            $path = $this->dispatch($uri);
 
             if (is_null($path)) continue;
 

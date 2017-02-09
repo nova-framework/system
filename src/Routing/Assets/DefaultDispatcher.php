@@ -84,12 +84,15 @@ class DefaultDispatcher implements DispatcherInterface
         if (in_array($request->method(), array('GET', 'HEAD'))) {
             $uri = $request->path();
 
-            $response = $this->container['assets']->resolvePath($uri);
+            $response = $this->container['assets']->dispatch($uri);
         }
 
         if (is_string($response) && ! empty($response)) {
             return $this->serve($response, $request);
-        } else if ($response instanceof SymfonyResponse) {
+        }
+
+        // Was return a Symfony Response instance, we should return it.
+        else if ($response instanceof SymfonyResponse) {
             return $response;
         }
     }
