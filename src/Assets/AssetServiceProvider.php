@@ -2,11 +2,11 @@
 
 namespace Nova\Assets;
 
-use Nova\Assets\Assets\Manager;
+use Nova\Assets\AssetManager;
 use Nova\Support\ServiceProvider;
 
 
-class AssetsServiceProvider extends ServiceProvider
+class AssetServiceProvider extends ServiceProvider
 {
 
     /**
@@ -60,7 +60,7 @@ class AssetsServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('assets', function($app)
         {
-            return new AssetsManager($app);
+            return new AssetManager($app);
         });
     }
 

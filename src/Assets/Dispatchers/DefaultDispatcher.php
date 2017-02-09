@@ -72,12 +72,11 @@ class DefaultDispatcher implements DispatcherInterface
     {
         // For proper Assets serving, the file URI should be either of the following:
         //
-        // /templates/default/assets/css/style.css
-        // /modules/blog/assets/css/style.css
         // /assets/css/style.css
+        // /modules/blog/assets/css/style.css
 
         if (! in_array($request->method(), array('GET', 'HEAD'))) {
-            // The Request Method is not valid for Asset Files.
+            // The Request Method is not valid for an Asset File.
             return null;
         }
 
@@ -85,9 +84,8 @@ class DefaultDispatcher implements DispatcherInterface
         $uri = $request->path();
 
         if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
+            $path = str_replace('/', DS, $matches[2]);
 
-            //
             $pathName = $matches[1];
 
             if (strlen($pathName) > 3) {
@@ -97,8 +95,6 @@ class DefaultDispatcher implements DispatcherInterface
                 // A short Template or Module name.
                 $pathName = strtoupper($pathName);
             }
-
-            $path = str_replace('/', DS, $matches[2]);
 
             // Calculate the base path.
             $module = Module::where('basename', $pathName);

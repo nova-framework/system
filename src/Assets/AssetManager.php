@@ -8,8 +8,15 @@ use Nova\Support\Facades\Module;
 use JShrink\Minifier as JShrink;
 
 
-class AssetsManager
+class AssetManager
 {
+    /**
+     * All of the named path hints.
+     *
+     * @var array
+     */
+    protected $hints = array();
+
     /**
      * The valid Vendor paths.
      * @var array
@@ -60,12 +67,12 @@ class AssetsManager
      */
     public function __construct(Application $app)
     {
-        $this->config = $app['config'];
+        $this->config = $config = $app['config'];
 
         $this->files = $app['files'];
 
         // Prepare the base URI (for cache files).
-        $this->baseUri = $this->config->get('assets.cache.baseUri', 'cache');
+        $this->baseUri = $config->get('assets.cache.baseUri', 'cache');
 
         // Prepare the base path (for cache files).
         $basePath = str_replace('/', DS, $this->baseUri);
@@ -73,7 +80,7 @@ class AssetsManager
         $this->basePath = WEBPATH .$basePath .DS;
 
         // Prepare the valid vendor paths.
-        $paths = $this->config->get('assets.paths', array());
+        $paths = $config->get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
     }
@@ -103,21 +110,18 @@ class AssetsManager
 
     public function getFilePath($uri)
     {
-        if (preg_match('#^(templates|modules)/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
+        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $path = str_replace('/', DS, $matches[2]);
 
-            //
-            $folder = $matches[2];
+            $pathName = $matches[1];
 
             if (strlen($folder) > 3) {
                 // A standard Template or Module name.
-                $folder = studly_case($folder);
+                $pathName = studly_case($folder);
             } else {
                 // A short Template or Module name.
-                $folder = strtoupper($folder);
+                $pathName = strtoupper($folder);
             }
-
-            $path = str_replace('/', DS, $matches[3]);
 
             // Calculate the base path.
             $module = Module::where('basename', $pathName);
@@ -259,7 +263,7 @@ class AssetsManager
         $remote = array();
 
         //
-        $siteUrl = $this->config['app.url'];
+        $siteUrl = $this->config->get('app.url');
 
         foreach ($files as $file) {
             if (starts_with($file, $siteUrl)) {
