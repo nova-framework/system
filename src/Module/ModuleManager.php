@@ -46,6 +46,8 @@ class ModuleManager
         $modules->each(function ($properties) {
             $this->registerServiceProvider($properties);
 
+            $this->registerAssetsNamespace($properties);
+
             $this->registerWidgetsNamespace($properties);
         });
     }
@@ -67,6 +69,28 @@ class ModuleManager
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
+        }
+    }
+
+    /**
+     * Register the Module Service Provider.
+     *
+     * @param string $properties
+     *
+     * @return string
+     */
+    protected function registerAssetsNamespace($properties)
+    {
+        if ($properties['location'] === 'vendor') {
+            $name = 'assets';
+        } else {
+            $name = 'Assets';
+        }
+
+        $path = $properties['path'] .$name;
+
+        if ($this->app['files']->isDirectory($path)) {
+            $this->app['assets']->addNamespace($properties['slug'], $path);
         }
     }
 

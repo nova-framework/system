@@ -2,9 +2,9 @@
 
 namespace Nova\Routing\Assets;
 
+use Nova\Container\Container;
 use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;
-use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Module;
 use Nova\Support\Str;
 
@@ -21,6 +21,13 @@ use LogicException;
 class DefaultDispatcher implements DispatcherInterface
 {
     /**
+     * The container instance used by Dispatcher.
+     *
+     * @var \Nova\Container\Container
+     */
+    protected $container;
+
+    /**
      * The valid Vendor paths.
      * @var array
      */
@@ -31,12 +38,6 @@ class DefaultDispatcher implements DispatcherInterface
      * @var int
      */
     protected $cacheControl = array();
-
-    /**
-     * Wheter or not the CSS and JS files are auto-compressed.
-     * @var boolean
-     */
-    protected $compress = true;
 
     /**
      * The currently accepted encodings for Response content compression.
@@ -51,76 +52,47 @@ class DefaultDispatcher implements DispatcherInterface
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Container $container)
     {
-        $paths = Config::get('assets.paths', array());
-
-        $this->paths = $this->parsePaths($paths);
+        $this->container = $container;
 
         //
-        $this->compress = Config::get('assets.compress', true);
+        $config = $this->container['config'];
 
-        $this->cacheControl = Config::get('assets.cache', array());
+        $paths = $config->get('assets.paths', array());
+
+        //
+        $this->paths = $this->parsePaths($paths);
+
+        $this->cacheControl = $config->get('assets.cache', array());
     }
 
     /**
      * Dispatch a Assets File Response.
      *
+     * For proper Assets serving, the file URI should be either of the following:
+     *
+     * /assets/css/style.css
+     * /modules/blog/assets/css/style.css
+     *
      * @return \Symfony\Component\HttpFoundation\Response|null
      */
     public function dispatch(SymfonyRequest $request)
     {
-        // For proper Assets serving, the file URI should be either of the following:
-        //
-        // /assets/css/style.css
-        // /modules/blog/assets/css/style.css
-
-        if (! in_array($request->method(), array('GET', 'HEAD'))) {
-            // The Request Method is not valid for an Asset File.
-            return null;
-        }
-
-        // Calculate the Asset File path, looking for a valid one.
         $uri = $request->path();
 
-        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $path = str_replace('/', DS, $matches[2]);
+        $method = $request->method();
 
-            $pathName = $matches[1];
+        $assets = $this->container['assets'];
 
-            if (strlen($pathName) > 3) {
-                // A standard Template or Module name.
-                $pathName = Str::studly($pathName);
-            } else {
-                // A short Template or Module name.
-                $pathName = strtoupper($pathName);
-            }
+        if (! in_array($method, array('GET', 'HEAD'))) return;
 
-            // Calculate the base path.
-            $module = Module::where('basename', $pathName);
+        // Resolve the file path via Assets Manager.
+        $path = $assets->resolveFilePath($uri);
 
-            if ($module->isEmpty()) return null;
-
-            $filePath = Module::resolveAssetPath($module, $path);
-        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
-
-            //
-            $path = $matches[2];
-
-            if (($baseName == 'vendor') && ! Str::startsWith($path, $this->paths)) {
-                // The current URI is not a valid Asset File path on Vendor.
-                return null;
-            }
-
-            $filePath = BASEPATH .$baseName .DS .str_replace('/', DS, $path);
-        } else {
-            // The current URI is not a valid Asset File path.
-            return null;
+        if (! is_null($path)) {
+            return $this->serve($path, $request);
         }
-
-        // Create a Response for the current Asset File path and return it.
-        return $this->serve($filePath, $request);
     }
 
     /**
@@ -284,7 +256,7 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function compressFiles()
     {
-        return $this->compress;
+        return $this->container['config']->get('assets.compress', true);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Nova\Assets;
 
 use Nova\Foundation\Application;
 use Nova\Support\Facades\Module;
+use Nova\Support\Str;
 
 use JShrink\Minifier as JShrink;
 
@@ -86,6 +87,104 @@ class AssetManager
     }
 
     /**
+     * Register a Package for cascading configuration.
+     *
+     * @param  string  $package
+     * @param  string  $hint
+     * @param  string  $namespace
+     * @return void
+     */
+    public function package($package, $hint, $namespace = null)
+    {
+        $namespace = $this->getPackageNamespace($package, $namespace);
+
+        $this->addNamespace($namespace, $hint);
+    }
+
+    /**
+     * Get the configuration namespace for a Package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageNamespace($package, $namespace)
+    {
+        if (is_null($namespace)) {
+            list($vendor, $namespace) = explode('/', $package);
+
+            return Str::snake($namespace);
+        }
+
+        return $namespace;
+    }
+
+    /**
+     * Get the path for a registered Package.
+     *
+     * @param  string  $namespace
+     * @return string|null
+     */
+    public function getPackagePath($namespace)
+    {
+        return array_get($this->hints, $namespace);
+    }
+
+    /**
+     * Add a new namespace to the loader.
+     *
+     * @param  string  $namespace
+     * @param  string  $hint
+     * @return void
+     */
+    public function addNamespace($namespace, $hint)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        $this->hints[$namespace] = $hint;
+    }
+
+    /**
+     * Returns all registered namespaces with the config
+     * loader.
+     *
+     * @return array
+     */
+    public function getNamespaces()
+    {
+        return $this->hints;
+    }
+
+    /**
+     * Get the file path for a given URI.
+     *
+     * @param  string  $uri
+     * @return string|null
+     */
+    public function resolveFilePath($uri)
+    {
+        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
+            $name = strtolower($matches[1]);
+
+            //
+            $path = $this->getPackagePath($name);
+
+            if (! is_null($path)) {
+                return $path .DS .str_replace('/', DS, $matches[2]);
+            }
+        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
+            $name = strtolower($matches[1]);
+
+            //
+            $path = $matches[2];
+
+            if (($name == 'assets') || starts_with($path, $this->paths)) {
+                return base_path($name) .DS .str_replace('/', DS, $path);
+            }
+        }
+    }
+
+    /**
      * Cleanup the Assets Cache directory.
      *
      * @return void
@@ -106,47 +205,6 @@ class AssetManager
         }
 
         return true;
-    }
-
-    public function getFilePath($uri)
-    {
-        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $path = str_replace('/', DS, $matches[2]);
-
-            $pathName = $matches[1];
-
-            if (strlen($folder) > 3) {
-                // A standard Template or Module name.
-                $pathName = studly_case($folder);
-            } else {
-                // A short Template or Module name.
-                $pathName = strtoupper($folder);
-            }
-
-            // Calculate the base path.
-            $module = Module::where('basename', $pathName);
-
-            if ($module->isEmpty()) return null;
-
-            $filePath = Module::resolveAssetPath($module, $path);
-        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
-            $baseName = strtolower($matches[1]);
-
-            //
-            $path = $matches[2];
-
-            if (($baseName == 'vendor') && ! starts_with($path, $this->paths)) {
-                // The current URI is not a valid Asset File path on Vendor.
-                return null;
-            }
-
-            $filePath = BASEPATH .$baseName .DS .str_replace('/', DS, $path);
-        } else {
-            // The current URI is not a valid Asset File path.
-            return null;
-        }
-
-        return $filePath;
     }
 
     /**
@@ -285,7 +343,7 @@ class AssetManager
         foreach ($files as $file) {
             $uri = $this->assetUri($file);
 
-            $path = $this->getFilePath($uri);
+            $path = $this->resolveFilePath($uri);
 
             if (is_null($path)) continue;
 
