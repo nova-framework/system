@@ -6,15 +6,15 @@
  * @version 3.0
  */
 
-namespace Nova\Helpers;
+namespace Nova\Forensics;
 
-use Nova\Helpers\Number;
+use Nova\Forensics\Profiler;
 use Nova\Support\Facades\Config;
 use Nova\Support\Facades\DB;
 use Nova\Support\Facades\Request;
 
 
-class Profiler
+class Statistics
 {
     /**
      * Array holding the configuration.
@@ -32,7 +32,7 @@ class Profiler
         $withDatabase = $this->withDatabase();
 
         // Calculate the variables.
-        $memoryUsage = Number::humanSize(memory_get_usage());
+        $memoryUsage = Profiler::getReadableSize(memory_get_usage());
 
         $elapsedTime = $this->getElapsedTime();
 

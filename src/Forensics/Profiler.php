@@ -91,7 +91,7 @@ class Profiler
                     $logs['console'][$key]['data'] = print_r($log['data'], true);
                 }
                 else if($log['type'] == 'memory') {
-                    $logs['console'][$key]['data'] = $this->getReadableFileSize($log['data']);
+                    $logs['console'][$key]['data'] = static::getReadableSize($log['data']);
                 }
                 else if($log['type'] == 'speed') {
                     $logs['console'][$key]['data'] = $this->getReadableTime(($log['data'] - $this->startTime) * 1000);
@@ -122,7 +122,7 @@ class Profiler
 
             $fileList[] = array(
                 'name' => str_replace(BASEPATH, '/', $file),
-                'size' => $this->getReadableFileSize($size)
+                'size' => static::getReadableSize($size)
             );
 
             $fileTotals['size'] += $size;
@@ -130,8 +130,8 @@ class Profiler
             if($size > $fileTotals['largest']) $fileTotals['largest'] = $size;
         }
 
-        $fileTotals['size'] = $this->getReadableFileSize($fileTotals['size']);
-        $fileTotals['largest'] = $this->getReadableFileSize($fileTotals['largest']);
+        $fileTotals['size'] = static::getReadableSize($fileTotals['size']);
+        $fileTotals['largest'] = static::getReadableSize($fileTotals['largest']);
 
         $this->output['files'] = $fileList;
         $this->output['fileTotals'] = $fileTotals;
@@ -144,7 +144,7 @@ class Profiler
     {
         $memoryTotals = array();
 
-        $memoryTotals['used'] = $this->getReadableFileSize(memory_get_peak_usage());
+        $memoryTotals['used'] = static::getReadableSize(memory_get_peak_usage());
 
         $memoryTotals['total'] = ini_get("memory_limit");
 
@@ -307,7 +307,7 @@ class Profiler
     /*
      * Helper functions to format data.
      */
-    public function getReadableFileSize($size, $result = null)
+    public static function getReadableSize($size, $result = null)
     {
         // Adapted from code at http://aidanlister.com/repos/v/function.size_readable.php
         $sizes = array('bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
