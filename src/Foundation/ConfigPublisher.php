@@ -4,7 +4,6 @@ namespace Nova\Foundation;
 
 use Nova\Config\Repository as Config;
 use Nova\Filesystem\Filesystem;
-use Nova\Helpers\Inflector;
 
 
 class ConfigPublisher

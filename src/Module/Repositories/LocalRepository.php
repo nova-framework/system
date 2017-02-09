@@ -2,9 +2,9 @@
 
 namespace Nova\Module\Repositories;
 
-use Nova\Helpers\Inflector;
 use Nova\Module\Repository;
 use Nova\Support\Collection;
+use Nova\Support\Str;
 
 
 class LocalRepository extends Repository
@@ -86,7 +86,7 @@ class LocalRepository extends Repository
      */
     public function exists($slug)
     {
-        $slug = Inflector::tableize($slug);
+        $slug = Str::snake($slug);
 
         $slugs = $this->slugs()->toArray();
 

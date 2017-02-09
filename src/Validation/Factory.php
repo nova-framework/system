@@ -8,8 +8,8 @@
 
 namespace Nova\Validation;
 
-use Nova\Helpers\Inflector;
 use Nova\Validation\Translator;
+use Nova\Support\Str;
 
 use Closure;
 
@@ -146,7 +146,7 @@ class Factory
         $this->extensions[$rule] = $extension;
 
         if ($message !== null) {
-            $rule = Inflector::tableize($rule);
+            $rule = Str::snake($rule);
 
             $this->fallbackMessages[$rule] = $message;
         }
@@ -165,7 +165,7 @@ class Factory
         $this->implicitExtensions[$rule] = $extension;
 
         if ($message !== null) {
-            $rule = Inflector::tableize($rule);
+            $rule = Str::snake($rule);
 
             $this->fallbackMessages[$rule] = $message;
         }

@@ -3,7 +3,6 @@
 namespace Nova\Module;
 
 use Nova\Config\Repository as Config;
-use Nova\Helpers\Inflector;
 use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
 use Nova\Module\RepositoryInterface;
@@ -150,7 +149,7 @@ abstract class Repository implements RepositoryInterface
             throw new LogicException("The Composer Package [$package] is not a Nova module");
         }
 
-        $slug = Inflector::tableize(str_replace('/', '_', $name));
+        $slug = Str::snake(str_replace('/', '_', $name));
 
         $version = ltrim($module['version'], 'v');
 
@@ -222,7 +221,7 @@ abstract class Repository implements RepositoryInterface
      */
     public function getModulePath($slug)
     {
-        $module = Inflector::classify($slug);
+        $module = Str::studly($slug);
 
         return $this->getPath() .DS .$module .DS;
     }

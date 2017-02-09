@@ -2,8 +2,8 @@
 
 namespace Nova\Module\Generators;
 
-use Nova\Helpers\Inflector;
 use Nova\Module\Generators\MakeCommand;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -113,7 +113,7 @@ class MakeMigrationCommand extends MakeCommand
      */
     protected function makeFileName($filePath)
     {
-        return date('Y_m_d_His') .'_' .strtolower(Inflector::tableize(basename($filePath)));
+        return date('Y_m_d_His') .'_' .strtolower(Str::snake(basename($filePath)));
     }
 
     /**

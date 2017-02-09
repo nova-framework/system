@@ -4,7 +4,6 @@ namespace Nova\Module\Generators;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
-use Nova\Helpers\Inflector;
 use Nova\Module\ModuleManager;
 use Nova\Support\Str;
 
@@ -136,7 +135,7 @@ class MakeModuleCommand extends Command
      */
     public function fire()
     {
-        $this->container['slug'] = Inflector::tableize($this->argument('slug'));
+        $this->container['slug'] = Str::snake($this->argument('slug'));
 
         //
         $slug = $this->container['slug'];

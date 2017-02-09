@@ -3,7 +3,6 @@
 namespace Nova\Config;
 
 use Nova\Filesystem\Filesystem;
-use Nova\Helpers\Inflector;
 
 
 class FileLoader implements LoaderInterface

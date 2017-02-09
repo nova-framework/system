@@ -2,7 +2,8 @@
 
 namespace Nova\Support;
 
-use Nova\Helpers\Inflector;
+use Nova\Support\Pluralizer;
+
 use RuntimeException;
 
 
@@ -181,7 +182,7 @@ class Str
      */
     public static function plural($value, $count = 2)
     {
-        return Inflector::pluralize($value, $count);
+        return Pluralizer::pluralize($value, $count);
     }
 
     /**
@@ -313,7 +314,7 @@ class Str
      */
     public static function singular($value)
     {
-        return Inflector::singularize($value);
+        return Pluralizer::singularize($value);
     }
 
     /**

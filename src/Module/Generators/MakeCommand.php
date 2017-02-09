@@ -3,7 +3,6 @@
 namespace Nova\Module\Generators;
 
 use Nova\Console\Command as CommandGenerator;
-use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Module\ModuleManager;
 use Nova\Support\Str;
@@ -199,7 +198,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function parseSlug($slug)
     {
-        return Inflector::tableize($slug);
+        return Str::snake($slug);
     }
 
     /**
@@ -217,12 +216,12 @@ class MakeCommand extends CommandGenerator
 
         if (str_contains($name, '/')) {
             $formats = collect(explode('/', $name))->map(function ($name) {
-                return Inflector::classify($name);
+                return Str::studly($name);
             });
 
             $name = $formats->implode('/');
         } else {
-            $name = Inflector::classify($name);
+            $name = Str::studly($name);
         }
 
         return $name;

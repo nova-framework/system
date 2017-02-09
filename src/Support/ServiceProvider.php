@@ -8,7 +8,7 @@
 
 namespace Nova\Support;
 
-use Nova\Helpers\Inflector;
+use Nova\Support\Str;
 
 use ReflectionClass;
 
@@ -106,7 +106,7 @@ abstract class ServiceProvider
         if (is_null($namespace)) {
             list($vendor, $namespace) = explode('/', $package);
 
-            return Inflector::tableize($namespace);
+            return Str::snake($namespace);
         }
 
         return $namespace;

@@ -3,8 +3,8 @@
 namespace Nova\Language;
 
 use Nova\Foundation\Application;
-use Nova\Helpers\Inflector;
 use Nova\Language\Language;
+use Nova\Support\Str;
 
 use Carbon\Carbon;
 
@@ -119,7 +119,7 @@ class LanguageManager
         if (is_null($namespace)) {
             list($vendor, $namespace) = explode('/', $package);
 
-            return Inflector::tableize($namespace);
+            return Str::snake($namespace);
         }
 
         return $namespace;

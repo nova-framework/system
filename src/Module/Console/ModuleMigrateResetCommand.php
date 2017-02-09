@@ -4,10 +4,10 @@ namespace Nova\Module\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Helpers\Inflector;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\Migrations\Migrator;
 use Nova\Module\ModuleManager;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -139,7 +139,7 @@ class ModuleMigrateResetCommand extends Command
 
         $classFile = implode('_', array_slice(explode('_', basename($file, '.php')), 4));
 
-        $className = Inflector::classify($classFile);
+        $className = Str::studly($classFile);
 
         $table = $this->nova['config']['database.migrations'];
 
