@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module\Console\Generators;
+namespace Nova\Module\Generators;
 
 use Nova\Console\Command as CommandGenerator;
 use Nova\Helpers\Inflector;

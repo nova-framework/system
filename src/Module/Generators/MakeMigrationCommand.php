@@ -1,35 +1,36 @@
 <?php
 
-namespace Nova\Module\Console\Generators;
+namespace Nova\Module\Generators;
 
-use Nova\Module\Console\Generators\MakeCommand;
+use Nova\Helpers\Inflector;
+use Nova\Module\Generators\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeControllerCommand extends MakeCommand
+class MakeMigrationCommand extends MakeCommand
 {
     /**
-     * The name of the console command.
+     * The name and signature of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:controller';
+    protected $name = 'make:module:migration';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Controller class';
+    protected $description = 'Create a new Module Migration file';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'Migration';
 
     /**
      * Module folders to be created.
@@ -37,7 +38,7 @@ class MakeControllerCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Controllers/',
+        'Database/Migrations/',
     );
 
     /**
@@ -55,7 +56,8 @@ class MakeControllerCommand extends MakeCommand
      * @var array
      */
     protected $signOption = array(
-        'resource',
+        'create',
+        'table',
     );
 
     /**
@@ -65,10 +67,13 @@ class MakeControllerCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'controller.stub',
+            'migration.stub',
         ),
-        'resource' => array(
-            'controller_resource.stub',
+        'create' => array(
+            'migration_create.stub',
+        ),
+        'table' => array(
+            'migration_table.stub',
         ),
     );
 
@@ -81,12 +86,34 @@ class MakeControllerCommand extends MakeCommand
      */
     protected function resolveByPath($filePath)
     {
-        $this->container['filename']  = $this->makeFileName($filePath);
-        $this->container['namespace'] = $this->getNamespace($filePath);
-
-        $this->container['path'] = $this->getBaseNamespace();
+        $this->container['filename'] = $this->makeFileName($filePath);
 
         $this->container['classname'] = basename($filePath);
+        $this->container['tablename'] = 'dummy';
+    }
+
+    /**
+     * Resolve Container after getting input option.
+     *
+     * @param string $option
+     *
+     * @return array
+     */
+    protected function resolveByOption($option)
+    {
+        $this->container['tablename'] = $option;
+    }
+
+    /**
+     * Make FileName.
+     *
+     * @param string $filePath
+     *
+     * @return string
+     */
+    protected function makeFileName($filePath)
+    {
+        return date('Y_m_d_His') .'_' .strtolower(Inflector::tableize(basename($filePath)));
     }
 
     /**
@@ -98,16 +125,14 @@ class MakeControllerCommand extends MakeCommand
     {
         $searches = array(
             '{{filename}}',
-            '{{path}}',
-            '{{namespace}}',
             '{{classname}}',
+            '{{tablename}}',
         );
 
         $replaces = array(
             $this->container['filename'],
-            $this->container['path'],
-            $this->container['namespace'],
             $this->container['classname'],
+            $this->container['tablename'],
         );
 
         return str_replace($searches, $replaces, $content);
@@ -122,7 +147,7 @@ class MakeControllerCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Controller class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Migration.'),
         );
     }
 
@@ -134,7 +159,8 @@ class MakeControllerCommand extends MakeCommand
     protected function getOptions()
     {
         return array(
-            array('--resource', null, InputOption::VALUE_NONE, 'Generate a module resource controller class'),
+            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
+            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
 }

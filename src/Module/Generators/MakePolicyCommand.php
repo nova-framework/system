@@ -1,34 +1,34 @@
 <?php
 
-namespace Nova\Module\Console\Generators;
+namespace Nova\Module\Generators;
 
-use Nova\Module\Console\Generators\MakeCommand;
+use Nova\Module\Generators\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeModelCommand extends MakeCommand
+class MakePolicyCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:model';
+    protected $name = 'make:module:policy';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Model class';
+    protected $description = 'Create a new Module Policy class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Model';
+    protected $type = 'Policy';
 
     /**
      * Module folders to be created.
@@ -36,7 +36,7 @@ class MakeModelCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = [
-        'Models/',
+        'Policies/',
     ];
 
     /**
@@ -55,7 +55,7 @@ class MakeModelCommand extends MakeCommand
      */
     protected $listStubs = [
         'default' => [
-            'model.stub',
+            'policy.stub',
         ],
     ];
 
@@ -108,7 +108,7 @@ class MakeModelCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Policy class.'),
         );
     }
 }

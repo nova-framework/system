@@ -1,68 +1,68 @@
 <?php
 
-namespace Nova\Module\Console\Generators;
+namespace Nova\Module\Generators;
 
-use Nova\Module\Console\Generators\MakeCommand;
+use Nova\Module\Generators\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakePolicyCommand extends MakeCommand
+class MakeSeederCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:policy';
+    protected $name = 'make:module:seeder';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Policy class';
+    protected $description = 'Create a new Module Seeder class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Policy';
+    protected $type = 'Seeder';
 
     /**
      * Module folders to be created.
      *
      * @var array
      */
-    protected $listFolders = [
-        'Policies/',
-    ];
+    protected $listFolders = array(
+        'Database/Seeds/',
+    );
 
     /**
      * Module files to be created.
      *
      * @var array
      */
-    protected $listFiles = [
+    protected $listFiles = array(
         '{{filename}}.php',
-    ];
+    );
 
     /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = [
-        'default' => [
-            'policy.stub',
-        ],
-    ];
+    protected $listStubs = array(
+        'default' => array(
+            'seeder_plus.stub',
+        ),
+    );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $filePath
+     * @param string $FilePath
      *
      * @return array
      */
@@ -70,7 +70,9 @@ class MakePolicyCommand extends MakeCommand
     {
         $this->container['filename']  = $this->makeFileName($filePath);
         $this->container['namespace'] = $this->getNamespace($filePath);
-        $this->container['path']      = $this->getBaseNamespace();
+
+        $this->container['path'] = $this->getBaseNamespace();
+
         $this->container['classname'] = basename($filePath);
     }
 
@@ -98,7 +100,6 @@ class MakePolicyCommand extends MakeCommand
         return str_replace($searches, $replaces, $content);
     }
 
-
     /**
      * Get the console command arguments.
      *
@@ -108,7 +109,8 @@ class MakePolicyCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Policy class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Seeder class.'),
         );
     }
+
 }

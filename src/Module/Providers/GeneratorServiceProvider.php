@@ -2,12 +2,12 @@
 
 namespace Nova\Module\Providers;
 
-use Nova\Module\Console\Generators\MakeModuleCommand;
-use Nova\Module\Console\Generators\MakeControllerCommand;
-use Nova\Module\Console\Generators\MakeModelCommand;
-use Nova\Module\Console\Generators\MakePolicyCommand;
-use Nova\Module\Console\Generators\MakeMigrationCommand;
-use Nova\Module\Console\Generators\MakeSeederCommand;
+use Nova\Module\Generators\MakeModuleCommand;
+use Nova\Module\Generators\MakeControllerCommand;
+use Nova\Module\Generators\MakeModelCommand;
+use Nova\Module\Generators\MakePolicyCommand;
+use Nova\Module\Generators\MakeMigrationCommand;
+use Nova\Module\Generators\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 

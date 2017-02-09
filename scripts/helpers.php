@@ -26,27 +26,27 @@ if (! function_exists('resource_url'))
 {
     /**
      * Resource URL helper
+     *
      * @param string $path
      * @param string|null $module
+     *
      * @return string
      */
     function resource_url($path, $module = null)
     {
-        $basePath = '';
-
         if (! is_null($module)) {
-            $basePath = 'modules/';
-
             if (Str::length($module) > 3) {
-                $basePath .= Str::snake($module, '-');
+                $module = Str::snake($module, '-');
             } else {
-                $basePath .= Str::lower($module);
+                $module = Str::lower($module);
             }
 
-            $basePath .= '/';
+            $basePath = 'modules/' .$module .'/assets/';
+        } else {
+            $basePath = 'assets/';
         }
 
-        $path = $basePath .'assets/' .ltrim($path, '/');
+        $path = $basePath .ltrim($path, '/');
 
         return url($path);
     }
@@ -56,8 +56,10 @@ if (! function_exists('vendor_url'))
 {
     /**
      * Vendor URL helper
+     *
      * @param string $path
      * @param string $vendor
+     *
      * @return string
      */
     function vendor_url($path, $vendor)
@@ -88,7 +90,7 @@ if (! function_exists('module_path'))
         if (! $properties->isEmpty()) {
             $result = $modules->resolveClassPath($properties);
         } else {
-            throw new InvalidArgumentException("Module not found [$module]");
+            return false;
         }
 
         if (! empty($path)) {

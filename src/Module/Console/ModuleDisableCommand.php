@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module\Console\Commands;
+namespace Nova\Module\Console;
 
 use Nova\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;

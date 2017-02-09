@@ -2,15 +2,15 @@
 
 namespace Nova\Module\Providers;
 
-use Nova\Module\Console\Commands\ModuleDisableCommand;
-use Nova\Module\Console\Commands\ModuleEnableCommand;
-use Nova\Module\Console\Commands\ModuleListCommand;
-use Nova\Module\Console\Commands\ModuleMigrateCommand;
-use Nova\Module\Console\Commands\ModuleMigrateRefreshCommand;
-use Nova\Module\Console\Commands\ModuleMigrateResetCommand;
-use Nova\Module\Console\Commands\ModuleMigrateRollbackCommand;
-use Nova\Module\Console\Commands\ModuleOptimizeCommand;
-use Nova\Module\Console\Commands\ModuleSeedCommand;
+use Nova\Module\Console\ModuleDisableCommand;
+use Nova\Module\Console\ModuleEnableCommand;
+use Nova\Module\Console\ModuleListCommand;
+use Nova\Module\Console\ModuleMigrateCommand;
+use Nova\Module\Console\ModuleMigrateRefreshCommand;
+use Nova\Module\Console\ModuleMigrateResetCommand;
+use Nova\Module\Console\ModuleMigrateRollbackCommand;
+use Nova\Module\Console\ModuleOptimizeCommand;
+use Nova\Module\Console\ModuleSeedCommand;
 
 use Nova\Support\ServiceProvider;
 
