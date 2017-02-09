@@ -64,7 +64,8 @@ class LanguageManager
 
         // Setup the default namespaces.
         $this->addNamespace('app',  APPPATH);
-        $this->addNamespace('nova', SYSPATH .'src' .DS);
+
+        $this->addNamespace('nova', dirname(__DIR__) .DS);
 
         $this->addNamespace('shared', BASEPATH .'shared' .DS);
     }
