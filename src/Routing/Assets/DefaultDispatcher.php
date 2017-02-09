@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing\Assets\Dispatchers;
+namespace Nova\Routing\Assets;
 
 use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;

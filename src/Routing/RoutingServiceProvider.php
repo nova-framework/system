@@ -146,11 +146,11 @@ class RoutingServiceProvider extends ServiceProvider
         if ($driver == 'custom') {
             $className = $config->get('assets.dispatcher');
         } else {
-            $className = 'Nova\Routing\Assets\Dispatchers\\' .ucfirst($driver) .'Dispatcher';
+            $className = 'Nova\Routing\Assets\\' .ucfirst($driver) .'Dispatcher';
         }
 
         // Bind the calculated class name to the Assets Dispatcher Interface.
         $this->app->bind('Nova\Routing\Assets\DispatcherInterface', $className);
     }
-    
+
 }

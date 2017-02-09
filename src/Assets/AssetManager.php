@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing\Assets;
+namespace Nova\Assets;
 
 use Nova\Foundation\Application;
 use Nova\Support\Facades\Module;
