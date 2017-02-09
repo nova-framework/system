@@ -79,16 +79,13 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function dispatch(SymfonyRequest $request)
     {
-        $uri = $request->path();
+        $path = null;
 
-        $method = $request->method();
+        if (in_array($request->method(), array('GET', 'HEAD'))) {
+            $uri = $request->path();
 
-        $assets = $this->container['assets'];
-
-        if (! in_array($method, array('GET', 'HEAD'))) return;
-
-        // Resolve the file path via Assets Manager.
-        $path = $assets->resolveFilePath($uri);
+            $path = $this->container['assets']->resolvePath($uri);
+        }
 
         if (! is_null($path)) {
             return $this->serve($path, $request);

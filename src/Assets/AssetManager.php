@@ -8,9 +8,20 @@ use Nova\Support\Str;
 
 use JShrink\Minifier as JShrink;
 
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
+use Closure;
+
 
 class AssetManager
 {
+    /**
+     * All of the registered Asset Routes.
+     *
+     * @var array
+     */
+    protected $routes = array();
+
     /**
      * All of the named path hints.
      *
@@ -84,6 +95,66 @@ class AssetManager
         $paths = $config->get('assets.paths', array());
 
         $this->paths = $this->parsePaths($paths);
+
+        // Finally, init the default Routes.
+        $this->initDefaultRoutes();
+    }
+
+    protected function initDefaultRoutes()
+    {
+        $me = $this;
+
+        // The Asset Route for Vendor and default Assets folder.
+        $this->route('(assets|vendor)/(.*)', function ($type, $path) use ($me)
+        {
+            $paths = $me->getVendorPaths();
+
+            if (($type === 'vendor') && ! starts_with($path, $paths)) {
+                // We are on an invalid path into Vendor.
+                return;
+            }
+
+            return base_path($type) .DS .str_replace('/', DS, $path);
+        });
+
+        // The Asset Route for Modules and Plugins.
+        $this->route('(modules|plugins)/([^/]+)/assets/(.*)', function ($type, $name, $path) use ($me)
+        {
+            $basePath = $me->getPackagePath($name);
+
+            if (! is_null($basePath)) {
+                return $basePath .DS .str_replace('/', DS, $path);
+            }
+        });
+    }
+
+    /**
+     * Register a new Asset Route with the manager.
+     *
+     * @param  string  $pattern
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public function route($pattern, $callback)
+    {
+        $this->routes[$pattern] = $callback;
+    }
+
+    /**
+     * Get the file path for a given URI.
+     *
+     * @param  string  $uri
+     * @return string|null
+     */
+    public function resolvePath($uri)
+    {
+        foreach ($this->routes as $pattern => $callback) {
+            if (preg_match('#^' .$pattern .'$#i', $uri, $matches)) {
+                array_shift($matches);
+
+                return call_user_func_array($callback, $matches);
+            }
+        }
     }
 
     /**
@@ -145,8 +216,7 @@ class AssetManager
     }
 
     /**
-     * Returns all registered namespaces with the config
-     * loader.
+     * Returns all registered namespaces with the manager.
      *
      * @return array
      */
@@ -156,32 +226,13 @@ class AssetManager
     }
 
     /**
-     * Get the file path for a given URI.
+     * Returns all registered Vendor paths with the manager.
      *
-     * @param  string  $uri
-     * @return string|null
+     * @return array
      */
-    public function resolveFilePath($uri)
+    public function getVendorPaths()
     {
-        if (preg_match('#^modules/([^/]+)/assets/(.*)$#i', $uri, $matches)) {
-            $name = strtolower($matches[1]);
-
-            //
-            $path = $this->getPackagePath($name);
-
-            if (! is_null($path)) {
-                return $path .DS .str_replace('/', DS, $matches[2]);
-            }
-        } else if (preg_match('#^(assets|vendor)/(.*)$#i', $uri, $matches)) {
-            $name = strtolower($matches[1]);
-
-            //
-            $path = $matches[2];
-
-            if (($name == 'assets') || starts_with($path, $this->paths)) {
-                return base_path($name) .DS .str_replace('/', DS, $path);
-            }
-        }
+        return $this->paths;
     }
 
     /**
@@ -343,7 +394,7 @@ class AssetManager
         foreach ($files as $file) {
             $uri = $this->assetUri($file);
 
-            $path = $this->resolveFilePath($uri);
+            $path = $this->resolvePath($uri);
 
             if (is_null($path)) continue;
 
