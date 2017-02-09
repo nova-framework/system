@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Assets\Dispatchers;
+namespace Nova\Routing\Assets\Dispatchers;
 
 use Nova\Http\Response;
-use Nova\Assets\DispatcherInterface;
+use Nova\Routing\Assets\DispatcherInterface;
 use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Module;
 use Nova\Support\Str;

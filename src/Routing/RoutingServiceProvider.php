@@ -2,6 +2,7 @@
 
 namespace Nova\Routing;
 
+use Nova\Routing\Assets\AssetManager;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
@@ -12,6 +13,27 @@ use Nova\Support\ServiceProvider;
 
 class RoutingServiceProvider extends ServiceProvider
 {
+
+    /**
+     * Boot the Service Provider.
+     */
+    public function boot()
+    {
+        $config = $this->app['config'];
+
+        // Register the Assets Dispatcher.
+        $driver = $config->get('assets.driver', 'default');
+
+        if ($driver == 'custom') {
+            $className = $config->get('assets.dispatcher');
+        } else {
+            $className = 'Nova\Routing\Assets\Dispatchers\\' .ucfirst($driver) .'Dispatcher';
+        }
+
+        // Bind the calculated class name to the Assets Dispatcher Interface.
+        $this->app->bind('Nova\Routing\Assets\DispatcherInterface', $className);
+    }
+
     /**
      * Register the service provider.
      *
@@ -26,6 +48,8 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerUrlGenerator();
 
         $this->registerRedirector();
+
+        $this->registerAssetManager();
     }
 
     /**
@@ -103,6 +127,19 @@ class RoutingServiceProvider extends ServiceProvider
             }
 
             return $redirector;
+        });
+    }
+
+    /**
+     * Register the Assets Manager.
+     *
+     * @return void
+     */
+    public function registerAssetManager()
+    {
+        $this->app->bindShared('assets', function($app)
+        {
+            return new AssetManager($app);
         });
     }
 
