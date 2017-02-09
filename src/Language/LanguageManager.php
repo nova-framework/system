@@ -62,12 +62,12 @@ class LanguageManager
         // Setup the know Languages.
         $this->languages = $app['config']['languages'];
 
-        // Setup the default namespaces.
-        $this->addNamespace('app',  APPPATH);
-
-        $this->addNamespace('nova', dirname(__DIR__) .DS);
-
-        $this->addNamespace('shared', BASEPATH .'shared' .DS);
+        // Setup the default path hints.
+        $this->hints = array(
+            'nova'   => dirname(__DIR__) .DS .'Language',
+            'app'    => APPPATH .'Language',
+            'shared' => BASEPATH .'shared' .DS .'Language',
+        );
     }
 
     /**

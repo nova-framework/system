@@ -81,15 +81,15 @@ class Language
         if (! array_key_exists($domain, $namespaces)) return;
 
         // Determine the Language(s) path.
-        $basePath = $namespaces[$domain] .'Language' .DS;
+        $namespace = $namespaces[$domain];
 
-        $filePath = $basePath .strtoupper($code) .DS .'messages.php';
+        $filePath = $namespace .DS .strtoupper($code) .DS .'messages.php';
 
         if (is_readable($filePath)) {
             // The requested language file exists; retrieve the messages from it.
             $messages = require $filePath;
 
-            // A final consistency check of the messages, before setting them.
+            // Some consistency check of the messages, before setting them.
             if (is_array($messages) && ! empty($messages)) {
                 $this->messages = $messages;
             }
