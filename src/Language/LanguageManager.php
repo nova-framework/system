@@ -67,7 +67,7 @@ class LanguageManager
             // Namespace for the Framework path.
             'nova' => dirname(__DIR__) .DS .'Language',
 
-            // Namespaces for the site paths.
+            // Namespaces for the Site paths.
             'app'    => APPPATH .'Language',
             'shared' => BASEPATH .'shared' .DS .'Language',
         );
