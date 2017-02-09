@@ -119,9 +119,9 @@ class AssetManager
         });
 
         // The Asset Route for Modules and Plugins.
-        $this->route('(modules|plugins)/([^/]+)/assets/(.*)', function ($type, $name, $path) use ($me)
+        $this->route('(modules|plugins)/([^/]+)/assets/(.*)', function ($type, $package, $path) use ($me)
         {
-            $basePath = $me->getPackagePath($name);
+            $basePath = $me->getPackagePath($package);
 
             if (is_null($basePath)) {
                 return Response::make('File Not Found', 404);
