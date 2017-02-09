@@ -78,21 +78,21 @@ class DefaultDispatcher implements DispatcherInterface
      */
     public function dispatch(SymfonyRequest $request)
     {
-        $path = null;
-
-        if (in_array($request->method(), array('GET', 'HEAD'))) {
-            $uri = $request->path();
-
-            $response = $this->container['assets']->dispatch($uri);
+        if (! in_array($request->method(), array('GET', 'HEAD'))) {
+            // An invalid HTTP method for Assets dispatching.
+            return;
         }
 
-        if (is_string($response) && ! empty($response)) {
-            return $this->serve($response, $request);
-        }
+        // Get the URI from the Request instance.
+        $uri = $request->path();
 
-        // Was return a Symfony Response instance, we should return it.
-        else if ($response instanceof SymfonyResponse) {
+        // Dispatch the URI to Assets Manager and get its response.
+        $response = $this->container['assets']->dispatch($uri);
+
+        if ($response instanceof SymfonyResponse) {
             return $response;
+        } else if (! is_null($response)) {
+            return $this->serve($response, $request);
         }
     }
 
