@@ -6,7 +6,7 @@ use Nova\Config\Repository as Config;
 use Nova\Helpers\Inflector;
 use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
-use Nova\Module\RepositoryInterface;
+use Nova\Module\Contracts\RepositoryInterface;
 use Nova\Support\Str;
 
 use InvalidArgumentException;
