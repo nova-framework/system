@@ -4,7 +4,7 @@ namespace Nova\Module\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Module\Traits\MigrationTrait;
+use Nova\Module\Console\MigrationTrait;
 use Nova\Module\ModuleManager;
 
 use Symfony\Component\Console\Input\InputOption;

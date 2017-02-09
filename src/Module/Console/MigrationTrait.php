@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module\Traits;
+namespace Nova\Module\Console;
 
 use InvalidArgumentException;
 
