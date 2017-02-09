@@ -3,12 +3,13 @@
 namespace Nova\Assets;
 
 use Nova\Foundation\Application;
-use Nova\Support\Facades\Module;
+use Nova\Support\Facades\Response;
 use Nova\Support\Str;
 
 use JShrink\Minifier as JShrink;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\SymfonyResponse as SymfonyResponse;
 
 use Closure;
 
@@ -111,7 +112,7 @@ class AssetManager
 
             if (($type === 'vendor') && ! starts_with($path, $paths)) {
                 // We are on an invalid path into Vendor.
-                return;
+                return Response::make('Unauthorized Access', 403);
             }
 
             return base_path($type) .DS .str_replace('/', DS, $path);
@@ -141,7 +142,7 @@ class AssetManager
     }
 
     /**
-     * Get the file path for a given URI.
+     * Dispatch an URI and return the associated file path.
      *
      * @param  string  $uri
      * @return string|null
@@ -233,6 +234,21 @@ class AssetManager
     public function getVendorPaths()
     {
         return $this->paths;
+    }
+
+    /**
+     * Get the file path for a given URI.
+     *
+     * @param  string  $uri
+     * @return string|null
+     */
+    public function resolveFilePath($uri)
+    {
+        $response = $this->dispatch($uri);
+
+        if (! $response instanceof SymfonyResponse) {
+            return $response;
+        }
     }
 
     /**
@@ -394,9 +410,11 @@ class AssetManager
         foreach ($files as $file) {
             $uri = $this->assetUri($file);
 
-            $path = $this->dispatch($uri);
+            $path = $this->resolveFilePath($uri);
 
-            if (is_null($path)) continue;
+            if (is_null($path)) {
+                continue;
+            }
 
             if (is_readable($path)) {
                 $assets[$file] = $path;

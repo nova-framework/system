@@ -5,7 +5,6 @@ namespace Nova\Routing\Assets;
 use Nova\Container\Container;
 use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;
-use Nova\Support\Facades\Module;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
