@@ -123,9 +123,11 @@ class AssetManager
         {
             $basePath = $me->getPackagePath($name);
 
-            if (! is_null($basePath)) {
-                return $basePath .DS .str_replace('/', DS, $path);
+            if (is_null($basePath)) {
+                return Response::make('File Not Found', 404);
             }
+
+            return $basePath .DS .str_replace('/', DS, $path);
         });
     }
 
