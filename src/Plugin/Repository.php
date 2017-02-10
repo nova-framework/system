@@ -105,7 +105,11 @@ class Repository
      */
     public function exists($slug)
     {
-        $slug = Str::snake($slug);
+        if (Str::length($slug) > 3) {
+            $slug = Str::snake($slug, '-');
+        } else {
+            $slug = Str::lower($slug);
+        }
 
         $slugs = $this->slugs()->toArray();
 
