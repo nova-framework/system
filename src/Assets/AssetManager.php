@@ -119,7 +119,7 @@ class AssetManager
         });
 
         // The Asset Route for Modules and Plugins.
-        $this->route('(modules|plugins)/([^/]+)/assets/(.*)', function ($type, $package, $path) use ($me)
+        $this->route('(modules|themes)/([^/]+)/assets/(.*)', function ($type, $package, $path) use ($me)
         {
             $basePath = $me->getPackagePath($package);
 

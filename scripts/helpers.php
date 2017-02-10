@@ -80,7 +80,7 @@ if (! function_exists('theme_url'))
             $plugin = Str::lower($plugin);
         }
 
-        $path = 'plugins/' .$plugin .'/assets/' .ltrim($path, '/');
+        $path = 'themes/' .$plugin .'/assets/' .ltrim($path, '/');
 
         return url($path);
     }
