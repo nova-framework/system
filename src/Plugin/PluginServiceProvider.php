@@ -2,6 +2,7 @@
 
 namespace Nova\Plugin;
 
+use Nova\Plugin\Console\PluginListCommand;
 use Nova\Plugin\PluginManager;
 use Nova\Support\ServiceProvider;
 
@@ -32,6 +33,21 @@ class PluginServiceProvider extends ServiceProvider
         {
             return new PluginManager($app, $app['files']);
         });
+
+        $this->registerListCommand();
+    }
+
+    /**
+     * Register the module:list command.
+     */
+    protected function registerListCommand()
+    {
+        $this->app->singleton('command.plugin.list', function ($app)
+        {
+            return new PluginListCommand($app['plugins']);
+        });
+
+        $this->commands('command.plugin.list');
     }
 
     /**
@@ -41,7 +57,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('plugins');
+        return array('plugins', 'command.plugin.list');
     }
 
 }
