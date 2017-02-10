@@ -58,7 +58,7 @@ if (! function_exists('resource_url'))
     }
 }
 
-if (! function_exists('plugin_url'))
+if (! function_exists('theme_url'))
 {
     /**
      * Resource URL helper
@@ -68,7 +68,7 @@ if (! function_exists('plugin_url'))
      *
      * @return string
      */
-    function plugin_url($path, $plugin)
+    function theme_url($path, $plugin)
     {
         if (! Plugin::exists($plugin)) {
             throw new LogicException("Plugin [$plugin] not found");

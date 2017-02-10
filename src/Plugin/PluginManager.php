@@ -48,7 +48,9 @@ class PluginManager
         {
             $this->registerServiceProvider($properties);
 
-            $this->registerAssetsNamespace($properties);
+            if ($properties['theme'] === true) {
+                $this->registerAssetsNamespace($properties);
+            }
         });
     }
 
@@ -67,8 +69,11 @@ class PluginManager
 
         $namespace = $this->resolveNamespace($properties);
 
+        //
+        $name = ($properties['theme'] === true) ? 'Theme' : 'Plugin';
+
         // Calculate the name of Service Provider, including the namespace.
-        $serviceProvider = "{$namespace}\\Providers\\PluginServiceProvider";
+        $serviceProvider = "{$namespace}\\Providers\\{$name}ServiceProvider";
 
         $classicProvider = "{$namespace}\\{$basename}ServiceProvider";
 
@@ -88,6 +93,9 @@ class PluginManager
      */
     protected function registerAssetsNamespace($properties)
     {
+        if ($properties['theme'] === false) return;
+
+        //
         $directory = 'assets';
 
         if ($properties['location'] === 'local') {

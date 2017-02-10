@@ -144,8 +144,8 @@ class Repository
             // Do nothing.
         }
 
-        // Retrieve the local Modules information.
-        $path = $this->getPath();
+        // Retrieve the local Plugins information.
+        $path = $this->getPluginsPath();
 
         try {
             $paths = collect($this->files->directories($path));
@@ -154,7 +154,25 @@ class Repository
                 $plugin = 'Plugins/' .basename($path);
 
                 if (! $plugins->has($plugin)) {
-                    $plugins->put($plugin, array('path' => $path .DS, 'location' => 'local'));
+                    $plugins->put($plugin, array('path' => $path .DS, 'location' => 'local', 'theme' => false));
+                }
+            });
+        }
+        catch (InvalidArgumentException $e) {
+            // Do nothing.
+        }
+
+        // Retrieve the local Themes information.
+        $path = $this->getThemesPath();
+
+        try {
+            $paths = collect($this->files->directories($path));
+
+            $paths->each(function ($path) use ($plugins) {
+                $plugin = 'Themes/' .basename($path);
+
+                if (! $plugins->has($plugin)) {
+                    $plugins->put($plugin, array('path' => $path .DS, 'location' => 'local', 'theme' => true));
                 }
             });
         }
@@ -223,7 +241,27 @@ class Repository
      */
     public function getPath()
     {
+        return $this->getPluginsPath();
+    }
+
+    /**
+     * Get (local) plugins path.
+     *
+     * @return string
+     */
+    public function getPluginsPath()
+    {
         return base_path('plugins');
+    }
+
+    /**
+     * Get (local) plugins path.
+     *
+     * @return string
+     */
+    public function getThemesPath()
+    {
+        return base_path('themes');
     }
 
     /**

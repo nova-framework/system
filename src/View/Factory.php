@@ -103,7 +103,14 @@ class Factory
      *
      * @var array
      */
-    protected $module = array();
+    protected $modules = array();
+
+    /**
+     *  Cached information about Plugins.
+     *
+     * @var array
+     */
+    protected $plugins = array();
 
     /**
      * Cached information about the default Theme.
@@ -860,9 +867,9 @@ class Factory
     {
         $viewPath = str_replace('/', DS, $view);
 
-        if (! is_null($theme) && ($module !== $theme)) {
+        if (! is_null($theme)) {
             // Try to find the View file on the override locations.
-            $basePath = $this->getModulePath($theme) .'Overrides' .DS;
+            $basePath = $this->getPluginPath($theme) .'Overrides' .DS;
 
             if (! is_null($module)) {
                 $basePath .= 'Modules' .DS .$module .DS;
@@ -896,16 +903,16 @@ class Factory
      * Find the Layout file.
      *
      * @param    string     $view
-     * @param    string     $module
+     * @param    string     $theme
      *
      * @return    string
      */
-    protected function findLayoutFile($view, $module)
+    protected function findLayoutFile($view, $theme)
     {
         $viewPath = str_replace('/', DS, $view);
 
         // Calculate the base path to the Layout files.
-        $basePath = $this->getModulePath($module) .'Layouts';
+        $basePath = $this->getPluginPath($theme) .'Layouts';
 
         // Find the Layout file depending on the Language direction.
         $language = $this->getLanguage();
@@ -945,6 +952,28 @@ class Factory
 
         if (! $module->isEmpty()) {
             return $this->modules[$name] = $modules->resolveClassPath($module);
+        }
+
+        throw new InvalidArgumentException("Module not found [$name]");
+    }
+
+    /**
+     * Return the current Modules path.
+     *
+     * @return string
+     */
+    protected function getPluginPath($name)
+    {
+        if (isset($this->plugins[$name])) {
+            return $this->plugins[$name];
+        }
+
+        $plugins = $this->container['plugins'];
+
+        $plugin = $plugins->where('basename', $name);
+
+        if (! $plugin->isEmpty()) {
+            return $this->plugins[$name] = $plugins->resolveClassPath($plugin);
         }
 
         throw new InvalidArgumentException("Module not found [$name]");

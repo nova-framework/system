@@ -32,7 +32,7 @@ class PluginListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['#', 'Package', 'Slug', 'Config Files', 'Translations', 'Location'];
+    protected $headers = ['#', 'Package', 'Slug', 'Config Files', 'Translations', 'Is Theme?', 'Location'];
 
     /**
      * Create a new command instance.
@@ -97,7 +97,11 @@ class PluginListCommand extends Command
         $config   = $plugin['path'] .'Config';
         $language = $plugin['path'] .'Language';
 
-        $location = ($plugin['location'] === 'local') ? 'Local' : 'Vendor';
+        if ($plugin['location'] === 'local') {
+            $location = ($plugin['theme'] === true) ? 'Themes' : 'Plugins';
+        } else {
+            $location = 'Vendor';
+        }
 
         return array(
             'id'       => $count,
@@ -105,6 +109,7 @@ class PluginListCommand extends Command
             'slug'     => $plugin['slug'],
             'config'   => is_dir($config)   ? 'Yes' : 'No',
             'language' => is_dir($language) ? 'Yes' : 'No',
+            'theme'    => ($plugin['theme'] === true) ? 'Yes' : 'No',
             'location' => $location,
         );
     }
