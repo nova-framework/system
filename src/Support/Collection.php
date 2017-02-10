@@ -434,12 +434,12 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Sort through each item with a callback.
      *
-     * @param  Closure  $callback
+     * @param  Closure|null  $callback
      * @return \Nova\Support\Collection
      */
-    public function sort(Closure $callback)
+    public function sort(Closure $callback = null)
     {
-        uasort($this->items, $callback);
+        $callback ? uasort($this->items, $callback) : asort($this->items);
 
         return $this;
     }

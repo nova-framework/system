@@ -100,10 +100,16 @@ abstract class Repository implements RepositoryInterface
         }
 
         // Process the retrieved information to generate their records.
-        $items = $modules->map(function ($properties, $key) {
-            $properties['name'] = $key;
+        $me = $this;
 
-            $properties['basename'] = basename($key);
+        $items = $modules->map(function ($properties, $name) use ($me)
+        {
+            $basename = $me->getPackageName($name);
+
+            //
+            $properties['name'] = $name;
+
+            $properties['basename'] = $basename;
 
             return $properties;
         });
