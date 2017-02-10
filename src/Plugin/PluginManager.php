@@ -46,7 +46,7 @@ class PluginManager
      */
     public function register()
     {
-        $plugins = $this->getPlugins();
+        $plugins = $this->all();
 
         $plugins->each(function($properties)
         {
