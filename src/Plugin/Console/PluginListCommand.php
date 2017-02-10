@@ -55,7 +55,7 @@ class PluginListCommand extends Command
     {
         $plugins = $this->plugins->all()->where('theme', true);
 
-        if (count($plugins) == 0) {
+        if ($plugins->isEmpty()) {
             return $this->error("Your application doesn't have any plugins.");
         }
 
