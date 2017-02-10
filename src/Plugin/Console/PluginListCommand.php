@@ -25,25 +25,25 @@ class PluginListCommand extends Command
     /**
      * @var \Nova\Plugin\PluginManager
      */
-    protected $plugin;
+    protected $plugins;
 
     /**
      * The table headers for the command.
      *
      * @var array
      */
-    protected $headers = ['Name', 'Slug', 'Location'];
+    protected $headers = ['Package', 'Slug', 'Location'];
 
     /**
      * Create a new command instance.
      *
      * @param \Nova\Plugin\PluginManager $plugin
      */
-    public function __construct(PluginManager $plugin)
+    public function __construct(PluginManager $plugins)
     {
         parent::__construct();
 
-        $this->plugin = $plugin;
+        $this->plugins = $plugins;
     }
 
     /**
@@ -53,7 +53,7 @@ class PluginListCommand extends Command
      */
     public function fire()
     {
-        $plugins = $this->plugin->all();
+        $plugins = $this->plugins->all();
 
         if (count($plugins) == 0) {
             return $this->error("Your application doesn't have any plugins.");
@@ -69,7 +69,7 @@ class PluginListCommand extends Command
      */
     protected function getPlugins()
     {
-        $plugins = $this->plugin->all();
+        $plugins = $this->plugins->all();
 
         $results = array();
 

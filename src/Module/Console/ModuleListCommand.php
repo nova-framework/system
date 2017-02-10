@@ -32,7 +32,7 @@ class ModuleListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['#', 'Name', 'Slug', 'Description', 'Status', 'Location'];
+    protected $headers = ['#', 'Package', 'Slug', 'Description', 'Status', 'Location'];
 
     /**
      * Create a new command instance.

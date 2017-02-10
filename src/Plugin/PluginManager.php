@@ -5,6 +5,7 @@ namespace Nova\Plugin;
 use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
 use Nova\Foundation\Application;
+use Nova\Plugin\Repository;
 use Nova\Support\Collection;
 use Nova\Support\Str;
 
@@ -17,14 +18,9 @@ class PluginManager
     protected $app;
 
     /**
-     * @var \Nova\Filesystem\Filesystem
+     * @var \Nova\Plugin\Repository
      */
-    protected $files;
-
-    /**
-     * @var \Nova\Support\Collection|null
-     */
-    protected static $plugins;
+    protected $repository;
 
 
     /**
@@ -32,11 +28,11 @@ class PluginManager
      *
      * @param Application $app
      */
-    public function __construct(Application $app, Filesystem $files)
+    public function __construct(Application $app, Repository $repository)
     {
         $this->app = $app;
 
-        $this->files = $files;
+        $this->repository = $repository;
     }
 
     /**
@@ -46,7 +42,7 @@ class PluginManager
      */
     public function register()
     {
-        $plugins = $this->all();
+        $plugins = $this->repository->all();
 
         $plugins->each(function($properties)
         {
@@ -65,13 +61,19 @@ class PluginManager
      */
     protected function registerServiceProvider($properties)
     {
+        $basename = $properties['basename'];
+
         $namespace = $this->resolveNamespace($properties);
 
         // Calculate the name of Service Provider, including the namespace.
         $serviceProvider = "{$namespace}\\Providers\\PluginServiceProvider";
 
+        $classicProvider = "{$namespace}\\{$basename}ServiceProvider";
+
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
+        } else if (class_exists($classicProvider)) {
+            $this->app->register($classicProvider);
         }
     }
 
@@ -87,110 +89,16 @@ class PluginManager
         return Str::studly($properties['slug']);
     }
 
-    public function all()
-    {
-        if (isset(static::$plugins)) return static::$plugins;
-
-        return static::$plugins = $this->getPlugins();
-    }
-
     /**
-     * Get local path for the specified plugin.
+     * Dynamically pass methods to the repository.
      *
-     * @param string $slug
+     * @param string $method
+     * @param mixed  $arguments
      *
-     * @return string
+     * @return mixed
      */
-    public function getPluginPath($slug)
+    public function __call($method, $arguments)
     {
-        $plugin = Str::studly($slug);
-
-        return $this->getPath() .DS .$plugin .DS;
-    }
-
-    public function getPath()
-    {
-        return base_path('plugins');
-    }
-
-    public function getPlugins()
-    {
-        // Retrieve the Composer's Module information.
-        $path = base_path('vendor/nova-plugins.php');
-
-        $plugins = collect();
-
-        try {
-            $data = $this->files->getRequire($path);
-
-            if (isset($data['plugins']) && is_array($data['plugins'])) {
-                $plugins = collect($data['plugins']);
-            }
-        }
-        catch (FileNotFoundException $e) {
-            // Do nothing.
-        }
-        /*
-        // Retrieve the local Modules information.
-        $path = $this->getPath();
-
-        try {
-            $paths = collect($this->files->directories($path));
-
-            $paths->each(function ($path) use ($plugins) {
-                $plugin = 'Plugins/' .basename($path);
-
-                if (! $plugins->has($plugin)) {
-                    $plugins->put($plugin, array('path' => $path .DS, 'location' => 'local'));
-                }
-            });
-        }
-        catch (InvalidArgumentException $e) {
-            // Do nothing.
-        }
-        */
-        // Process the retrieved information to generate their records.
-        $me = $this;
-
-        $items = $plugins->map(function ($properties, $name) use ($me)
-        {
-            $basename = $me->getPackageName($name);
-
-            //
-            $properties['name'] = $name;
-
-            $properties['slug'] = Str::snake($basename);
-
-            $properties['namespace'] = str_replace('/', '\\', $name);
-
-            $properties['basename'] = $basename;
-
-            return $properties;
-        });
-
-        return $items->sortBy('slug');
-    }
-
-    /**
-     * Get the name for a Package.
-     *
-     * @param  string  $package
-     * @param  string  $namespace
-     * @return string
-     */
-    protected function getPackageName($package)
-    {
-        if (strpos($package, '/') === false) {
-            return $package;
-        }
-
-        list($vendor, $namespace) = explode('/', $package);
-
-        return $namespace;
-    }
-
-    public function getNamespace()
-    {
-        return 'Plugins';
+        return call_user_func_array(array($this->repository, $method), $arguments);
     }
 }

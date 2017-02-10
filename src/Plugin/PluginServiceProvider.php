@@ -5,6 +5,7 @@ namespace Nova\Plugin;
 use Nova\Plugin\Console\PluginListCommand;
 use Nova\Plugin\Generators\MakePluginCommand;
 use Nova\Plugin\PluginManager;
+use Nova\Plugin\Repository;
 use Nova\Support\ServiceProvider;
 
 
@@ -32,11 +33,14 @@ class PluginServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('plugins', function ($app)
         {
-            return new PluginManager($app, $app['files']);
+            $repository = new Repository($app['files']);
+
+            return new PluginManager($app, $repository);
         });
 
         // Register the Forge Commands.
         $this->registerPluginListCommand();
+
         $this->registerMakePluginCommand();
     }
 
