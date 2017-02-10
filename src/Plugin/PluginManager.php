@@ -130,7 +130,7 @@ class PluginManager
         catch (FileNotFoundException $e) {
             // Do nothing.
         }
-
+        /*
         // Retrieve the local Modules information.
         $path = $this->getPath();
 
@@ -148,7 +148,7 @@ class PluginManager
         catch (InvalidArgumentException $e) {
             // Do nothing.
         }
-
+        */
         // Process the retrieved information to generate their records.
         $me = $this;
 
