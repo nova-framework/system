@@ -32,7 +32,7 @@ class PluginListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['#', 'Package', 'Slug', 'Configuration', 'Translations', 'Location'];
+    protected $headers = ['#', 'Package', 'Slug', 'Config Files', 'Translations', 'Location'];
 
     /**
      * Create a new command instance.
