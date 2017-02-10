@@ -140,11 +140,11 @@ class ModuleManager
     {
         $path = $properties['path'];
 
-        if ($properties['location'] === 'vendor') {
-            $path .= 'src' .DS;
+        if ($properties['location'] === 'local') {
+            return $path;
         }
 
-        return $path;
+        return $path .'src' .DS;
     }
 
     /**

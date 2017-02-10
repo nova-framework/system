@@ -90,6 +90,24 @@ class PluginManager
     }
 
     /**
+     * Resolve the correct plugin files path.
+     *
+     * @param array $properties
+     *
+     * @return string
+     */
+    public function resolveClassPath($properties)
+    {
+        $path = $properties['path'];
+
+        if ($properties['location'] === 'local') {
+            return $path;
+        }
+
+        return $path .'src' .DS;
+    }
+
+    /**
      * Dynamically pass methods to the repository.
      *
      * @param string $method
