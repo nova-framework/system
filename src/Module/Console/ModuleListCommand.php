@@ -91,13 +91,15 @@ class ModuleListCommand extends Command
     {
         $enabled = $this->module->isEnabled($module['slug']);
 
+        $location = ($module['location'] === 'local') ? 'Local' : 'Vendor';
+
         return array(
             '#'           => $module['order'],
             'name'        => $module['name'],
             'slug'        => $module['slug'],
             'description' => $module['description'],
             'status'      => $enabled ? 'Enabled' : 'Disabled',
-            'location'    => ($module['location'] === 'local') ? 'Local' : 'Vendor',
+            'location'    => $location,
         );
     }
 
