@@ -32,7 +32,7 @@ class ModuleListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['#', 'Name', 'Slug', 'Description', 'Status'];
+    protected $headers = ['#', 'Name', 'Slug', 'Description', 'Status', 'Location'];
 
     /**
      * Create a new command instance.
@@ -97,6 +97,7 @@ class ModuleListCommand extends Command
             'slug'        => $module['slug'],
             'description' => $module['description'],
             'status'      => $enabled ? 'Enabled' : 'Disabled',
+            'location'    => ($module['location'] === 'local') ? 'Local' : 'Vendor',
         );
     }
 

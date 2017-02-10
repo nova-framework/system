@@ -94,6 +94,20 @@ class PluginManager
         return static::$plugins = $this->getPlugins();
     }
 
+    /**
+     * Get local path for the specified plugin.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getPluginPath($slug)
+    {
+        $plugin = Str::studly($slug);
+
+        return $this->getPath() .DS .$plugin .DS;
+    }
+
     public function getPath()
     {
         return base_path('plugins');
@@ -173,5 +187,10 @@ class PluginManager
         list($vendor, $namespace) = explode('/', $package);
 
         return $namespace;
+    }
+
+    public function getNamespace()
+    {
+        return 'Plugins';
     }
 }

@@ -3,6 +3,7 @@
 namespace Nova\Plugin;
 
 use Nova\Plugin\Console\PluginListCommand;
+use Nova\Plugin\Generators\MakePluginCommand;
 use Nova\Plugin\PluginManager;
 use Nova\Support\ServiceProvider;
 
@@ -34,13 +35,15 @@ class PluginServiceProvider extends ServiceProvider
             return new PluginManager($app, $app['files']);
         });
 
-        $this->registerListCommand();
+        // Register the Forge Commands.
+        $this->registerPluginListCommand();
+        $this->registerMakePluginCommand();
     }
 
     /**
      * Register the module:list command.
      */
-    protected function registerListCommand()
+    protected function registerPluginListCommand()
     {
         $this->app->singleton('command.plugin.list', function ($app)
         {
@@ -51,13 +54,25 @@ class PluginServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the make:module command.
+     */
+    private function registerMakePluginCommand()
+    {
+        $this->app->bindShared('command.make.plugin', function ($app) {
+            return new MakePluginCommand($app['files'], $app['plugins']);
+        });
+
+        $this->commands('command.make.plugin');
+    }
+
+    /**
      * Get the Services provided by the Provider.
      *
      * @return string
      */
     public function provides()
     {
-        return array('plugins', 'command.plugin.list');
+        return array('plugins', 'command.plugin.list', 'command.make.plugin');
     }
 
 }
