@@ -53,7 +53,7 @@ class PluginListCommand extends Command
      */
     public function fire()
     {
-        $plugins = $this->plugins->all()->where('theme', true);
+        $plugins = $this->plugins->all()->where('theme', false);
 
         if ($plugins->isEmpty()) {
             return $this->error("Your application doesn't have any plugins.");
