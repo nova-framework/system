@@ -47,6 +47,8 @@ class PluginManager
         $plugins->each(function($properties)
         {
             $this->registerServiceProvider($properties);
+
+            $this->registerAssetsNamespace($properties);
         });
     }
 
@@ -78,6 +80,28 @@ class PluginManager
     }
 
     /**
+     * Register the Module Service Provider.
+     *
+     * @param string $properties
+     *
+     * @return string
+     */
+    protected function registerAssetsNamespace($properties)
+    {
+        $directory = 'assets';
+
+        if ($properties['location'] === 'local') {
+            $directory = ucfirst($directory);
+        }
+
+        $path = $properties['path'] .$directory;
+
+        if ($this->app['files']->isDirectory($path)) {
+            $this->app['assets']->addNamespace($properties['slug'], $path);
+        }
+    }
+
+    /**
      * Resolve the correct Plugin namespace.
      *
      * @param array $properties
@@ -105,6 +129,27 @@ class PluginManager
         }
 
         return $path .'src' .DS;
+    }
+
+    /**
+     * Resolve the correct module files path.
+     *
+     * @param array  $properties
+     * @param string $path
+     *
+     * @return string
+     */
+    public function resolveAssetPath($properties, $path)
+    {
+        $directory = 'assets';
+
+        if ($properties['location'] === 'local') {
+            $directory = ucfirst($directory);
+        }
+
+        $basePath = $properties['path'] .$directory;
+
+        return $basePath .DS .str_replace('/', DS, $path);
     }
 
     /**

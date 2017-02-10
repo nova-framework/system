@@ -2,6 +2,8 @@
 
 use Nova\Support\Arr;
 use Nova\Support\Collection;
+use Nova\Support\Facades\Module;
+use Nova\Support\Facades\Plugin;
 use Nova\Support\Str;
 use Nova\View\Expression;
 
@@ -35,6 +37,10 @@ if (! function_exists('resource_url'))
     function resource_url($path, $module = null)
     {
         if (! is_null($module)) {
+            if (! Module::exists($module)) {
+                throw new LogicException("Module [$module] not found");
+            }
+
             if (Str::length($module) > 3) {
                 $module = Str::snake($module, '-');
             } else {
@@ -47,6 +53,34 @@ if (! function_exists('resource_url'))
         }
 
         $path = $basePath .ltrim($path, '/');
+
+        return url($path);
+    }
+}
+
+if (! function_exists('plugin_url'))
+{
+    /**
+     * Resource URL helper
+     *
+     * @param string $path
+     * @param string $plugin
+     *
+     * @return string
+     */
+    function plugin_url($path, $plugin)
+    {
+        if (! Plugin::exists($plugin)) {
+            throw new LogicException("Plugin [$plugin] not found");
+        }
+
+        if (Str::length($module) > 3) {
+            $module = Str::snake($module, '-');
+        } else {
+            $module = Str::lower($module);
+        }
+
+        $path = 'plugins/' .$plugin .'/assets/' .ltrim($path, '/');
 
         return url($path);
     }

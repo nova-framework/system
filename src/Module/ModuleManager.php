@@ -81,13 +81,13 @@ class ModuleManager
      */
     protected function registerAssetsNamespace($properties)
     {
-        if ($properties['location'] === 'vendor') {
-            $name = 'assets';
-        } else {
-            $name = 'Assets';
+        $directory = 'assets';
+
+        if ($properties['location'] === 'local') {
+            $directory = ucfirst($directory);
         }
 
-        $path = $properties['path'] .$name;
+        $path = $properties['path'] .$directory;
 
         if ($this->app['files']->isDirectory($path)) {
             $this->app['assets']->addNamespace($properties['slug'], $path);
@@ -157,15 +157,15 @@ class ModuleManager
      */
     public function resolveAssetPath($properties, $path)
     {
-        $basePath = $properties['path'];
+        $directory = 'assets';
 
-        if ($properties['location'] === 'vendor') {
-            $basePath .= 'assets';
-        } else {
-            $basePath .= 'Assets';
+        if ($properties['location'] === 'local') {
+            $directory = ucfirst($directory);
         }
 
-        return $basePath .DS .$path;
+        $basePath = $properties['path'] .$directory;
+
+        return $basePath .DS .str_replace('/', DS, $path);
     }
 
     /**

@@ -104,13 +104,20 @@ class MakePluginCommand extends Command
      */
     public function fire()
     {
-        $this->container['name'] = Str::studly($this->argument('name'));
+        $name = $this->argument('name');
+
+        if (Str::length($name) > 3) {
+            $slug = Str::snake($name);
+        } else {
+            $slug = Str::lower($name);
+        }
+
+        $this->container['slug'] = $slug;
 
         //
-        $name = $this->container['name'];
+        $name = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
-        $this->container['slug'] = Str::snake($name);
-
+        $this->container['name']      = $name;
         $this->container['namespace'] = $name;
 
         if ($this->option('quick')) {

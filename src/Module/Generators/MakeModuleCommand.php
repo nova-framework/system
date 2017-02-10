@@ -135,13 +135,21 @@ class MakeModuleCommand extends Command
      */
     public function fire()
     {
-        $this->container['slug'] = Str::snake($this->argument('slug'));
+        $slug = $this->argument('slug');
+
+        if (Str::length($slug) > 3) {
+            $slug = Str::snake($slug);
+        } else {
+            $slug = Str::lower($slug);
+        }
+
+        $this->container['slug'] = $slug;
 
         //
-        $slug = $this->container['slug'];
+        $name = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
-        $this->container['name']      = Str::studly($slug);
-        $this->container['namespace'] = Str::studly($slug);
+        $this->container['name']      = $name;
+        $this->container['namespace'] = $name;
 
         $this->container['version']     = '1.0.0';
         $this->container['description'] = 'This is the description for the ' .$this->container['name'] .' module.';
