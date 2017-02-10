@@ -3,6 +3,7 @@
 namespace Nova\Plugin;
 
 use Nova\Plugin\Console\PluginListCommand;
+use Nova\Plugin\Console\ThemeListCommand;
 use Nova\Plugin\Generators\MakePluginCommand;
 use Nova\Plugin\PluginManager;
 use Nova\Plugin\Repository;
@@ -41,6 +42,8 @@ class PluginServiceProvider extends ServiceProvider
         // Register the Forge Commands.
         $this->registerPluginListCommand();
 
+        $this->registerThemeListCommand();
+
         $this->registerMakePluginCommand();
     }
 
@@ -55,6 +58,19 @@ class PluginServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.plugin.list');
+    }
+
+    /**
+     * Register the module:list command.
+     */
+    protected function registerThemeListCommand()
+    {
+        $this->app->singleton('command.theme.list', function ($app)
+        {
+            return new ThemeListCommand($app['plugins']);
+        });
+
+        $this->commands('command.theme.list');
     }
 
     /**
@@ -76,7 +92,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('plugins', 'command.plugin.list', 'command.make.plugin');
+        return array('plugins', 'command.plugin.list', 'command.theme.list', 'command.make.plugin');
     }
 
 }

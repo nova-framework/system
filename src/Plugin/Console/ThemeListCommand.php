@@ -6,21 +6,21 @@ use Nova\Console\Command;
 use Nova\Plugin\PluginManager;
 
 
-class PluginListCommand extends Command
+class ThemeListCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'plugin:list';
+    protected $name = 'theme:list';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'List all application plugins';
+    protected $description = 'List all application themes';
 
     /**
      * @var \Nova\Plugin\PluginManager
@@ -56,7 +56,7 @@ class PluginListCommand extends Command
         $plugins = $this->plugins->all()->where('theme', true);
 
         if (count($plugins) == 0) {
-            return $this->error("Your application doesn't have any plugins.");
+            return $this->error("Your application doesn't have any themes.");
         }
 
         $this->displayPlugins($this->getPlugins());
@@ -69,7 +69,7 @@ class PluginListCommand extends Command
      */
     protected function getPlugins()
     {
-        $plugins = $this->plugins->all()->where('theme', false);
+        $plugins = $this->plugins->all()->where('theme', true);
 
         $results = array();
 

@@ -48,9 +48,8 @@ class PluginManager
         {
             $this->registerServiceProvider($properties);
 
-            if ($properties['theme'] === true) {
-                $this->registerAssetsNamespace($properties);
-            }
+            // The Assets Namespace will be registered only for Themes.
+            $this->registerAssetsNamespace($properties);
         });
     }
 
