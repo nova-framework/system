@@ -74,10 +74,10 @@ if (! function_exists('plugin_url'))
             throw new LogicException("Plugin [$plugin] not found");
         }
 
-        if (Str::length($module) > 3) {
-            $module = Str::snake($module, '-');
+        if (Str::length($plugin) > 3) {
+            $plugin = Str::snake($plugin, '-');
         } else {
-            $module = Str::lower($module);
+            $plugin = Str::lower($plugin);
         }
 
         $path = 'plugins/' .$plugin .'/assets/' .ltrim($path, '/');
