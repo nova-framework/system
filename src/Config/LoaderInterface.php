@@ -17,8 +17,7 @@ interface LoaderInterface
      *
      * @param  string  $environment
      * @param  string  $group
-     * @param  string  $namespace
      * @return array
      */
-    public function load($group);
+    public function load($environment, $group);
 }

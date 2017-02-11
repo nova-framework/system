@@ -8,7 +8,6 @@
 
 namespace Nova\Routing;
 
-use Nova\Config\Config;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
@@ -17,6 +16,14 @@ use Nova\Support\ServiceProvider;
 
 class RoutingServiceProvider extends ServiceProvider
 {
+
+    /**
+     * Boot the Service Provider.
+     */
+    public function boot()
+    {
+        $this->registerAssetDispatcher();
+    }
 
     /**
      * Register the Service Provider.
@@ -30,8 +37,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerUrlGenerator();
 
         $this->registerRedirector();
-
-        $this->registerAssetDispatcher();
     }
 
     /**
@@ -90,11 +95,13 @@ class RoutingServiceProvider extends ServiceProvider
      */
     public function registerAssetDispatcher()
     {
-        // NOTE: When this method is executed, the Config Store is not yet available.
-        $driver = Config::get('routing.assets.driver', 'default');
+        $config = $this->app['config'];
+
+        //
+        $driver = $config->get('routing.assets.driver', 'default');
 
         if ($driver == 'custom') {
-            $className = Config::get('routing.assets.dispatcher');
+            $className = $config->get('routing.assets.dispatcher');
         } else {
             $className = 'Nova\Routing\Assets\\' .ucfirst($driver) .'Dispatcher';
         }

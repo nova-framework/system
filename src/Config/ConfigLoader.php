@@ -49,7 +49,7 @@ class ConfigLoader implements LoaderInterface
      * @param    string     $group
      * @return     array
      */
-    public function load($group)
+    public function load($environment, $group)
     {
         $items = array();
 
@@ -57,16 +57,40 @@ class ConfigLoader implements LoaderInterface
             // The Config hasn't loaded this Group; try to load it now.
             $path = $this->getPath();
 
-            $filePath = $path .DS .ucfirst($group) .'.php';
+            $file = $path .DS .ucfirst($group) .'.php';
 
-            if ($this->files->exists($filePath)) {
-                $items = $this->getRequire($filePath);
+            if ($this->files->exists($file)) {
+                $items = $this->getRequire($file);
             }
 
-            if (is_array($items)) return $items;
+            if (is_array($items)) {
+                $group = ucfirst($group);
+
+                $environment = ucfirst($environment);
+
+                $file = "{$path}/{$environment}/{$group}.php";
+
+                if ($this->files->exists($file)) {
+                    $items = $this->mergeEnvironment($items, $file);
+                }
+
+                return $items;
+            }
         }
 
         return Config::get($group, array());
+    }
+
+    /**
+     * Merge the items in the given file into the items.
+     *
+     * @param  array   $items
+     * @param  string  $file
+     * @return array
+     */
+    protected function mergeEnvironment(array $items, $file)
+    {
+        return array_replace_recursive($items, $this->getRequire($file));
     }
 
     /**

@@ -8,9 +8,8 @@
 
 namespace Nova\Helpers;
 
-use Nova\Config\Config;
-
-use Nova\Support\Facades\Request as HttpRequest;
+use Nova\Support\Facade\Config;
+use Nova\Support\Facades\Request;
 
 
 /**
@@ -31,7 +30,7 @@ class ReCaptcha
 
     public function __construct()
     {
-        $this->config = Config::get('recaptcha', array());
+        $this->config = Config::get('reCaptcha', array());
     }
 
     /**
@@ -74,17 +73,14 @@ class ReCaptcha
     {
         if (! $this->isActive()) return true;
 
-        // Get the Http Request instance.
-        $request = HttpRequest::instance();
-
         // Get the recaptcha response value.
-        $response = $response ?: $request->input('g-recaptcha-response', '');
+        $response = $response ?: Request::input('g-recaptcha-response', '');
 
         // Build the query string.
         $query = http_build_query(array(
             'secret'   => $this->getSecretKey(),
             'response' => $response,
-            'remoteip' => $request->ip()
+            'remoteip' => Request::ip()
         ));
 
         // Calculate the (complete) request URL.

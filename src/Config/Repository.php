@@ -20,6 +20,13 @@ class Repository implements \ArrayAccess
     protected $loader;
 
     /**
+     * The current environment.
+     *
+     * @var string
+     */
+    protected $environment;
+
+    /**
      * All of the configuration items.
      *
      * @var array
@@ -29,11 +36,16 @@ class Repository implements \ArrayAccess
     /**
      * Create a new repository instance.
      *
+     * @param  \Nova\Config\LoaderInterface  $loader
+     * @param  string  $environment
+     *
      * @return void
      */
-    function __construct(LoaderInterface $loader)
+    function __construct(LoaderInterface $loader, $environment)
     {
         $this->loader = $loader;
+
+        $this->environment = $environment;
     }
 
     /**
@@ -101,7 +113,7 @@ class Repository implements \ArrayAccess
     {
         if (isset($this->items[$group])) return;
 
-        $this->items[$group] = $this->loader->load($group);
+        $this->items[$group] = $this->loader->load($this->environment, $group);
     }
 
     /**
