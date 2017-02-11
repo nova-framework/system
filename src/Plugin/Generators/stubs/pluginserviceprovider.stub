@@ -19,6 +19,8 @@ class PluginServiceProvider extends ServiceProvider
 
         // Configure the Package.
         $this->package('{{path}}/{{namespace}}', '{{slug}}', $path);
+        
+        //
     }
 
     /**
