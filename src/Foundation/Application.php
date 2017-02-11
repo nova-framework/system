@@ -324,7 +324,9 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
 
         $this->markAsRegistered($provider);
 
-        if ($this->booted) $provider->boot();
+        if ($this->booted) {
+            $this->bootProvider($provider);
+        }
 
         return $provider;
     }
@@ -418,7 +420,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         if (! $this->booted) {
             $this->booting(function() use ($instance)
             {
-                $instance->boot();
+                $this->bootProvider($instance);
             });
         }
     }
@@ -559,9 +561,25 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         if ($this->booted) return;
 
-        array_walk($this->serviceProviders, function($p) { $p->boot(); });
+        array_walk($this->serviceProviders, function($provider)
+        {
+            $this->bootProvider($provider);
+        });
 
         $this->bootApplication();
+    }
+
+    /**
+     * Boot the given service provider.
+     *
+     * @param  \Nova\Support\ServiceProvider  $provider
+     * @return mixed
+     */
+    protected function bootProvider(ServiceProvider $provider)
+    {
+        if (method_exists($provider, 'boot')) {
+            return $this->call(array($provider, 'boot'));
+        }
     }
 
     /**
