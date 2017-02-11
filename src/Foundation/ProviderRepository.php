@@ -32,7 +32,7 @@ class ProviderRepository
     {
         $this->files = $files;
 
-        $this->manifestPath = $manifestPath .DS .'Services.php';
+        $this->manifestPath = $manifestPath .DS .'services.php';
     }
 
     /**
