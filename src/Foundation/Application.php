@@ -8,7 +8,7 @@ use Stack\Builder;
 
 use Nova\Http\Request;
 use Nova\Http\Response;
-use Nova\Config\ConfigLoader;
+use Nova\Config\FileLoader;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Facades\Facade;
@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.75.12';
+    const VERSION = '3.75.13';
 
     /**
      * Indicates if the application has "booted".
@@ -958,7 +958,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function getConfigLoader()
     {
-        return new ConfigLoader(new Filesystem, $this['path'] .DS .'Config');
+        return new FileLoader(new Filesystem, $this['path'] .DS .'Config');
     }
 
     /**

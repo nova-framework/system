@@ -33,6 +33,7 @@ class Repository implements \ArrayAccess
      */
     protected $items = array();
 
+
     /**
      * Create a new repository instance.
      *
@@ -62,13 +63,26 @@ class Repository implements \ArrayAccess
     }
 
     /**
+     * Determine if a configuration group exists.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function hasGroup($key)
+    {
+        list($group, $item) = $this->parseKey($key);
+
+        return $this->loader->exists($group);
+    }
+
+    /**
      * Get the specified configuration value.
      *
      * @param  string  $key
      * @param  mixed   $default
      * @return mixed
      */
-    public function get($key, $default = false)
+    public function get($key, $default = null)
     {
         list($group, $item) = $this->parseKey($key);
 

@@ -12,7 +12,7 @@ use Nova\Config\Config;
 use Nova\Filesystem\Filesystem;
 
 
-class ConfigLoader implements LoaderInterface
+class FileLoader implements LoaderInterface
 {
     /**
      * The filesystem instance.
@@ -27,6 +27,13 @@ class ConfigLoader implements LoaderInterface
      * @var string
      */
     protected $defaultPath;
+
+    /**
+     * A cache of whether groups exists.
+     *
+     * @var array
+     */
+    protected $exists = array();
 
 
     /**
@@ -53,24 +60,18 @@ class ConfigLoader implements LoaderInterface
     {
         $items = array();
 
-        if (! Config::has($group)) {
-            // The Config hasn't loaded this Group; try to load it now.
-            $path = $this->getPath();
+        $group = ucfirst($group);
 
-            $file = $path .DS .ucfirst($group) .'.php';
+        // Load the options from the group's file.
+        $path = $this->getPath();
 
-            if ($this->files->exists($file)) {
-                $items = $this->getRequire($file);
-            }
+        $file = $path .DS .$group .'.php';
 
-            if (! is_array($items)) $items = array();
-        } else {
-            $items = Config::get($group, array());
+        if ($this->files->exists($file)) {
+            $items = $this->getRequire($file);
         }
 
         // Merge the Environment options.
-        $group = ucfirst($group);
-
         $environment = ucfirst($environment);
 
         $file = "{$path}/{$environment}/{$group}.php";
@@ -95,15 +96,27 @@ class ConfigLoader implements LoaderInterface
     }
 
     /**
-     * Set a given configuration value.
+     * Determine if the given group exists.
      *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
+     * @param  string  $group
+     * @param  string  $namespace
+     * @return bool
      */
-    public function set($key, $value)
+    public function exists($group)
     {
-        Config::set($key, $value);
+        $group = ucfirst($group);
+
+        if (isset($this->exists[$group])) {
+            return $this->exists[$group];
+        }
+
+        $path = $this->getPath();
+
+        $file = "{$path}/{$group}.php";
+
+        $exists = $this->files->exists($file);
+
+        return $this->exists[$group] = $exists;
     }
 
     /**
@@ -125,5 +138,15 @@ class ConfigLoader implements LoaderInterface
     protected function getRequire($path)
     {
         return $this->files->getRequire($path);
+    }
+
+    /**
+     * Get the Filesystem instance.
+     *
+     * @return \Nova\Filesystem\Filesystem
+     */
+    public function getFilesystem()
+    {
+        return $this->files;
     }
 }
