@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.75.9';
+    const VERSION = '3.75.10';
 
     /**
      * Indicates if the application has "booted".
@@ -958,7 +958,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function getConfigLoader()
     {
-        return new ConfigLoader();
+        return new ConfigLoader(new Filesystem, $this['path'] .DS .'Config');
     }
 
     /**

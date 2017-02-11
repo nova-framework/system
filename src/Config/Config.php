@@ -33,7 +33,7 @@ class Config
      * @param  string  $key
      * @return bool
      */
-    public function has($key)
+    public static function has($key)
     {
         $default = microtime(true);
 
