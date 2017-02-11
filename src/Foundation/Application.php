@@ -12,6 +12,7 @@ use Nova\Config\LoaderManager;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Facades\Facade;
+use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;
 use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
