@@ -8,10 +8,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Nova\Helpers\ReservedWords;
 
+
 class ControllerCommand extends Command
 {
     private $controllerName;
+
     private $methods;
+
 
     protected function configure()
     {
@@ -34,11 +37,14 @@ class ControllerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->controllerName = $input->getArgument('controllerName');
+
         $this->methods = $input->getArgument('methods');
 
         $error = null;
+
         if (in_array($this->controllerName, ReservedWords::getList())) {
             $output->writeln("<error>Controller name cannot be a reserved word</>");
+
             $error = true;
         }
 
@@ -46,12 +52,14 @@ class ControllerCommand extends Command
             foreach ($this->methods as $method) {
                 if (in_array($method, ReservedWords::getList())) {
                     $output->writeln("<error>Method name ($method) cannot be a reserved word</>");
+
                     $error = true;
                 }
             }
         }
 
         if ($error == true) {
+        
             exit;
         }
 
@@ -68,12 +76,13 @@ class ControllerCommand extends Command
 
     private function makeViews()
     {
-        if (!is_dir("app/Views/".ucwords($this->controllerName))) {
+        if (! is_dir("app/Views/".ucwords($this->controllerName))) {
             mkdir("app/Views/".ucwords($this->controllerName));
         }
+
         if (is_array($this->methods)) {
             foreach ($this->methods as $method) {
-                file_put_contents("app/Views/".ucwords($this->controllerName)."/".ucwords($method.".php"), null);
+                file_put_contents("app/Views/".ucwords($this->controllerName) ."/" .ucwords($method .".php"), null);
             }
         }
     }
@@ -84,13 +93,16 @@ class ControllerCommand extends Command
         if (is_array($this->methods)) {
             foreach ($this->methods as $method) {
                 if ($method == 'index') {
-                    $methods .="Route::any('".strtolower($this->controllerName)."', 'App\\Controllers\\".ucwords($this->controllerName)."@$method');\n";
+                    $methods .="Route::any('".strtolower($this->controllerName)."', '".ucwords($this->controllerName)."@$method');\n";
                 } else {
-                    $methods .="Route::any('".strtolower($this->controllerName)."/$method', 'App\\Controllers\\".ucwords($this->controllerName)."@$method');\n";
+                    $methods .="Route::any('".strtolower($this->controllerName)."/$method', '".ucwords($this->controllerName)."@$method');\n";
                 }
             }
+
             $file = file_get_contents("app/Routes.php");
+
             $file = str_replace("/** End default Routes */", "$methods/** End default Routes */", $file);
+
             file_put_contents("app/Routes.php", $file);
         }
     }
