@@ -15,26 +15,33 @@ class Config
     /**
      * @var array
      */
-    protected static $settings = array();
+    protected static $options = array();
 
 
     /**
      * Get the registered settings.
-     * @return mixed|null
+     * @return array
      */
     public static function all()
     {
-        return static::$settings;
+        return static::$options;
     }
 
     /**
-     * Return true if the key exists.
-     * @param string $key
+     * Determine if the given configuration value exists.
+     *
+     * @param  string  $key
      * @return bool
      */
-    public static function has($key)
+    public function has($key)
     {
-        return ! is_null(array_get(static::$settings, $key));
+        $default = microtime(true);
+
+        if (static::get($key, $default) !== $default) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -44,7 +51,7 @@ class Config
      */
     public static function get($key, $default = null)
     {
-        return array_get(static::$settings, $key, $default);
+        return array_get(static::$options, $key, $default);
     }
 
     /**
@@ -54,6 +61,6 @@ class Config
      */
     public static function set($key, $value)
     {
-        array_set(static::$settings, $key, $value);
+        array_set(static::$options, $key, $value);
     }
 }

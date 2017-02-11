@@ -8,7 +8,7 @@ use Stack\Builder;
 
 use Nova\Http\Request;
 use Nova\Http\Response;
-use Nova\Config\LoaderManager;
+use Nova\Config\ConfigLoader;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Facades\Facade;
@@ -958,7 +958,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function getConfigLoader()
     {
-        return new LoaderManager();
+        return new ConfigLoader();
     }
 
     /**

@@ -58,7 +58,7 @@ class Repository implements \ArrayAccess
      */
     public function get($key, $default = false)
     {
-        @list($group, $item) = $this->parseKey($key);
+        list($group, $item) = $this->parseKey($key);
 
         $this->load($group);
 
@@ -78,7 +78,7 @@ class Repository implements \ArrayAccess
      */
     public function set($key, $value)
     {
-        @list($group, $item) = $this->parseKey($key);
+        list($group, $item) = $this->parseKey($key);
 
         $this->load($group);
 
@@ -114,23 +114,15 @@ class Repository implements \ArrayAccess
     {
         $segments = explode('.', $key);
 
-        $group = $segments[0];
+        $group = head($segments);
 
-        unset($segments[0]);
+        if (count($segments) == 1) {
+            return array($group, null);
+        }
 
-        $segments = implode('.', $segments);
+        $item = implode('.', array_slice($segments, 1));
 
-        return array($group, $segments);
-    }
-
-    /**
-     * Get all of the configuration items.
-     *
-     * @return array
-     */
-    public function getItems()
-    {
-        return $this->items;
+        return array($group, $item);
     }
 
     /**
@@ -141,6 +133,27 @@ class Repository implements \ArrayAccess
     public function getLoader()
     {
         return $this->loader;
+    }
+
+    /**
+     * Set the loader implementation.
+     *
+     * @param  \Nova\Config\LoaderInterface  $loader
+     * @return void
+     */
+    public function setLoader(LoaderInterface $loader)
+    {
+        $this->loader = $loader;
+    }
+
+    /**
+     * Get all of the configuration items.
+     *
+     * @return array
+     */
+    public function getItems()
+    {
+        return $this->items;
     }
 
     /**

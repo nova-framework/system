@@ -1,6 +1,6 @@
 <?php
 /**
- * FileLoader - Implements a Configuration Loader for Files storage.
+ * ConfigLoader - Implements a Configuration Loader.
  *
  * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
  * @version 3.0
@@ -11,17 +11,8 @@ namespace Nova\Config;
 use Nova\Config\Config;
 
 
-class FileLoader implements LoaderInterface
+class ConfigLoader implements LoaderInterface
 {
-    /**
-     * Create a new FileLoader instance.
-     *
-     * @return void
-     */
-    function __construct()
-    {
-    }
-
     /**
      * Load the Configuration Group for the key.
      *
