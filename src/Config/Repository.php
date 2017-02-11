@@ -99,8 +99,6 @@ class Repository implements \ArrayAccess
         } else {
             array_set($this->items[$group], $item, $value);
         }
-
-        $this->loader->set($key, $value);
     }
 
     /**
@@ -111,9 +109,12 @@ class Repository implements \ArrayAccess
      */
     public function load($group)
     {
+        $env = $this->environment;
+
+        //
         if (isset($this->items[$group])) return;
 
-        $this->items[$group] = $this->loader->load($this->environment, $group);
+        $this->items[$group] = $this->loader->load($env, $group);
     }
 
     /**

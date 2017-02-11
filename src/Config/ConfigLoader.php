@@ -63,22 +63,23 @@ class ConfigLoader implements LoaderInterface
                 $items = $this->getRequire($file);
             }
 
-            if (is_array($items)) {
-                $group = ucfirst($group);
-
-                $environment = ucfirst($environment);
-
-                $file = "{$path}/{$environment}/{$group}.php";
-
-                if ($this->files->exists($file)) {
-                    $items = $this->mergeEnvironment($items, $file);
-                }
-
-                return $items;
-            }
+            if (! is_array($items)) $items = array();
+        } else {
+            $items = Config::get($group, array());
         }
 
-        return Config::get($group, array());
+        // Merge the Environment options.
+        $group = ucfirst($group);
+
+        $environment = ucfirst($environment);
+
+        $file = "{$path}/{$environment}/{$group}.php";
+
+        if ($this->files->exists($file)) {
+            $items = $this->mergeEnvironment($items, $file);
+        }
+
+        return $items;
     }
 
     /**

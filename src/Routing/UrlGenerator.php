@@ -2,9 +2,9 @@
 
 namespace Nova\Routing;
 
-use Nova\Config\Config;
 use Nova\Http\Request;
 use Nova\Routing\Legacy\RouteParser;
+use Nova\Support\Facades\Config;
 use Nova\Support\Str;
 
 use InvalidArgumentException;
