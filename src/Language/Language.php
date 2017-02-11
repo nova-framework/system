@@ -88,7 +88,7 @@ class Language
         }
 
         if ($pathName == 'Nova') {
-            $basePath = SYSTEMDIR .'src' .DS;
+            $basePath = dirname(__DIR__) .DS;
         } else if ($pathName == 'Shared') {
             $basePath = ROOTDIR .'shared' .DS;
         } else if (is_dir(APPDIR .'Modules' .DS .$pathName)) {
