@@ -38,19 +38,11 @@ abstract class ServiceProvider
     }
 
     /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot() {}
-
-    /**
      * Register the service provider.
      *
      * @return void
      */
     abstract public function register();
-
 
     /**
      * Get the services provided by the provider.
@@ -80,5 +72,21 @@ abstract class ServiceProvider
     public function isDeferred()
     {
         return $this->defer;
+    }
+
+    /**
+     * Dynamically handle missing method calls.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        if ($method == 'boot') {
+            return;
+        }
+
+        throw new BadMethodCallException("Call to undefined method [{$method}]");
     }
 }
