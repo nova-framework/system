@@ -44,6 +44,7 @@ class MakeModuleCommand extends Command
         'Database/Migrations/',
         'Database/Seeds/',
         'Events/',
+        'Http/',
         'Http/Controllers/',
         'Http/Middleware/',
         'Http/Requests/',
@@ -248,7 +249,7 @@ class MakeModuleCommand extends Command
 
         $path = $this->getModulePath($slug, true);
 
-        $this->files->makeDirectory($path);
+        $this->files->makeDirectory($path, 0755, true, true);
 
         //
         $modulePath = $this->getModulePath($slug);
