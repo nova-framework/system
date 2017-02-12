@@ -6,6 +6,7 @@ use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
+use Nova\Routing\Contracts\RouteFiltererInterface;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;

@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Container\Container;
 use Nova\Http\Request;
+use Nova\Routing\Contracts\RouteFiltererInterface;
 use Nova\Routing\RouteDependencyResolverTrait;
 
 use Closure;
@@ -12,11 +13,11 @@ use Closure;
 class ControllerDispatcher
 {
     use RouteDependencyResolverTrait;
-    
+
     /**
      * The routing filterer implementation.
      *
-     * @var \Nova\Routing\RouteFiltererInterface  $filterer
+     * @var \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
      */
     protected $filterer;
 
@@ -30,7 +31,7 @@ class ControllerDispatcher
     /**
      * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\RouteFiltererInterface  $filterer
+     * @param  \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
      * @param  \Nova\Container\Container  $container
      * @return void
      */

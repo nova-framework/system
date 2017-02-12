@@ -3,6 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Http\Response;
+use Nova\Routing\Contracts\RouteFiltererInterface;
 use Nova\View\View;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -45,7 +46,7 @@ abstract class Controller
     /**
      * The route filterer implementation.
      *
-     * @var \Nova\Routing\RouteFiltererInterface
+     * @var \Nova\Routing\Contracts\RouteFiltererInterface
      */
     protected static $filterer;
 
@@ -207,7 +208,7 @@ abstract class Controller
     /**
      * Get the route filterer implementation.
      *
-     * @return \Nova\Routing\RouteFiltererInterface
+     * @return \Nova\Routing\Contracts\RouteFiltererInterface
      */
     public static function getFilterer()
     {
@@ -217,7 +218,7 @@ abstract class Controller
     /**
      * Set the route filterer implementation.
      *
-     * @param  \Nova\Routing\RouteFiltererInterface  $filterer
+     * @param  \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
      * @return void
      */
     public static function setFilterer(RouteFiltererInterface $filterer)

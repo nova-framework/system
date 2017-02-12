@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing;
+namespace Nova\Routing\Contracts;
 
 
 interface RouteFiltererInterface
