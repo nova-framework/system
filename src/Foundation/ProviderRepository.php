@@ -33,7 +33,7 @@ class ProviderRepository
         $this->files = $files;
 
         //
-        $manifest = $runningInConsole ? 'consoleServices.php' : 'defaultServices.php';
+        $manifest = $runningInConsole ? 'console-services.php' : 'default-services.php';
 
         $this->manifestPath = $manifestPath .DS .$manifest;
     }
