@@ -1,10 +1,13 @@
-<?php namespace Nova\Log;
+<?php
+
+namespace Nova\Log;
 
 use Monolog\Logger;
 use Nova\Support\ServiceProvider;
 
-class LogServiceProvider extends ServiceProvider {
 
+class LogServiceProvider extends ServiceProvider
+{
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -40,23 +43,6 @@ class LogServiceProvider extends ServiceProvider {
         {
             call_user_func($this->app['log.setup'], $logger);
         }
-
-        $this->registerCommands();
-    }
-
-    /**
-     * Register the Cache related Console commands.
-     *
-     * @return void
-     */
-    public function registerCommands()
-    {
-        $this->app->bindShared('command.log.clear', function($app)
-        {
-            return new Console\ClearCommand($app['files']);
-        });
-
-        $this->commands('command.log.clear');
     }
 
     /**
@@ -66,7 +52,7 @@ class LogServiceProvider extends ServiceProvider {
      */
     public function provides()
     {
-        return array('log', 'Psr\Log\LoggerInterface', 'command.log.clear');
+        return array('log', 'Psr\Log\LoggerInterface');
     }
 
 }
