@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.75.14';
+    const VERSION = '3.75.15';
 
     /**
      * Indicates if the application has "booted".
@@ -211,22 +211,9 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function startExceptionHandling()
     {
-        // Optionally setup the Default Timezone to UTC.
-        $timezone = ini_get('date.timezone');
-
-        if (empty($timezone)) {
-            date_default_timezone_set('UTC');
-        }
-
-        // Start the Exception Handling.
         $this['exception']->register($this->environment());
 
-        //$this['exception']->setDebug($this['config']['app.debug']);
-
-        // This way is possible to start early the Exception Handler.
-        $debug = (ENVIRONMENT == 'development');
-
-        $this['exception']->setDebug($debug);
+        $this['exception']->setDebug($this['config']['app.debug']);
     }
 
     /**
