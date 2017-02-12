@@ -5,7 +5,7 @@ namespace Nova\Module;
 use Nova\Config\Repository as Config;
 use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
-use Nova\Module\RepositoryInterface;
+use Nova\Module\Contracts\RepositoryInterface;
 use Nova\Support\Str;
 
 use InvalidArgumentException;
