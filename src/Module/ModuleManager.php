@@ -3,7 +3,7 @@
 namespace Nova\Module;
 
 use Nova\Foundation\Application;
-use Nova\Module\RepositoryInterface;
+use Nova\Module\Contracts\RepositoryInterface;
 
 use LogicException;
 

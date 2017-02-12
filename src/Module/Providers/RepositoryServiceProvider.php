@@ -28,6 +28,6 @@ class RepositoryServiceProvider extends ServiceProvider
             $className = 'Nova\Module\Repositories\\' .ucfirst($driver) .'Repository';
         }
 
-        $this->app->bind('Nova\Module\RepositoryInterface', $className);
+        $this->app->bind('Nova\Module\Contracts\RepositoryInterface', $className);
     }
 }
