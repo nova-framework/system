@@ -5,7 +5,7 @@ namespace Nova\Cache;
 use Nova\Support\ServiceProvider;
 
 
-class CacheServiceProvider extends ServiceProvider
+class ConsoleServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
@@ -21,20 +21,17 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('cache', function($app)
+        $this->app->bindShared('command.cache.clear', function($app)
         {
-            return new CacheManager($app);
+            return new Console\ClearCommand($app['cache'], $app['files']);
         });
 
-        $this->app->bindShared('cache.store', function($app)
+        $this->app->bindShared('command.cache.table', function($app)
         {
-            return $app['cache']->driver();
+            return new Console\CacheTableCommand($app['files']);
         });
 
-        $this->app->bindShared('memcached.connector', function()
-        {
-            return new MemcachedConnector;
-        });
+        $this->commands('command.cache.clear', 'command.cache.table');
     }
 
     /**
@@ -44,7 +41,7 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('cache', 'cache.store', 'memcached.connector');
+        return array('command.cache.clear', 'command.cache.table');
     }
 
 }
