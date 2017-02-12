@@ -8,7 +8,7 @@
 
 namespace Nova\Helpers;
 
-use Nova\Support\Facade\Config;
+use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Request;
 
 
