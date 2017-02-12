@@ -1023,7 +1023,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $manifest = $this['config']['app.manifest'];
 
-        return new ProviderRepository(new Filesystem, $manifest);
+        return new ProviderRepository(new Filesystem, $manifest, $this->runningInConsole());
     }
 
     /**

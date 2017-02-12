@@ -28,11 +28,14 @@ class ProviderRepository
      * @param  string  $manifestPath
      * @return void
      */
-    public function __construct(Filesystem $files, $manifestPath)
+    public function __construct(Filesystem $files, $manifestPath, $runningInConsole)
     {
         $this->files = $files;
 
-        $this->manifestPath = $manifestPath .DS .'services.php';
+        //
+        $manifest = $runningInConsole ? 'consoleServices.php' : 'webServices.php';
+
+        $this->manifestPath = $manifestPath .DS .$manifest;
     }
 
     /**
