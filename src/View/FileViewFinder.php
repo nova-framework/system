@@ -3,7 +3,7 @@
 namespace Nova\View;
 
 use Nova\Filesystem\Filesystem;
-use Nova\View\ViewFinderInterface;
+use Nova\View\Contracts\ViewFinderInterface;
 
 
 class FileViewFinder implements ViewFinderInterface

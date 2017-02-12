@@ -8,7 +8,7 @@ use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\Layout;
 use Nova\View\View;
-use Nova\View\ViewFinderInterface;
+use Nova\View\Contracts\ViewFinderInterface;
 
 use Closure;
 use InvalidArgumentException;
@@ -26,7 +26,7 @@ class Factory
     /**
      * The view finder implementation.
      *
-     * @var \Nova\View\ViewFinderInterface
+     * @var \Nova\View\Contracts\ViewFinderInterface
      */
     protected $finder;
 
@@ -131,7 +131,7 @@ class Factory
      * Create new View Factory instance.
      *
      * @param  \Nova\View\Engines\EngineResolver  $engines
-     * @param  \Nova\View\ViewFinderInterface  $finder
+     * @param  \Nova\View\Contracts\ViewFinderInterface  $finder
      * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
@@ -753,7 +753,7 @@ class Factory
     /**
      * Get the View Finder instance.
      *
-     * @return \Nova\View\ViewFinderInterface
+     * @return \Nova\View\Contracts\ViewFinderInterface
      */
     public function getFinder()
     {

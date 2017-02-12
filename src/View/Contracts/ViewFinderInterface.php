@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View;
+namespace Nova\View\Contracts;
 
 
 interface ViewFinderInterface
