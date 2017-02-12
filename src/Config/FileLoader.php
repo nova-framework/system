@@ -53,8 +53,9 @@ class FileLoader implements LoaderInterface
     /**
      * Load the Configuration Group for the key.
      *
-     * @param    string     $group
-     * @return     array
+     * @param string $environment
+     * @param string $group
+     * @return array
      */
     public function load($environment, $group)
     {
