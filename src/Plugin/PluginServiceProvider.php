@@ -29,9 +29,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->register('Nova\Plugin\Providers\ConsoleServiceProvider');
-        $this->app->register('Nova\Plugin\Providers\GeneratorServiceProvider');
-
         $this->app->bindShared('plugins', function ($app)
         {
             $repository = new Repository($app['files']);

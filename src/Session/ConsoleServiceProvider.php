@@ -5,7 +5,7 @@ namespace Nova\Session;
 use Nova\Support\ServiceProvider;
 
 
-class CommandsServiceProvider extends ServiceProvider
+class ConsoleServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
