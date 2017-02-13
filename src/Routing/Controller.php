@@ -3,7 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Http\Response;
-use Nova\Routing\Contracts\RouteFiltererInterface;
+use Nova\Routing\Router;
 use Nova\View\View;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -30,200 +30,62 @@ abstract class Controller
     protected $layout;
 
     /**
-     * The "before" filters registered on the controller.
+     * The middleware registered on the controller.
      *
      * @var array
      */
-    protected $beforeFilters = array();
+    protected $middleware = array();
 
     /**
-     * The "after" filters registered on the controller.
+     * The router implementation.
      *
-     * @var array
+     * @var \Nova\Routing\Router
      */
-    protected $afterFilters = array();
-
-    /**
-     * The route filterer implementation.
-     *
-     * @var \Nova\Routing\Contracts\RouteFiltererInterface
-     */
-    protected static $filterer;
+    protected static $router;
 
 
     /**
-     * Register a "before" filter on the controller.
+     * Register middleware on the controller.
      *
-     * @param  \Closure|string  $filter
-     * @param  array  $options
+     * @param  string  $middleware
+     * @param  array   $options
      * @return void
      */
-    public function beforeFilter($filter, array $options = array())
+    public function middleware($middleware, array $options = array())
     {
-        $this->beforeFilters[] = $this->parseFilter($filter, $options);
+        $this->middleware[$middleware] = $options;
     }
 
     /**
-     * Register an "after" filter on the controller.
-     *
-     * @param  \Closure|string  $filter
-     * @param  array  $options
-     * @return void
-     */
-    public function afterFilter($filter, array $options = array())
-    {
-        $this->afterFilters[] = $this->parseFilter($filter, $options);
-    }
-
-    /**
-     * Parse the given filter and options.
-     *
-     * @param  \Closure|string  $filter
-     * @param  array  $options
-     * @return array
-     */
-    protected function parseFilter($filter, array $options)
-    {
-        $parameters = array();
-
-        $original = $filter;
-
-        if ($filter instanceof Closure) {
-            $filter = $this->registerClosureFilter($filter);
-        } else if ($this->isInstanceFilter($filter)) {
-            $filter = $this->registerInstanceFilter($filter);
-        } else {
-            list($filter, $parameters) = Route::parseFilter($filter);
-        }
-
-        return compact('original', 'filter', 'parameters', 'options');
-    }
-
-    /**
-     * Register an anonymous controller filter Closure.
-     *
-     * @param  \Closure  $filter
-     * @return string
-     */
-    protected function registerClosureFilter(Closure $filter)
-    {
-        $this->getFilterer()->filter($name = spl_object_hash($filter), $filter);
-
-        return $name;
-    }
-
-    /**
-     * Register a controller instance method as a filter.
-     *
-     * @param  string  $filter
-     * @return string
-     */
-    protected function registerInstanceFilter($filter)
-    {
-        $method = substr($filter, 1);
-
-        $this->getFilterer()->filter($filter, array($this, $method));
-
-        return $filter;
-    }
-
-    /**
-     * Determine if a filter is a local method on the controller.
-     *
-     * @param  mixed  $filter
-     * @return boolean
-     *
-     * @throws \InvalidArgumentException
-     */
-    protected function isInstanceFilter($filter)
-    {
-        if (is_string($filter) && starts_with($filter, '@')) {
-            $method = substr($filter, 1);
-
-            if (method_exists($this, $method)) return true;
-
-            throw new \InvalidArgumentException("Filter method [$filter] does not exist.");
-        }
-
-        return false;
-    }
-
-    /**
-     * Remove the given before filter.
-     *
-     * @param  string  $filter
-     * @return void
-     */
-    public function forgetBeforeFilter($filter)
-    {
-        $this->beforeFilters = $this->removeFilter($filter, $this->getBeforeFilters());
-    }
-
-    /**
-     * Remove the given after filter.
-     *
-     * @param  string  $filter
-     * @return void
-     */
-    public function forgetAfterFilter($filter)
-    {
-        $this->afterFilters = $this->removeFilter($filter, $this->getAfterFilters());
-    }
-
-    /**
-     * Remove the given controller filter from the provided filter array.
-     *
-     * @param  string  $removing
-     * @param  array  $current
-     * @return array
-     */
-    protected function removeFilter($removing, $current)
-    {
-        return array_filter($current, function($filter) use ($removing)
-        {
-            return $filter['original'] != $removing;
-        });
-    }
-
-    /**
-     * Get the registered "before" filters.
+     * Get the middleware assigned to the controller.
      *
      * @return array
      */
-    public function getBeforeFilters()
+    public function getMiddleware()
     {
-        return $this->beforeFilters;
+        return $this->middleware;
     }
 
-    /**
-     * Get the registered "after" filters.
-     *
-     * @return array
-     */
-    public function getAfterFilters()
-    {
-        return $this->afterFilters;
-    }
 
     /**
-     * Get the route filterer implementation.
+     * Get the route implementation.
      *
-     * @return \Nova\Routing\Contracts\RouteFiltererInterface
+     * @return \Nova\Routing\Router
      */
-    public static function getFilterer()
+    public static function getRouter()
     {
-        return static::$filterer;
+        return static::$router;
     }
 
     /**
      * Set the route filterer implementation.
      *
-     * @param  \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
+     * @param  \Nova\Routing\Router  $router
      * @return void
      */
-    public static function setFilterer(RouteFiltererInterface $filterer)
+    public static function setRouter(Router $router)
     {
-        static::$filterer = $filterer;
+        static::$router = $router;
     }
 
     /**

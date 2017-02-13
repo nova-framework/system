@@ -2,9 +2,9 @@
 
 /*
 |--------------------------------------------------------------------------
-| Module Filters
+| Module Middleware
 |--------------------------------------------------------------------------
 |
-| Here is where you can register all of the Route Filters for the module.
+| Here is where you can register all of the Route Middleware for the module.
 */
 

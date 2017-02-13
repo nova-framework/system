@@ -96,7 +96,11 @@ class UrlGenerator
      */
     public function previous()
     {
-        return $this->to($this->request->headers->get('referer'));
+        $referrer = $this->request->headers->get('referer');
+
+        $url = $referrer ? $this->to($referrer) : $this->getPreviousUrlFromSession();
+
+        return $url ?: $this->to('/');
     }
 
     /**
@@ -519,4 +523,40 @@ class UrlGenerator
         $this->request = $request;
     }
 
+    /**
+     * Get the previous URL from the session if possible.
+     *
+     * @return string|null
+     */
+    protected function getPreviousUrlFromSession()
+    {
+        $session = $this->getSession();
+
+        return $session ? $session->previousUrl() : null;
+    }
+
+    /**
+     * Get the session implementation from the resolver.
+     *
+     * @return \Nova\Session\Store|null
+     */
+    protected function getSession()
+    {
+        if ($this->sessionResolver) {
+            return call_user_func($this->sessionResolver);
+        }
+    }
+
+    /**
+     * Set the session resolver for the generator.
+     *
+     * @param  callable  $sessionResolver
+     * @return $this
+     */
+    public function setSessionResolver(callable $sessionResolver)
+    {
+        $this->sessionResolver = $sessionResolver;
+
+        return $this;
+    }
 }

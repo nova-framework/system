@@ -10,6 +10,7 @@ use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\RouteDependencyResolverTrait;
+use Nova\Support\Arr;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route as SymfonyRoute;
@@ -257,97 +258,26 @@ class Route
     }
 
     /**
-     * Get the "before" filters for the route.
+     * Get or set the middlewares attached to the route.
      *
-     * @return array
+     * @param  array|string|null $middleware
+     * @return $this|array
      */
-    public function beforeFilters()
+    public function middleware($middleware = null)
     {
-        if (! isset($this->action['before'])) return array();
-
-        return $this->parseFilters($this->action['before']);
-    }
-
-    /**
-     * Get the "after" filters for the route.
-     *
-     * @return array
-     */
-    public function afterFilters()
-    {
-        if (! isset($this->action['after'])) return array();
-
-        return $this->parseFilters($this->action['after']);
-    }
-
-    /**
-     * Parse the given filter string.
-     *
-     * @param  string  $filters
-     * @return array
-     */
-    public static function parseFilters($filters)
-    {
-        return array_build(static::explodeFilters($filters), function($key, $value)
-        {
-            return Route::parseFilter($value);
-        });
-    }
-
-    /**
-     * Turn the filters into an array if they aren't already.
-     *
-     * @param  array|string  $filters
-     * @return array
-     */
-    protected static function explodeFilters($filters)
-    {
-        if (is_array($filters)) return static::explodeArrayFilters($filters);
-
-        return array_map('trim', explode('|', $filters));
-    }
-
-    /**
-     * Flatten out an array of filter declarations.
-     *
-     * @param  array  $filters
-     * @return array
-     */
-    protected static function explodeArrayFilters(array $filters)
-    {
-        $results = array();
-
-        foreach ($filters as $filter) {
-            $results = array_merge($results, array_map('trim', explode('|', $filter)));
+        if (is_null($middleware)) {
+            return (array) Arr::get($this->action, 'middleware', array());
         }
 
-        return $results;
-    }
+        if (is_string($middleware)) {
+            $middleware = array($middleware);
+        }
 
-    /**
-     * Parse the given filter into name and parameters.
-     *
-     * @param  string  $filter
-     * @return array
-     */
-    public static function parseFilter($filter)
-    {
-        if (! str_contains($filter, ':')) return array($filter, array());
+        $this->action['middleware'] = array_merge(
+            (array) Arr::get($this->action, 'middleware', array()), $middleware
+        );
 
-        return static::parseParameterFilter($filter);
-    }
-
-    /**
-     * Parse a filter with parameters.
-     *
-     * @param  string  $filter
-     * @return array
-     */
-    protected static function parseParameterFilter($filter)
-    {
-        list($name, $parameters) = explode(':', $filter, 2);
-
-        return array($name, explode(',', $parameters));
+        return $this;
     }
 
     /**

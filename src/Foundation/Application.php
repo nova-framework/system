@@ -2,13 +2,12 @@
 
 namespace Nova\Foundation;
 
-use Stack\Builder;
-
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Config\FileLoader;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
+use Nova\Foundation\Http\Kernel;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;
@@ -16,7 +15,6 @@ use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
 use Nova\Config\FileEnvironmentVariablesLoader;
 
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Debug\Exception\FatalErrorException;
@@ -31,7 +29,7 @@ use Closure;
 use RuntimeException;
 
 
-class Application extends Container implements HttpKernelInterface, TerminableInterface, ResponsePreparerInterface
+class Application extends Container implements ResponsePreparerInterface
 {
     /**
      * The Nova framework version.
@@ -129,8 +127,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         $this->registerBaseBindings($request ?: $this->createNewRequest());
 
         $this->registerBaseServiceProviders();
-
-        $this->registerBaseMiddlewares();
     }
 
     /**
@@ -517,28 +513,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     }
 
     /**
-     * Register a "before" application filter.
-     *
-     * @param  \Closure|string  $callback
-     * @return void
-     */
-    public function before($callback)
-    {
-        return $this['router']->before($callback);
-    }
-
-    /**
-     * Register an "after" application filter.
-     *
-     * @param  \Closure|string  $callback
-     * @return void
-     */
-    public function after($callback)
-    {
-        return $this['router']->after($callback);
-    }
-
-    /**
      * Register a "finish" application filter.
      *
      * @param  \Closure|string  $callback
@@ -671,121 +645,64 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $request = $request ?: $this['request'];
 
-        $response = with($stack = $this->getStackedClient())->handle($request);
+        $response = with($kernel = $this->getKernel())->handle($request);
+
+        //
+        $response = $this->prepareResponse($response, $request);
 
         $response->send();
 
-        $stack->terminate($request, $response);
+        $kernel->terminate($request, $response);
     }
 
-    /**
-     * Get the stacked HTTP kernel for the application.
-     *
-     * @return  \Symfony\Component\HttpKernel\HttpKernelInterface
-     */
-    protected function getStackedClient()
+    protected function getKernel()
     {
-        $sessionReject = $this->bound('session.reject') ? $this['session.reject'] : null;
+        $kernel = new Kernel($this, $this['router']);
 
-        $client = (new Builder)
-                    ->push('Nova\Cookie\Guard', $this['encrypter'])
-                    ->push('Nova\Cookie\Queue', $this['cookie'])
-                    ->push('Nova\Session\Middleware', $this['session'], $sessionReject);
+        $this->mergeCustomMiddlewares($kernel);
 
-        $this->mergeCustomMiddlewares($client);
-
-        return $client->resolve($this);
+        return $kernel;
     }
 
     /**
      * Merge the developer defined middlewares onto the stack.
      *
-     * @param  \Stack\Builder
+     * @param  \Nova\Foundation\Http\Kernel
      * @return void
      */
-    protected function mergeCustomMiddlewares(Builder $stack)
+    protected function mergeCustomMiddlewares(Kernel $kernel)
     {
         foreach ($this->middlewares as $middleware) {
-            list($class, $parameters) = array_values($middleware);
-
-            array_unshift($parameters, $class);
-
-            call_user_func_array(array($stack, 'push'), $parameters);
+            $kernel->pushMiddleware($middleware);
         }
     }
 
     /**
-     * Register the default, but optional middlewares.
+     * Add a Http Kernel middleware onto the stack.
      *
-     * @return void
-     */
-    protected function registerBaseMiddlewares()
-    {
-        //
-    }
-
-    /**
-     * Add a HttpKernel middleware onto the stack.
-     *
-     * @param  string  $class
-     * @param  array  $parameters
+     * @param  string|array  $middleware
      * @return $this
      */
-    public function middleware($class, array $parameters = array())
+    public function middleware($middleware)
     {
-        $this->middlewares[] = compact('class', 'parameters');
+        if (is_array($middleware)) {
+            $this->middlewares = array_merge($this->middlewares, $midleware);
+        } else {
+            $this->middlewares[] = $middleware;
+        }
 
         return $this;
     }
 
     /**
-     * Remove a custom middleware from the application.
+     * Determine if middleware has been disabled for the application.
      *
-     * @param  string  $class
-     * @return void
+     * @return bool
      */
-    public function forgetMiddleware($class)
+    public function shouldSkipMiddleware()
     {
-        $this->middlewares = array_filter($this->middlewares, function($m) use ($class)
-        {
-            return $m['class'] != $class;
-        });
-    }
-
-    /**
-     * Handle the given request and get the response.
-     *
-     * Provides compatibility with BrowserKit functional testing.
-     *
-     * @implements HttpKernelInterface::handle
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Symfony\Component\HttpFoundation\Response
-     *
-     * @throws \Exception
-     * @throws \Throwable
-     */
-    public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        try {
-            $this->refreshRequest($request = Request::createFromBase($request));
-
-            $this->boot();
-
-            return $this->dispatch($request);
-        }
-        catch (\Exception $e) {
-            if (! $catch || $this->runningUnitTests()) throw $e;
-
-            return $this['exception']->handleException($e);
-        }
-        catch (\Throwable $e) {
-            if (! $catch || $this->runningUnitTests()) throw $e;
-
-            return $this['exception']->handleException($e);
-        }
+        return $this->bound('middleware.disable') &&
+               ($this->make('middleware.disable') === true);
     }
 
     /**
@@ -799,7 +716,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
         if ($this->isDownForMaintenance()) {
             $response = $this['events']->until('nova.app.down');
 
-            if (! is_null($response)) return $this->prepareResponse($response, $request);
+            if (! is_null($response)) return $this->prepareResponse($response);
         }
 
         if ($this->runningUnitTests() && ! $this['session']->isStarted()) {

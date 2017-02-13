@@ -102,7 +102,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $query = $this->getQueryString();
 
-        return $query ? $this->url().'?'.$query : $this->url();
+        return $query ? $this->url() .'?' .$query : $this->url();
     }
 
     /**

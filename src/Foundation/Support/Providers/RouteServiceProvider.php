@@ -61,12 +61,12 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load the standard Route Filters file for the application.
+     * Load the standard Route Middleware file for the application.
      *
      * @param  string  $path
      * @return mixed
      */
-    protected function loadFiltersFrom($path)
+    protected function loadMiddlewareFrom($path)
     {
         $app = $this->app;
 

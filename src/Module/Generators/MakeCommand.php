@@ -128,8 +128,6 @@ class MakeCommand extends CommandGenerator
         foreach ($this->listFiles as $key => $file) {
             $filePath = $this->makeFilePath($this->listFolders[$key], $this->container['name']);
 
-            echo var_export($filePath) ."\n";
-
             $this->resolveByPath($filePath);
 
             $file = $this->formatContent($file);

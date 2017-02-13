@@ -4,7 +4,8 @@ namespace Nova\Routing;
 
 use Nova\Container\Container;
 use Nova\Http\Request;
-use Nova\Routing\Contracts\RouteFiltererInterface;
+use Nova\Pipeline\Pipeline;
+use Nova\Routing\Router;
 use Nova\Routing\RouteDependencyResolverTrait;
 
 use Closure;
@@ -17,9 +18,9 @@ class ControllerDispatcher
     /**
      * The routing filterer implementation.
      *
-     * @var \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
+     * @var \Nova\Routing\Contracts\RouteFiltererInterface  $router
      */
-    protected $filterer;
+    protected $router;
 
     /**
      * The IoC container instance.
@@ -31,13 +32,13 @@ class ControllerDispatcher
     /**
      * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\Contracts\RouteFiltererInterface  $filterer
+     * @param  \Nova\Routing\Router $router
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(RouteFiltererInterface $filterer, Container $container = null)
+    public function __construct(Router $router, Container $container = null)
     {
-        $this->filterer = $filterer;
+        $this->router = $router;
         $this->container = $container;
     }
 
@@ -52,23 +53,9 @@ class ControllerDispatcher
      */
     public function dispatch(Route $route, Request $request, $controller, $method)
     {
-        // First we will make an instance of this controller via the IoC container instance
-        // so that we can call the methods on it. We will also apply any "after" filters
-        // to the route so that they will be run by the routers after this processing.
         $instance = $this->makeController($controller);
 
-        $this->assignAfter($instance, $route, $request, $method);
-
-        $response = $this->before($instance, $route, $request, $method);
-
-        // If no before filters returned a response we'll call the method on the controller
-        // to get the response to be returned to the router. We will then return it back
-        // out for processing by this router and the after filters can be called then.
-        if (is_null($response)) {
-            $response = $this->call($instance, $route, $method);
-        }
-
-        return $response;
+        return $this->callWithinStack($instance, $route, $request, $method);
     }
 
     /**
@@ -79,9 +66,73 @@ class ControllerDispatcher
      */
     protected function makeController($controller)
     {
-        Controller::setFilterer($this->filterer);
+        Controller::setRouter($this->router);
 
         return $this->container->make($controller);
+    }
+
+    /**
+     * Call the given controller instance method.
+     *
+     * @param  \Nova\Routing\Controller  $instance
+     * @param  \Nova\Routing\Route  $route
+     * @param  \Nova\Http\Request  $request
+     * @param  string  $method
+     * @return mixed
+     */
+    protected function callWithinStack($instance, $route, $request, $method)
+    {
+        $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
+                                ($this->container->make('middleware.disable') === true);
+
+        $middleware = $shouldSkipMiddleware ? array() : $this->getMiddleware($instance, $method);
+
+        // Here we will make a stack onion instance to execute this request in, which gives
+        // us the ability to define middlewares on controllers. We will return the given
+        // response back out so that "after" filters can be run after the middlewares.
+        $pipeline = new Pipeline($this->container);
+
+        return $pipeline->send($request)
+            ->through($middleware)
+            ->then(function ($request) use ($instance, $route, $method)
+            {
+                return $this->router->prepareResponse(
+                    $request, $this->call($instance, $route, $method)
+                );
+            });
+    }
+
+    /**
+     * Get the middleware for the controller instance.
+     *
+     * @param  \Nova\Routing\Controller  $instance
+     * @param  string  $method
+     * @return array
+     */
+    protected function getMiddleware($instance, $method)
+    {
+        $results = array();
+
+        foreach ($instance->getMiddleware() as $name => $options) {
+            if (! $this->methodExcludedByOptions($method, $options)) {
+                $results[] = $this->router->resolveMiddleware($name);
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $options
+     * @return bool
+     */
+    public function methodExcludedByOptions($method, array $options)
+    {
+        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 
     /**
@@ -239,7 +290,7 @@ class ControllerDispatcher
     {
         extract($filter);
 
-        return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
+        return $this->router->callRouteFilter($filter, $parameters, $route, $request);
     }
 
 }

@@ -6,17 +6,17 @@ use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
-use Nova\Routing\Contracts\RouteFiltererInterface;
+use Nova\Pipeline\Pipeline;
+use Nova\Support\Collection;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Closure;
 
 
-class Router implements HttpKernelInterface, RouteFiltererInterface
+class Router
 {
     /**
      * The event dispatcher instance.
@@ -54,32 +54,18 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected $currentRequest;
 
     /**
+     * All of the short-hand keys for middlewares.
+     *
+     * @var array
+     */
+    protected $middleware = array();
+
+    /**
      * The controller inspector instance.
      *
      * @var \Nova\Routing\ControllerInspector
      */
     protected $inspector;
-
-    /**
-     * Indicates if the router is running filters.
-     *
-     * @var bool
-     */
-    protected $filtering = true;
-
-    /**
-     * The registered pattern based filters.
-     *
-     * @var array
-     */
-    protected $patternFilters = array();
-
-    /**
-     * The registered regular expression based filters.
-     *
-     * @var array
-     */
-    protected $regexFilters = array();
 
     /**
      * The registered route value binders.
@@ -115,6 +101,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @var array
      */
     protected $resourceDefaults = array('index', 'create', 'store', 'show', 'edit', 'update', 'destroy');
+
 
     /**
      * Create a new Router instance.
@@ -945,21 +932,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         $this->currentRequest = $request;
 
-        // If no response was returned from the before filter, we will call the proper
-        // route instance to get the response. If no route is found a response will
-        // still get returned based on why no routes were found for this request.
-        $response = $this->callFilter('before', $request);
-
-        if (is_null($response)) {
-            $response = $this->dispatchToRoute($request);
-        }
+        $response = $this->dispatchToRoute($request);
 
         $response = $this->prepareResponse($request, $response);
-
-        // Once this route has run and the response has been prepared, we will run the
-        // after filter to do any last work on the response or for this application
-        // before we will return the response back to the consuming code for use.
-        $this->callFilter('after', $request, $response);
 
         return $response;
     }
@@ -972,6 +947,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function dispatchToRoute(Request $request)
     {
+        // First we will find a route that matches this request. We will also set the
+        // route resolver on the request so middlewares assigned to the route will
+        // receive access to this route instance for checking of the parameters.
         $route = $this->findRoute($request);
 
         $request->setRouteResolver(function() use ($route)
@@ -981,23 +959,79 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
         $this->events->fire('router.matched', array($route, $request));
 
-        // Once we have successfully matched the incoming request to a given route we
-        // can call the before filters on that route. This works similar to global
-        // filters in that if a response is returned we will not call the route.
-        $response = $this->callRouteBefore($route, $request);
+        $response = $this->runRouteWithinStack($route, $request);
 
-        if (is_null($response)) {
-            $response = $route->run($request);
+        return $this->prepareResponse($request, $response);
+    }
+
+    /**
+     * Run the given route within a Stack "onion" instance.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
+     */
+    protected function runRouteWithinStack(Route $route, Request $request)
+    {
+        $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
+                                ($this->container->make('middleware.disable') === true);
+
+        $middleware = $shouldSkipMiddleware ? array() : $this->gatherRouteMiddlewares($route);
+
+        // Create a Pipeline instance.
+        $pipeline = new Pipeline($this->container);
+
+        return $pipeline->send($request)
+            ->through($middleware)
+            ->then(function ($request) use ($route)
+            {
+                $response = $route->run($request);
+
+                return $this->prepareResponse($request, $response);
+            });
+    }
+
+    /**
+     * Gather the middleware for the given route.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @return array
+     */
+    public function gatherRouteMiddlewares(Route $route)
+    {
+        return Collection::make($route->middleware())->map(function ($name)
+        {
+            $middleware = $this->resolveMiddleware($name);
+
+            return array($middleware);
+
+        })->collapse()->all();
+    }
+
+    /**
+     * Resolve the middleware name to a class name preserving passed parameters.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    public function resolveMiddleware($name)
+    {
+        $map = $this->middleware;
+
+        list($name, $parameters) = array_pad(explode(':', $name, 2), 2, null);
+
+        // Adjust the name and the parameters.
+        if (isset($map[$name])) {
+            $name = $map[$name];
         }
 
-        $response = $this->prepareResponse($request, $response);
+        if ($name instanceof Closure) {
+            return array('callback' => $name, 'parameters' => $parameters);
+        }
 
-        // After we have a prepared response from the route or filter we will call to
-        // the "after" filters to do any last minute processing on this request or
-        // response object before the response is returned back to the consumer.
-        $this->callRouteAfter($route, $request, $response);
+        $parameters = ! is_null($parameters) ? ':' .$parameters : '';
 
-        return $response;
+        return $name .$parameters;
     }
 
     /**
@@ -1055,94 +1089,27 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
-     * Register a new "before" filter with the router.
+     * Get all of the defined middleware short-hand names.
      *
-     * @param  string|callable  $callback
-     * @return void
+     * @return array
      */
-    public function before($callback)
+    public function getMiddleware()
     {
-        $this->addGlobalFilter('before', $callback);
+        return $this->middleware;
     }
 
     /**
-     * Register a new "after" filter with the router.
-     *
-     * @param  string|callable  $callback
-     * @return void
-     */
-    public function after($callback)
-    {
-        $this->addGlobalFilter('after', $callback);
-    }
-
-    /**
-     * Register a new global filter with the router.
-     *
-     * @param  string  $filter
-     * @param  string|callable   $callback
-     * @return void
-     */
-    protected function addGlobalFilter($filter, $callback)
-    {
-        $this->events->listen('router.'.$filter, $this->parseFilter($callback));
-    }
-
-    /**
-     * Register a new filter with the router.
+     * Register a short-hand name for a middleware.
      *
      * @param  string  $name
-     * @param  string|callable  $callback
-     * @return void
+     * @param  string|\Closure  $middleware
+     * @return $this
      */
-    public function filter($name, $callback)
+    public function middleware($name, $middleware)
     {
-        $this->events->listen('router.filter: '.$name, $this->parseFilter($callback));
-    }
+        $this->middleware[$name] = $middleware;
 
-    /**
-     * Parse the registered filter.
-     *
-     * @param  callable|string  $callback
-     * @return mixed
-     */
-    protected function parseFilter($callback)
-    {
-        if (is_string($callback) && ! str_contains($callback, '@')) {
-            return $callback.'@filter';
-        }
-
-        return $callback;
-    }
-
-    /**
-     * Register a pattern-based filter with the router.
-     *
-     * @param  string  $pattern
-     * @param  string  $name
-     * @param  array|null  $methods
-     * @return void
-     */
-    public function when($pattern, $name, $methods = null)
-    {
-        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
-
-        $this->patternFilters[$pattern][] = compact('name', 'methods');
-    }
-
-    /**
-     * Register a regular expression based filter with the router.
-     *
-     * @param  string     $pattern
-     * @param  string     $name
-     * @param  array|null $methods
-     * @return void
-     */
-    public function whenRegex($pattern, $name, $methods = null)
-    {
-        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
-
-        $this->regexFilters[$pattern][] = compact('name', 'methods');
+        return $this;
     }
 
     /**
@@ -1246,239 +1213,19 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
-     * Call the given filter with the request and response.
-     *
-     * @param  string  $filter
-     * @param  \Nova\Http\Request   $request
-     * @param  \Nova\Http\Response  $response
-     * @return mixed
-     */
-    protected function callFilter($filter, $request, $response = null)
-    {
-        if (! $this->filtering) return null;
-
-        return $this->events->until('router.'.$filter, array($request, $response));
-    }
-
-    /**
-     * Call the given route's before filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function callRouteBefore($route, $request)
-    {
-        $response = $this->callPatternFilters($route, $request);
-
-        return $response ?: $this->callAttachedBefores($route, $request);
-    }
-
-    /**
-     * Call the pattern based filters for the request.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed|null
-     */
-    protected function callPatternFilters($route, $request)
-    {
-        foreach ($this->findPatternFilters($request) as $filter => $parameters) {
-            $response = $this->callRouteFilter($filter, $parameters, $route, $request);
-
-            if (! is_null($response)) return $response;
-        }
-    }
-
-    /**
-     * Find the patterned filters matching a request.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return array
-     */
-    public function findPatternFilters($request)
-    {
-        $results = array();
-
-        list($path, $method) = array($request->path(), $request->getMethod());
-
-        foreach ($this->patternFilters as $pattern => $filters) {
-            // To find the patterned middlewares for a request, we just need to check these
-            // registered patterns against the path info for the current request to this
-            // applications, and when it matches we will merge into these middlewares.
-            if (str_is($pattern, $path)) {
-                $merge = $this->patternsByMethod($method, $filters);
-
-                $results = array_merge($results, $merge);
-            }
-        }
-
-        foreach ($this->regexFilters as $pattern => $filters) {
-            // To find the patterned middlewares for a request, we just need to check these
-            // registered patterns against the path info for the current request to this
-            // applications, and when it matches we will merge into these middlewares.
-            if (preg_match($pattern, $path)) {
-                $merge = $this->patternsByMethod($method, $filters);
-
-                $results = array_merge($results, $merge);
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Filter pattern filters that don't apply to the request verb.
-     *
-     * @param  string  $method
-     * @param  array   $filters
-     * @return array
-     */
-    protected function patternsByMethod($method, $filters)
-    {
-        $results = array();
-
-        foreach ($filters as $filter) {
-            // The idea here is to check and see if the pattern filter applies to this HTTP
-            // request based on the request methods. Pattern filters might be limited by
-            // the request verb to make it simply to assign to the given verb at once.
-            if ($this->filterSupportsMethod($filter, $method)) {
-                $parsed = Route::parseFilters($filter['name']);
-
-                $results = array_merge($results, $parsed);
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Determine if the given pattern filters applies to a given method.
-     *
-     * @param  array  $filter
-     * @param  array  $method
-     * @return bool
-     */
-    protected function filterSupportsMethod($filter, $method)
-    {
-        $methods = $filter['methods'];
-
-        return (is_null($methods) || in_array($method, $methods));
-    }
-
-    /**
-     * Call the given route's before (non-pattern) filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    protected function callAttachedBefores($route, $request)
-    {
-        foreach ($route->beforeFilters() as $filter => $parameters) {
-            $response = $this->callRouteFilter($filter, $parameters, $route, $request);
-
-            if (! is_null($response)) return $response;
-        }
-    }
-
-    /**
-     * Call the given route's before filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @param  \Nova\Http\Response  $response
-     * @return mixed
-     */
-    public function callRouteAfter($route, $request, $response)
-    {
-        foreach ($route->afterFilters() as $filter => $parameters) {
-            $this->callRouteFilter($filter, $parameters, $route, $request, $response);
-        }
-    }
-
-    /**
-     * Call the given route filter.
-     *
-     * @param  string  $filter
-     * @param  array  $parameters
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @param  \Nova\Http\Response|null $response
-     * @return mixed
-     */
-    public function callRouteFilter($filter, $parameters, $route, $request, $response = null)
-    {
-        if (! $this->filtering) return null;
-
-        $data = array_merge(array($route, $request, $response), $parameters);
-
-        return $this->events->until('router.filter: '.$filter, $this->cleanFilterParameters($data));
-    }
-
-    /**
-     * Clean the parameters being passed to a filter callback.
-     *
-     * @param  array  $parameters
-     * @return array
-     */
-    protected function cleanFilterParameters(array $parameters)
-    {
-        return array_filter($parameters, function($p)
-        {
-            return ! is_null($p) && ($p !== '');
-        });
-    }
-
-    /**
      * Create a response instance from the given value.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
      * @param  mixed  $response
      * @return \Nova\Http\Response
      */
-    protected function prepareResponse($request, $response)
+    public function prepareResponse($request, $response)
     {
         if (! $response instanceof SymfonyResponse) {
             $response = new Response($response);
         }
 
         return $response->prepare($request);
-    }
-
-    /**
-     * Run a callback with filters disable on the router.
-     *
-     * @param  callable  $callback
-     * @return void
-     */
-    public function withoutFilters(callable $callback)
-    {
-        $this->disableFilters();
-
-        call_user_func($callback);
-
-        $this->enableFilters();
-    }
-
-    /**
-     * Enable route filtering on the router.
-     *
-     * @return void
-     */
-    public function enableFilters()
-    {
-        $this->filtering = true;
-    }
-
-    /**
-     * Disable route filtering on the router.
-     *
-     * @return void
-     */
-    public function disableFilters()
-    {
-        $this->filtering = false;
     }
 
     /**
@@ -1642,19 +1389,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getPatterns()
     {
         return $this->patterns;
-    }
-
-    /**
-     * Get the response for a given request.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Nova\Http\Response
-     */
-    public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        return $this->dispatch(Request::createFromBase($request));
     }
 
 }

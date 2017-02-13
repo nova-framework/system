@@ -1,26 +1,23 @@
 <?php
 
-namespace Nova\Session;
+namespace Nova\Session\Middleware;
+
+use Nova\Http\Request;
+use Nova\Session\SessionManager;
+use Nova\Session\SessionInterface;
+use Nova\Session\CookieSessionHandler;
+use Nova\Support\Arr;
 
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 use Carbon\Carbon;
 
 use Closure;
 
 
-class Middleware implements HttpKernelInterface
+class StartSession
 {
-    /**
-     * The wrapped kernel implementation.
-     *
-     * @var \Symfony\Component\HttpKernel\HttpKernelInterface
-     */
-    protected $app;
-
     /**
      * The session manager.
      *
@@ -29,41 +26,34 @@ class Middleware implements HttpKernelInterface
     protected $manager;
 
     /**
-     * The callback to determine to use session arrays.
+     * Indicates if the session was handled for the current request.
      *
-     * @var \Closure|null
+     * @var bool
      */
-    protected $reject;
+    protected $sessionHandled = false;
+
 
     /**
      * Create a new session middleware.
      *
-     * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
      * @param  \Nova\Session\SessionManager  $manager
-     * @param  \Closure|null  $reject
      * @return void
      */
-    public function __construct(HttpKernelInterface $app, SessionManager $manager, Closure $reject = null)
+    public function __construct(SessionManager $manager)
     {
-        $this->app = $app;
-
-        $this->reject  = $reject;
         $this->manager = $manager;
     }
 
     /**
-     * Handle the given request and get the response.
+     * Handle an incoming request.
      *
-     * @implements HttpKernelInterface::handle
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  \Nova\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
      */
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    public function handle($request, Closure $next)
     {
-        $this->checkRequestForArraySessions($request);
+        $this->sessionHandled = true;
 
         // If a session driver has been configured, we will need to start the session here
         // so that the data is ready for an application. Note that the Laravel sessions
@@ -74,13 +64,15 @@ class Middleware implements HttpKernelInterface
             $request->setSession($session);
         }
 
-        $response = $this->app->handle($request, $type, $catch);
+        $response = $next($request);
 
         // Again, if the session has been configured we will need to close out the session
         // so that the attributes may be persisted to some storage medium. We will also
         // add the session identifier cookie to the application response headers now.
         if ($this->sessionConfigured()) {
-            $this->closeSession($session);
+            $this->storeCurrentUrl($request, $session);
+
+            $this->collectGarbage($session);
 
             $this->addCookieToResponse($response, $session);
         }
@@ -89,24 +81,23 @@ class Middleware implements HttpKernelInterface
     }
 
     /**
-     * Check the request and reject callback for array sessions.
+     * Perform any final actions for the request lifecycle.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \Nova\Http\Request  $request
+     * @param  \Symfony\Component\HttpFoundation\Response  $response
      * @return void
      */
-    public function checkRequestForArraySessions(Request $request)
+    public function terminate($request, $response)
     {
-        if (is_null($this->reject)) return;
-
-        if (call_user_func($this->reject, $request)) {
-            $this->manager->setDefaultDriver('array');
+        if ($this->sessionHandled && $this->sessionConfigured() && ! $this->usingCookieSessions()) {
+            $this->manager->driver()->save();
         }
     }
 
     /**
      * Start the session for the given request.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \Nova\Http\Request  $request
      * @return \Nova\Session\SessionInterface
      */
     protected function startSession(Request $request)
@@ -119,29 +110,32 @@ class Middleware implements HttpKernelInterface
     }
 
     /**
-     * Close the session handling for the request.
+     * Get the session implementation from the manager.
      *
-     * @param  \Nova\Session\SessionInterface  $session
-     * @return void
+     * @param  \Nova\Http\Request  $request
+     * @return \Nova\Session\SessionInterface
      */
-    protected function closeSession(SessionInterface $session)
+    public function getSession(Request $request)
     {
-        $session->save();
+        $session = $this->manager->driver();
 
-        $this->collectGarbage($session);
+        $session->setId($request->cookies->get($session->getName()));
+
+        return $session;
     }
 
     /**
-     * Get the full URL for the request.
+     * Store the current URL for the request if necessary.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @return string
+     * @param  \Nova\Http\Request  $request
+     * @param  \Nova\Session\SessionInterface  $session
+     * @return void
      */
-    protected function getUrl(Request $request)
+    protected function storeCurrentUrl(Request $request, $session)
     {
-        $url = rtrim(preg_replace('/\?.*/', '', $request->getUri()), '/');
-
-        return $request->getQueryString() ? $url.'?'.$request->getQueryString() : $url;
+        if (($request->method() === 'GET') && $request->route() && ! $request->ajax()) {
+            $session->setPreviousUrl($request->fullUrl());
+        }
     }
 
     /**
@@ -158,7 +152,7 @@ class Middleware implements HttpKernelInterface
         // the odds needed to perform garbage collection on any given request. If we do
         // hit it, we'll call this handler to let it delete all the expired sessions.
         if ($this->configHitsLottery($config)) {
-            $session->getHandler()->gc($this->getLifetimeSeconds());
+            $session->getHandler()->gc($this->getSessionLifetimeInSeconds());
         }
     }
 
@@ -177,21 +171,19 @@ class Middleware implements HttpKernelInterface
      * Add the session cookie to the application response.
      *
      * @param  \Symfony\Component\HttpFoundation\Response  $response
-     * @param  \Symfony\Component\HttpFoundation\Session\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function addCookieToResponse(Response $response, SessionInterface $session)
     {
-        if ($this->sessionIsPersistent($cookie = $this->manager->getSessionConfig())) {
-            $secure = array_get($cookie, 'secure', false);
+        if ($this->usingCookieSessions()) {
+            $this->manager->driver()->save();
+        }
 
+        if ($this->sessionIsPersistent($config = $this->manager->getSessionConfig())) {
             $response->headers->setCookie(new Cookie(
-                $session->getName(),
-                $session->getId(),
-                $this->getCookieLifetime(),
-                $cookie['path'],
-                $cookie['domain'],
-                $secure
+                $session->getName(), $session->getId(), $this->getCookieExpirationDate(),
+                $config['path'], $config['domain'], Arr::get($config, 'secure', false)
             ));
         }
     }
@@ -199,11 +191,11 @@ class Middleware implements HttpKernelInterface
     /**
      * Get the session lifetime in seconds.
      *
-     *
+     * @return int
      */
-    protected function getLifetimeSeconds()
+    protected function getSessionLifetimeInSeconds()
     {
-        return array_get($this->manager->getSessionConfig(), 'lifetime') * 60;
+        return Arr::get($this->manager->getSessionConfig(), 'lifetime') * 60;
     }
 
     /**
@@ -211,7 +203,7 @@ class Middleware implements HttpKernelInterface
      *
      * @return int
      */
-    protected function getCookieLifetime()
+    protected function getCookieExpirationDate()
     {
         $config = $this->manager->getSessionConfig();
 
@@ -225,7 +217,7 @@ class Middleware implements HttpKernelInterface
      */
     protected function sessionConfigured()
     {
-        return ! is_null(array_get($this->manager->getSessionConfig(), 'driver'));
+        return ! is_null(Arr::get($this->manager->getSessionConfig(), 'driver'));
     }
 
     /**
@@ -236,27 +228,24 @@ class Middleware implements HttpKernelInterface
      */
     protected function sessionIsPersistent(array $config = null)
     {
-        // Some session drivers are not persistent, such as the test array driver or even
-        // when the developer don't have a session driver configured at all, which the
-        // session cookies will not need to get set on any responses in those cases.
         $config = $config ?: $this->manager->getSessionConfig();
 
         return ! in_array($config['driver'], array(null, 'array'));
     }
 
     /**
-     * Get the session implementation from the manager.
+     * Determine if the session is using cookie sessions.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @return \Nova\Session\SessionInterface
+     * @return bool
      */
-    public function getSession(Request $request)
+    protected function usingCookieSessions()
     {
-        $session = $this->manager->driver();
+        if (! $this->sessionConfigured()) {
+            return false;
+        }
 
-        $session->setId($request->cookies->get($session->getName()));
+        $handler = $this->manager->driver()->getHandler();
 
-        return $session;
+        return ($handler instanceof CookieSessionHandler);
     }
-
 }

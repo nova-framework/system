@@ -3,8 +3,8 @@
 namespace Nova\Routing\Assets;
 
 use Nova\Container\Container;
-use Nova\Http\Response;
 use Nova\Routing\Assets\DispatcherInterface;
+use Nova\Support\Facades\Response;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -106,9 +106,9 @@ class DefaultDispatcher implements DispatcherInterface
     public function serve($path, SymfonyRequest $request)
     {
         if (! file_exists($path)) {
-            return new Response('File Not Found', 404);
+            return Response::make('File Not Found', 404);
         } else if (! is_readable($path)) {
-            return new Response('Unauthorized Access', 403);
+            return Response::make('Unauthorized Access', 403);
         }
 
         // Retrieve the file content type.
