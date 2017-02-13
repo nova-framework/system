@@ -657,7 +657,9 @@ class Application extends Container implements ResponsePreparerInterface
 
     protected function getKernel()
     {
-        $kernel = new Kernel($this, $this['router']);
+        //$kernel = new Kernel($this, $this['router']);
+
+        $kernel = $this->make('Nova\Http\Contracts\KernelInterface');
 
         $this->mergeCustomMiddlewares($kernel);
 
@@ -1097,6 +1099,22 @@ class Application extends Container implements ResponsePreparerInterface
 
         $this->loadedProviders = array();
     }
+
+    /**
+     * Get the used kernel object.
+     *
+     * @return \Nova\Console\Contracts\KernelInterface|\Nova\Http\Contracts\KernelInterface
+     */
+    /*
+    protected function getKernel()
+    {
+        $kernel = $this->runningInConsole()
+            ? 'Nova\Console\Contracts\KernelInterface'
+            : 'Nova\Http\Contracts\KernelInterface';
+
+        return $this->make($kernelInterface);
+    }
+    */
 
     /**
      * Get the application namespace.

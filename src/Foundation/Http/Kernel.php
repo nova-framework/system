@@ -34,6 +34,13 @@ class Kernel implements KernelInterface
      */
     protected $middleware = array();
 
+    /**
+     * The application's route middleware.
+     *
+     * @var array
+     */
+    protected $routeMiddleware = array();
+
 
     /**
      * Create a new HTTP kernel instance.
@@ -47,15 +54,7 @@ class Kernel implements KernelInterface
 
         $this->router = $router;
 
-        // Setup the Application Midlleware.
-        $config = $this->app['config'];
-
-        $this->middleware = $config->get('app.middleware', array());
-
-        // Setup the Route Midlleware.
-        $middlewares = $config->get('app.routeMiddleware', array());
-
-        foreach($middlewares as $name => $middleware) {
+        foreach($this->routeMiddleware as $name => $middleware) {
             $this->router->middleware($name, $middleware);
         }
     }
