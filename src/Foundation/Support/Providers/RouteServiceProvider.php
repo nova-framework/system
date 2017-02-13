@@ -61,21 +61,6 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load the standard Route Middleware file for the application.
-     *
-     * @param  string  $path
-     * @return mixed
-     */
-    protected function loadMiddlewareFrom($path)
-    {
-        $app = $this->app;
-
-        $router = $app['router'];
-
-        return require $path;
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void
