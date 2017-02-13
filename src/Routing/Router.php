@@ -1101,17 +1101,26 @@ class Router
     /**
      * Register a short-hand name for a middleware.
      *
-     * @param  string|array  $name
+     * @param  string  $name
      * @param  string|\Closure  $middleware
      * @return $this
      */
-    public function middleware($name, $middleware = null)
+    public function middleware($name, $middleware)
     {
-        if (is_array($name)) {
-            foreach ($name as $key => $value) {
-                $this->middleware[$key] = $value;
-            }
-        } else if (! is_null($middleware)) {
+        $this->middleware[$name] = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * Register short-hand names for middlewares.
+     *
+     * @param  array  $middlewares
+     * @return $this
+     */
+    public function middlewares(array $middlewares)
+    {
+        foreach ($middlewares as $name => $middleware) {
             $this->middleware[$name] = $middleware;
         }
 
