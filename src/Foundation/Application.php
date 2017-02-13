@@ -812,17 +812,6 @@ class Application extends Container implements ResponsePreparerInterface
     }
 
     /**
-     * Register a maintenance mode event listener.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function down(Closure $callback)
-    {
-        $this['events']->listen('nova.app.down', $callback);
-    }
-
-    /**
      * Throw an HttpException with the given data.
      *
      * @param  int     $code
