@@ -138,7 +138,7 @@ class DefaultDispatcher implements DispatcherInterface
             $lastModified = $modifyTime->format('D, j M Y H:i:s') .' GMT';
 
             // Create the custom Response instance.
-            $response = new Response($content, 200, array(
+            $response = Response::make($content, 200, array(
                 'Content-Type'     => $mimeType,
                 'Content-Encoding' => $algorithm,
                 'Last-Modified'    => $lastModified,
