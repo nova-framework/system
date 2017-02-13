@@ -26,7 +26,7 @@ class EncryptCookies
      *
      * @var array
      */
-    protected $except = array('PHPSESSID');
+    protected $except = array();
 
 
     /**

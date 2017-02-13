@@ -2,7 +2,7 @@
 
 namespace Nova\Cookie\Middleware;
 
-use Nova\Cookie\CookieJar;
+use Nova\Foundation\Application;
 
 use Closure;
 
@@ -19,12 +19,12 @@ class AddQueuedCookiesToResponse
     /**
      * Create a new CookieQueue instance.
      *
-     * @param  \Nova\Cookie\CookieJar  $cookies
+     * @param  \Nova\Foundation\Application  $app
      * @return void
      */
-    public function __construct(CookieJar $cookies)
+    public function __construct(Application $app)
     {
-        $this->cookies = $cookies;
+        $this->cookies = $app['cookie'];
     }
 
     /**
