@@ -1113,21 +1113,6 @@ class Router
     }
 
     /**
-     * Register short-hand names for middlewares.
-     *
-     * @param  array  $middlewares
-     * @return $this
-     */
-    public function middlewares(array $middlewares)
-    {
-        foreach ($middlewares as $name => $middleware) {
-            $this->middleware[$name] = $middleware;
-        }
-
-        return $this;
-    }
-
-    /**
      * Register a model binder for a wildcard.
      *
      * @param  string  $key

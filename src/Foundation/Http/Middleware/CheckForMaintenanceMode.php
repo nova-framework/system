@@ -3,7 +3,9 @@
 namespace Nova\Foundation\Http\Middleware;
 
 use Nova\Foundation\Application;
+use Nova\Http\Response;
 
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 use Closure;
@@ -41,9 +43,27 @@ class CheckForMaintenanceMode
     public function handle($request, Closure $next)
     {
         if ($this->app->isDownForMaintenance()) {
-            throw new HttpException(503);
+            $response = $this->callMaintenanceFilter();
+
+            if (is_null($response)) {
+                throw new HttpException(503);
+            }
+
+            // The maintenance Event returned something.
+            else if (! $response instanceof SymfonyResponse) {
+                $response = new Response($response);
+            }
+
+            return $response->prepare($request);
         }
 
         return $next($request);
+    }
+
+    protected function callMaintenanceFilter()
+    {
+        $events = $this->app['events'];
+
+        return $events->until('nova.app.down');
     }
 }

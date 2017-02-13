@@ -708,27 +708,6 @@ class Application extends Container implements ResponsePreparerInterface
     }
 
     /**
-     * Handle the given request and get the response.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function dispatch(Request $request)
-    {
-        if ($this->isDownForMaintenance()) {
-            $response = $this['events']->until('nova.app.down');
-
-            if (! is_null($response)) return $this->prepareResponse($response);
-        }
-
-        if ($this->runningUnitTests() && ! $this['session']->isStarted()) {
-            $this['session']->start();
-        }
-
-        return $this['router']->dispatch($this->prepareRequest($request));
-    }
-
-    /**
      * Call the "finish" and "shutdown" callbacks assigned to the application.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
