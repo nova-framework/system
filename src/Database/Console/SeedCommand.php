@@ -4,7 +4,7 @@ namespace Nova\Database\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
 
 use Symfony\Component\Console\Input\InputOption;
 
@@ -30,14 +30,14 @@ class SeedCommand extends Command
     /**
      * The connection resolver instance.
      *
-     * @var \Nova\Database\ConnectionResolverInterface
+     * @var \Nova\Database\Contracts\ConnectionResolverInterface
      */
     protected $resolver;
 
     /**
      * Create a new database seed command instance.
      *
-     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\Contracts\ConnectionResolverInterface  $resolver
      * @return void
      */
     public function __construct(Resolver $resolver)

@@ -1,8 +1,9 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Contracts;
 
 use Closure;
+
 
 interface ConnectionInterface
 {

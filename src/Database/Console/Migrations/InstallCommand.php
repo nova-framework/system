@@ -3,7 +3,7 @@
 namespace Nova\Database\Console\Migrations;
 
 use Nova\Console\Command;
-use Nova\Database\Migrations\MigrationRepositoryInterface;
+use Nova\Database\Contracts\Migrations\MigrationRepositoryInterface;
 
 use Symfony\Component\Console\Input\InputOption;
 
@@ -27,14 +27,14 @@ class InstallCommand extends Command
     /**
      * The repository instance.
      *
-     * @var \Nova\Database\Migrations\MigrationRepositoryInterface
+     * @var \Nova\Database\Contracts\Migrations\MigrationRepositoryInterface
      */
     protected $repository;
 
     /**
      * Create a new migration install command instance.
      *
-     * @param  \Nova\Database\Migrations\MigrationRepositoryInterface  $repository
+     * @param  \Nova\Database\Contracts\Migrations\MigrationRepositoryInterface  $repository
      * @return void
      */
     public function __construct(MigrationRepositoryInterface $repository)

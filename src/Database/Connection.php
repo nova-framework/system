@@ -4,6 +4,7 @@ namespace Nova\Database;
 
 
 use Nova\Events\Dispatcher;
+use Nova\Database\Contracts\ConnectionInterface;
 use Nova\Database\Query\Processors\Processor;
 
 use Doctrine\DBAL\Connection as DoctrineConnection;

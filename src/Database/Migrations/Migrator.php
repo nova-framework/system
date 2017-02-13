@@ -3,7 +3,8 @@
 namespace Nova\Database\Migrations;
 
 use Nova\Filesystem\Filesystem;
-use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Database\Contracts\Migrations\MigrationRepositoryInterface;
+use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
 
 
 class Migrator
@@ -11,7 +12,7 @@ class Migrator
     /**
      * The migration repository implementation.
      *
-     * @var \Nova\Database\Migrations\MigrationRepositoryInterface
+     * @var \Nova\Database\Contracts\Migrations\MigrationRepositoryInterface
      */
     protected $repository;
 
@@ -25,7 +26,7 @@ class Migrator
     /**
      * The connection resolver instance.
      *
-     * @var \Nova\Database\ConnectionResolverInterface
+     * @var \Nova\Database\Contracts\ConnectionResolverInterface
      */
     protected $resolver;
 
@@ -46,8 +47,8 @@ class Migrator
     /**
      * Create a new migrator instance.
      *
-     * @param  \Nova\Database\Migrations\MigrationRepositoryInterface  $repository
-     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\Contracts\Migrations\MigrationRepositoryInterface  $repository
+     * @param  \Nova\Database\Contracts\ConnectionResolverInterface  $resolver
      * @param  \Nova\Filesystem\Filesystem  $files
      * @return void
      */
@@ -349,7 +350,7 @@ class Migrator
     /**
      * Get the migration repository instance.
      *
-     * @return \Nova\Database\Migrations\MigrationRepositoryInterface
+     * @return \Nova\Database\Contracts\Migrations\MigrationRepositoryInterface
      */
     public function getRepository()
     {

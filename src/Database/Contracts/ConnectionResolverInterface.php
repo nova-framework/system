@@ -1,6 +1,7 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Contracts;
+
 
 interface ConnectionResolverInterface
 {

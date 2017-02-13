@@ -9,7 +9,7 @@
 namespace Nova\Database\Classic;
 
 use Nova\Database\Connection;
-use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\Classic\Builder;
 use Nova\Support\Str;
@@ -55,7 +55,7 @@ class Model
     /**
      * The connection resolver instance.
      *
-     * @var \Nova\Database\ConnectionResolverInterface
+     * @var \Nova\Database\Contracts\ConnectionResolverInterface
      */
     protected static $resolver;
 
@@ -243,7 +243,7 @@ class Model
     /**
      * Get the connection resolver instance.
      *
-     * @return \Nova\Database\ConnectionResolverInterface
+     * @return \Nova\Database\Contracts\ConnectionResolverInterface
      */
     public static function getConnectionResolver()
     {
@@ -253,7 +253,7 @@ class Model
     /**
      * Set the connection resolver instance.
      *
-     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\Contracts\ConnectionResolverInterface  $resolver
      * @return void
      */
     public static function setConnectionResolver(Resolver $resolver)

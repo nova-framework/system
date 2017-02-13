@@ -15,7 +15,7 @@ use Nova\Database\ORM\Relations\MorphToMany;
 use Nova\Database\ORM\Relations\BelongsToMany;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\Query\Builder as QueryBuilder;
-use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\ArrayableInterface;
 
@@ -186,7 +186,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     /**
      * The connection resolver instance.
      *
-     * @var \Nova\Database\ConnectionResolverInterface
+     * @var \Nova\Database\Contracts\ConnectionResolverInterface
      */
     protected static $resolver;
 
@@ -2857,7 +2857,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     /**
      * Get the connection resolver instance.
      *
-     * @return \Nova\Database\ConnectionResolverInterface
+     * @return \Nova\Database\Contracts\ConnectionResolverInterface
      */
     public static function getConnectionResolver()
     {
@@ -2867,7 +2867,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     /**
      * Set the connection resolver instance.
      *
-     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\Contracts\ConnectionResolverInterface  $resolver
      * @return void
      */
     public static function setConnectionResolver(Resolver $resolver)

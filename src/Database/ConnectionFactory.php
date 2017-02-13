@@ -162,7 +162,7 @@ class ConnectionFactory
      * Create a connector instance based on the configuration.
      *
      * @param  array  $config
-     * @return \Nova\Database\Connectors\ConnectorInterface
+     * @return \Nova\Database\Contracts\ConnectorInterface
      *
      * @throws \InvalidArgumentException
      */

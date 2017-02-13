@@ -1,7 +1,7 @@
 <?php namespace Nova\Database\Query;
 
 use Nova\Support\Collection;
-use Nova\Database\ConnectionInterface;
+use Nova\Database\Contracts\ConnectionInterface;
 use Nova\Database\Query\Grammar;
 use Nova\Database\Query\Processor;
 
@@ -213,7 +213,7 @@ class Builder
     /**
      * Create a new query builder instance.
      *
-     * @param  \Nova\Database\ConnectionInterface  $connection
+     * @param  \Nova\Database\Contracts\ConnectionInterface  $connection
      * @param  \Nova\Database\Query\Grammar  $grammar
      * @param  \Nova\Database\Query\Processor  $processor
      * @return void
@@ -2122,7 +2122,7 @@ class Builder
     /**
      * Get the database connection instance.
      *
-     * @return \Nova\Database\ConnectionInterface
+     * @return \Nova\Database\Contracts\ConnectionInterface
      */
     public function getConnection()
     {

@@ -3,7 +3,7 @@
 namespace Nova\Database\Connectors;
 
 use Nova\Database\Connector;
-use Nova\Database\ConnectorInterface;
+use Nova\Database\Contracts\ConnectorInterface;
 
 use PDO;
 

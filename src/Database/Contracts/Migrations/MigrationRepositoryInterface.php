@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Migrations;
+namespace Nova\Database\Contracts\Migrations;
 
 
 interface MigrationRepositoryInterface

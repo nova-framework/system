@@ -3,6 +3,7 @@
 namespace Nova\Database;
 
 use Nova\Support\Str;
+use Nova\Database\Contracts\ConnectionResolverInterface;
 use Nova\Database\ConnectionFactory;
 
 

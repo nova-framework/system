@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Failed;
 
-use Nova\Database\ConnectionResolverInterface;
+use Nova\Database\Contracts\ConnectionResolverInterface;
 
 use Carbon\Carbon;
 
