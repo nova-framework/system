@@ -19,6 +19,9 @@ class SessionServiceProvider extends ServiceProvider
         $this->registerSessionManager();
 
         $this->registerSessionDriver();
+
+        //
+        $this->app->singleton('Nova\Session\Middleware\StartSession');
     }
 
     /**

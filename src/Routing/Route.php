@@ -266,7 +266,7 @@ class Route
     public function middleware($middleware = null)
     {
         if (is_null($middleware)) {
-            return (array) Arr::get($this->action, 'middleware', array());
+            return $this->getMiddleware();
         }
 
         if (is_string($middleware)) {
@@ -278,6 +278,19 @@ class Route
         );
 
         return $this;
+    }
+
+    protected function getMiddleware()
+    {
+        $middleware = Arr::get($this->action, 'middleware');
+
+        if (is_null($middleware)) {
+            return array();
+        } else if (is_array($middleware)) {
+            return $middleware;
+        }
+
+        return explode('|', $middleware);
     }
 
     /**

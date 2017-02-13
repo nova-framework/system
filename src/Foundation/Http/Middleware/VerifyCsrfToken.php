@@ -35,6 +35,7 @@ class VerifyCsrfToken
      */
     protected $except = array();
 
+
     /**
      * Create a new middleware instance.
      *
@@ -121,7 +122,7 @@ class VerifyCsrfToken
      */
     protected function addCookieToResponse($request, $response)
     {
-        $config = $this->app['session'];
+        $config = $this->app['config']['session'];
 
         $cookie = new Cookie(
             'XSRF-TOKEN',
