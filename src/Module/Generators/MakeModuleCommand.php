@@ -54,7 +54,6 @@ class MakeModuleCommand extends Command
         'Policies/',
         'Providers/',
         'Views/',
-        'Widgets/',
     );
 
     /**
