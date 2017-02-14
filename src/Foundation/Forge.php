@@ -42,6 +42,7 @@ class Forge
     {
         if (! is_null($this->forge)) return $this->forge;
 
+        //
         $this->app->loadDeferredProviders();
 
         $this->forge = ConsoleApplication::make($this->app);
@@ -58,7 +59,9 @@ class Forge
      */
     public function __call($method, $parameters)
     {
-        return call_user_func_array(array($this->getForge(), $method), $parameters);
+        $instance = $this->getForge();
+
+        return call_user_func_array(array($instance, $method), $parameters);
     }
 
 }
