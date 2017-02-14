@@ -97,9 +97,9 @@ class MakeCommandCommand extends Command
     protected function addNamespace($stub)
     {
         if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Console\\'.$namespace.';', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console\Commands\\' .$namespace.';', $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Console;', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console\Commands;', $stub);
         }
     }
 
