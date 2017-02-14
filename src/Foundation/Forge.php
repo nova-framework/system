@@ -22,6 +22,7 @@ class Forge
      */
     protected $forge;
 
+    
     /**
      * Create a new forge command runner instance.
      *
