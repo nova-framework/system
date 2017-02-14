@@ -74,13 +74,6 @@ class Application extends Container implements ResponsePreparerInterface
     protected $shutdownCallbacks = array();
 
     /**
-     * All of the developer defined middlewares.
-     *
-     * @var array
-     */
-    protected $middlewares = array();
-
-    /**
      * All of the registered service providers.
      *
      * @var array
@@ -659,41 +652,7 @@ class Application extends Container implements ResponsePreparerInterface
     {
         //$kernel = new Kernel($this, $this['router']);
 
-        $kernel = $this->make('Nova\Http\Contracts\KernelInterface');
-
-        $this->mergeCustomMiddlewares($kernel);
-
-        return $kernel;
-    }
-
-    /**
-     * Merge the developer defined middlewares onto the stack.
-     *
-     * @param  \Nova\Foundation\Http\Kernel
-     * @return void
-     */
-    protected function mergeCustomMiddlewares(Kernel $kernel)
-    {
-        foreach ($this->middlewares as $middleware) {
-            $kernel->pushMiddleware($middleware);
-        }
-    }
-
-    /**
-     * Add a Http Kernel middleware onto the stack.
-     *
-     * @param  string|array  $middleware
-     * @return $this
-     */
-    public function middleware($middleware)
-    {
-        if (is_array($middleware)) {
-            $this->middlewares = array_merge($this->middlewares, $midleware);
-        } else {
-            $this->middlewares[] = $middleware;
-        }
-
-        return $this;
+        return $this->make('Nova\Http\Contracts\KernelInterface');
     }
 
     /**
