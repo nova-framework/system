@@ -47,8 +47,6 @@ class ModuleManager
             $this->registerServiceProvider($properties);
 
             $this->registerAssetsNamespace($properties);
-
-            $this->registerWidgetsNamespace($properties);
         });
     }
 
@@ -91,29 +89,6 @@ class ModuleManager
 
         if ($this->app['files']->isDirectory($path)) {
             $this->app['assets']->addNamespace($properties['slug'], $path);
-        }
-    }
-
-    /**
-     * Register the Module Service Provider.
-     *
-     * @param string $properties
-     *
-     * @return string
-     */
-    protected function registerWidgetsNamespace($properties)
-    {
-        // Determine the Package Widgets path.
-        $path = $this->resolveClassPath($properties) .'Widgets';
-
-        $hasWidgets = array_get($properties, 'has-widgets', true);
-
-        if ($hasWidgets && $this->app['files']->isDirectory($path)) {
-            $namespace = $this->resolveNamespace($properties);
-
-            $namespace = "{$namespace}\\Widgets";
-
-            $this->app['widgets']->register($namespace);
         }
     }
 
