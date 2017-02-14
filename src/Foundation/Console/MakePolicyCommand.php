@@ -95,9 +95,9 @@ class MakePolicyCommand extends Command
     protected function addNamespace($stub)
     {
         if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Policies\\'.$namespace.';', $stub);
+            return str_replace('{{namespace}}', 'namespace App\Policies\\' .$namespace .';', $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Policies;', $stub);
+            return str_replace('{{namespace}}', 'namespace App\Policies;', $stub);
         }
     }
 

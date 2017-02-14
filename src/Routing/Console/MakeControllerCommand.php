@@ -89,7 +89,7 @@ class MakeControllerCommand extends Command
     protected function getPath()
     {
         if (! is_null($this->input->getOption('path'))) {
-            return $this->nova['path.base'].'/'.$this->input->getOption('path');
+            return $this->nova['path.base'] .DS .$this->input->getOption('path');
         }
 
         return $this->path;
@@ -144,9 +144,7 @@ class MakeControllerCommand extends Command
     {
         return array(
             array('only', null, InputOption::VALUE_OPTIONAL, 'The methods that should be included'),
-
             array('except', null, InputOption::VALUE_OPTIONAL, 'The methods that should be excluded'),
-
             array('path', null, InputOption::VALUE_OPTIONAL, 'Where to place the Controller'),
         );
     }
