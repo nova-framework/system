@@ -38,8 +38,8 @@ class Factory
      */
     public function register($namespace)
     {
-        if (! array_key_exists($namespace, $this->namespaces)) {
-            $this->namespaces[] = $namespace;
+        if (array_search($namespace, $this->namespaces) === false) {
+            array_push($this->namespaces, $namespace);
         }
     }
 
