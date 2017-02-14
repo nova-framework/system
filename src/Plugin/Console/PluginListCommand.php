@@ -32,7 +32,7 @@ class PluginListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['#', 'Package', 'Slug', 'Config Files', 'Translations', 'Location'];
+    protected $headers = ['Package', 'Slug', 'Config Files', 'Translations', 'Location'];
 
     /**
      * Create a new command instance.
@@ -73,13 +73,8 @@ class PluginListCommand extends Command
 
         $results = array();
 
-        //
-        $count = 1;
-
         foreach ($plugins as $plugin) {
-            $results[] = $this->getPluginInformation($plugin, $count);
-
-            $count++;
+            $results[] = $this->getPluginInformation($plugin);
         }
 
         return array_filter($results);
@@ -92,7 +87,7 @@ class PluginListCommand extends Command
      *
      * @return array
      */
-    protected function getPluginInformation($plugin, $count)
+    protected function getPluginInformation($plugin)
     {
         $config   = $plugin['path'] .'Config';
         $language = $plugin['path'] .'Language';
@@ -104,7 +99,6 @@ class PluginListCommand extends Command
         }
 
         return array(
-            'id'       => $count,
             'name'     => $plugin['name'],
             'slug'     => $plugin['slug'],
             'config'   => is_dir($config)   ? 'Yes' : 'No',
