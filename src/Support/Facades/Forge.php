@@ -13,6 +13,6 @@ class Forge extends Facade
      *
      * @return string
      */
-    protected static function getFacadeAccessor() { return 'forge'; }
+    protected static function getFacadeAccessor() { return 'Nova\Console\Contracts\KernelInterface'; }
 
 }
