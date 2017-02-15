@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Foundation\Http\Middleware;
+namespace Nova\Assets\Middleware;
 
 use Nova\Foundation\Application;
 
@@ -9,7 +9,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Closure;
 
 
-class ServeAssetFile
+class ServeAsset
 {
     /**
      * The application implementation.
