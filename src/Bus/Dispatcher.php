@@ -273,6 +273,14 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
      */
     protected function pushCommandToQueue($queue, $command)
     {
+        if (isset($command->queue, $command->delay)) {
+            return $queue->laterOn($command->queue, $command->delay, $command);
+        }
+
+        if (isset($command->queue)) {
+            return $queue->pushOn($command->queue, $command);
+        }
+        
         if (isset($command->delay)) {
             return $queue->later($command->delay, $command);
         }

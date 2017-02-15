@@ -19,7 +19,7 @@ trait QueueableTrait
      */
     public $delay;
 
-    
+
     /**
      * Set the desired queue for the job.
      *
