@@ -213,7 +213,8 @@ class MakeCommand extends CommandGenerator
         }
 
         if (str_contains($name, '/')) {
-            $formats = collect(explode('/', $name))->map(function ($name) {
+            $formats = collect(explode('/', $name))->map(function ($name)
+            {
                 return Str::studly($name);
             });
 
