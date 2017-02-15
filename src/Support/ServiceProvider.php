@@ -10,6 +10,7 @@ namespace Nova\Support;
 
 use Nova\Support\Str;
 
+use BadMethodCallException;
 use ReflectionClass;
 
 

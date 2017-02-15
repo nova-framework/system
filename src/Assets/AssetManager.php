@@ -260,9 +260,9 @@ class AssetManager
      */
     public function cleanup()
     {
-        $cacheActive = $this->config->get('assets.cache.active', false);
+        //$cacheActive = $this->config->get('assets.cache.active', false);
 
-        if (! $cacheActive) return;
+        //if (! $cacheActive) return;
 
         //
         $search = $this->basePath .'cache-*';

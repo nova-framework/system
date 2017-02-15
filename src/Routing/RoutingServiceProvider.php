@@ -36,8 +36,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerUrlGenerator();
 
         $this->registerRedirector();
-
-        $this->registerAssetManager();
     }
 
     /**
