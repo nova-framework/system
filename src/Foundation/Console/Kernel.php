@@ -109,7 +109,9 @@ class Kernel implements KernelInterface
      */
     protected function getForge()
     {
-        if (isset($this->forge)) return $this->forge;
+        if (isset($this->forge)) {
+            return $this->forge;
+        }
 
         $this->app->loadDeferredProviders();
 
