@@ -260,6 +260,11 @@ class AssetManager
      */
     public function cleanup()
     {
+        $cacheActive = $this->config->get('assets.cache.active', false);
+
+        if (! $cacheActive) return;
+
+        //
         $search = $this->basePath .'cache-*';
 
         $paths = $this->files->glob($search);
@@ -268,9 +273,9 @@ class AssetManager
         if ($paths === false) return false;
 
         foreach ($paths as $path) {
-            if ($this->validate($path)) continue;
-
-            $this->files->delete($path);
+            if (! $this->validate($path)) {
+                $this->files->delete($path);
+            }
         }
 
         return true;

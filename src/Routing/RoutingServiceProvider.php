@@ -126,19 +126,6 @@ class RoutingServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the Assets Manager.
-     *
-     * @return void
-     */
-    public function registerAssetManager()
-    {
-        $this->app->bindShared('assets', function($app)
-        {
-            return new AssetManager($app);
-        });
-    }
-
-    /**
      * Register the Assets Dispatcher.
      *
      * @return void
