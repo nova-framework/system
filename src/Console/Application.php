@@ -48,7 +48,7 @@ class Application extends \Symfony\Component\Console\Application
     {
         $app->boot();
 
-        $console = with($console = new static('Nova Framework', $app::VERSION))
+        $console = with($console = new static('Nova Framework', $app->version()))
             ->setNova($app)
             ->setExceptionHandler($app['exception'])
             ->setAutoExit(false);
@@ -65,10 +65,6 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        $path = $this->nova['path'] .DS .'Boot' .DS .'Forge.php';
-
-        if (is_readable($path)) require $path;
-
         // If the event dispatcher is set on the application, we will fire an event
         // with the Nova instance to provide each listener the opportunity to
         // register their commands on this application before it gets started.
