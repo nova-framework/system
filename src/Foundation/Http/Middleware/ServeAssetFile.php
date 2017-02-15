@@ -40,10 +40,6 @@ class ServeAssetFile
     {
         $dispatcher = $this->app->make('Nova\Routing\Assets\DispatcherInterface');
 
-        if (! is_null($response = $dispatcher->dispatch($request))) {
-            return $response;
-        }
-
-        return $next($request);
+        return $dispatcher->dispatch($request) ?: $next($request);
     }
 }
