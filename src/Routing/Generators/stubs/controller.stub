@@ -2,18 +2,10 @@
 
 {{namespace}}
 
-use Nova\Routing\Controller;
+use Nova\Routing\Controller as BaseController;
 
 
-class {{class}} extends Controller
+class {{class}} extends BaseController
 {
-    /**
-     * Create a new {{class}} instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
 {{methods}}
 }

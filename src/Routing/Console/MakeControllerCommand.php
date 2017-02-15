@@ -70,7 +70,7 @@ class MakeControllerCommand extends Command
      */
     protected function generateController()
     {
-        $controller = $this->input->getArgument('name');
+        $controller = str_replace('/', '\\', $this->input->getArgument('name'));
 
         $path = $this->getPath();
 
