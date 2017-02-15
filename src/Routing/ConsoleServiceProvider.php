@@ -7,7 +7,7 @@ use Nova\Routing\Console\MakeControllerCommand;
 use Nova\Routing\Generators\ControllerGenerator;
 
 
-class ControllerServiceProvider extends ServiceProvider
+class ConsoleServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
@@ -41,7 +41,7 @@ class ControllerServiceProvider extends ServiceProvider
             // The controller generator is responsible for building resourceful controllers
             // quickly and easily for the developers via the Artisan CLI. We'll go ahead
             // and register this command instances in this container for registration.
-            $path = $app['path'] .DS .'Controllers';
+            $path = $app['path'] .DS .'Http' .DS 'Controllers';
 
             $generator = new ControllerGenerator($app['files']);
 
