@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Connections;
 
 use Nova\Database\Connection;
 use Nova\Database\Query\Grammars\PostgresGrammar as QueryGrammar;

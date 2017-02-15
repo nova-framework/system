@@ -3,14 +3,14 @@
 namespace Nova\Database;
 
 use Nova\Container\Container;
+use Nova\Database\Connections\MySqlConnection;
+use Nova\Database\Connections\SQLiteConnection;
+use Nova\Database\Connections\PostgresConnection;
+use Nova\Database\Connections\SqlServerConnection;
 use Nova\Database\Connectors\MySqlConnector;
 use Nova\Database\Connectors\SQLiteConnector;
 use Nova\Database\Connectors\PostgresConnector;
 use Nova\Database\Connectors\SqlServerConnector;
-use Nova\Database\MySqlConnection;
-use Nova\Database\SQLiteConnection;
-use Nova\Database\PostgresConnection;
-use Nova\Database\SqlServerConnection;
 
 use PDO;
 

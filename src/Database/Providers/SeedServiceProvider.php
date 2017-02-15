@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Providers;
 
-use Nova\Support\ServiceProvider;
 use Nova\Database\Console\SeedCommand;
+use Nova\Support\ServiceProvider;
 
 
 class SeedServiceProvider extends ServiceProvider

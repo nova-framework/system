@@ -1,10 +1,7 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Providers;
 
-use Nova\Support\ServiceProvider;
-use Nova\Database\Migrations\Migrator;
-use Nova\Database\Migrations\MigrationCreator;
 use Nova\Database\Console\Migrations\ResetCommand;
 use Nova\Database\Console\Migrations\RefreshCommand;
 use Nova\Database\Console\Migrations\InstallCommand;
@@ -12,6 +9,9 @@ use Nova\Database\Console\Migrations\MigrateCommand;
 use Nova\Database\Console\Migrations\RollbackCommand;
 use Nova\Database\Console\Migrations\MakeMigrationCommand;
 use Nova\Database\Migrations\DatabaseMigrationRepository;
+use Nova\Database\Migrations\Migrator;
+use Nova\Database\Migrations\MigrationCreator;
+use Nova\Support\ServiceProvider;
 
 
 class MigrationServiceProvider extends ServiceProvider
