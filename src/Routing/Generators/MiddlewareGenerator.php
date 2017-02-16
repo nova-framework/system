@@ -35,7 +35,7 @@ class MiddlewareGenerator
      */
     public function make($middleware, $path)
     {
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'middleware.stub');
+        $stub = $this->getMiddleware($middleware);
 
         $this->writeFile($stub, $middleware, $path);
 
@@ -96,7 +96,7 @@ class MiddlewareGenerator
      * @param  string  $middleware
      * @return string
      */
-    protected function getController($middleware)
+    protected function getMiddleware($middleware)
     {
         $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'middleware.stub');
 
