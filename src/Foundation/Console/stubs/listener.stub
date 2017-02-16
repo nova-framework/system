@@ -1,12 +1,14 @@
 <?php
 
-namespace DummyNamespace;
+namespace {{namespace}};
 
-use DummyFullEvent;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Nova\Queue\InteractsWithQueueTrait;
+use Nova\Queue\ShouldQueueInteface;
 
-class DummyClass
+use {{fullEvent}};
+
+
+class {{className}}
 {
     /**
      * Create the event listener.
@@ -24,7 +26,7 @@ class DummyClass
      * @param  DummyEvent  $event
      * @return void
      */
-    public function handle(DummyEvent $event)
+    public function handle({{event}} $event)
     {
         //
     }

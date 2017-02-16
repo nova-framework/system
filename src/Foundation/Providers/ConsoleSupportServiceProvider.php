@@ -19,7 +19,6 @@ class ConsoleSupportServiceProvider extends ServiceProvider
         'Nova\Foundation\Providers\EventCreatorServiceProvider',
         'Nova\Foundation\Providers\EventHandlerCreatorServiceProvider',
         'Nova\Foundation\Providers\ModelCreatorServiceProvider',
-        'Nova\Foundation\Providers\MiddlewareCreatorServiceProvider',
         'Nova\Foundation\Providers\PolicyCreatorServiceProvider',
         'Nova\Foundation\Providers\RequestCreatorServiceProvider',
         'Nova\Foundation\Providers\ComposerServiceProvider',
