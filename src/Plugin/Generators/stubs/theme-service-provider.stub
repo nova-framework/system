@@ -5,7 +5,7 @@ namespace {{path}}\{{namespace}}\Providers;
 use Nova\Support\ServiceProvider;
 
 
-class PluginServiceProvider extends ServiceProvider
+class ThemeServiceProvider extends ServiceProvider
 {
 
     /**
@@ -19,12 +19,12 @@ class PluginServiceProvider extends ServiceProvider
 
         // Configure the Package.
         $this->package('{{path}}/{{namespace}}', '{{slug}}', $path);
-        
+
         //
     }
 
     /**
-     * Register the {{name}} module Service Provider.
+     * Register the {{name}} theme Service Provider.
      *
      * This service provider is a convenient place to register your modules
      * services in the IoC container. If you wish, you may make additional

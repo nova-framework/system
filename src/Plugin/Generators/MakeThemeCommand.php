@@ -12,30 +12,39 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 
-class MakePluginCommand extends Command
+class MakeThemeCommand extends Command
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:plugin';
+    protected $name = 'make:theme';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Plugin and bootstrap it';
+    protected $description = 'Create a new Theme and bootstrap it';
 
     /**
      * Plugin folders to be created.
      *
      * @var array
      */
-    protected $pluginFolders = array(
+    protected $themeFolders = array(
+        'Assets/',
+        'Assets/css/',
+        'Assets/images/',
+        'Assets/js/',
         'Config/',
         'Language/',
+        'Layouts/',
+        'Layouts/RTL',
+        'Overrides/',
+        'Overrides/Modules/',
+        'Overrides/Views/',
         'Providers/',
     );
 
@@ -44,9 +53,13 @@ class MakePluginCommand extends Command
      *
      * @var array
      */
-    protected $pluginFiles = array(
+    protected $themeFiles = array(
+        'Assets/css/style.css',
         'Config/Config.php',
-        'Providers/PluginServiceProvider.php',
+        'Layouts/Default.php',
+        'Layouts/Message.php',
+        'Layouts/RTL/Default.php',
+        'Providers/ThemeServiceProvider.php',
         'README.md',
     );
 
@@ -55,18 +68,22 @@ class MakePluginCommand extends Command
      *
      * @var array
      */
-    protected $pluginStubs = array(
+    protected $themeStubs = array(
+        'style',
         'config',
-        'plugin-service-provider',
+        'layout',
+        'message',
+        'rtl-layout',
+        'theme-service-provider',
         'readme',
     );
 
     /**
-     * The plugins instance.
+     * The Plugins Manager instance.
      *
      * @var \Nova\Plugin\PluginManager
      */
-    protected $plugin;
+    protected $plugins;
 
     /**
      * The filesystem instance.
@@ -86,15 +103,15 @@ class MakePluginCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \>Nova\Plugin\PluginManager    $plugin
+     * @param \>Nova\Plugin\PluginManager    $theme
      */
-    public function __construct(Filesystem $files, PluginManager $plugin)
+    public function __construct(Filesystem $files, PluginManager $plugins)
     {
         parent::__construct();
 
         $this->files  = $files;
 
-        $this->plugin = $plugin;
+        $this->plugins = $plugins;
     }
 
     /**
@@ -129,13 +146,13 @@ class MakePluginCommand extends Command
 
 
     /**
-     * Step 1: Configure plugin.
+     * Step 1: Configure theme.
      *
      * @return mixed
      */
     private function stepOne()
     {
-        $this->container['name'] = $this->ask('Please enter the name of the plugin:', $this->container['name']);
+        $this->container['name'] = $this->ask('Please enter the name of the theme:', $this->container['name']);
 
         $this->comment('You have provided the following information:');
 
@@ -151,7 +168,7 @@ class MakePluginCommand extends Command
     }
 
     /**
-     * Generate the plugin.
+     * Generate the theme.
      */
     protected function generate()
     {
@@ -175,33 +192,33 @@ class MakePluginCommand extends Command
 
         $progress->finish();
 
-        $this->info("\nPlugin generated successfully.");
+        $this->info("\nTheme generated successfully.");
     }
 
     /**
-     * Generate defined plugin folders.
+     * Generate defined theme folders.
      */
     protected function generateFolders()
     {
         $slug = $this->container['slug'];
 
         //
-        $path = $this->plugin->getPath();
+        $path = $this->plugins->getThemesPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
         }
 
-        $path = $this->getPluginPath($slug, true);
+        $path = $this->getThemePath($slug, true);
 
         $this->files->makeDirectory($path);
 
         //
-        $pluginPath = $this->getPluginPath($slug);
+        $themePath = $this->getThemePath($slug);
 
         // Generate the Plugin directories.
-        foreach ($this->pluginFolders as $folder) {
-            $path = $pluginPath .$folder;
+        foreach ($this->themeFolders as $folder) {
+            $path = $themePath .$folder;
 
             $this->files->makeDirectory($path);
         }
@@ -210,18 +227,18 @@ class MakePluginCommand extends Command
         $languageFolders = $this->getLanguagePaths($slug);
 
         foreach ($languageFolders as $folder) {
-            $path = $pluginPath .$folder;
+            $path = $themePath .$folder;
 
             $this->files->makeDirectory($path);
         }
     }
 
     /**
-     * Generate defined plugin files.
+     * Generate defined theme files.
      */
     protected function generateFiles()
     {
-        foreach ($this->pluginFiles as $key => $file) {
+        foreach ($this->themeFiles as $key => $file) {
             $file = $this->formatContent($file);
 
             $this->files->put($this->getDestinationFile($file), $this->getStubContent($key));
@@ -230,7 +247,7 @@ class MakePluginCommand extends Command
         // Generate the Language files
         $slug = $this->container['slug'];
 
-        $pluginPath = $this->getPluginPath($slug);
+        $themePath = $this->getThemePath($slug);
 
         $content ='<?php
 
@@ -240,7 +257,7 @@ return array (
         $languageFolders = $this->getLanguagePaths($slug);
 
         foreach ($languageFolders as $folder) {
-            $path = $pluginPath .$folder .DS .'messages.php';
+            $path = $themePath .$folder .DS .'messages.php';
 
             $this->files->put($path, $content);
         }
@@ -253,10 +270,10 @@ return array (
     {
         $slug = $this->container['slug'];
 
-        $pluginPath = $this->getPluginPath($slug);
+        $themePath = $this->getThemePath($slug);
 
-        foreach ($this->pluginFolders as $folder) {
-            $path = $pluginPath .$folder;
+        foreach ($this->themeFolders as $folder) {
+            $path = $themePath .$folder;
 
             //
             $files = $this->files->glob($path .'/*');
@@ -270,19 +287,19 @@ return array (
     }
 
     /**
-     * Get the path to the plugin.
+     * Get the path to the theme.
      *
      * @param string $slug
      *
      * @return string
      */
-    protected function getPluginPath($slug = null)
+    protected function getThemePath($slug = null)
     {
         if (! is_null($slug)) {
-            return $this->plugin->getPluginPath($slug);
+            return $this->plugins->getThemePath($slug);
         }
 
-        return $this->plugin->getPath();
+        return $this->plugins->getThemesPath();
     }
 
     protected function getLanguagePaths($slug)
@@ -307,7 +324,7 @@ return array (
      */
     protected function getDestinationFile($file)
     {
-        return $this->getPluginPath($this->container['slug']) .$this->formatContent($file);
+        return $this->getThemePath($this->container['slug']) .$this->formatContent($file);
     }
 
     /**
@@ -319,7 +336,7 @@ return array (
      */
     protected function getStubContent($key)
     {
-        $stub = $this->pluginStubs[$key];
+        $stub = $this->themeStubs[$key];
 
         $path = __DIR__ .DS .'stubs' .DS .$stub .'.stub';
 
@@ -346,7 +363,7 @@ return array (
             $this->container['slug'],
             $this->container['name'],
             $this->container['namespace'],
-            $this->plugin->getNamespace(),
+            'Themes',
         );
 
         return str_replace($searches, $replaces, $content);
@@ -372,7 +389,7 @@ return array (
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:plugin Wizard and use default values'),
+            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:theme Wizard and use default values'),
         );
     }
 }

@@ -255,6 +255,20 @@ class Repository
     }
 
     /**
+     * Get local path for the specified theme.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getThemePath($slug)
+    {
+        $plugin = Str::studly($slug);
+
+        return $this->getThemesPath() .DS .$plugin .DS;
+    }
+
+    /**
      * Get (local) plugins path.
      *
      * @return string
