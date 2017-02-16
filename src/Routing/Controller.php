@@ -23,27 +23,13 @@ abstract class Controller
     private $method = null;
 
     /**
-     * The currently used Layout.
-     *
-     * @var mixed
-     */
-    protected $layout;
-
-    /**
      * The middleware registered on the controller.
      *
      * @var array
      */
     protected $middleware = array();
 
-    /**
-     * The router implementation.
-     *
-     * @var \Nova\Routing\Router
-     */
-    protected static $router;
-
-
+    
     /**
      * Register middleware on the controller.
      *
@@ -66,30 +52,8 @@ abstract class Controller
         return $this->middleware;
     }
 
-
     /**
-     * Get the route implementation.
-     *
-     * @return \Nova\Routing\Router
-     */
-    public static function getRouter()
-    {
-        return static::$router;
-    }
-
-    /**
-     * Set the route filterer implementation.
-     *
-     * @param  \Nova\Routing\Router  $router
-     * @return void
-     */
-    public static function setRouter(Router $router)
-    {
-        static::$router = $router;
-    }
-
-    /**
-     * Create the layout used by the controller.
+     * Method executed before any action.
      *
      * @return void
      */
@@ -106,18 +70,11 @@ abstract class Controller
     {
         $this->method = $method;
 
-        // Setup the Layout.
+        // Execute the Before method.
         $this->before();
 
         // Execute the requested Method with the given arguments.
         $response = call_user_func_array(array($this, $method), $parameters);
-
-        // If no response is returned from the controller action and a layout is being
-        // used we will assume we want to just return the Layout view as any nested
-        // Views were probably bound on this view during this Controller actions.
-        if (is_null($response) && ($this->layout instanceof View)) {
-            $response = $this->layout;
-        }
 
         // Process the Response and return it.
         return $this->processResponse($response);

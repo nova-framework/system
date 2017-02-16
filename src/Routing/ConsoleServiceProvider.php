@@ -2,9 +2,11 @@
 
 namespace Nova\Routing;
 
-use Nova\Support\ServiceProvider;
-use Nova\Routing\Console\MakeControllerCommand;
+use Nova\Routing\Console\ControllerMakeCommand;
+use Nova\Routing\Console\MiddlewareMakeCommand;
 use Nova\Routing\Generators\ControllerGenerator;
+use Nova\Routing\Generators\MiddlewareGenerator;
+use Nova\Support\ServiceProvider;
 
 
 class ConsoleServiceProvider extends ServiceProvider
@@ -26,7 +28,7 @@ class ConsoleServiceProvider extends ServiceProvider
         // Console support.
         $this->registerGenerator();
 
-        $this->commands('command.controller.make');
+        $this->commands('command.controller.make', 'command.middleware.make');
     }
 
     /**
@@ -45,7 +47,19 @@ class ConsoleServiceProvider extends ServiceProvider
 
             $generator = new ControllerGenerator($app['files']);
 
-            return new MakeControllerCommand($generator, $path);
+            return new ControllerMakeCommand($generator, $path);
+        });
+
+        $this->app->bindShared('command.middleware.make', function($app)
+        {
+            // The controller generator is responsible for building resourceful controllers
+            // quickly and easily for the developers via the Artisan CLI. We'll go ahead
+            // and register this command instances in this container for registration.
+            $path = $app['path'] .DS .'Http' .DS .'Controllers';
+
+            $generator = new MiddlewareGenerator($app['files']);
+
+            return new MiddlewareMakeCommand($generator, $path);
         });
     }
 
@@ -57,7 +71,7 @@ class ConsoleServiceProvider extends ServiceProvider
     public function provides()
     {
         return array(
-            'command.controller.make'
+            'command.controller.make', 'command.middleware.make'
         );
     }
 

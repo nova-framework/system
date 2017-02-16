@@ -7,7 +7,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Nova\Routing\Generators\ControllerGenerator;
 
-class MakeControllerCommand extends Command
+
+class ControllerMakeCommand extends Command
 {
     /**
      * The console command name.
