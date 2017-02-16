@@ -18,6 +18,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
+
     /**
      * Register the service provider.
      *
@@ -25,24 +26,8 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Console support.
-        $this->registerGenerator();
-
-        $this->commands('command.controller.make', 'command.middleware.make');
-    }
-
-    /**
-     * Register the controller generator command.
-     *
-     * @return void
-     */
-    protected function registerGenerator()
-    {
         $this->app->bindShared('command.controller.make', function($app)
         {
-            // The controller generator is responsible for building resourceful controllers
-            // quickly and easily for the developers via the Artisan CLI. We'll go ahead
-            // and register this command instances in this container for registration.
             $path = $app['path'] .DS .'Http' .DS .'Controllers';
 
             $generator = new ControllerGenerator($app['files']);
@@ -52,15 +37,14 @@ class ConsoleServiceProvider extends ServiceProvider
 
         $this->app->bindShared('command.middleware.make', function($app)
         {
-            // The controller generator is responsible for building resourceful controllers
-            // quickly and easily for the developers via the Artisan CLI. We'll go ahead
-            // and register this command instances in this container for registration.
             $path = $app['path'] .DS .'Http' .DS .'Middleware';
 
             $generator = new MiddlewareGenerator($app['files']);
 
             return new MiddlewareMakeCommand($generator, $path);
         });
+
+        $this->commands('command.controller.make', 'command.middleware.make');
     }
 
     /**
