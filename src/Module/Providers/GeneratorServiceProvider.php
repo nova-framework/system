@@ -4,6 +4,7 @@ namespace Nova\Module\Providers;
 
 use Nova\Module\Generators\MakeModuleCommand;
 use Nova\Module\Generators\MakeControllerCommand;
+use Nova\Module\Generators\MakeMiddlewareCommand;
 use Nova\Module\Generators\MakeModelCommand;
 use Nova\Module\Generators\MakePolicyCommand;
 use Nova\Module\Generators\MakeMigrationCommand;
@@ -26,7 +27,7 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeController', 'MakeModel', 'MakePolicy', 'MakeMigration', 'MakeSeeder');
+        $commands = array('MakeModule', 'MakeController', 'MakeMiddleware', 'MakeModel', 'MakePolicy', 'MakeMigration', 'MakeSeeder');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
@@ -38,7 +39,8 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     private function registerMakeModuleCommand()
     {
-        $this->app->bindShared('command.make.module', function ($app) {
+        $this->app->bindShared('command.make.module', function ($app)
+        {
             return new MakeModuleCommand($app['files'], $app['modules']);
         });
 
@@ -50,7 +52,8 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     private function registerMakeControllerCommand()
     {
-        $this->app->bindShared('command.make.module.controller', function ($app) {
+        $this->app->bindShared('command.make.module.controller', function ($app)
+        {
             return new MakeControllerCommand($app['files'], $app['modules']);
         });
 
@@ -58,11 +61,25 @@ class GeneratorServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the make:module:middleware command.
+     */
+    private function registerMakeMiddlewareCommand()
+    {
+        $this->app->bindShared('command.make.module.middleware', function ($app)
+        {
+            return new MakeMiddlewareCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.middleware');
+    }
+
+    /**
      * Register the make:module:model command.
      */
     private function registerMakeModelCommand()
     {
-        $this->app->bindShared('command.make.module.model', function ($app) {
+        $this->app->bindShared('command.make.module.model', function ($app)
+        {
             return new MakeModelCommand($app['files'], $app['modules']);
         });
 
@@ -74,7 +91,8 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     private function registerMakePolicyCommand()
     {
-        $this->app->bindShared('command.make.module.policy', function ($app) {
+        $this->app->bindShared('command.make.module.policy', function ($app)
+        {
             return new MakePolicyCommand($app['files'], $app['modules']);
         });
 
@@ -86,7 +104,8 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     private function registerMakeMigrationCommand()
     {
-        $this->app->bindShared('command.make.module.migration', function ($app) {
+        $this->app->bindShared('command.make.module.migration', function ($app)
+        {
             return new MakeMigrationCommand($app['files'], $app['modules']);
         });
 
@@ -98,7 +117,8 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     private function registerMakeSeederCommand()
     {
-        $this->app->bindShared('command.make.module.seeder', function ($app) {
+        $this->app->bindShared('command.make.module.seeder', function ($app)
+        {
             return new MakeSeederCommand($app['files'], $app['modules']);
         });
 
