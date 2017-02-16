@@ -39,7 +39,7 @@ class MakeCommandCommand extends GeneratorCommand
     {
         parent::fire();
 
-        if (! is_null($this->option('handler'))) {
+        if ($this->option('handler')) {
             $this->call('handler:command', array(
                 'name' => $this->argument('name') .'Handler',
                 '--command' => $this->parseName($this->argument('name')),
@@ -54,11 +54,14 @@ class MakeCommandCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if (! is_null($this->option('queued')) && ! is_null($this->option('handler'))) {
+        $queued  = $this->option('queued');
+        $handler = $this->option('handler');
+
+        if ($queued && $handler) {
             return realpath(__DIR__) .str_replace('/', DS, '/stubs/command-queued-with-handler.stub');
-        } else if (! is_null($this->option('queued'))) {
+        } else if ($queued) {
             return realpath(__DIR__) .str_replace('/', DS, '/stubs/command-queued.stub');
-        } else if (! is_null($this->option('handler'))) {
+        } else if ($handler) {
             return realpath(__DIR__) .str_replace('/', DS, '/stubs/command-with-handler.stub');
         } else {
             return realpath(__DIR__) .str_replace('/', DS, '/stubs/command.stub');
