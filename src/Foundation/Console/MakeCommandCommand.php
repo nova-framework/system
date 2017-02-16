@@ -46,7 +46,7 @@ class MakeCommandCommand extends Command
     {
         $path = $this->getPath();
 
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'command.stub');
+        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'console.stub');
 
         $file = $path .DS .$this->input->getArgument('name') .'.php';
 
