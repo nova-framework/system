@@ -1,0 +1,35 @@
+<?php
+
+namespace {{namespace}};
+
+use Illuminate\Queue\InteractsWithQueueTrait;
+use Illuminate\Contracts\Queue\ShouldQueueInterface;
+
+use {{fullEvent}};
+
+
+class {{className}} implements ShouldQueueInterface
+{
+    use InteractsWithQueueTrait;
+
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  DummyEvent  $event
+     * @return void
+     */
+    public function handle(DummyEvent $event)
+    {
+        //
+    }
+}

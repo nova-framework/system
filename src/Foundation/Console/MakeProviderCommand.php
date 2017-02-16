@@ -5,28 +5,28 @@ namespace Nova\Foundation\Console;
 use Nova\Console\GeneratorCommand;
 
 
-class MakeRequestCommand extends GeneratorCommand
+class MakeProviderCommand extends GeneratorCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:request';
+    protected $name = 'make:provider';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Request class';
+    protected $description = 'Create a new Service Provider class';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Request';
+    protected $type = 'Provider';
 
 
     /**
@@ -36,7 +36,7 @@ class MakeRequestCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return realpath(__DIR__) .str_replace('/', DS, '/stubs/request.stub');
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/provider.stub');
     }
 
     /**
@@ -47,6 +47,6 @@ class MakeRequestCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace .'\Http\Requests';
+        return $rootNamespace .'\Providers';
     }
 }
