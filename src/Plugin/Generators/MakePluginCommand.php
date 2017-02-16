@@ -26,7 +26,7 @@ class MakePluginCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new Plugin and bootstrap it';
+    protected $description = 'Create a new Plugin';
 
     /**
      * Plugin folders to be created.

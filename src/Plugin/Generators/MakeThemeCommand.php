@@ -26,7 +26,7 @@ class MakeThemeCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new Theme and bootstrap it';
+    protected $description = 'Create a new Theme';
 
     /**
      * Plugin folders to be created.
