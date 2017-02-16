@@ -8,14 +8,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeCommandCommand extends Command
+class MakeConsoleCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:command';
+    protected $name = 'make:console';
 
     /**
      * The console command description.

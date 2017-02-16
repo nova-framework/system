@@ -13,7 +13,7 @@ class ConsoleSupportServiceProvider extends ServiceProvider
      * @var array
      */
     protected $providers = array(
-        'Nova\Foundation\Providers\CommandCreatorServiceProvider',
+        'Nova\Foundation\Providers\ConsoleCreatorServiceProvider',
         'Nova\Foundation\Providers\ModelCreatorServiceProvider',
         'Nova\Foundation\Providers\MiddlewareCreatorServiceProvider',
         'Nova\Foundation\Providers\PolicyCreatorServiceProvider',
