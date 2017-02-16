@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing;
+namespace Nova\Routing\Providers;
 
 use Nova\Routing\Console\ControllerMakeCommand;
 use Nova\Routing\Console\MiddlewareMakeCommand;
