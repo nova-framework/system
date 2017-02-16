@@ -2,9 +2,9 @@
 
 namespace {{namespace}};
 
-use {{rootNamespace}}Commands\Command;
-
 use Nova\Bus\Contracts\SelfHandlingInterface;
+
+use {{rootNamespace}}Commands\Command;
 
 
 class {{className}} extends Command implements SelfHandlingInterface
