@@ -1,0 +1,32 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Queue\InteractsWithQueueTrait;
+
+use {{fullCommand}};
+
+
+class {{className}}
+{
+    /**
+     * Create the command handler.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the command.
+     *
+     * @param  DummyCommand  $command
+     * @return void
+     */
+    public function handle({{command}} $command)
+    {
+        //
+    }
+}

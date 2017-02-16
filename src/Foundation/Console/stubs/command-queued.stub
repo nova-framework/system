@@ -1,0 +1,36 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Bus\Contracts\SelfHandlingInterface;
+use Nova\Queue\InteractsWithQueueTrait;
+use Nova\Queue\SerializesModelsTrait;
+use Nova\Queue\ShouldQueueInterface;
+
+use {{rootNamespace}}Commands\Command;
+
+
+class DummyClass extends Command implements SelfHandlingInterface, ShouldQueueInterface
+{
+    use InteractsWithQueueTrait, SerializesModelsTrait;
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Execute the command.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        //
+    }
+}

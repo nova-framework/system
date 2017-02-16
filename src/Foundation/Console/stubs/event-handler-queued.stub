@@ -1,0 +1,36 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Queue\InteractsWithQueueTrait;
+use Nova\Queue\ShouldQueueInterface;
+
+use {{fullEvent}};
+
+
+class {{className}} implements ShouldQueueInterface
+{
+    use InteractsWithQueueTrait;
+
+    
+    /**
+     * Create the event handler.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  DummyEvent  $event
+     * @return void
+     */
+    public function handle({{event}} $event)
+    {
+        //
+    }
+}

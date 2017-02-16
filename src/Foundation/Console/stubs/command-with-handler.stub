@@ -1,0 +1,19 @@
+<?php
+
+namespace {{namespace}};
+
+use {{rootNamespace}}Commands\Command;
+
+
+class {{className}} extends Command
+{
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+}

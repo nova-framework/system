@@ -648,13 +648,6 @@ class Application extends Container implements ResponsePreparerInterface
         $kernel->terminate($request, $response);
     }
 
-    protected function getKernel()
-    {
-        //$kernel = new Kernel($this, $this['router']);
-
-        return $this->make('Nova\Http\Contracts\KernelInterface');
-    }
-
     /**
      * Determine if middleware has been disabled for the application.
      *
@@ -1032,16 +1025,14 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @return \Nova\Console\Contracts\KernelInterface|\Nova\Http\Contracts\KernelInterface
      */
-    /*
     protected function getKernel()
     {
-        $kernel = $this->runningInConsole()
+        $kernelInterface = $this->runningInConsole()
             ? 'Nova\Console\Contracts\KernelInterface'
             : 'Nova\Http\Contracts\KernelInterface';
 
         return $this->make($kernelInterface);
     }
-    */
 
     /**
      * Get the application namespace.

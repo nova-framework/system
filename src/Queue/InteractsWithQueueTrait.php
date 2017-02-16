@@ -21,7 +21,7 @@ trait InteractsWithQueue
      */
     public function delete()
     {
-        if ($this->job) {
+        if (isset($this->job)) {
             return $this->job->delete();
         }
     }
@@ -34,7 +34,7 @@ trait InteractsWithQueue
      */
     public function release($delay = 0)
     {
-        if ($this->job) {
+        if (isset($this->job)) {
             return $this->job->release($delay);
         }
     }
@@ -46,7 +46,7 @@ trait InteractsWithQueue
      */
     public function attempts()
     {
-        return $this->job ? $this->job->attempts() : 1;
+        return isset($this->job) ? $this->job->attempts() : 1;
     }
 
     /**
