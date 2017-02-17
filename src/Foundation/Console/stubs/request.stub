@@ -1,11 +1,11 @@
 <?php
 
-{{namespace}}
+namespace {{namespace}};
 
 use Nova\Foundation\Http\FormRequest;
 
 
-class {{class}} extends FormRequest
+class {{className}} extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -5,7 +5,7 @@ namespace Nova\Foundation\Bus;
 use ArrayAccess;
 
 
-trait DispatchesJobs
+trait DispatchesJobsTrait
 {
     /**
      * Dispatch a job to its appropriate handler.

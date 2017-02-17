@@ -1,10 +1,11 @@
 <?php
 
-namespace DummyNamespace;
+namespace {{namespace}};
 
-use Illuminate\Support\ServiceProvider;
+use Nova\Support\ServiceProvider;
 
-class DummyClass extends ServiceProvider
+
+class {{className}} extends ServiceProvider
 {
     /**
      * Bootstrap the application services.

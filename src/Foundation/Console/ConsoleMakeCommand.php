@@ -1,14 +1,14 @@
 <?php
 
-namespace Nova\Foundation\Console;
+namespace NovaFoundation\Console;
 
-use Nova\Console\Command;
-use Nova\Filesystem\Filesystem;
+use NovaConsole\GeneratorCommand;
+
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class ConsoleMakeCommand extends Command
+class ConsoleMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
@@ -22,101 +22,49 @@ class ConsoleMakeCommand extends Command
      *
      * @var string
      */
-    protected $description = "Create a new Forge command";
+    protected $description = 'Create a new Forge command';
 
     /**
-     * Create a new command creator command.
+     * The type of class being generated.
      *
-     * @param  \Nova\Filesystem\Filesystem  $files
-     * @return void
+     * @var string
      */
-    public function __construct(Filesystem $files)
-    {
-        parent::__construct();
+    protected $type = 'Console command';
 
-        $this->files = $files;
-    }
-
+    
     /**
-     * Execute the console command.
-     *
-     * @return void
-     */
-    public function fire()
-    {
-        $path = $this->getPath();
-
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'console.stub');
-
-        $file = $path .DS .$this->input->getArgument('name') .'.php';
-
-        $this->writeCommand($file, $stub);
-    }
-
-    /**
-     * Write the finished command file to disk.
-     *
-     * @param  string  $file
-     * @param  string  $stub
-     * @return void
-     */
-    protected function writeCommand($file, $stub)
-    {
-        if (! file_exists($file)) {
-            $this->files->put($file, $this->formatStub($stub));
-
-            $this->info('Command created successfully.');
-        } else {
-            $this->error('Command already exists!');
-        }
-    }
-
-    /**
-     * Format the command class stub.
+     * Replace the class name for the given stub.
      *
      * @param  string  $stub
+     * @param  string  $name
      * @return string
      */
-    protected function formatStub($stub)
+    protected function replaceClass($stub, $name)
     {
-        $stub = str_replace('{{class}}', $this->input->getArgument('name'), $stub);
+        $stub = parent::replaceClass($stub, $name);
 
-        if (! is_null($this->option('command'))) {
-            $stub = str_replace('command:name', $this->option('command'), $stub);
-        }
-
-        return $this->addNamespace($stub);
+        return str_replace('command:name', $this->option('command'), $stub);
     }
 
     /**
-     * Add the proper namespace to the command.
-     *
-     * @param  string  $stub
-     * @return string
-     */
-    protected function addNamespace($stub)
-    {
-        if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Console\Commands\\' .$namespace.';', $stub);
-        } else {
-            return str_replace('{{namespace}}', ' namespace App\Console\Commands;', $stub);
-        }
-    }
-
-    /**
-     * Get the path where the command should be stored.
+     * Get the stub file for the generator.
      *
      * @return string
      */
-    protected function getPath()
+    protected function getStub()
     {
-        $path = $this->input->getOption('path');
+        return realpath(__DIR__).str_replace('/', DS, '/stubs/console.stub');
+    }
 
-        if (is_null($path)) {
-            return $this->nova['path'] .DS .'Console' .DS .'Commands';
-        } else {
-            return $this->nova['path.base'] .DS .$path;
-        }
+    /**
+     * Get the default namespace for the class.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultNamespace($rootNamespace)
+    {
+        return $rootNamespace .'\Console\Commands';
     }
 
     /**
@@ -139,10 +87,7 @@ class ConsoleMakeCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', null),
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the command should be stored.', null),
-            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The command namespace.', null),
+            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', 'command:name'),
         );
     }
-
 }
