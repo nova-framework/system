@@ -1,8 +1,9 @@
 <?php
 
-namespace Illuminate\Foundation\Console;
+namespace Nova\Foundation\Console;
 
-use Illuminate\Console\GeneratorCommand;
+use Nova\Console\GeneratorCommand;
+
 
 class PolicyMakeCommand extends GeneratorCommand
 {
@@ -18,7 +19,7 @@ class PolicyMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $description = 'Create a new policy class';
+    protected $description = 'Create a new Policy class';
 
     /**
      * The type of class being generated.
@@ -34,7 +35,7 @@ class PolicyMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return __DIR__.'/stubs/policy.stub';
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/policy.stub');
     }
 
     /**
@@ -45,6 +46,6 @@ class PolicyMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\Policies';
+        return $rootNamespace .'\Policies';
     }
 }

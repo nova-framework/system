@@ -8,21 +8,21 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeModelCommand extends Command
+class ConsoleMakeCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:model';
+    protected $name = 'make:console';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Create a new ORM Model";
+    protected $description = "Create a new Forge command";
 
     /**
      * Create a new command creator command.
@@ -46,10 +46,9 @@ class MakeModelCommand extends Command
     {
         $path = $this->getPath();
 
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'model.stub');
+        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'console.stub');
 
-        //
-        $file = $path .DS .$this->input->getArgument('name').'.php';
+        $file = $path .DS .$this->input->getArgument('name') .'.php';
 
         $this->writeCommand($file, $stub);
     }
@@ -63,12 +62,12 @@ class MakeModelCommand extends Command
      */
     protected function writeCommand($file, $stub)
     {
-        if (! $this->files->exists($file)) {
+        if (! file_exists($file)) {
             $this->files->put($file, $this->formatStub($stub));
 
-            $this->info('Model created successfully.');
+            $this->info('Command created successfully.');
         } else {
-            $this->error('Model already exists!');
+            $this->error('Command already exists!');
         }
     }
 
@@ -82,6 +81,10 @@ class MakeModelCommand extends Command
     {
         $stub = str_replace('{{class}}', $this->input->getArgument('name'), $stub);
 
+        if (! is_null($this->option('command'))) {
+            $stub = str_replace('command:name', $this->option('command'), $stub);
+        }
+
         return $this->addNamespace($stub);
     }
 
@@ -94,9 +97,9 @@ class MakeModelCommand extends Command
     protected function addNamespace($stub)
     {
         if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Models\\'.$namespace.';', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console\Commands\\' .$namespace.';', $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Models;', $stub);
+            return str_replace('{{namespace}}', ' namespace App\Console\Commands;', $stub);
         }
     }
 
@@ -110,7 +113,7 @@ class MakeModelCommand extends Command
         $path = $this->input->getOption('path');
 
         if (is_null($path)) {
-            return $this->nova['path'] .DS .'Models';
+            return $this->nova['path'] .DS .'Console' .DS .'Commands';
         } else {
             return $this->nova['path.base'] .DS .$path;
         }
@@ -124,7 +127,7 @@ class MakeModelCommand extends Command
     protected function getArguments()
     {
         return array(
-            array('name', InputArgument::REQUIRED, 'The name of the Model.'),
+            array('name', InputArgument::REQUIRED, 'The name of the command.'),
         );
     }
 
@@ -136,8 +139,9 @@ class MakeModelCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the Model should be stored.', null),
-            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The Model namespace.', null),
+            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', null),
+            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the command should be stored.', null),
+            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The command namespace.', null),
         );
     }
 

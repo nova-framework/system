@@ -5,28 +5,29 @@ namespace Nova\Foundation\Console;
 use Nova\Console\GeneratorCommand;
 
 
-class MakePolicyCommand extends GeneratorCommand
+class RequestMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:policy';
+    protected $name = 'make:request';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Policy class';
+    protected $description = 'Create a new Request class';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Policy';
+    protected $type = 'Request';
+
 
     /**
      * Get the stub file for the generator.
@@ -35,7 +36,7 @@ class MakePolicyCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return realpath(__DIR__) .str_replace('/', DS, '/stubs/policy.stub');
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/request.stub');
     }
 
     /**
@@ -46,6 +47,6 @@ class MakePolicyCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace .'\Policies';
+        return $rootNamespace .'\Http\Requests';
     }
 }

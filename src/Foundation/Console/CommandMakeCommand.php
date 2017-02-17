@@ -7,7 +7,7 @@ use Nova\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeCommandCommand extends GeneratorCommand
+class CommandMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View\Console;
+namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
@@ -8,7 +8,7 @@ use Nova\Filesystem\Filesystem;
 use RuntimeException;
 
 
-class ClearCommand extends Command
+class ViewClearCommand extends Command
 {
     /**
      * The console command name.
@@ -22,7 +22,7 @@ class ClearCommand extends Command
      *
      * @var string
      */
-    protected $description = "Clear all compiled view files";
+    protected $description = "Clear all compiled View files";
 
     /**
      * The File System instance.
@@ -30,13 +30,6 @@ class ClearCommand extends Command
      * @var \Nova\Filesystem\Filesystem
      */
     protected $files;
-
-    /**
-    * Get the cache path for the compiled views.
-    *
-    * @var string
-    */
-    protected $cachePath;
 
 
     /**
@@ -46,14 +39,12 @@ class ClearCommand extends Command
      * @param  string  $cachePath
      * @return void
      */
-    public function __construct(Filesystem $files, $cachePath)
+    public function __construct(Filesystem $files)
     {
         parent::__construct();
 
         //
         $this->files = $files;
-
-        $this->cachePath = $cachePath;
     }
 
     /**
@@ -63,7 +54,7 @@ class ClearCommand extends Command
      */
     public function fire()
     {
-        $path = $this->getCachePath();
+        $path = $this->nova['config']->get('view.compiled');
 
         if (! $this->files->exists($path)) {
             throw new RuntimeException('View path not found.');
@@ -75,15 +66,4 @@ class ClearCommand extends Command
 
         $this->info('Compiled views cleared!');
     }
-
-    /**
-     * Return the cache files path.
-     *
-     * @return string
-     */
-    protected function getCachePath()
-    {
-        return $this->cachePath;
-    }
-
 }

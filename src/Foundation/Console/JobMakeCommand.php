@@ -6,7 +6,7 @@ use Nova\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeJobCommand extends GeneratorCommand
+class JobMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.

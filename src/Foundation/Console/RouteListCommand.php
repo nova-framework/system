@@ -11,7 +11,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class RoutesCommand extends Command
+class RouteListCommand extends Command
 {
     /**
     * The console command name.

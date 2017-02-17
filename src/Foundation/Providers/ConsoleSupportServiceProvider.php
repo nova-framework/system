@@ -2,10 +2,10 @@
 
 namespace Nova\Foundation\Providers;
 
-use Nova\Support\ServiceProvider;
+use Nova\Support\AggregateServiceProvider;
 
 
-class ConsoleSupportServiceProvider extends ServiceProvider
+class ConsoleSupportServiceProvider extends AggregateServiceProvider
 {
     /**
      * The Provider Class names.
@@ -13,71 +13,8 @@ class ConsoleSupportServiceProvider extends ServiceProvider
      * @var array
      */
     protected $providers = array(
-        'Nova\Foundation\Providers\ConsoleCreatorServiceProvider',
-        'Nova\Foundation\Providers\CommandCreatorServiceProvider',
-        'Nova\Foundation\Providers\CommandHandlerCreatorServiceProvider',
-        'Nova\Foundation\Providers\EventCreatorServiceProvider',
-        'Nova\Foundation\Providers\EventHandlerCreatorServiceProvider',
-        'Nova\Foundation\Providers\JobCreatorServiceProvider',
-        'Nova\Foundation\Providers\ModelCreatorServiceProvider',
-        'Nova\Foundation\Providers\PolicyCreatorServiceProvider',
-        'Nova\Foundation\Providers\ProviderCreatorServiceProvider',
-        'Nova\Foundation\Providers\RequestCreatorServiceProvider',
         'Nova\Foundation\Providers\ComposerServiceProvider',
-        'Nova\Foundation\Providers\KeyGeneratorServiceProvider',
-        'Nova\Foundation\Providers\MaintenanceServiceProvider',
-        'Nova\Foundation\Providers\OptimizeServiceProvider',
         'Nova\Foundation\Providers\PublisherServiceProvider',
-        'Nova\Foundation\Providers\RouteListServiceProvider',
-        'Nova\Foundation\Providers\ServerServiceProvider',
-        'Nova\Foundation\Providers\TinkerServiceProvider',
         'Nova\Queue\ConsoleServiceProvider',
     );
-
-    /**
-     * An array of the Service Provider instances.
-     *
-     * @var array
-     */
-    protected $instances = array();
-
-    /**
-     * Indicates if loading of the Provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
-    /**
-     * Register the Service Provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->instances = array();
-
-        foreach ($this->providers as $provider) {
-            $this->instances[] = $this->app->register($provider);
-        }
-    }
-
-    /**
-     * Get the Services provided by the Provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        $provides = array();
-
-        foreach ($this->providers as $provider) {
-            $instance = $this->app->resolveProviderClass($provider);
-
-            $provides = array_merge($provides, $instance->provides());
-        }
-
-        return $provides;
-    }
-
 }
