@@ -27,7 +27,7 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @var array
      */
-    protected $extensions = array('tpl.php', 'php');
+    protected $extensions = array('tpl', 'php');
 
 
     /**
@@ -75,7 +75,7 @@ class FileViewFinder implements ViewFinderInterface
             }
         }
 
-        // 
+        //
         $name = str_replace(BASEPATH, '', $path);
 
         throw new \InvalidArgumentException("View [$name] not found.");
