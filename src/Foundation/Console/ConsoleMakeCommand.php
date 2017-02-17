@@ -1,8 +1,8 @@
 <?php
 
-namespace NovaFoundation\Console;
+namespace Nova\Foundation\Console;
 
-use NovaConsole\GeneratorCommand;
+use Nova\Console\GeneratorCommand;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,7 +31,7 @@ class ConsoleMakeCommand extends GeneratorCommand
      */
     protected $type = 'Console command';
 
-    
+
     /**
      * Replace the class name for the given stub.
      *
