@@ -427,8 +427,7 @@ class Guard
         // If we have an event dispatcher instance set we will fire an event so that
         // any listeners will hook into the authentication events and run actions
         // based on the login and logout events fired from the guard instances.
-        if (isset($this->events))
-        {
+        if (isset($this->events)) {
             $this->events->fire('auth.login', array($user, $remember));
         }
 

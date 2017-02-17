@@ -6,7 +6,7 @@ use Nova\Auth\Access\Response;
 use Nova\Auth\Access\UnauthorizedException;
 
 
-trait HandlesAuthorization
+trait HandlesAuthorizationTrait
 {
     /**
      * Create a new access response.

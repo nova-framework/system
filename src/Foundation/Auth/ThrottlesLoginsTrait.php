@@ -3,7 +3,6 @@
 namespace Nova\Foundation\Auth;
 
 use Nova\Http\Request;
-use Nova\Cache\RateLimiter;
 use Nova\Support\Facades\App;
 use Nova\Support\Facades\Redirect;
 
@@ -18,7 +17,7 @@ trait ThrottlesLoginsTrait
      */
     protected function hasTooManyLoginAttempts(Request $request)
     {
-        $rateLimiter = App::make(RateLimiter::class);
+        $rateLimiter = App::make('Nova\Cache\RateLimiter');
 
         return $rateLimiter->tooManyAttempts(
             $this->getThrottleKey($request),

@@ -3,7 +3,7 @@
 namespace Nova\Auth\Access;
 
 use Nova\Auth\Access\GateInterface;
-use Nova\Auth\Access\HandlesAuthorization;
+use Nova\Auth\Access\HandlesAuthorizationTrait;
 use Nova\Auth\Access\Response;
 use Nova\Auth\Access\UnauthorizedException;
 use Nova\Container\Container;
@@ -14,7 +14,7 @@ use InvalidArgumentException;
 
 class Gate implements GateInterface
 {
-    use HandlesAuthorization;
+    use HandlesAuthorizationTrait;
 
     /**
      * The container instance.
