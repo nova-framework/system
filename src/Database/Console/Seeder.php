@@ -1,9 +1,10 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Console;
 
 use Nova\Console\Command;
 use Nova\Container\Container;
+
 
 class Seeder
 {

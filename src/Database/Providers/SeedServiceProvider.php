@@ -3,6 +3,7 @@
 namespace Nova\Database\Providers;
 
 use Nova\Database\Console\SeedCommand;
+use Nova\Database\Console\Seeder;
 use Nova\Support\ServiceProvider;
 
 
@@ -26,7 +27,7 @@ class SeedServiceProvider extends ServiceProvider
 
         $this->app->bindShared('seeder', function($app)
         {
-            return new Seeder;
+            return new Seeder();
         });
 
         $this->commands('command.seed');
