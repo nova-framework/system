@@ -68,7 +68,7 @@ class Factory
      *
      * @var array
      */
-    protected $extensions = array('tpl' => 'template', 'php' => 'php');
+    protected $extensions = array('tpl' => 'template', 'ntp' => 'template', 'php' => 'php');
 
     /**
      * The view composer events.
@@ -170,22 +170,22 @@ class Factory
      * Create a Layout instance
      *
      * @param string $view
-     * @param string|null $template
+     * @param string|null $theme
      *
      * @return \Nova\View\Layout
      */
-    public function makeLayout($view, $template = null)
+    public function makeLayout($view, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $template = $template ?: $this->getDefaultTheme();
+        $theme = $theme ?: $this->getDefaultTheme();
 
         // Get the View file path.
-        $path = $this->findLayoutFile($view, $template);
+        $path = $this->findLayoutFile($view, $theme);
 
         // Normalize the Layout name.
-        $name = 'Layout/' .$template .'::' .str_replace('/', '.', $view);
+        $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
 
         $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
 
@@ -850,7 +850,7 @@ class Factory
      *
      * @param    string  $view
      * @param    string  $module
-     * @param    string  $template
+     * @param    string  $theme
      *
      * @return    string
      */
@@ -872,16 +872,16 @@ class Factory
      * Find the Layout file.
      *
      * @param    string     $view
-     * @param    string     $template
+     * @param    string     $theme
      *
      * @return    string
      */
-    protected function findLayoutFile($view, $template)
+    protected function findLayoutFile($view, $theme)
     {
         $viewPath = str_replace('/', DS, $view);
 
         // Calculate the search path.
-        $basePath = APPDIR .'Templates' .DS .$template;
+        $basePath = APPDIR .'Themes' .DS .$theme;
 
         // Find the Layout file depending on the Language direction.
         $language = $this->getLanguage();
@@ -925,7 +925,7 @@ class Factory
     {
         $config = $this->container['config'];
 
-        return $config->get('app.template', 'Default');
+        return $config->get('app.theme', 'Default');
     }
 
     /**

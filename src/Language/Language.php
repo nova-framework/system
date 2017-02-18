@@ -93,8 +93,8 @@ class Language
             $basePath = ROOTDIR .'shared' .DS;
         } else if (is_dir(APPDIR .'Modules' .DS .$pathName)) {
             $basePath = APPDIR .'Modules/' .$pathName .DS;
-        } else if (is_dir(APPDIR .'Templates' .DS .$pathName)) {
-            $basePath = APPDIR .'Templates/' .$pathName .DS;
+        } else if (is_dir(APPDIR .'Themes' .DS .$pathName)) {
+            $basePath = APPDIR .'Themes/' .$pathName .DS;
         } else {
             $basePath = APPDIR;
         }

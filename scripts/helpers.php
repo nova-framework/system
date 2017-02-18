@@ -49,29 +49,29 @@ if (! function_exists('resource_url'))
     }
 }
 
-if (! function_exists('template_url'))
+if (! function_exists('theme_url'))
 {
     /**
      * Template URL helper
      * @param string $path
-     * @param string $template
+     * @param string $theme
      * @return string
      */
-    function template_url($path, $template = null)
+    function theme_url($path, $theme = null)
     {
         $config = app('config');
 
-        $template = $template ?: $config['app']['template'];
+        $theme = $theme ?: $config['app']['template'];
 
-        if ('adminlte' == Str::lower($template)) {
-            $template = 'adminlte';
-        } else if (Str::length($template) > 3) {
-            $template = Str::snake($template, '-');
+        if ('adminlte' == Str::lower($theme)) {
+            $theme = 'adminlte';
+        } else if (Str::length($theme) > 3) {
+            $theme = Str::snake($theme, '-');
         } else {
-            $template = Str::lower($template);
+            $theme = Str::lower($theme);
         }
 
-        $path = sprintf('templates/%s/assets/%s', $template, ltrim($path, '/'));
+        $path = sprintf('themes/%s/assets/%s', $theme, ltrim($path, '/'));
 
         return url($path);
     }
