@@ -29,7 +29,7 @@ class ClearSessionsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $error = false;
-        $path = Config::get('session.files', 'app/Storage/Sessions');
+        $path = Config::get('session.files', 'storage/sessions');
 
         if ($input->getArgument('lifeTime')) {
             $lifeTime = $input->getArgument('lifeTime');
