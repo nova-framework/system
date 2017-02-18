@@ -89,15 +89,12 @@ class DefaultDispatcher implements DispatcherInterface
             //
             $folder = $matches[2];
 
-            if (($folder == 'adminlte') && ($baseName == 'themes')) {
-                // The Asset path is on the AdminLTE Template.
-                $folder = 'AdminLTE';
-            } else if (strlen($folder) > 3) {
-                // A standard Template or Module name.
+            if (strlen($folder) > 3) {
+                // A standard Theme or Module name.
                 $folder = Str::studly($folder);
             } else {
                 // A short Template or Module name.
-                $folder = strtoupper($folder);
+                $folder = Str::upper($folder);
             }
 
             $path = str_replace('/', DS, $matches[3]);

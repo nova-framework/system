@@ -63,9 +63,7 @@ if (! function_exists('theme_url'))
 
         $theme = $theme ?: $config['app']['template'];
 
-        if ('adminlte' == Str::lower($theme)) {
-            $theme = 'adminlte';
-        } else if (Str::length($theme) > 3) {
+        if (Str::length($theme) > 3) {
             $theme = Str::snake($theme, '-');
         } else {
             $theme = Str::lower($theme);
