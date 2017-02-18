@@ -23,7 +23,7 @@ class ClearCacheCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $error = false;
-        $path = Config::get('cache.path', 'app/Storage/Cache');
+        $path = Config::get('cache.path', 'storage/cache');
 
         if (!is_dir($path)) {
             $output->writeln("<error>Cache directory does not exist. path: $path</>");
