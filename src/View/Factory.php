@@ -137,6 +137,11 @@ class Factory
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
+        if (is_string($data) && is_null($module)) {
+            // The module name is passed as second parameter; adjust the variables.
+            list($module, $data) = array($data, array());
+        }
+
         // Get the View file path.
         $path = $this->findViewFile($view, $module);
 
