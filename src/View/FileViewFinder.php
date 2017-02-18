@@ -27,7 +27,7 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @var array
      */
-    protected $extensions = array('php');
+    protected $extensions = array('tpl', 'php');
 
 
     /**
@@ -62,19 +62,23 @@ class FileViewFinder implements ViewFinderInterface
     /**
      * Find the given view in the list of paths.
      *
-     * @param  string  $name
-     * @param  array   $paths
+     * @param  string  $path
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    protected function findViewFile($name)
+    protected function findViewFile($path)
     {
-        foreach ($this->getPossibleViewFiles($name) as $file) {
+        foreach ($this->getPossibleViewFiles($path) as $file) {
             if ($this->files->exists($file)) {
                 return $file;
             }
         }
+
+        //
+        $name = str_replace(ROOTDIR, '', $path);
+
+        throw new \InvalidArgumentException("View [$name] not found.");
     }
 
     /**

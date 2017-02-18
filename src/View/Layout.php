@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Layout;
+namespace Nova\View;
 
 use Nova\View\View;
 

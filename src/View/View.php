@@ -79,11 +79,22 @@ class View implements ArrayAccess, Renderable
      */
     public function render(Closure $callback = null)
     {
-        $contents = $this->renderContents();
+        try {
+            $contents = $this->renderContents();
 
-        $response = isset($callback) ? $callback($this, $contents) : null;
+            $response = isset($callback) ? $callback($this, $contents) : null;
 
-        return $response ?: $contents;
+            // Once we have the contents of the view, we will flush the sections if we are
+            // done rendering all views so that there is nothing left hanging over when
+            // another view gets rendered in the future by the application developer.
+            $this->factory->flushSectionsIfDoneRendering();
+
+            return $response ?: $contents;
+        } catch (Exception $e) {
+            $this->factory->flushSections();
+
+            throw $e;
+        }
     }
 
     /**
@@ -92,6 +103,44 @@ class View implements ArrayAccess, Renderable
      * @return string
      */
     public function renderContents()
+    {
+        // We will keep track of the amount of views being rendered so we can flush
+        // the section after the complete rendering operation is done. This will
+        // clear out the sections for any separate views that may be rendered.
+        $this->factory->incrementRender();
+
+        $this->factory->callComposer($this);
+
+        $contents = $this->getContents();
+
+        // Once we've finished rendering the view, we'll decrement the render count
+        // so that each sections get flushed out next time a view is created and
+        // no old sections are staying around in the memory of an environment.
+        $this->factory->decrementRender();
+
+        return $contents;
+    }
+
+    /**
+     * Get the sections of the rendered view.
+     *
+     * @return array
+     */
+    public function renderSections()
+    {
+        $env = $this->factory;
+
+        return $this->render(function ($view) use ($env) {
+            return $env->getSections();
+        });
+    }
+
+    /**
+     * Get the evaluated contents of the view.
+     *
+     * @return string
+     */
+    protected function getContents()
     {
         return $this->engine->get($this->path, $this->gatherData());
     }
