@@ -22,15 +22,16 @@ class ClearCacheCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $error = false;
         $path = Config::get('cache.path', STORAGE_PATH .'cache');
 
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             $output->writeln("<error>Cache directory does not exist. path: $path</>");
-            $error = true;
+
+            return true;
         }
 
         self::cleanCache($path);
+
         $output->writeln("<info>Cache directory has been cleaned. path: $path</>");
     }
 
@@ -38,15 +39,17 @@ class ClearCacheCommand extends Command
    {
        if (is_dir($dir)) {
             $objects = scandir($dir);
+
             foreach ($objects as $object) {
-                if ($object != "." && $object != ".." && $object != ".gitignore") {
-                    if (is_dir($dir."/".$object)) {
-                        self::cleanCache($dir."/".$object);
+                if (($object != ".") && ($object != "..") && ($object != ".gitignore")) {
+                    if (is_dir($dir .DS .$object)) {
+                        self::cleanCache($dir .DS .$object);
                     } else {
-                        unlink($dir."/".$object);
+                        unlink($dir .DS .$object);
                     }
                 }
             }
+
             @rmdir($dir);
         }
     }

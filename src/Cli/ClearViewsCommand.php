@@ -38,8 +38,8 @@ class ClearViewsCommand extends Command
         $output->writeln("<info>Views directory has been cleaned. path: $path</>");
     }
 
-   protected function cleanCache($files)
-   {
+    protected function cleanCache($files)
+    {
         foreach ($files as $file) {
             if (is_file($file) && (basename($file) != ".gitignore")) {
                 unlink($file);
