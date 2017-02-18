@@ -29,7 +29,8 @@ class ClearSessionsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $error = false;
-        $path = Config::get('session.files', 'storage/sessions');
+
+        $path = Config::get('session.files', STORAGE_PATH .'sessions');
 
         if ($input->getArgument('lifeTime')) {
             $lifeTime = $input->getArgument('lifeTime');
@@ -39,10 +40,12 @@ class ClearSessionsCommand extends Command
 
         if (!is_dir($path)) {
             $output->writeln("<error>Session directory does not exist. path: $path</>");
+
             $error = true;
         }
 
         self::clearSessions($path, $lifeTime);
+        
         $output->writeln("<info>The sessions have been cleared. Lifetime: $lifeTime, path: $path</>");
     }
 

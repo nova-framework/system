@@ -22,31 +22,28 @@ class ClearViewsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = Config::get('view.compiled', 'storage/views');
+        $path = Config::get('view.compiled', STORAGE_PATH .'views');
 
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             $output->writeln("<error>Views directory does not exist. path: $path</>");
+
             return true;
         }
 
-        self::cleanCache($path);
+        // Get the files from Views Cache directory.
+        $paths = glob($path .DS .'*.php');
+
+        self::cleanCache($paths);
+
         $output->writeln("<info>Views directory has been cleaned. path: $path</>");
     }
 
-   protected function cleanCache($dir)
+   protected function cleanCache($files)
    {
-       if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != ".." && $object != ".gitignore") {
-                    if (is_dir($dir."/".$object)) {
-                        self::cleanCache($dir."/".$object);
-                    } else {
-                        unlink($dir."/".$object);
-                    }
-                }
+        foreach ($files as $file) {
+            if (is_file($file) && (basename($file) != ".gitignore")) {
+                unlink($file);
             }
-            @rmdir($dir);
         }
     }
 }
