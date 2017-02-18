@@ -93,7 +93,7 @@ class DefaultDispatcher implements DispatcherInterface
                 // A standard Theme or Module name.
                 $folder = Str::studly($folder);
             } else {
-                // A short Template or Module name.
+                // A short Theme or Module name.
                 $folder = Str::upper($folder);
             }
 

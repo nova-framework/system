@@ -99,7 +99,7 @@ class Language
             $basePath = APPDIR;
         }
 
-        $filePath = $basePath .'Language' .DS .ucfirst($code) .DS .'messages.php';
+        $filePath = $basePath .'Language' .DS .strtoupper($code) .DS .'messages.php';
 
         // Check if the language file is readable.
         if (! is_readable($filePath)) {
