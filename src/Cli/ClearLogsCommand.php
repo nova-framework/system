@@ -19,7 +19,7 @@ class ClearLogsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $logsPath = 'app/Storage/Logs';
+        $logsPath = 'storage/logs';
         $logs = glob($logsPath.'/*');
         $error = false;
 
