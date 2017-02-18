@@ -640,7 +640,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         return '<?php endif; ?>';
     }
-    
+
     /**
      * Compile the end-if statements into valid PHP.
      *
@@ -724,19 +724,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         $expression = $this->stripParentheses($expression);
 
         return "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
-    }
-
-    /**
-     * Compile the fragment statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compileFragment($expression)
-    {
-        $expression = $this->stripParentheses($expression);
-
-        return "<?php echo \$__env->makeLayout($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
     }
 
     /**
