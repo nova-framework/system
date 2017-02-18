@@ -99,20 +99,6 @@ class Factory
     protected $renderCount = 0;
 
     /**
-     *  Cached information about Modules.
-     *
-     * @var array
-     */
-    protected $modules = array();
-
-    /**
-     *  Cached information about Plugins.
-     *
-     * @var array
-     */
-    protected $plugins = array();
-
-    /**
      * Cached information about the current Language.
      *
      * @var \Nova\Language\Language
