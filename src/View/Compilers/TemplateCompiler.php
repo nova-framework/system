@@ -706,7 +706,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        $data = "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+        $data = "<?php echo \$__env->makeView($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
 
         $this->footer[] = $data;
 
@@ -723,7 +723,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        return "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+        return "<?php echo \$__env->makeView($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
     }
 
     /**

@@ -158,11 +158,6 @@ class Factory
     public function make($view, $data = array(), $module = null, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
-        
-        if (is_string($data) && is_null($module)) {
-            // The module name is passed as second parameter; adjust the variables.
-            list($module, $data) = array($data, array());
-        }
 
         // Get the View file path.
         $path = $this->findViewFile($view, $module, $theme);
@@ -181,6 +176,19 @@ class Factory
     }
 
     /**
+     * Create a View instance
+     *
+     * @param string $path
+     * @param string|null $module
+     *
+     * @return \Nova\View\View
+     */
+    public function makeView($view, $module = null)
+    {
+        return $this->make($view, array(), $module);
+    }
+
+    /**
      * Create a Layout instance
      *
      * @param string $view
@@ -188,18 +196,18 @@ class Factory
      *
      * @return \Nova\View\Layout
      */
-    public function makeLayout($view, $module = null)
+    public function makeLayout($view, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Calculate the current Template name.
-        $module = $module ?: $this->getDefaultTheme();
+        $theme = $theme ?: $this->getDefaultTheme();
 
         // Get the View file path.
-        $path = $this->findLayoutFile($view, $module);
+        $path = $this->findLayoutFile($view, $theme);
 
         // Normalize the Layout name.
-        $name = 'Layout/' .$module .'::' .str_replace('/', '.', $view);
+        $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
 
         $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
 
