@@ -1,11 +1,16 @@
 <?php
 namespace Nova\Cli;
 
+use Nova\Support\Facades\Config;
+use Nova\Support\Facades\File;
+use Nova\Support\Str;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
 
 class EncryptionCommand extends Command
 {
@@ -21,23 +26,40 @@ class EncryptionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->length = 32;
+        $currentKey = Config::get('app.key');
 
-        $error = null;
+        list($path, $contents) = $this->getKeyFile();
 
-        $this->makeKey($this->length);
+        $key = $this->getRandomKey();
+
+        $contents = str_replace($currentKey, $key, $contents);
+
+        File::put($path, $contents);
 
         $output->writeln("<info>An Encryption key has been generated.</>");
     }
 
-    public function makeKey($length)
+    /**
+     * Get the key file and contents.
+     *
+     * @return array
+     */
+    protected function getKeyFile()
     {
-        $key = str_random($length);
+        $path = app_path('Config/App.php');
 
-        $file = file_get_contents("app/Config/App.php");
+        $contents = File::get($path);
 
-        $file = str_replace("    'key' => 'SomeRandomStringThere_1234567890',", "    'key' => '$key',", $file);
+        return array($path, $contents);
+    }
 
-        file_put_contents("app/Config/App.php", $file);
+    /**
+     * Generate a random key for the application.
+     *
+     * @return string
+     */
+    protected function getRandomKey()
+    {
+        return Str::random(32);
     }
 }

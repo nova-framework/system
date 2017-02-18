@@ -30,6 +30,12 @@ class ClearCacheCommand extends Command
             return true;
         }
 
+        $services = STORAGE_PATH .'services.php';
+
+        if (file_exists($services)) {
+            unlink($services);
+        }
+
         self::cleanCache($path);
 
         $output->writeln("<info>Cache directory has been cleaned. path: $path</>");
