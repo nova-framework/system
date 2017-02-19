@@ -78,7 +78,7 @@ class FileViewFinder implements ViewFinderInterface
         //
         $name = str_replace(BASEPATH, '', $path);
 
-        throw new \InvalidArgumentException("View [$name] not found.");
+        throw new \InvalidArgumentException("View [$name] not found, while using the path: $path");
     }
 
     /**

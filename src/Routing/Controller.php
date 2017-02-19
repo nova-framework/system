@@ -29,7 +29,7 @@ abstract class Controller
      */
     protected $middleware = array();
 
-    
+
     /**
      * Register middleware on the controller.
      *
@@ -71,10 +71,12 @@ abstract class Controller
         $this->method = $method;
 
         // Execute the Before method.
-        $this->before();
+        $response = $this->before();
 
-        // Execute the requested Method with the given arguments.
-        $response = call_user_func_array(array($this, $method), $parameters);
+        if (is_null($response)) {
+            // Execute the requested Method with the given arguments.
+            $response = call_user_func_array(array($this, $method), $parameters);
+        }
 
         // Process the Response and return it.
         return $this->processResponse($response);
