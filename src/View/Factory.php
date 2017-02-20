@@ -873,7 +873,7 @@ class Factory
         if (! empty($module)) {
             $basePath = $this->getModulePath($module);
 
-            $path = $basePath .$viewPath;
+            $path = $basePath .DS .$viewPath;
         } else {
             $path = APPDIR .$viewPath;
         }
@@ -930,7 +930,7 @@ class Factory
 
         $basePath = $config->get('modules.path', APPDIR .'Modules');
 
-        return rtrim($basePath, DS) .DS .$module .DS;
+        return rtrim($basePath, DS) .DS .$module;
     }
 
     /**
