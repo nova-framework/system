@@ -880,11 +880,11 @@ class Factory
     {
         $viewPath = str_replace('/', DS, $view);
 
-        if (! is_null($theme)) {
+        if (! empty($theme)) {
             // Try to find the View file on the override locations.
             $basePath = $this->getPluginPath($theme) .'Overrides' .DS;
 
-            if (! is_null($module)) {
+            if (! empty($module)) {
                 $path .= $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
             } else {
                 $path .= $basePath .DS .'Views' .DS .$viewPath;
@@ -901,7 +901,7 @@ class Factory
         // Try to find the View file on the base locations.
         $viewPath = 'Views' .DS .$viewPath;
 
-        if (! is_null($module)) {
+        if (! empty($module)) {
             $basePath = $this->getModulePath($module);
 
             $path = $basePath .$viewPath;
