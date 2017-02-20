@@ -18,7 +18,7 @@ trait AuthenticatesUsersTrait
      *
      * @return \Nova\Http\Response
      */
-    public public function getLogin()
+    public function getLogin()
     {
         View::share('title', __d('nova', 'User Login'));
 
