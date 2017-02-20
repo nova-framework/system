@@ -867,7 +867,7 @@ class Factory
             }
         }
 
-        // Prepare the (base) View path.
+        // Try to find the View file on the base locations.
         $viewPath = 'Views' .DS .$viewPath;
 
         if (! empty($module)) {
