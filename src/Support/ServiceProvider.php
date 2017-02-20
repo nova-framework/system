@@ -8,6 +8,8 @@
 
 namespace Nova\Support;
 
+use BadMethodCallException;
+
 
 abstract class ServiceProvider
 {

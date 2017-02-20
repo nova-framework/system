@@ -54,8 +54,6 @@ class ModuleManager
 
             if ($enabled) {
                 $this->registerServiceProvider($properties);
-
-                $this->autoloadFiles($properties);
             }
         });
     }
@@ -73,36 +71,11 @@ class ModuleManager
     {
         $namespace = $this->resolveNamespace($properties);
 
-        $file = $this->getPath() .$namespace .DS .'Providers' .DS .$namespace .'ServiceProvider.php';
-
         // Calculate the name of Service Provider, including the namespace.
-        $serviceProvider = $this->getNamespace() ."\\{$namespace}\\Providers\\{$namespace}ServiceProvider";
+        $serviceProvider = $this->getNamespace() ."{$namespace}\\Providers\\ModuleServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
-        }
-    }
-
-    /**
-     * Autoload custom Module files.
-     *
-     * @param array $properties
-     *
-     * @return void
-     */
-    protected function autoloadFiles($properties)
-    {
-        $namespace = $this->resolveNamespace($properties);
-
-        $autoload = array_get($properties, 'autoload', array());
-
-        // Calculate the Module base path.
-        $basePath = $this->getPath() .$namespace .DS;
-
-        foreach ($autoload as $name) {
-            $path = $basePath .ucfirst($name) .'.php';
-
-            if (is_readable($path)) require $path;
         }
     }
 
@@ -139,17 +112,6 @@ class ModuleManager
 
         $modules = array_map(function($slug, $properties)
         {
-            $autoload = array('config', 'events', 'filters', 'routes');
-
-            $options = array_get($properties, 'autoload', array());
-
-            if (! empty($options)) {
-                $autoload = array_intersect($options, $autoload);
-            }
-
-            array_push($autoload, 'bootstrap');
-
-            //
             $namespace = isset($properties['namespace']) ? $properties['namespace'] : Str::studly($slug);
 
             return array_merge(array(
@@ -158,7 +120,6 @@ class ModuleManager
                 'namespace' => $namespace,
                 'enabled'   => isset($properties['enabled']) ? $properties['enabled'] : true,
                 'order'     => isset($properties['order'])   ? $properties['order']   : 9001,
-                'autoload'  => $autoload,
             ), $properties);
 
         }, array_keys($modules), $modules);
