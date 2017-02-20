@@ -27,7 +27,7 @@ class Translator implements TranslatorInterface
      */
     public function __construct()
     {
-        $lines = require __DIR__ .DS .'messages.php';
+        $lines = require realpath(__DIR__) .DS .'Language' .DS .'messages.php';
 
         $this->messages = array('validation' => $lines);
     }
