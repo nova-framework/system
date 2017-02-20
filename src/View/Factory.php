@@ -68,7 +68,7 @@ class Factory
      *
      * @var array
      */
-    protected $extensions = array('tpl' => 'template', 'ntp' => 'template', 'php' => 'php');
+    protected $extensions = array('tpl' => 'template', 'php' => 'php');
 
     /**
      * The view composer events.
