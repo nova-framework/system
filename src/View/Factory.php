@@ -847,7 +847,7 @@ class Factory
      */
     protected function findViewFile($view, $module, $theme = null)
     {
-        $viewPath = str_replace('/', DS, "Views/$view");
+        $viewPath = str_replace('/', DS, $view);
 
         if (! empty($theme)) {
             // Try to find the View file on the override locations.
@@ -866,6 +866,9 @@ class Factory
                 // Do nothing.
             }
         }
+
+        // Prepare the (base) View path.
+        $viewPath = 'Views' .DS .$viewPath;
 
         if (! empty($module)) {
             $basePath = $this->getModulePath($module);
