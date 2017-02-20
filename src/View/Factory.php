@@ -853,7 +853,7 @@ class Factory
             // Try to find the View file on the override locations.
             $basePath = APPDIR .'Themes' .DS .$theme .DS .'Overrides';
 
-            if (! is_null($module)) {
+            if (! empty($module)) {
                 $path = $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
             } else {
                 $path = $basePath .DS .$viewPath;
