@@ -130,18 +130,22 @@ class Factory
      * @param string $path
      * @param mixed $data
      * @param string|null $module
+     * @param string|null $theme
      *
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $module = null)
+    public function make($view, $data = array(), $module = null, $theme = null)
     {
         if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
+        // Calculate the current Template name.
+        $theme = $theme ?: $this->getDefaultTheme();
+
         // Get the View file path.
-        $path = $this->findViewFile($view, $module);
+        $path = $this->findViewFile($view, $module, $theme);
 
         // Normalize the View name.
-        $domain = $module ?: 'App';
+        $domain = ! empty($module) ? $module : 'App';
 
         $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
 
@@ -151,19 +155,6 @@ class Factory
         $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
 
         return $view;
-    }
-
-    /**
-     * Create a View instance
-     *
-     * @param string $path
-     * @param string|null $module
-     *
-     * @return \Nova\View\View
-     */
-    public function makeView($view, $module = null)
-    {
-        return $this->make($view, array(), $module);
     }
 
     /**
@@ -854,14 +845,34 @@ class Factory
      *
      * @return    string
      */
-    protected function findViewFile($view, $module)
+    protected function findViewFile($view, $module, $theme = null)
     {
-        if (is_null($module)) {
-            $path = APPDIR .str_replace('/', DS, "Views/$view");
-        } else {
-            $modulesPath = $this->getModulesPath();
+        $viewPath = str_replace('/', DS, "Views/$view");
 
-            $path = $modulesPath .DS .str_replace('/', DS, "$module/Views/$view");
+        if (! empty($theme)) {
+            // Try to find the View file on the override locations.
+            $basePath = APPDIR .'Themes' .DS .$theme .DS .'Overrides';
+
+            if (! is_null($module)) {
+                $path = $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
+            } else {
+                $path = $basePath .DS .$viewPath;
+            }
+
+            try {
+                return $this->finder->find($path);
+            }
+            catch (InvalidArgumentException $e) {
+                // Do nothing.
+            }
+        }
+
+        if (! empty($module)) {
+            $basePath = $this->getModulePath($module);
+
+            $path = $basePath .DS .$viewPath;
+        } else {
+            $path = APPDIR .$viewPath;
         }
 
         // Try to find the View file.
@@ -871,24 +882,24 @@ class Factory
     /**
      * Find the Layout file.
      *
-     * @param    string     $view
+     * @param    string     $layout
      * @param    string     $theme
      *
      * @return    string
      */
-    protected function findLayoutFile($view, $theme)
+    protected function findLayoutFile($layout, $theme)
     {
-        $viewPath = str_replace('/', DS, $view);
-
-        // Calculate the search path.
-        $basePath = APPDIR .'Themes' .DS .$theme;
-
-        // Find the Layout file depending on the Language direction.
         $language = $this->getLanguage();
+
+        // Prepare the Layout path.
+        $layoutPath = str_replace('/', DS, $layout);
+
+        // Calculate the path to Layouts in the requested Theme.
+        $basePath = APPDIR .'Themes' .DS .$theme .DS .'Layouts';
 
         if ($language->direction() == 'rtl') {
             // Search for the Layout file used on the RTL languages.
-            $path = $basePath .DS .'RTL' .DS .$viewPath;
+            $path = $basePath .DS .'RTL' .DS .$layoutPath;
 
             try {
                 return $this->finder->find($path);
@@ -899,7 +910,7 @@ class Factory
         }
 
         // Search for the (main) Layout file.
-        $path = $basePath .DS .$viewPath;
+        $path = $basePath .DS .$layoutPath;
 
         return $this->finder->find($path);
     }
@@ -907,13 +918,16 @@ class Factory
     /**
      * Return the Modules path, configured on Application.
      *
+     * @param string $module
      * @return string
      */
-    protected function getModulesPath()
+    protected function getModulePath($module)
     {
         $config = $this->container['config'];
 
-        return $config->get('modules.path', APPDIR .'Modules');
+        $basePath = $config->get('modules.path', APPDIR .'Modules');
+
+        return rtrim($basePath, DS) .DS .$module;
     }
 
     /**
