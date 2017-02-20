@@ -851,7 +851,7 @@ class Factory
 
         if (! empty($theme)) {
             // Try to find the View file on the override locations.
-            $basePath = APPDIR .'Themes' .DS .$theme .DS .'Overrides';
+            $basePath = $this->getThemePath($theme) .DS .'Overrides';
 
             if (! empty($module)) {
                 $path = $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
@@ -898,7 +898,7 @@ class Factory
         $layoutPath = str_replace('/', DS, $layout);
 
         // Calculate the path to Layouts in the requested Theme.
-        $basePath = APPDIR .'Themes' .DS .$theme .DS .'Layouts';
+        $basePath = $this->getThemePath($theme) .DS .'Layouts';
 
         if ($language->direction() == 'rtl') {
             // Search for the Layout file used on the RTL languages.
@@ -931,6 +931,17 @@ class Factory
         $basePath = $config->get('modules.path', APPDIR .'Modules');
 
         return rtrim($basePath, DS) .DS .$module;
+    }
+
+    /**
+     * Return the qualified Theme path.
+     *
+     * @param string $theme
+     * @return string
+     */
+    protected function getThemePath($theme)
+    {
+        return APPDIR .'Themes' .DS .$theme;
     }
 
     /**
