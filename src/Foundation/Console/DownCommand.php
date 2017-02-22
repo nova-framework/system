@@ -30,7 +30,7 @@ class DownCommand extends Command
     {
         $config = $this->nova['config'];
 
-        touch($config['path.storage'] .DS .'framework' .DS .'down');
+        touch($config['path.storage'] .DS .'down');
 
         $this->comment('Application is now in maintenance mode.');
     }
