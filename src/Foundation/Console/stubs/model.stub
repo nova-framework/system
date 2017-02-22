@@ -1,0 +1,11 @@
+<?php
+
+{{namespace}};
+
+use Nova\Database\ORM\Model;
+
+
+class {{class}} extends Model
+{
+    //
+}
