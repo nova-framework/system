@@ -70,7 +70,6 @@ class MakeModuleCommand extends Command
      */
     protected $moduleStubs = array(
         'config',
-        'auth-service-provider',
         'event-service-provider',
         'module-service-provider',
         'route-service-provider',
