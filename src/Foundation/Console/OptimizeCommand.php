@@ -61,55 +61,6 @@ class OptimizeCommand extends Command
         } else {
             $this->composer->dumpOptimized();
         }
-
-        if ($this->option('force') || ! $this->nova['config']['app.debug']) {
-            $this->info('Compiling common classes');
-
-            $this->compileClasses();
-        } else {
-            $this->call('clear-compiled');
-        }
-    }
-
-    /**
-     * Generate the compiled class file.
-     *
-     * @return void
-     */
-    protected function compileClasses()
-    {
-        $outputPath = $this->nova['path'] .DS .'Boot' .DS .'Compiled.php';
-
-        //
-        $config = array('skip' => true);
-
-        $preloader = with(new Factory)->create($config);
-
-        $handle = $preloader->prepareOutput($outputPath);
-
-        foreach ($this->getClassFiles() as $file) {
-            try {
-                fwrite($handle, $preloader->getCode($file, false)."\n");
-            } catch (VisitorExceptionInterface $e) {
-                //
-            }
-        }
-
-        fclose($handle);
-    }
-
-    /**
-     * Get the classes that should be combined and compiled.
-     *
-     * @return array
-     */
-    protected function getClassFiles()
-    {
-        $app = $this->nova;
-
-        $core = require __DIR__ .DS .'Optimize' .DS .'config.php';
-
-        return array_merge($core, $this->nova['config']['compile']);
     }
 
     /**
@@ -120,7 +71,6 @@ class OptimizeCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('force', null, InputOption::VALUE_NONE, 'Force the compiled class file to be written.'),
             array('psr', null, InputOption::VALUE_NONE, 'Do not optimize Composer dump-autoload.'),
         );
     }
