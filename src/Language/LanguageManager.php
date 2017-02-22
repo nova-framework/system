@@ -4,6 +4,7 @@ namespace Nova\Language;
 
 use Nova\Foundation\Application;
 use Nova\Language\Language;
+use Nova\Support\Str;
 
 use Carbon\Carbon;
 
@@ -39,6 +40,14 @@ class LanguageManager
     protected $instances = array();
 
     /**
+     * All of the named path hints.
+     *
+     * @var array
+     */
+    protected $hints = array();
+
+
+    /**
      * Create new Language Manager instance.
      *
      * @param  \core\Application  $app
@@ -52,6 +61,15 @@ class LanguageManager
 
         // Setup the know Languages.
         $this->languages = $app['config']['languages'];
+
+        // Setup the default path hints.
+        $this->hints = array(
+            // Namespace for the Framework path.
+            'nova' => dirname(__DIR__) .DS .'Language',
+
+            // Namespaces for the Site paths.
+            'app' => APPDIR .'Language',
+        );
     }
 
     /**
@@ -67,12 +85,66 @@ class LanguageManager
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
         $id = $locale .'/' .$domain;
 
-        // Initialize the domain instance, if not already exists.
-        if (! isset($this->instances[$id])) {
-            $this->instances[$id] = new Language($this, $domain, $locale);
+        // Returns the Language domain instance, if it already exists.
+        if (isset($this->instances[$id])) return $this->instances[$id];
+
+        return $this->instances[$id] = new Language($this, $domain, $locale);
+    }
+
+    /**
+     * Register a Package for cascading configuration.
+     *
+     * @param  string  $package
+     * @param  string  $hint
+     * @param  string  $namespace
+     * @return void
+     */
+    public function package($package, $hint, $namespace = null)
+    {
+        $namespace = $this->getPackageNamespace($package, $namespace);
+
+        $this->addNamespace($namespace, $hint);
+    }
+
+    /**
+     * Get the configuration namespace for a Package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageNamespace($package, $namespace)
+    {
+        if (is_null($namespace)) {
+            list($vendor, $namespace) = explode('/', $package);
+
+            return Str::snake($namespace);
         }
 
-        return $this->instances[$id];
+        return $namespace;
+    }
+
+    /**
+     * Add a new namespace to the loader.
+     *
+     * @param  string  $namespace
+     * @param  string  $hint
+     * @return void
+     */
+    public function addNamespace($namespace, $hint)
+    {
+        $this->hints[$namespace] = $hint;
+    }
+
+    /**
+     * Returns all registered namespaces with the config
+     * loader.
+     *
+     * @return array
+     */
+    public function getNamespaces()
+    {
+        return $this->hints;
     }
 
     /**

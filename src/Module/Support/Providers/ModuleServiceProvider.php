@@ -25,13 +25,6 @@ class ModuleServiceProvider extends ServiceProvider
         //
     }
 
-    protected function loadConfigFrom($path)
-    {
-        $app = $this->app;
-
-        return require $path;
-    }
-
     protected function bootstrapFrom($path)
     {
         $app = $this->app;

@@ -47,6 +47,70 @@ abstract class ServiceProvider
     abstract public function register();
 
     /**
+     * Register the package's component namespaces.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @param  string  $path
+     * @return void
+     */
+    public function package($package, $namespace = null, $path = null)
+    {
+        $namespace = $this->getPackageNamespace($package, $namespace);
+
+        // In this method we will register the configuration package for the package
+        // so that the configuration options cleanly cascade into the application
+        // folder to make the developers lives much easier in maintaining them.
+        $path = $path ?: $this->guessPackagePath();
+
+        // Determine the Package Configuration path.
+        $config = $path .DS .'Config';
+
+        if ($this->app['files']->isDirectory($config)) {
+            $this->app['config']->package($package, $config, $namespace);
+        }
+
+        // Determine the Package Language path.
+        $language = $path .DS .'Language';
+
+        if ($this->app['files']->isDirectory($language)) {
+            $this->app['language']->package($package, $language, $namespace);
+        }
+    }
+
+    /**
+     * Determine the namespace for a package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageNamespace($package, $namespace)
+    {
+        if (is_null($namespace)) {
+            list($vendor, $namespace) = explode('/', $package);
+
+            return Str::snake($namespace);
+        }
+
+        return $namespace;
+    }
+
+    /**
+     * Guess the package path for the provider.
+     *
+     * @return string
+     */
+    public function guessPackagePath()
+    {
+        $reflection = new ReflectionClass($this);
+
+        $path = $reflection->getFileName();
+
+        return realpath(dirname($path) .'/../');
+    }
+
+    /**
      * Register the package's custom Forge commands.
      *
      * @param  array  $commands
@@ -66,7 +130,7 @@ abstract class ServiceProvider
             $forge->resolveCommands($commands);
         });
     }
-    
+
     /**
      * Get the services provided by the provider.
      *

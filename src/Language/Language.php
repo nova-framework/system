@@ -8,7 +8,6 @@
 
 namespace Nova\Language;
 
-use Nova\Helpers\Inflector;
 use Nova\Language\LanguageManager;
 
 use MessageFormatter;
@@ -47,18 +46,13 @@ class Language
     private $locale    = 'en-US';
     private $direction = 'ltr';
 
+
     /**
-     * Holds an array with the Legacy Messages.
+     * Create an new Language instance.
      *
-     * @var array
-     */
-    private $legacyMessages = array();
-
-
-    /**
-     * Language constructor.
      * @param string $domain
      * @param string $code
+     * @param string $path
      */
     public function __construct(LanguageManager $manager, $domain, $code)
     {
@@ -80,38 +74,25 @@ class Language
 
         $this->domain = $domain;
 
-        //
-        if (strtolower($domain) == 'adminlte') {
-            $pathName = 'AdminLTE';
-        } else {
-            $pathName = Inflector::classify($domain);
-        }
-
-        if ($pathName == 'Nova') {
-            $basePath = dirname(__DIR__) .DS;
-        } else if ($pathName == 'Shared') {
-            $basePath = ROOTDIR .'shared' .DS;
-        } else if (is_dir(APPDIR .'Modules' .DS .$pathName)) {
-            $basePath = APPDIR .'Modules/' .$pathName .DS;
-        } else if (is_dir(APPDIR .'Themes' .DS .$pathName)) {
-            $basePath = APPDIR .'Themes/' .$pathName .DS;
-        } else {
-            $basePath = APPDIR;
-        }
-
-        $filePath = $basePath .'Language' .DS .strtoupper($code) .DS .'messages.php';
+        // Determine the current Language file path.
+        $namespaces = $manager->getNamespaces();
 
         // Check if the language file is readable.
-        if (! is_readable($filePath)) {
-            return;
-        }
+        if (! array_key_exists($domain, $namespaces)) return;
 
-        // Get the Domain's messages from the Language file.
-        $messages = include($filePath);
+        // Determine the Language(s) path.
+        $namespace = $namespaces[$domain];
 
-        // A final consistency check.
-        if (is_array($messages) && ! empty($messages)) {
-            $this->messages = $messages;
+        $filePath = $namespace .DS .strtoupper($code) .DS .'messages.php';
+
+        if (is_readable($filePath)) {
+            // The requested language file exists; retrieve the messages from it.
+            $messages = require $filePath;
+
+            // Some consistency check of the messages, before setting them.
+            if (is_array($messages) && ! empty($messages)) {
+                $this->messages = $messages;
+            }
         }
     }
 
