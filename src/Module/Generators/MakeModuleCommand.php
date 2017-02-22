@@ -359,12 +359,6 @@ return array (
             '{{slug}}',
             '{{name}}',
             '{{namespace}}',
-            '{{version}}',
-            '{{description}}',
-            '{{author}}',
-            '{{email}}',
-            '{{homepage}}',
-            '{{license}}',
             '{{path}}'
         );
 
@@ -372,12 +366,6 @@ return array (
             $this->container['slug'],
             $this->container['name'],
             $this->container['namespace'],
-            $this->container['version'],
-            $this->container['description'],
-            $this->container['author'],
-            $this->container['email'],
-            $this->container['homepage'],
-            $this->container['license'],
             $this->module->getNamespace(),
         );
 
