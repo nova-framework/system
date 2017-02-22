@@ -59,6 +59,7 @@ class MakeModuleCommand extends Command
         'Providers/RouteServiceProvider.php',
         'Bootstrap.php',
         'Events.php',
+        'Filters.php',
         'Routes.php',
     );
 
@@ -75,6 +76,7 @@ class MakeModuleCommand extends Command
         'route-service-provider',
         'bootstrap',
         'events',
+        'filters',
         'routes',
     );
 
