@@ -100,7 +100,7 @@ class ModuleManager
     {
         $path = $this->config->get('modules.path', APPDIR .'Modules');
 
-        return str_replace('/', DS, realpath($path)) .DS;
+        return str_replace('/', DS, realpath($path));
     }
 
     /**
