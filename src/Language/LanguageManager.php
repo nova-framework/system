@@ -69,6 +69,8 @@ class LanguageManager
 
             // Namespaces for the Site paths.
             'app' => APPDIR .'Language',
+
+            'shared' => ROOTDIR .'shared' .DS .'Language',
         );
     }
 
