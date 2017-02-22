@@ -13,7 +13,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string|null
      */
-    protected $namespace = '{{path}}\{{namespace}}\Http\Controllers';
+    protected $namespace = '{{path}}\{{namespace}}\Controllers';
 
 
     /**
@@ -37,9 +37,11 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(Router $router)
     {
-        $router->group(array('namespace' => $this->namespace), function($router)
+        $path = realpath(__DIR__ .'/../');
+
+        $router->group(array('namespace' => $this->namespace), function($router) use ($path)
         {
-            require module_path('{{namespace}}', 'Http/Routes.php');
+            require $path .DS .'Routes.php';
         });
     }
 }
