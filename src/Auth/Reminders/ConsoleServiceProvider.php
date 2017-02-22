@@ -2,7 +2,6 @@
 
 namespace Nova\Auth\Reminders;
 
-use Nova\Auth\Console\RemindersTableCommand;
 use Nova\Auth\Console\ClearRemindersCommand;
 use Nova\Auth\Console\RemindersControllerCommand;
 use Nova\Support\ServiceProvider;
@@ -23,11 +22,6 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('command.auth.reminders', function($app)
-        {
-            return new RemindersTableCommand($app['files']);
-        });
-
         $this->app->bindShared('command.auth.reminders.clear', function()
         {
             return new ClearRemindersCommand;
@@ -39,7 +33,7 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands(
-            'command.auth.reminders', 'command.auth.reminders.clear', 'command.auth.reminders.controller'
+            'command.auth.reminders.clear', 'command.auth.reminders.controller'
         );
     }
 
@@ -50,7 +44,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('command.auth.reminders');
+        return array('command.auth.reminders.clear', 'command.auth.reminders.controller');
     }
 
 }
