@@ -872,9 +872,9 @@ class Factory
             $basePath = $this->getPluginPath($theme) .'Overrides';
 
             if (! empty($module)) {
-                $path .= $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
+                $path = $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
             } else {
-                $path .= $basePath .DS .'Views' .DS .$viewPath;
+                $path = $basePath .DS .'Views' .DS .$viewPath;
             }
 
             try {
