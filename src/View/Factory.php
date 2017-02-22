@@ -176,19 +176,6 @@ class Factory
     }
 
     /**
-     * Create a View instance
-     *
-     * @param string $path
-     * @param string|null $module
-     *
-     * @return \Nova\View\View
-     */
-    public function makeView($view, $module = null)
-    {
-        return $this->make($view, array(), $module);
-    }
-
-    /**
      * Create a Layout instance
      *
      * @param string $view

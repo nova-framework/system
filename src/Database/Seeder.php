@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Console;
+namespace Nova\Database;
 
 use Nova\Console\Command;
 use Nova\Container\Container;
