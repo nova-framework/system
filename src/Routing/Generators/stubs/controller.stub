@@ -1,0 +1,11 @@
+<?php
+
+{{namespace}}
+
+use Nova\Routing\Controller as BaseController;
+
+
+class {{class}} extends BaseController
+{
+{{methods}}
+}
