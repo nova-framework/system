@@ -72,7 +72,7 @@ class ModuleManager
         $namespace = $this->resolveNamespace($properties);
 
         // Calculate the name of Service Provider, including the namespace.
-        $serviceProvider = $this->getNamespace() ."{$namespace}\\Providers\\ModuleServiceProvider";
+        $serviceProvider = $this->getNamespace() ."\\{$namespace}\\Providers\\ModuleServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
