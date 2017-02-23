@@ -36,7 +36,9 @@ class GeneratorServiceProvider extends ServiceProvider
         $commands = array('MakeModule', 'MakeConsole', 'MakeController', 'MakeModel', 'MakeProvider');
 
         foreach ($commands as $command) {
-            $this->{'register' .$command .'Command'}();
+            $method = 'register' .$command .'Command';
+
+            call_user_func(array($this, $method));
         }
     }
 
