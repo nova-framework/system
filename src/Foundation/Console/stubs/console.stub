@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class {{class}} extends Command
+class {{className}} extends Command
 {
     /**
      * The console command name.
