@@ -42,6 +42,8 @@ class ConsoleMakeCommand extends GeneratorCommand
     protected function replaceClass($stub, $name)
     {
         $stub = parent::replaceClass($stub, $name);
+        
+        $stub = str_replace('{{class}}', $this->input->getArgument('name'), $stub);
 
         return str_replace('command:name', $this->option('command'), $stub);
     }
