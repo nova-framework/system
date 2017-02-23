@@ -3,6 +3,7 @@
 namespace Nova\Module\Providers;
 
 use Nova\Module\Generators\MakeModuleCommand;
+use Nova\Module\Generators\MakeConsoleCommand;
 use Nova\Module\Generators\MakeControllerCommand;
 use Nova\Module\Generators\MakeMiddlewareCommand;
 use Nova\Module\Generators\MakeModelCommand;
@@ -28,7 +29,7 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeController', 'MakeModel');
+        $commands = array('MakeModule', 'MakeConsole', 'MakeController', 'MakeModel');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
@@ -46,6 +47,19 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module');
+    }
+
+    /**
+     * Register the make:module:controller command.
+     */
+    private function registerMakeConsoleCommand()
+    {
+        $this->app->bindShared('command.make.module.console', function ($app)
+        {
+            return new MakeConsoleCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.console');
     }
 
     /**
