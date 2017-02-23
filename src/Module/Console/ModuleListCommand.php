@@ -20,7 +20,7 @@ class ModuleListCommand extends Command
      *
      * @var string
      */
-    protected $description = 'List all application modules';
+    protected $description = 'List all Application Modules';
 
     /**
      * @var \Nova\Module\ModuleManager

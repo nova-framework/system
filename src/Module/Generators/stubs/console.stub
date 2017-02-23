@@ -1,6 +1,6 @@
 <?php
 
-namespace {{namespace}};
+namespace {{path}}\{{namespace}};
 
 use Nova\Console\Command;
 
@@ -8,14 +8,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class {{className}} extends Command
+class {{classname}} extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'command:name';
+    protected $name = '{{command}}';
 
     /**
      * The Console Command description.

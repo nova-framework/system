@@ -3,12 +3,14 @@
 namespace Nova\Module\Providers;
 
 use Nova\Module\Generators\MakeModuleCommand;
+use Nova\Module\Generators\MakeConsoleCommand;
 use Nova\Module\Generators\MakeControllerCommand;
 use Nova\Module\Generators\MakeMiddlewareCommand;
 use Nova\Module\Generators\MakeModelCommand;
 use Nova\Module\Generators\MakePolicyCommand;
 use Nova\Module\Generators\MakeRequestCommand;
 use Nova\Module\Generators\MakeMigrationCommand;
+use Nova\Module\Generators\MakeProviderCommand;
 use Nova\Module\Generators\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
@@ -28,10 +30,23 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeController', 'MakeMiddleware', 'MakeModel', 'MakePolicy', 'MakeRequest', 'MakeMigration', 'MakeSeeder');
+        $commands = array(
+            'MakeModule',
+            'MakeConsole',
+            'MakeController',
+            'MakeMiddleware',
+            'MakeModel',
+            'MakePolicy',
+            'MakeRequest',
+            'MakeMigration',
+            'MakeProvider',
+            'MakeSeeder'
+        );
 
         foreach ($commands as $command) {
-            $this->{'register' .$command .'Command'}();
+            $method = 'register' .$command .'Command';
+
+            call_user_func(array($this, $method));
         }
     }
 
@@ -46,6 +61,19 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module');
+    }
+
+    /**
+     * Register the make:module:controller command.
+     */
+    private function registerMakeConsoleCommand()
+    {
+        $this->app->bindShared('command.make.module.console', function ($app)
+        {
+            return new MakeConsoleCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.console');
     }
 
     /**
@@ -127,6 +155,19 @@ class GeneratorServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the make:module:model command.
+     */
+    private function registerMakeProviderCommand()
+    {
+        $this->app->bindShared('command.make.module.provider', function ($app)
+        {
+            return new MakeProviderCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.provider');
+    }
+
+    /**
      * Register the make:module:seeder command.
      */
     private function registerMakeSeederCommand()
@@ -138,4 +179,5 @@ class GeneratorServiceProvider extends ServiceProvider
 
         $this->commands('command.make.module.seeder');
     }
+
 }
