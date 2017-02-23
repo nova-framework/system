@@ -20,7 +20,7 @@ class PluginListCommand extends Command
      *
      * @var string
      */
-    protected $description = 'List all application plugins';
+    protected $description = 'List all Framework Plugins';
 
     /**
      * @var \Nova\Plugin\PluginManager

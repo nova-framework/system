@@ -20,7 +20,7 @@ class ThemeListCommand extends Command
      *
      * @var string
      */
-    protected $description = 'List all application themes';
+    protected $description = 'List all Application Themes';
 
     /**
      * @var \Nova\Plugin\PluginManager
