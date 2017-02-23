@@ -26,7 +26,7 @@ class MakeModuleCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new Module';
+    protected $description = 'Create a new Application Module';
 
     /**
      * Module folders to be created.
