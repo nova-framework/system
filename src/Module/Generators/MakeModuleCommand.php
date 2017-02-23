@@ -39,7 +39,6 @@ class MakeModuleCommand extends Command
         'Assets/css/',
         'Assets/images/',
         'Assets/js/',
-        'Console/',
         'Database/',
         'Database/Migrations/',
         'Database/Seeds/',
