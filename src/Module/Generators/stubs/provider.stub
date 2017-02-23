@@ -5,7 +5,7 @@ namespace {{path}}{{namespace}};
 use Nova\Support\ServiceProvider;
 
 
-class {{className}} extends ServiceProvider
+class {{classname}} extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.
@@ -14,7 +14,7 @@ class {{className}} extends ServiceProvider
      */
     protected $defer = true;
 
-    
+
     /**
      * Bootstrap the application services.
      *
