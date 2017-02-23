@@ -10,6 +10,14 @@ use Nova\Support\ServiceProvider;
 class ConsoleServiceProvider extends ServiceProvider
 {
     /**
+     * Indicates if loading of the Provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = true;
+
+    
+    /**
      * Bootstrap the application services.
      */
     public function boot()

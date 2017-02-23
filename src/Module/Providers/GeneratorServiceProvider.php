@@ -5,17 +5,21 @@ namespace Nova\Module\Providers;
 use Nova\Module\Generators\MakeModuleCommand;
 use Nova\Module\Generators\MakeConsoleCommand;
 use Nova\Module\Generators\MakeControllerCommand;
-use Nova\Module\Generators\MakeMiddlewareCommand;
 use Nova\Module\Generators\MakeModelCommand;
-use Nova\Module\Generators\MakePolicyCommand;
-use Nova\Module\Generators\MakeRequestCommand;
-use Nova\Module\Generators\MakeMigrationCommand;
-use Nova\Module\Generators\MakeSeederCommand;
+use Nova\Module\Generators\MakeProviderCommand;
 use Nova\Support\ServiceProvider;
 
 
 class GeneratorServiceProvider extends ServiceProvider
 {
+    /**
+     * Indicates if loading of the Provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = true;
+
+
     /**
      * Bootstrap the application services.
      */
@@ -29,7 +33,7 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeConsole', 'MakeController', 'MakeModel');
+        $commands = array('MakeModule', 'MakeConsole', 'MakeController', 'MakeModel', 'MakeProvider');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
@@ -88,4 +92,16 @@ class GeneratorServiceProvider extends ServiceProvider
         $this->commands('command.make.module.model');
     }
 
+    /**
+     * Register the make:module:model command.
+     */
+    private function registerMakeProviderCommand()
+    {
+        $this->app->bindShared('command.make.module.provider', function ($app)
+        {
+            return new MakeProviderCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.provider');
+    }
 }

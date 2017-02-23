@@ -5,31 +5,30 @@ namespace Nova\Module\Generators;
 use Nova\Module\Generators\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeConsoleCommand extends MakeCommand
+class MakeProviderCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:console';
+    protected $name = 'make:module:provider';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Forge command';
+    protected $description = 'Create a new Module Service Provider class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Command';
+    protected $type = 'Provider';
 
     /**
      * Module folders to be created.
@@ -37,7 +36,7 @@ class MakeConsoleCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Console/Commands/',
+        'Providers/',
     );
 
     /**
@@ -56,7 +55,7 @@ class MakeConsoleCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'console.stub',
+            'provider.stub',
         ),
     );
 
@@ -73,9 +72,6 @@ class MakeConsoleCommand extends MakeCommand
         $this->container['namespace'] = $this->getNamespace($filePath);
         $this->container['path']      = $this->getBaseNamespace();
         $this->container['classname'] = basename($filePath);
-
-        //
-        $this->container['command'] = $this->option('command');
     }
 
     /**
@@ -117,15 +113,4 @@ class MakeConsoleCommand extends MakeCommand
         );
     }
 
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', 'command:name'),
-        );
-    }
 }
