@@ -3,10 +3,11 @@
 namespace Nova\Foundation\Providers;
 
 use Nova\Foundation\Composer;
+use Nova\Foundation\Forge;
 use Nova\Support\ServiceProvider;
 
 
-class ComposerServiceProvider extends ServiceProvider
+class ConsoleSupportServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.
@@ -26,6 +27,11 @@ class ComposerServiceProvider extends ServiceProvider
         {
             return new Composer($app['files'], $app['path.base']);
         });
+
+        $this->app->bindShared('forge', function($app)
+        {
+           return new Forge($app);
+        });
     }
 
     /**
@@ -35,7 +41,7 @@ class ComposerServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('composer');
+        return array('composer', 'forge');
     }
 
 }
