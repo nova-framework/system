@@ -57,10 +57,9 @@ abstract class Repository implements RepositoryInterface
 
         if ($path == base_path('modules')) {
             // We are on the default path, load the Composer configured Modules.
+            $filePath = base_path('vendor/nova-modules.php');
 
             try {
-                $filePath = base_path('vendor/nova-modules.php');
-
                 $data = $this->files->getRequire($filePath);
 
                 if (isset($data['modules']) && is_array($data['modules'])) {
