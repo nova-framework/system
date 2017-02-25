@@ -61,50 +61,60 @@ abstract class Repository implements RepositoryInterface
 
             try {
                 $data = $this->files->getRequire($filePath);
-
-                if (isset($data['modules']) && is_array($data['modules'])) {
-                    $modules = collect($data['modules']);
-                }
             }
             catch (FileNotFoundException $e) {
                 // Do nothing.
+                $data = array();
+            }
+
+            if (is_array($data) && isset($data['modules']) && is_array($data['modules'])) {
+                $modules = collect($data['modules']);
             }
         }
 
         // Retrieve the local Modules information.
-        $namespace = str_replace('\\', '/', $this->getNamespace());
+        $classPath = str_replace('\\', '/', $this->getNamespace());
 
-        $vendor = basename($namespace);
+        $vendor = basename($classPath);
 
         try {
             $paths = collect($this->files->directories($path));
-
-            $paths->each(function ($path) use ($modules, $vendor) {
-                $module =  $vendor .'/' .basename($path);
-
-                if (! $modules->has($module)) {
-                    // Determine the local Package version.
-                    $filePath = $path .DS .'module.json';
-
-                    if (is_readable($filePath)) {
-                        $properties = json_decode(file_get_contents($filePath), true);
-
-                        $version = $properties['version'];
-                    } else {
-                        $version = '0.0.0';
-                    }
-
-                    $modules->put($module, array(
-                        'path'     => $path .DS,
-                        'version'  => $version,
-                        'location' => 'local',
-                    ));
-                }
-            });
         }
         catch (InvalidArgumentException $e) {
             // Do nothing.
+            $paths = collect();
         }
+
+        $paths->each(function ($path) use ($modules, $vendor) {
+            $module =  $vendor .'/' .basename($path);
+
+            if (! $modules->has($module)) {
+                // Determine the local Package version.
+                $filePath = $path .DS .'module.json';
+
+                try {
+                    $content = $this->files->getRequire($filePath);
+
+                    $properties = json_decode($content, true);
+                }
+                catch (FileNotFoundException $e) {
+                    // Do nothing.
+                    $properties = array();
+                }
+
+                if (is_array($properties) && isset($properties['version'])) {
+                    $version = $properties['version'];
+                } else {
+                    $version = '0.0.0';
+                }
+
+                $modules->put($module, array(
+                    'path'     => $path .DS,
+                    'version'  => $version,
+                    'location' => 'local',
+                ));
+            }
+        });
 
         // Process the retrieved information to generate their records.
         $items = $modules->map(function ($properties, $name)
