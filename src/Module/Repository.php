@@ -56,7 +56,7 @@ abstract class Repository implements RepositoryInterface
         $modules = collect();
 
         if ($path == base_path('modules')) {
-            // We are the default path, load the configured Modules.
+            // We are on the default path, load the Composer configured Modules.
 
             try {
                 $filePath = base_path('vendor/nova-modules.php');
