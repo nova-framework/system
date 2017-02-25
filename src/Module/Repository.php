@@ -50,32 +50,38 @@ abstract class Repository implements RepositoryInterface
      */
     protected function getAllModules()
     {
-        // Retrieve the Composer's Module information.
-        $path = base_path('vendor/nova-modules.php');
+        $path = $this->getPath();
 
+        // Retrieve the Composer's Module information.
         $modules = collect();
 
-        try {
-            $data = $this->files->getRequire($path);
+        if ($path == base_path('modules')) {
+            // We are the default path, load the configured Modules.
 
-            if (isset($data['modules']) && is_array($data['modules'])) {
-                $modules = collect($data['modules']);
+            try {
+                $filePath = base_path('vendor/nova-modules.php');
+
+                $data = $this->files->getRequire($filePath);
+
+                if (isset($data['modules']) && is_array($data['modules'])) {
+                    $modules = collect($data['modules']);
+                }
             }
-        }
-        catch (FileNotFoundException $e) {
-            // Do nothing.
+            catch (FileNotFoundException $e) {
+                // Do nothing.
+            }
         }
 
         // Retrieve the local Modules information.
-        $namespace = $this->getNamespace();
+        $namespace = str_replace('\\', '/', $this->getNamespace());
 
-        $path = $this->getPath();
+        $vendor = basename($namespace);
 
         try {
             $paths = collect($this->files->directories($path));
 
-            $paths->each(function ($path) use ($modules, $namespace) {
-                $module = $namespace .'/' .basename($path);
+            $paths->each(function ($path) use ($modules, $vendor) {
+                $module =  $vendor .'/' .basename($path);
 
                 if (! $modules->has($module)) {
                     // Determine the local Package version.
@@ -102,11 +108,9 @@ abstract class Repository implements RepositoryInterface
         }
 
         // Process the retrieved information to generate their records.
-        $me = $this;
-
-        $items = $modules->map(function ($properties, $name) use ($me)
+        $items = $modules->map(function ($properties, $name)
         {
-            $basename = $me->getPackageName($name);
+            $basename = $this->getPackageName($name);
 
             //
             $properties['name'] = $name;
