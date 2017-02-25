@@ -67,13 +67,15 @@ abstract class Repository implements RepositoryInterface
         }
 
         // Retrieve the local Modules information.
+        $namespace = $this->getNamespace();
+
         $path = $this->getPath();
 
         try {
             $paths = collect($this->files->directories($path));
 
-            $paths->each(function ($path) use ($modules) {
-                $module = 'Modules/' .basename($path);
+            $paths->each(function ($path) use ($modules, $namespace) {
+                $module = $namespace .'/' .basename($path);
 
                 if (! $modules->has($module)) {
                     // Determine the local Package version.
@@ -249,6 +251,6 @@ abstract class Repository implements RepositoryInterface
      */
     public function getNamespace()
     {
-        return rtrim($this->config->get('modules.namespace'), '/\\');
+        return rtrim($this->config->get('modules.namespace', 'Modules\\'), '/\\');
     }
 }
