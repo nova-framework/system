@@ -47,7 +47,7 @@ class ModuleManager
      */
     public function register()
     {
-        $modules = $this->all();
+        $modules = $this->repository->all();
 
         $modules->each(function($properties)
         {
@@ -70,10 +70,13 @@ class ModuleManager
      */
     protected function registerServiceProvider($properties)
     {
-        $namespace = $this->resolveNamespace($properties);
+        $namespace = $this->repository->getNamespace();
+
+        // Resolve the Module namespace.
+        $module = $this->resolveNamespace($properties);
 
         // Calculate the name of Service Provider, including the namespace.
-        $serviceProvider = $this->getNamespace() ."\\{$namespace}\\Providers\\ModuleServiceProvider";
+        $serviceProvider = "{$namespace}\\{$module}\\Providers\\ModuleServiceProvider";
 
         if (class_exists($serviceProvider)) {
             $this->app->register($serviceProvider);
@@ -87,7 +90,9 @@ class ModuleManager
      */
     public function resolveNamespace($properties)
     {
-        if (isset($properties['namespace'])) return $properties['namespace'];
+        if (isset($properties['namespace'])) {
+            return $properties['namespace'];
+        }
 
         return Str::studly($properties['slug']);
     }

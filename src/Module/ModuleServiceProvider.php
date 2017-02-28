@@ -32,7 +32,7 @@ class ModuleServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('modules.repository', function ($app)
         {
-            return new Repository($app['config']);
+            return new Repository($app['config'], $app['files']);
         });
 
         $this->app->bindShared('modules', function ($app)

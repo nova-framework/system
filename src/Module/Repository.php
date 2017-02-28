@@ -3,6 +3,7 @@
 namespace Nova\Module;
 
 use Nova\Config\Repository as Config;
+use Nova\Filesystem\Filesystem;
 use Nova\Support\Collection;
 use Nova\Support\Str;
 
@@ -35,36 +36,16 @@ class Repository
      *
      * @param \Nova\Config\Repository     $config
      */
-    public function __construct(Config $config)
+    public function __construct(Config $config, Filesystem $files)
     {
         $this->config = $config;
+
+        $this->files = $files;
     }
 
     public function all()
     {
-        if (isset(static::$modules)) return static::$modules;
-
-        //
-        $modules = $this->config->get('modules.modules', array());
-
-        $modules = array_map(function($slug, $properties)
-        {
-            $namespace = isset($properties['namespace']) ? $properties['namespace'] : Str::studly($slug);
-
-            $name = isset($properties['name']) ? $properties['name'] : $namespace;
-
-            return array_merge(array(
-                'slug'      => $slug,
-                'name'      => $name,
-                'basename'  => $name,
-                'namespace' => $namespace,
-                'enabled'   => isset($properties['enabled']) ? $properties['enabled'] : true,
-                'order'     => isset($properties['order'])   ? $properties['order']   : 9001,
-            ), $properties);
-
-        }, array_keys($modules), $modules);
-
-        return static::$modules = Collection::make($modules)->sortBy('order');
+        return $this->getCache()->sortBy('order');
     }
 
     /**
@@ -76,11 +57,53 @@ class Repository
     {
         $slugs = collect();
 
-        $this->all()->each(function ($item) use ($slugs) {
+        $this->all()->each(function ($item) use ($slugs)
+        {
             $slugs->push($item['slug']);
         });
 
         return $slugs;
+    }
+
+    /**
+     * Get modules based on where clause.
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return Collection
+     */
+    public function where($key, $value)
+    {
+        return collect($this->all()->where($key, $value)->first());
+    }
+
+    /**
+     * Sort modules by given key in ascending order.
+     *
+     * @param string $key
+     *
+     * @return Collection
+     */
+    public function sortBy($key)
+    {
+        $collection = $this->all();
+
+        return $collection->sortBy($key);
+    }
+
+    /**
+     * Sort modules by given key in ascending order.
+     *
+     * @param string $key
+     *
+     * @return Collection
+     */
+    public function sortByDesc($key)
+    {
+        $collection = $this->all();
+
+        return $collection->sortByDesc($key);
     }
 
     /**
@@ -104,16 +127,33 @@ class Repository
     }
 
     /**
-     * Get modules based on where clause.
+     * Returns count of all modules.
      *
-     * @param string $key
-     * @param mixed  $value
+     * @return int
+     */
+    public function count()
+    {
+        return $this->all()->count();
+    }
+
+    /**
+     * Get all enabled modules.
      *
      * @return Collection
      */
-    public function where($key, $value)
+    public function enabled()
     {
-        return collect($this->all()->where($key, $value)->first());
+        return $this->all()->where('enabled', true);
+    }
+
+    /**
+     * Get all disabled modules.
+     *
+     * @return Collection
+     */
+    public function disabled()
+    {
+        return $this->all()->where('enabled', false);
     }
 
     /**
@@ -128,6 +168,20 @@ class Repository
         $module = $this->where('slug', $slug);
 
         return ($module['enabled'] === true);
+    }
+
+    /**
+     * Check if specified module is disabled.
+     *
+     * @param string $slug
+     *
+     * @return bool
+     */
+    public function isDisabled($slug)
+    {
+        $module = $this->where('slug', $slug);
+
+        return ($module['enabled'] === false);
     }
 
     /**
@@ -164,5 +218,129 @@ class Repository
     public function getNamespace()
     {
         return rtrim($this->config->get('modules.namespace', 'App\Modules\\'), '/\\');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Optimization Methods
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    /**
+     * Get the contents of the cache file.
+     *
+     * The cache file lists all module slugs and their
+     * enabled or disabled status. This can be used to
+     * filter out modules depending on their status.
+     *
+     * @return Collection
+     */
+    public function getCache()
+    {
+        if ($this->isCacheExpired()) {
+            $modules = $this->getAllModules();
+
+            $this->writeCache($modules);
+
+            return $modules;
+        }
+
+        $cachePath = $this->getCachePath();
+
+        $data = $this->files->getRequire($cachePath);
+
+        return collect($data);
+    }
+
+    /**
+     * Write the service cache file to disk.
+     *
+     * @param  array  $modules
+     * @return void
+     */
+    public function writeCache($modules)
+    {
+        $cachePath = $this->getCachePath();
+
+        //
+        $data = array();
+
+        foreach ($modules->all() as $key => $module) {
+             $properties = ($module instanceof Collection) ? $module->all() : $module;
+
+             ksort($properties);
+
+             $data[$key] = $properties;
+        }
+
+        //
+        $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
+
+        $this->files->put($cachePath, $content);
+    }
+
+    /**
+     * Get the path to the cache file.
+     *
+     * @return string
+     */
+    protected function getCachePath()
+    {
+        return $this->config->get('modules.cache', STORAGE_PATH .'modules.php');
+    }
+
+    /*
+     * Determine if the cahe is expired.
+     *
+     * @return bool
+     */
+    public function isCacheExpired()
+    {
+        $cachePath = $this->getCachePath();
+
+        if (! $this->files->exists($cachePath)) {
+            return true;
+        }
+
+        // Determine the path to the associated configuration file.
+        $path = APPDIR .'Config' .DS .'Modules.php';
+
+        $lastModified = $this->files->lastModified($path);
+
+        if ($lastModified >= $this->files->lastModified($cachePath)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get all defined modules.
+     *
+     * @return array
+     */
+    protected function getAllModules()
+    {
+        $modules = $this->config->get('modules.modules', array());
+
+        $modules = array_map(function($slug, $properties)
+        {
+            $name = isset($properties['name']) ? $properties['name'] : 'Modules/' .Str::studly($slug);
+
+            $basename = isset($properties['basename']) ? $properties['basename'] : Str::studly($slug);
+
+            return array_merge(array(
+                'slug'      => $slug,
+                'name'      => $name,
+                'basename'  => $basename,
+                'namespace' => $basename,
+                'enabled'   => isset($properties['enabled']) ? $properties['enabled'] : true,
+                'order'     => isset($properties['order'])   ? $properties['order']   : 9001,
+            ), $properties);
+
+        }, array_keys($modules), $modules);
+
+        return collect($modules);
     }
 }
