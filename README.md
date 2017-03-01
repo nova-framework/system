@@ -1,4 +1,4 @@
-![Nova Framework](http://novaframework.com/app/templates/publicthemes/nova/images/nova.png)
+![Nova Framework](https://novaframework.com/templates/nova4/assets/img/nova.png)
 
 # Nova Framework 3.0 (Kernel)
 
@@ -8,7 +8,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/nova-framework/system.svg)](https://github.com/nova-framework/system/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/nova-framework/system.svg)](https://github.com/nova-framework/system)
 
-[![Join the chat at https://gitter.im/nova-framework/framework](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/nova-framework/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/nova-framework/framework/novausers](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/nova-framework/framework/novausers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 > **Note:** This repository contains the core code of the Nova framework. If you want to build an application using Nova 3, visit the main [Nova repository](https://github.com/nova-framework/framework).
 
