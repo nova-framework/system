@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.77.2';
+    const VERSION = '3.77.3';
 
     /**
      * Indicates if the application has "booted".
@@ -116,7 +116,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     protected $namespace = null;
 
-    
+
     /**
      * Create a new Nova application instance.
      *
@@ -221,10 +221,8 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $this['exception']->register($this->environment());
 
-        //$this['exception']->setDebug($this['config']['app.debug']);
-
-        // This way is possible to start early the Exception Handler.
-        $debug = (ENVIRONMENT == 'development');
+        //
+        $debug = $this['config']['app.debug'];
 
         $this['exception']->setDebug($debug);
     }
@@ -1088,6 +1086,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
     {
         $aliases = array(
             'app'            => 'Nova\Foundation\Application',
+            'forge'          => 'Nova\Console\Application',
             'auth'           => 'Nova\Auth\AuthManager',
             'cache'          => 'Nova\Cache\CacheManager',
             'cache.store'    => 'Nova\Cache\Repository',
