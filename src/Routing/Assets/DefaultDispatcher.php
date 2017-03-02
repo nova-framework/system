@@ -258,6 +258,9 @@ class DefaultDispatcher implements DispatcherInterface
             case 'js':
                 return 'application/javascript';
 
+            case 'svg':
+                return 'image/svg+xml';
+
             default:
                 break;
         }
