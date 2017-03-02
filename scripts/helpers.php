@@ -61,7 +61,7 @@ if (! function_exists('theme_url'))
     {
         $config = app('config');
 
-        $theme = $theme ?: $config['app']['template'];
+        $theme = $theme ?: $config['app']['theme'];
 
         if (Str::length($theme) > 3) {
             $theme = Str::snake($theme, '-');
