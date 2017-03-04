@@ -15,7 +15,6 @@ use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
 use Nova\Config\FileEnvironmentVariablesLoader;
 
-use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 
