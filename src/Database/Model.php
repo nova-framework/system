@@ -6,7 +6,7 @@
  * @version 4.0
  */
 
-namespace Nova\Database\Classic;
+namespace Nova\Database;
 
 use Nova\Database\Connection;
 use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;

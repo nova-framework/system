@@ -86,7 +86,6 @@ class MakeProviderCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{classname}}',
-            '{{command}}',
         );
 
         $replaces = array(
@@ -94,7 +93,6 @@ class MakeProviderCommand extends MakeCommand
             $this->container['path'],
             $this->container['namespace'],
             $this->container['classname'],
-            $this->container['command'],
         );
 
         return str_replace($searches, $replaces, $content);
