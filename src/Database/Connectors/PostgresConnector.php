@@ -64,12 +64,16 @@ class PostgresConnector extends Connector implements ConnectorInterface
         //
         $host = isset($host) ? "host={$host};" : '';
 
-        $dsn = "pgsql:{$hostname}dbname={$database}";
+        $dsn = "pgsql:{$host}dbname={$database}";
 
         if (isset($config['port'])) {
             $dsn .= ";port={$port}";
         }
 
+        if (isset($config['sslmode'])) {
+            $dsn .= ";sslmode={$sslmode}";
+        }
+        
         return $dsn;
     }
 
