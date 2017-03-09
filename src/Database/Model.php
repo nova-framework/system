@@ -84,8 +84,7 @@ class Model
      */
     public function all($columns = array('*'))
     {
-        return $this->newQuery()
-            ->get($columns);
+        return $this->newQuery()->get($columns);
     }
 
     /**
@@ -97,8 +96,7 @@ class Model
      */
     public function find($id, $columns = array('*'))
     {
-        return $this->newQuery()
-            ->find($id, $columns);
+        return $this->newQuery()->find($id, $columns);
     }
 
     /**
@@ -110,8 +108,7 @@ class Model
      */
     public function findMany($ids, $columns = array('*'))
     {
-        return $this->newQuery()
-            ->findMany($ids, $columns);
+        return $this->newQuery()->findMany($ids, $columns);
     }
 
     /**
@@ -122,8 +119,7 @@ class Model
      */
     public function insert(array $values)
     {
-        return $this->newQuery()
-            ->insertGetId($values);
+        return $this->newQuery()->insertGetId($values);
     }
 
     /**
