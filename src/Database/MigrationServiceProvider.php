@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Providers;
+namespace Nova\Database;
 
 use Nova\Database\Console\Migrations\ResetCommand;
 use Nova\Database\Console\Migrations\RefreshCommand;
