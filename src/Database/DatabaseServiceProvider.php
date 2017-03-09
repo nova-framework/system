@@ -11,7 +11,7 @@ namespace Nova\Database;
 use Nova\Database\ORM\Model;
 use Nova\Database\ConnectionFactory;
 use Nova\Database\DatabaseManager;
-use Nova\Database\Classic\Model as ClassicModel;
+use Nova\Database\Model as ClassicModel;
 use Nova\Support\ServiceProvider;
 
 
