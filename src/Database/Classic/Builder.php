@@ -1,14 +1,15 @@
 <?php
 
-namespace Nova\Database;
+namespace Nova\Database\Classic;
 
 use Nova\Database\Query\Expression;
 use Nova\Database\Query\Builder as QueryBuilder;
+use Nova\Database\Model;
 
 use Closure;
 
 
-class Query
+class Builder
 {
     /**
      * The base Query Builder instance.

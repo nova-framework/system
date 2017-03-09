@@ -11,7 +11,7 @@ namespace Nova\Database;
 use Nova\Database\Connection;
 use Nova\Database\ConnectionResolverInterface as Resolver;
 use Nova\Database\Query\Builder as QueryBuilder;
-use Nova\Database\Query as Builder;
+use Nova\Database\Classic\Builder;
 use Nova\Support\Str;
 
 
