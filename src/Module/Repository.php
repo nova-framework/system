@@ -322,9 +322,46 @@ class Repository
      */
     protected function getAllModules()
     {
-        $modules = $this->config->get('modules.modules', array());
+        $path = $this->getPath();
 
-        $modules = array_map(function($slug, $properties)
+        // Get the Modules from configuration.
+        $config = $this->config->get('modules.modules', array());
+
+        $modules = collect($config);
+
+        // Retrieve all local Modules information.
+        $classPath = str_replace('\\', '/', $this->getNamespace());
+
+        $vendor = basename($classPath);
+
+        try {
+            $paths = collect($this->files->directories($path));
+        }
+        catch (InvalidArgumentException $e) {
+            // Do nothing.
+            $paths = collect();
+        }
+
+        $paths->each(function ($path) use (&$modules, $vendor)
+        {
+            $basename = basename($path);
+
+            $slug = Str::snake($basename);
+
+            if (! $modules->has($slug)) {
+                $name = $vendor .'/' .basename($path);
+
+                $modules->put($slug, array(
+                    'name'     => $name,
+                    'basename' => $basename,
+                    'enabled'  =>true,
+                    'order'    => 9001
+                ));
+            }
+        });
+
+        // Process the collected Modules information.
+        $items = $modules->map(function ($properties, $slug)
         {
             $name = isset($properties['name']) ? $properties['name'] : 'Modules/' .Str::studly($slug);
 
@@ -339,8 +376,8 @@ class Repository
                 'order'     => isset($properties['order'])   ? $properties['order']   : 9001,
             ), $properties);
 
-        }, array_keys($modules), $modules);
+        });
 
-        return collect($modules);
+        return $items->sortBy('basename');
     }
 }
