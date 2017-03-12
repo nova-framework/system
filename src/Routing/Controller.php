@@ -219,11 +219,11 @@ abstract class Controller
     }
 
     /**
-     * Create the layout used by the controller.
+     * Method executed before any action.
      *
      * @return void
      */
-    protected function setupLayout() {}
+    protected function before() {}
 
     /**
      * Execute an action on the controller.
@@ -234,7 +234,11 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
-        $this->setupLayout();
+        $this->before();
+
+        if (! is_null($response)) {
+            return $this->processResponse($response);
+        }
 
         // Execute the requested Method with the given arguments.
         $response = call_user_func_array(array($this, $method), $parameters);
