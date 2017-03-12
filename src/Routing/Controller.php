@@ -234,7 +234,8 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
-        $this->before();
+        // Execute the Before method.
+        $response = $this->before();
 
         if (! is_null($response)) {
             return $this->processResponse($response);
