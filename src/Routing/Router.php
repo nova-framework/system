@@ -344,7 +344,9 @@ class Router
     protected function updateGroupStack(array $attributes)
     {
         if (! empty($this->groupStack)) {
-            $attributes = static::mergeGroup($attributes, last($this->groupStack));
+            $old = last($this->groupStack);
+
+            $attributes = static::mergeGroup($attributes, $old);
         }
 
         $this->groupStack[] = $attributes;
@@ -358,7 +360,9 @@ class Router
      */
     public function mergeWithLastGroup($new)
     {
-        return static::mergeGroup($new, last($this->groupStack));
+        $old = last($this->groupStack);
+
+        return static::mergeGroup($new, $old);
     }
 
     /**
@@ -897,6 +901,26 @@ class Router
         }
 
         return $response->prepare($request);
+    }
+
+    /**
+     * Determine if the router currently has a group stack.
+     *
+     * @return bool
+     */
+    public function hasGroupStack()
+    {
+        return ! empty($this->groupStack);
+    }
+
+    /**
+     * Get the current group stack for the router.
+     *
+     * @return array
+     */
+    public function getGroupStack()
+    {
+        return $this->groupStack;
     }
 
     /**

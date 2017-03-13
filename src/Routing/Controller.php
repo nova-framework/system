@@ -73,10 +73,12 @@ abstract class Controller
         // Execute the Before method.
         $response = $this->before();
 
-        if (is_null($response)) {
-            // Execute the requested Method with the given arguments.
-            $response = call_user_func_array(array($this, $method), $parameters);
+        if (! is_null($response)) {
+            return $this->processResponse($response);
         }
+
+        // Execute the requested Method with the given arguments.
+        $response = call_user_func_array(array($this, $method), $parameters);
 
         // Process the Response and return it.
         return $this->processResponse($response);
