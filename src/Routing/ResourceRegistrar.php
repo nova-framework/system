@@ -43,18 +43,12 @@ class ResourceRegistrar
      */
     public function register($name, $controller, array $options = array())
     {
-        // If the resource name contains a slash, we will assume the developer wishes to
-        // register these resource routes with a prefix so we will set that up out of
-        // the box so they don't have to mess with it. Otherwise, we will continue.
         if (Str::contains($name, '/')) {
             $this->prefixedResource($name, $controller, $options);
 
             return;
         }
 
-        // We need to extract the base resource from the resource name. Nested resources
-        // are supported in the framework, but we need to know what name to use for a
-        // place-holder on the route wildcards, which should be the base resources.
         $base = $this->getResourceWildcard(last(explode('.', $name)));
 
         $defaults = $this->resourceDefaults;
@@ -78,9 +72,6 @@ class ResourceRegistrar
     {
         list($name, $prefix) = $this->getResourcePrefix($name);
 
-        // We need to extract the base resource from the resource name. Nested resources
-        // are supported in the framework, but we need to know what name to use for a
-        // place-holder on the route wildcards, which should be the base resources.
         $callback = function ($me) use ($name, $controller, $options) {
             $me->resource($name, $controller, $options);
         };
@@ -98,9 +89,6 @@ class ResourceRegistrar
     {
         $segments = explode('/', $name);
 
-        // To get the prefix, we will take all of the name segments and implode them on
-        // a slash. This will generate a proper URI prefix for us. Then we take this
-        // last segment, which will be considered the final resources name we use.
         $prefix = implode('/', array_slice($segments, 0, -1));
 
         return array(end($segments), $prefix);
@@ -136,9 +124,6 @@ class ResourceRegistrar
             return $resource;
         }
 
-        // Once we have built the base URI, we'll remove the wildcard holder for this
-        // base resource name so that the individual route adders can suffix these
-        // paths however they need to, as some do not have any wildcards at all.
         $segments = explode('.', $resource);
 
         $uri = $this->getNestedResourceUri($segments);
@@ -154,9 +139,6 @@ class ResourceRegistrar
      */
     protected function getNestedResourceUri(array $segments)
     {
-        // We will spin through the segments and create a place-holder for each of the
-        // resource segments, as well as the resource itself. Then we should get an
-        // entire string for the resource URI that contains all nested resources.
         return implode('/', array_map(function ($segment)
         {
             return $segment .'/{'.$this->getResourceWildcard($segment) .'}';
@@ -194,9 +176,6 @@ class ResourceRegistrar
             return $options['names'][$method];
         }
 
-        // If a global prefix has been assigned to all names for this resource, we will
-        // grab that so we can prepend it onto the name when we create this name for
-        // the resource action. Otherwise we'll just use an empty string for here.
         $prefix = isset($options['as']) ? $options['as'].'.' : '';
 
         if (! $this->router->hasGroupStack()) {
