@@ -590,6 +590,26 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
+     * Determine if the router currently has a group stack.
+     *
+     * @return bool
+     */
+    public function hasGroupStack()
+    {
+        return ! empty($this->groupStack);
+    }
+
+    /**
+     * Get the current group stack for the router.
+     *
+     * @return array
+     */
+    public function getGroupStack()
+    {
+        return $this->groupStack;
+    }
+
+    /**
      * Determine if the action is routing to a controller.
      *
      * @param  array  $action
