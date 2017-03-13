@@ -681,7 +681,7 @@ class Router
         {
             $middleware = $this->resolveMiddleware($name);
 
-            return array($middleware);
+            return (array) $middleware;
 
         })->collapse()->all();
     }

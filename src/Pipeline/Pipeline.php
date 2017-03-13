@@ -101,9 +101,10 @@ class Pipeline implements PipelineInterface
 
         $pipes = array_reverse($this->pipes);
 
-        return call_user_func(
-            array_reduce($pipes, $this->getSlice(), $firstSlice), $this->passable
-        );
+        //
+        $callback = array_reduce($pipes, $this->getSlice(), $firstSlice);
+
+        return call_user_func($callback, $this->passable);
     }
 
     /**
@@ -131,13 +132,17 @@ class Pipeline implements PipelineInterface
                         $parameters = $parameters ?: array();
                     }
 
-                    return call_user_func_array($callback,
-                                                array_merge(array($passable, $stack), $parameters));
+                    $parameters = array_merge(array($passable, $stack), $parameters);
+
+                    return call_user_func_array($callback, $parameters);
                 } else {
                     list($name, $parameters) = $this->parsePipeString($pipe);
 
-                    return call_user_func_array(array($this->container->make($name), $this->method),
-                                                array_merge(array($passable, $stack), $parameters));
+                    $parameters = array_merge(array($passable, $stack), $parameters);
+
+                    $instance = $this->container->make($name);
+
+                    return call_user_func_array(array($instance, $this->method), $parameters);
                 }
             };
         };
