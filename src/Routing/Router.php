@@ -136,6 +136,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public static $methods = array('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS');
 
+    /**
+     * The resource registrar instance.
+     *
+     * @var \Nova\Routing\ResourceRegistrar
+     */
+    protected $registrar;
+
 
     /**
      * Router constructor.
@@ -151,7 +158,10 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->container = $container ?: new Container();
 
         //
-        $this->bind('_missing', function($value) { return explode('/', $value); });
+        $this->bind('_missing', function($value)
+        {
+            return explode('/', $value);
+        });
     }
 
     /**
@@ -344,7 +354,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function resource($name, $controller, array $options = array())
     {
-        $registrar = new ResourceRegistrar($this);
+        $registrar = $this->getRegistrar();
 
         $registrar->register($name, $controller, $options);
     }
@@ -501,8 +511,8 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function createRoute($methods, $uri, $action)
     {
-        if ($this->routingToController($action)) {
-            $action = $this->getControllerAction($action);
+        if ($this->actionReferencesController($action)) {
+            $action = $this->convertToControllerAction($action);
         }
 
         // Prefix the current route pattern.
@@ -511,7 +521,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $route = $this->newRoute($methods, $uri, $action);
 
         if ($this->hasGroupStack()) {
-            $this->mergeController($route);
+            $this->mergeGroupAttributesIntoRoute($route);
         }
 
         $this->addWhereClausesToRoute($route);
@@ -566,7 +576,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @param  \Nova\Routing\Route  $route
      * @return void
      */
-    protected function mergeController($route)
+    protected function mergeGroupAttributesIntoRoute($route)
     {
         $action = $this->mergeWithLastGroup($route->getAction());
 
@@ -579,11 +589,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @param  array  $action
      * @return bool
      */
-    protected function routingToController($action)
+    protected function actionReferencesController($action)
     {
-        if ($action instanceof Closure) return false;
+        if ($action instanceof Closure) {
+            return false;
+        }
 
-        return is_string($action) || is_string(array_get($action, 'uses'));
+        return is_string($action) || (isset($action['uses']) && is_string($action['uses']));
     }
 
     /**
@@ -592,7 +604,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @param  array|string  $action
      * @return array
      */
-    protected function getControllerAction($action)
+    protected function convertToControllerAction($action)
     {
         if (is_string($action)) $action = array('uses' => $action);
 
@@ -1401,6 +1413,16 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getInspector()
     {
         return $this->inspector ?: $this->inspector = new ControllerInspector();
+    }
+
+    /**
+     * Get a Resource Registrar instance.
+     *
+     * @return \Nova\Routing\ResourceRegistrar
+     */
+    public function getRegistrar()
+    {
+        return $this->registrar ?: $this->registrar = new ResourceRegistrar($this);
     }
 
     /**
