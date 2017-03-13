@@ -96,11 +96,11 @@ class Router
     public static $verbs = array('GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS');
 
     /**
-     * The default actions for a resourceful controller.
+     * The resource registrar instance.
      *
-     * @var array
+     * @var \Nova\Routing\ResourceRegistrar
      */
-    protected $resourceDefaults = array('index', 'create', 'store', 'show', 'edit', 'update', 'destroy');
+    protected $registrar;
 
 
     /**
@@ -118,7 +118,10 @@ class Router
 
         $this->container = $container ?: new Container;
 
-        $this->bind('_missing', function($v) { return explode('/', $v); });
+        $this->bind('_missing', function($v)
+        {
+            return explode('/', $v);
+        });
     }
 
     /**
@@ -311,7 +314,7 @@ class Router
      */
     public function resource($name, $controller, array $options = array())
     {
-        $registrar = new ResourceRegistrar($this);
+        $registrar = $this->getRegistrar();
 
         $registrar->register($name, $controller, $options);
     }
@@ -472,8 +475,8 @@ class Router
         // If the route is routing to a controller we will parse the route action into
         // an acceptable array format before registering it and creating this route
         // instance itself. We need to build the Closure that will call this out.
-        if ($this->routingToController($action)) {
-            $action = $this->getControllerAction($action);
+        if ($this->actionReferencesController($action)) {
+            $action = $this->convertToControllerAction($action);
         }
 
         $route = $this->newRoute(
@@ -484,7 +487,7 @@ class Router
         // route has already been created and is ready to go. After we're done with
         // the merge we will be ready to return the route back out to the caller.
         if (! empty($this->groupStack)) {
-            $this->mergeController($route);
+            $this->mergeGroupAttributesIntoRoute($route);
         }
 
         $this->addWhereClausesToRoute($route);
@@ -537,7 +540,7 @@ class Router
      * @param  \Nova\Routing\Route  $route
      * @return void
      */
-    protected function mergeController($route)
+    protected function mergeGroupAttributesIntoRoute($route)
     {
         $action = $this->mergeWithLastGroup($route->getAction());
 
@@ -550,13 +553,13 @@ class Router
      * @param  array  $action
      * @return bool
      */
-    protected function routingToController($action)
+    protected function actionReferencesController($action)
     {
         if ($action instanceof Closure) {
             return false;
         }
 
-        return is_string($action) || is_string(array_get($action, 'uses'));
+        return is_string($action) || (isset($action['uses']) && is_string($action['uses']));
     }
 
     /**
@@ -565,7 +568,7 @@ class Router
      * @param  array|string  $action
      * @return array
      */
-    protected function getControllerAction($action)
+    protected function convertToControllerAction($action)
     {
         if (is_string($action)) $action = array('uses' => $action);
 
@@ -1074,6 +1077,16 @@ class Router
     public function getInspector()
     {
         return $this->inspector ?: $this->inspector = new ControllerInspector;
+    }
+
+    /**
+     * Get a Resource Registrar instance.
+     *
+     * @return \Nova\Routing\ResourceRegistrar
+     */
+    public function getRegistrar()
+    {
+        return $this->registrar ?: $this->registrar = new ResourceRegistrar($this);
     }
 
     /**
