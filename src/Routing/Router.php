@@ -510,7 +510,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
         $route = $this->newRoute($methods, $uri, $action);
 
-        if (! empty($this->groupStack)) {
+        if ($this->hasGroupStack()) {
             $this->mergeController($route);
         }
 
@@ -571,42 +571,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $action = $this->mergeWithLastGroup($route->getAction());
 
         $route->setAction($action);
-    }
-
-    /**
-     * Create a response instance from the given value.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  mixed  $response
-     * @return \Nova\Http\Response
-     */
-    protected function prepareResponse($request, $response)
-    {
-        if (! $response instanceof SymfonyResponse) {
-            $response = new Response($response);
-        }
-
-        return $response->prepare($request);
-    }
-
-    /**
-     * Determine if the router currently has a group stack.
-     *
-     * @return bool
-     */
-    public function hasGroupStack()
-    {
-        return ! empty($this->groupStack);
-    }
-
-    /**
-     * Get the current group stack for the router.
-     *
-     * @return array
-     */
-    public function getGroupStack()
-    {
-        return $this->groupStack;
     }
 
     /**
@@ -1211,6 +1175,42 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getFilters()
     {
         return $this->filters;
+    }
+
+    /**
+     * Create a response instance from the given value.
+     *
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  mixed  $response
+     * @return \Nova\Http\Response
+     */
+    protected function prepareResponse($request, $response)
+    {
+        if (! $response instanceof SymfonyResponse) {
+            $response = new Response($response);
+        }
+
+        return $response->prepare($request);
+    }
+
+    /**
+     * Determine if the router currently has a group stack.
+     *
+     * @return bool
+     */
+    public function hasGroupStack()
+    {
+        return ! empty($this->groupStack);
+    }
+
+    /**
+     * Get the current group stack for the router.
+     *
+     * @return array
+     */
+    public function getGroupStack()
+    {
+        return $this->groupStack;
     }
 
     /**

@@ -179,7 +179,7 @@ class ResourceRegistrar
         $prefix = isset($options['as']) ? $options['as'].'.' : '';
 
         if (! $this->router->hasGroupStack()) {
-            return $prefix.$resource.'.'.$method;
+            return $prefix .$resource .'.' .$method;
         }
 
         return $this->getGroupResourceName($prefix, $resource, $method);
