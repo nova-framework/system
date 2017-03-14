@@ -670,6 +670,19 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the include statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileInclude($expression)
+    {
+        $expression = $this->stripParentheses($expression);
+
+        return "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+    }
+    
+    /**
      * Compile the layout statements into valid PHP.
      *
      * @param  string  $expression
@@ -684,19 +697,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         $this->footer[] = $data;
 
         return '';
-    }
-
-    /**
-     * Compile the include statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compileInclude($expression)
-    {
-        $expression = $this->stripParentheses($expression);
-
-        return "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
     }
 
     /**
