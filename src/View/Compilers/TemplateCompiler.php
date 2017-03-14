@@ -700,12 +700,12 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Compile the fragment statements into valid PHP.
+     * Compile the partial statements into valid PHP.
      *
      * @param  string  $expression
      * @return string
      */
-    protected function compileFragment($expression)
+    protected function compilePartial($expression)
     {
         $expression = $this->stripParentheses($expression);
 
