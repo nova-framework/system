@@ -179,16 +179,28 @@ class Factory
      * Create a Layout instance
      *
      * @param string $view
-     * @param string|null $module
+     * @param string|null $theme
      *
      * @return \Nova\View\Layout
      */
     public function makeLayout($view, $theme = null)
     {
-        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
-
-        // Calculate the current Template name.
         $theme = $theme ?: $this->getDefaultTheme();
+
+        return $this->createLayout($view, $theme);
+    }
+
+    /**
+     * Create a Layout instance
+     *
+     * @param string $view
+     * @param string $theme
+     *
+     * @return \Nova\View\Layout
+     */
+    public function createLayout($view, $theme)
+    {
+        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
 
         // Get the View file path.
         $path = $this->findLayoutFile($view, $theme);
