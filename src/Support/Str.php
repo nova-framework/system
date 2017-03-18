@@ -182,7 +182,7 @@ class Str
      */
     public static function plural($value, $count = 2)
     {
-        return Pluralizer::pluralize($value, $count);
+        return Pluralizer::plural($value, $count);
     }
 
     /**
