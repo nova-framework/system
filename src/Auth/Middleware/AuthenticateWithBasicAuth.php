@@ -32,10 +32,11 @@ class AuthenticateWithBasicAuth
      *
      * @param  \Nova\Http\Request  $request
      * @param  \Closure  $next
+     * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $guard = null)
     {
-        return $this->auth->basic() ?: $next($request);
+        return $this->auth->guard($guard)->basic() ?: $next($request);
     }
 }

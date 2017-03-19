@@ -44,7 +44,7 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app->singleton('auth.driver', function ($app)
         {
-            return $app['auth']->driver();
+            return $app['auth']->guard();
         });
     }
 
@@ -84,11 +84,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerRequestRebindHandler()
     {
-        $this->app->rebinding('request', function($app, $request)
+        $this->app->rebinding('request', function ($app, $request)
         {
-            $request->setUserResolver(function() use ($app)
+            $request->setUserResolver(function ($guard = null) use ($app)
             {
-                return $app['auth']->user();
+                $resolver = $app['auth']->userResolver();
+
+                return call_user_func($resolver, $guard);
             });
         });
     }

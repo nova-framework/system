@@ -93,6 +93,7 @@ class Route
      */
     protected static $validators;
 
+    
     /**
      * Create a new Route instance.
      *

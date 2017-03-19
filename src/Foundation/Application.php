@@ -973,7 +973,6 @@ class Application extends Container implements ResponsePreparerInterface
             'auth'              => 'Nova\Auth\AuthManager',
             'cache'             => 'Nova\Cache\CacheManager',
             'cache.store'       => 'Nova\Cache\Repository',
-            'auth.reminder.repository' => 'Nova\Auth\Reminders\ReminderRepositoryInterface',
             'template.compiler' => 'Nova\View\Compilers\TemplateCompiler',
             'config'            => 'Nova\Config\Repository',
             'cookie'            => 'Nova\Cookie\CookieJar',

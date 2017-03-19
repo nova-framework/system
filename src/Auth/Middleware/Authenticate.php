@@ -2,7 +2,7 @@
 
 namespace Nova\Auth\Middleware;
 
-use Nova\Foundation\Application;
+use Nova\Support\Facades\Auth;
 use Nova\Support\Facades\Response;
 use Nova\Support\Facades\Redirect;
 
@@ -12,13 +12,6 @@ use Closure;
 class Authenticate
 {
     /**
-     * The Guard implementation.
-     *
-     * @var \Nova\Auth\Guard
-     */
-    protected $auth;
-
-    /**
      * The URI where are redirected the Guests.
      *
      * @var string
@@ -27,26 +20,16 @@ class Authenticate
 
 
     /**
-     * Create a new middleware instance.
-     *
-     * @param  Guard  $auth
-     * @return void
-     */
-    public function __construct(Application $app)
-    {
-        $this->auth = $app['auth'];
-    }
-
-    /**
      * Handle an incoming request.
      *
      * @param  \Nova\Http\Request  $request
      * @param  \Closure  $next
+     * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $guard = null)
     {
-        if ($this->auth->guest()) {
+        if (Auth::guard($guard)->guest()) {
             if ($request->ajax() || $request->wantsJson()) {
                 return Response::make('Unauthorized.', 401);
             } else {

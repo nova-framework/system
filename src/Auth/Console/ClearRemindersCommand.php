@@ -28,7 +28,12 @@ class ClearRemindersCommand extends Command
      */
     public function fire()
     {
-        $this->nova['auth.reminder.repository']->deleteExpired();
+        $name = $this->argument('name');
+
+        $broker = $this->nova['auth.password']->broker($name);
+
+        //
+        $broker->getRepository()->deleteExpired();
 
         $this->info('Expired reminders cleared!');
     }

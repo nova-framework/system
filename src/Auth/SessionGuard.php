@@ -2,6 +2,8 @@
 
 namespace Nova\Auth;
 
+use Nova\Auth\GuardHelpersTrait;
+use Nova\Auth\GuardInterface;
 use Nova\Cookie\CookieJar;
 use Nova\Events\Dispatcher;
 use Nova\Session\Store as SessionStore;
@@ -10,14 +12,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class Guard
+class SessionGuard implements GuardInterface
 {
+    use GuardHelpersTrait;
+
     /**
-     * The currently authenticated user.
+     * The name of the Guard. Typically "session".
      *
-     * @var \Nova\Auth\UserInterface
+     * Corresponds to driver name in authentication configuration.
+     *
+     * @var string
      */
-    protected $user;
+    protected $name;
 
     /**
      * The user we last attempted to retrieve.
@@ -32,13 +38,6 @@ class Guard
      * @var bool
      */
     protected $viaRemember = false;
-
-    /**
-     * The user provider implementation.
-     *
-     * @var \Nova\Auth\UserProviderInterface
-     */
-    protected $provider;
 
     /**
      * The session store used by the guard.
@@ -82,41 +81,25 @@ class Guard
      */
     protected $tokenRetrievalAttempted = false;
 
+
     /**
      * Create a new authentication guard.
      *
-     * @param  \Nova\Auth\UserProviderInterface  $provider
-     * @param  \Nova\Session\Store  $session
+     * @param  \Auth\UserProviderInterface  $provider
+     * @param  \Session\Store  $session
      * @param  \Symfony\Component\HttpFoundation\Request  $request
      * @return void
      */
-    public function __construct(UserProviderInterface $provider,
+    public function __construct($name,
+                                UserProviderInterface $provider,
                                 SessionStore $session,
                                 Request $request = null)
     {
-        $this->session = $session;
-        $this->request = $request;
+        $this->name = $name;
+
+        $this->session  = $session;
+        $this->request  = $request;
         $this->provider = $provider;
-    }
-
-    /**
-     * Determine if the current user is authenticated.
-     *
-     * @return bool
-     */
-    public function check()
-    {
-        return ! is_null($this->user());
-    }
-
-    /**
-     * Determine if the current user is a guest.
-     *
-     * @return bool
-     */
-    public function guest()
-    {
-        return ! $this->check();
     }
 
     /**
@@ -126,7 +109,9 @@ class Guard
      */
     public function user()
     {
-        if ($this->loggedOut) return;
+        if ($this->loggedOut) {
+            return;
+        }
 
         // If we have already retrieved the user for the current request we can just
         // return it back immediately. We do not want to pull the user data every
@@ -165,15 +150,28 @@ class Guard
      */
     public function id()
     {
-        if ($this->loggedOut) return;
+        if ($this->loggedOut) {
+            return;
+        }
 
         $id = $this->session->get($this->getName(), $this->getRecallerId());
 
-        if (is_null($id) && $this->user()) {
-            $id = $this->user()->getAuthIdentifier();
+        if (is_null($id) && ! is_null($user = $this->user())) {
+            $id = $user->getAuthIdentifier();
         }
 
         return $id;
+    }
+
+    /**
+     * Validate a user's credentials.
+     *
+     * @param  array  $credentials
+     * @return bool
+     */
+    public function validate(array $credentials = array())
+    {
+        return $this->attempt($credentials, false, false);
     }
 
     /**
@@ -202,7 +200,9 @@ class Guard
      */
     protected function getRecaller()
     {
-        return $this->request->cookies->get($this->getRecallerName());
+        $name = $this->getRecallerName();
+
+        return $this->request->cookies->get($name);
     }
 
     /**
@@ -213,7 +213,9 @@ class Guard
     protected function getRecallerId()
     {
         if ($this->validRecaller($recaller = $this->getRecaller())) {
-            return head(explode('|', $recaller));
+            $segments = explode('|', $recaller);
+
+            return head($segments);
         }
     }
 
@@ -225,11 +227,13 @@ class Guard
      */
     protected function validRecaller($recaller)
     {
-        if (! is_string($recaller) || ! str_contains($recaller, '|')) return false;
+        if (! is_string($recaller) || ! str_contains($recaller, '|')) {
+            return false;
+        }
 
         $segments = explode('|', $recaller);
 
-        return count($segments) == 2 && trim($segments[0]) !== '' && trim($segments[1]) !== '';
+        return (count($segments) == 2) && (trim($segments[0]) !== '') && (trim($segments[1]) !== '');
     }
 
     /**
@@ -250,17 +254,6 @@ class Guard
     }
 
     /**
-     * Validate a user's credentials.
-     *
-     * @param  array  $credentials
-     * @return bool
-     */
-    public function validate(array $credentials = array())
-    {
-        return $this->attempt($credentials, false, false);
-    }
-
-    /**
      * Attempt to authenticate using HTTP Basic Auth.
      *
      * @param  string  $field
@@ -269,14 +262,18 @@ class Guard
      */
     public function basic($field = 'email', Request $request = null)
     {
-        if ($this->check()) return;
+        if ($this->check()) {
+            return;
+        }
 
         $request = $request ?: $this->getRequest();
 
         // If a username is set on the HTTP basic request, we will return out without
         // interrupting the request lifecycle. Otherwise, we'll need to generate a
         // request indicating that the given credentials were invalid for login.
-        if ($this->attemptBasic($request, $field)) return;
+        if ($this->attemptBasic($request, $field)) {
+            return;
+        }
 
         return $this->getBasicResponse();
     }
@@ -306,7 +303,9 @@ class Guard
      */
     protected function attemptBasic(Request $request, $field)
     {
-        if (! $request->getUser()) return false;
+        if (! $request->getUser()) {
+            return false;
+        }
 
         return $this->attempt($this->getBasicCredentials($request, $field));
     }
@@ -352,13 +351,15 @@ class Guard
         // If an implementation of UserInterface was returned, we'll ask the provider
         // to validate the user against the given credentials, and if they are in
         // fact valid we'll log the users into the application and return true.
-        if ($this->hasValidCredentials($user, $credentials)) {
-            if ($login) $this->login($user, $remember);
-
-            return true;
+        if (! $this->hasValidCredentials($user, $credentials)) {
+            return false;
         }
 
-        return false;
+        if ($login) {
+            $this->login($user, $remember);
+        }
+
+        return true;
     }
 
     /**
@@ -398,8 +399,7 @@ class Guard
      */
     public function attempting($callback)
     {
-        if ($this->events)
-        {
+        if ($this->events) {
             $this->events->listen('auth.attempt', $callback);
         }
     }
@@ -407,7 +407,7 @@ class Guard
     /**
      * Log a user into the application.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  bool  $remember
      * @return void
      */
@@ -458,7 +458,9 @@ class Guard
     {
         $this->session->put($this->getName(), $id);
 
-        $this->login($user = $this->provider->retrieveById($id), $remember);
+        $user = $this->provider->retrieveById($id);
+
+        $this->login($user, $remember);
 
         return $user;
     }
@@ -471,22 +473,26 @@ class Guard
      */
     public function onceUsingId($id)
     {
-        $this->setUser($this->provider->retrieveById($id));
+        $user = $this->provider->retrieveById($id);
 
-        return $this->user instanceof UserInterface;
+        $this->setUser($user);
+
+        return ($user instanceof UserInterface);
     }
 
     /**
      * Queue the recaller cookie into the cookie jar.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function queueRecallerCookie(UserInterface $user)
     {
-        $value = $user->getAuthIdentifier().'|'.$user->getRememberToken();
+        $value = $user->getAuthIdentifier() .'|' .$user->getRememberToken();
 
-        $this->getCookieJar()->queue($this->createRecaller($value));
+        $cookie = $this->createRecaller($value);
+
+        $this->getCookieJar()->queue($cookie);
     }
 
     /**
@@ -497,7 +503,9 @@ class Guard
      */
     protected function createRecaller($value)
     {
-        return $this->getCookieJar()->forever($this->getRecallerName(), $value);
+        $cookies = $this->getCookieJar();
+
+        return $cookies->forever($this->getRecallerName(), $value);
     }
 
     /**
@@ -547,7 +555,7 @@ class Guard
     /**
      * Refresh the remember token for the user.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function refreshRememberToken(UserInterface $user)
@@ -560,7 +568,7 @@ class Guard
     /**
      * Create a new remember token for the user if one doesn't already exist.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     protected function createRememberTokenIfDoesntExist(UserInterface $user)
@@ -575,7 +583,7 @@ class Guard
     /**
      * Get the cookie creator instance used by the guard.
      *
-     * @return \Nova\Cookie\CookieJar
+     * @return \Cookie\CookieJar
      *
      * @throws \RuntimeException
      */
@@ -591,7 +599,7 @@ class Guard
     /**
      * Set the cookie creator instance used by the guard.
      *
-     * @param  \Nova\Cookie\CookieJar  $cookie
+     * @param  \Cookie\CookieJar  $cookie
      * @return void
      */
     public function setCookieJar(CookieJar $cookie)
@@ -602,7 +610,7 @@ class Guard
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Nova\Events\Dispatcher
+     * @return \Events\Dispatcher
      */
     public function getDispatcher()
     {
@@ -623,7 +631,7 @@ class Guard
     /**
      * Get the session store used by the guard.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     public function getSession()
     {
@@ -643,7 +651,7 @@ class Guard
     /**
      * Set the user provider used by the guard.
      *
-     * @param  \Nova\Auth\UserProviderInterface  $provider
+     * @param  \Auth\UserProviderInterface  $provider
      * @return void
      */
     public function setProvider(UserProviderInterface $provider)
@@ -664,7 +672,7 @@ class Guard
     /**
      * Set the current user of the application.
      *
-     * @param  \Nova\Auth\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @return void
      */
     public function setUser(UserInterface $user)
@@ -672,6 +680,8 @@ class Guard
         $this->user = $user;
 
         $this->loggedOut = false;
+
+        return $this;
     }
 
     /**
@@ -714,7 +724,7 @@ class Guard
      */
     public function getName()
     {
-        return 'login_'.md5(get_class($this));
+        return 'login_' .$this->name .'_' .md5(get_class($this));
     }
 
     /**
@@ -724,7 +734,7 @@ class Guard
      */
     public function getRecallerName()
     {
-        return 'remember_'.md5(get_class($this));
+        return 'remember_' .$this->name .'_' .md5(get_class($this));
     }
 
     /**

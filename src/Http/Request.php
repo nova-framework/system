@@ -583,8 +583,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function format($default = 'html')
     {
-        foreach ($this->getAcceptableContentTypes() as $type)
-        {
+        foreach ($this->getAcceptableContentTypes() as $type) {
             if ($format = $this->getFormat($type)) return $format;
         }
 
