@@ -108,11 +108,11 @@ class AuthManager
 
         $method = 'create' .ucfirst($config['driver']) .'Driver';
 
-        if (method_exists($this, $method)) {
-            return call_user_func(array($this, $method), $name, $config);
+        if (! method_exists($this, $method)) {
+            throw new InvalidArgumentException("Auth guard driver [{$config['driver']}] is not defined.");
         }
 
-        throw new InvalidArgumentException("Auth guard driver [{$config['driver']}] is not defined.");
+        return call_user_func(array($this, $method), $name, $config);
     }
 
     /**
