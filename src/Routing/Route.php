@@ -19,8 +19,10 @@ use Nova\Routing\RouteDependencyResolverTrait;
 
 use Symfony\Component\Routing\Route as SymfonyRoute;
 
+use Closure;
 use BadMethodCallException;
 use LogicException;
+use ReflectionFunction;
 
 
 /**
