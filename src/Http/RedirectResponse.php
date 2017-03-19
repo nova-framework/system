@@ -10,7 +10,7 @@ use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 
 class RedirectResponse extends SymfonyRedirectResponse
@@ -103,7 +103,7 @@ class RedirectResponse extends SymfonyRedirectResponse
 
         $this->session->flashInput(array_filter($input, function ($value)
         {
-            return ! $value instanceof UploadedFile;
+            return ! $value instanceof SymfonyUploadedFile;
         }));
 
         return $this;

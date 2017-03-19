@@ -14,6 +14,7 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     protected $attributes;
 
+
     /**
      * Create a new generic User object.
      *
@@ -62,7 +63,9 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     public function getRememberToken()
     {
-        return $this->attributes[$this->getRememberTokenName()];
+        $key = $this->getRememberTokenName();
+
+        return $this->attributes[$key];
     }
 
     /**
@@ -73,7 +76,9 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     public function setRememberToken($value)
     {
-        $this->attributes[$this->getRememberTokenName()] = $value;
+        $key = $this->getRememberTokenName();
+
+        $this->attributes[$key] = $value;
     }
 
     /**

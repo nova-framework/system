@@ -60,10 +60,8 @@ class ExceptionServiceProvider extends ServiceProvider
             // out HTML. This debug handler always returns JSON from the console env.
             if ($app->runningInConsole()) {
                 return $app['exception.debug'];
-            }
-            else
-            {
-                return new PlainDisplayer;
+            } else {
+                return new PlainDisplayer();
             }
         });
     }

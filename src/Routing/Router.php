@@ -539,7 +539,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function newRoute($methods, $uri, $action)
     {
-        return new Route($methods, $uri, $action);
+        return (new Route($methods, $uri, $action))->setContainer($this->container);
     }
 
     /**
@@ -614,32 +614,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
         $action['controller'] = $action['uses'];
 
-        $closure = $this->getClassClosure($action['uses']);
-
-        return array_set($action, 'uses', $closure);
-    }
-
-    /**
-     * Get the Closure for a controller based action.
-     *
-     * @param  string  $controller
-     * @return \Closure
-     */
-    protected function getClassClosure($controller)
-    {
-        $dispatcher = $this->getControllerDispatcher();
-
-        return function() use ($dispatcher, $controller)
-        {
-            $route = $this->getCurrentRoute();
-
-            $request = $this->getCurrentRequest();
-
-            //
-            list($class, $method) = explode('@', $controller);
-
-            return $dispatcher->dispatch($route, $request, $class, $method);
-        };
+        return $action;
     }
 
     /**
@@ -698,6 +673,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // Execute the Routes matching.
         $route = $this->findRoute($request);
 
+        $request->setRouteResolver(function() use ($route)
+        {
+            return $route;
+        });
+
         $this->events->fire('router.matched', array($route, $request));
 
         // Once we have successfully matched the incoming request to a given route we
@@ -706,7 +686,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $response = $this->callRouteBefore($route, $request);
 
         if (is_null($response)) {
-            $response = $route->run();
+            $response = $route->run($request);
         }
 
         // Prepare the Reesponse.

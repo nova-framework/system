@@ -4,6 +4,8 @@ namespace Nova\Auth\Console;
 
 use Nova\Console\Command;
 
+use Symfony\Component\Console\Input\InputArgument;
+
 
 class ClearRemindersCommand extends Command
 {
@@ -28,9 +30,26 @@ class ClearRemindersCommand extends Command
      */
     public function fire()
     {
-        $this->nova['auth.reminder.repository']->deleteExpired();
+        $name = $this->argument('name');
+
+        $broker = $this->nova['auth.password']->broker($name);
+
+        // 
+        $broker->getRepository()->deleteExpired();
 
         $this->info('Expired reminders cleared!');
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('name', InputArgument::OPTIONAL, 'The name of the password broker.'),
+        );
     }
 
 }

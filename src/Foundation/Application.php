@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.77.15';
+    const VERSION = '3.77.16';
 
     /**
      * Indicates if the application has "booted".
@@ -1090,7 +1090,6 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'auth'           => 'Nova\Auth\AuthManager',
             'cache'          => 'Nova\Cache\CacheManager',
             'cache.store'    => 'Nova\Cache\Repository',
-            'auth.reminder.repository' => 'Nova\Auth\Reminders\ReminderRepositoryInterface',
             'config'         => 'Nova\Config\Repository',
             'cookie'         => 'Nova\Cookie\CookieJar',
             'encrypter'      => 'Nova\Encryption\Encrypter',

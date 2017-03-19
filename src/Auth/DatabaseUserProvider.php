@@ -54,8 +54,7 @@ class DatabaseUserProvider implements UserProviderInterface
     {
         $user = $this->conn->table($this->table)->find($identifier);
 
-        if (! is_null($user))
-        {
+        if (! is_null($user)) {
             return new GenericUser((array) $user);
         }
     }
@@ -70,12 +69,11 @@ class DatabaseUserProvider implements UserProviderInterface
     public function retrieveByToken($identifier, $token)
     {
         $user = $this->conn->table($this->table)
-                                ->where('id', $identifier)
-                                ->where('remember_token', $token)
-                                ->first();
+            ->where('id', $identifier)
+            ->where('remember_token', $token)
+            ->first();
 
-        if (! is_null($user))
-        {
+        if (! is_null($user)) {
             return new GenericUser((array) $user);
         }
     }
@@ -90,8 +88,8 @@ class DatabaseUserProvider implements UserProviderInterface
     public function updateRememberToken(UserInterface $user, $token)
     {
         $this->conn->table($this->table)
-                            ->where('id', $user->getAuthIdentifier())
-                            ->update(array('remember_token' => $token));
+            ->where('id', $user->getAuthIdentifier())
+            ->update(array('remember_token' => $token));
     }
 
     /**
@@ -107,10 +105,8 @@ class DatabaseUserProvider implements UserProviderInterface
         // generic "user" object that will be utilized by the Guard instances.
         $query = $this->conn->table($this->table);
 
-        foreach ($credentials as $key => $value)
-        {
-            if (! str_contains($key, 'password'))
-            {
+        foreach ($credentials as $key => $value) {
+            if (! str_contains($key, 'password')) {
                 $query->where($key, $value);
             }
         }
@@ -120,8 +116,7 @@ class DatabaseUserProvider implements UserProviderInterface
         // that there are no matching users for these given credential arrays.
         $user = $query->first();
 
-        if (! is_null($user))
-        {
+        if (! is_null($user)) {
             return new GenericUser((array) $user);
         }
     }

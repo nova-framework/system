@@ -97,7 +97,9 @@ class Handler
 
         $this->registerExceptionHandler();
 
-        if ($environment != 'testing') $this->registerShutdownHandler();
+        if ($environment != 'testing') {
+            $this->registerShutdownHandler();
+        }
     }
 
     /**
@@ -281,7 +283,7 @@ class Handler
     {
         $reflection = new ReflectionFunction($handler);
 
-        return $reflection->getNumberOfParameters() == 0 || $this->hints($reflection, $exception);
+        return ($reflection->getNumberOfParameters() == 0) || $this->hints($reflection, $exception);
     }
 
     /**
@@ -357,7 +359,7 @@ class Handler
      */
     public function runningInConsole()
     {
-        return php_sapi_name() == 'cli';
+        return (php_sapi_name() == 'cli');
     }
 
     /**

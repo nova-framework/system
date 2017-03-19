@@ -7,12 +7,6 @@ use Nova\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
 
     /**
      * Register the service provider.
@@ -20,6 +14,20 @@ class AuthServiceProvider extends ServiceProvider
      * @return void
      */
     public function register()
+    {
+        $this->registerAuthenticator();
+
+        $this->registerUserResolver();
+
+        $this->registerRequestRebindHandler();
+    }
+
+    /**
+     * Register the authenticator services.
+     *
+     * @return void
+     */
+    protected function registerAuthenticator()
     {
         $this->app->bindShared('auth', function($app)
         {
@@ -30,16 +38,44 @@ class AuthServiceProvider extends ServiceProvider
 
             return new AuthManager($app);
         });
+
+        $this->app->singleton('auth.driver', function ($app)
+        {
+            return $app['auth']->guard();
+        });
     }
 
     /**
-     * Get the services provided by the provider.
+     * Register a resolver for the authenticated user.
      *
-     * @return array
+     * @return void
      */
-    public function provides()
+    protected function registerUserResolver()
     {
-        return array('auth');
+        $this->app->bind('Nova\Auth\UserInterface', function ($app)
+        {
+            $resolver = $app['auth']->userResolver();
+
+            return call_user_func($resolver);
+        });
+    }
+
+    /**
+     * Register a resolver for the authenticated user.
+     *
+     * @return void
+     */
+    protected function registerRequestRebindHandler()
+    {
+        $this->app->rebinding('request', function ($app, $request)
+        {
+            $request->setUserResolver(function ($guard = null) use ($app)
+            {
+                $resolver = $app['auth']->userResolver();
+
+                return call_user_func($resolver, $guard);
+            });
+        });
     }
 
 }

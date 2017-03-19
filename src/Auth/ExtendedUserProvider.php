@@ -117,7 +117,7 @@ class ExtendedUserProvider implements UserProviderInterface
      */
     public function createModel()
     {
-        $className = '\\'.ltrim($this->model, '\\');
+        $className = '\\' .ltrim($this->model, '\\');
 
         return new $className;
     }

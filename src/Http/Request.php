@@ -2,13 +2,17 @@
 
 namespace Nova\Http;
 
+use Nova\Support\Str;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
+use ArrayAccess;
+use Closure;
 use SplFileInfo;
 
 
-class Request extends SymfonyRequest
+class Request extends SymfonyRequest implements ArrayAccess
 {
     /**
      * The decoded JSON content for the request.
@@ -18,11 +22,33 @@ class Request extends SymfonyRequest
     protected $json;
 
     /**
+     * All of the converted files for the request.
+     *
+     * @var array
+     */
+    protected $convertedFiles;
+
+    /**
+     * The user resolver callback.
+     *
+     * @var \Closure
+     */
+    protected $userResolver;
+
+    /**
+     * The route resolver callback.
+     *
+     * @var \Closure
+     */
+    protected $routeResolver;
+
+    /**
      * The Nova session store implementation.
      *
      * @var \Nova\Session\Store
      */
     protected $sessionStore;
+
 
     /**
      * Return the Request instance.
@@ -191,9 +217,10 @@ class Request extends SymfonyRequest
 
         $input = $this->all();
 
-        foreach ($keys as $value)
-        {
-            if (! array_key_exists($value, $input)) return false;
+        foreach ($keys as $value) {
+            if (! array_key_exists($value, $input)) {
+                return false;
+            }
         }
 
         return true;
@@ -209,9 +236,10 @@ class Request extends SymfonyRequest
     {
         $keys = is_array($key) ? $key : func_get_args();
 
-        foreach ($keys as $value)
-        {
-            if ($this->isEmptyString($value)) return false;
+        foreach ($keys as $value) {
+            if ($this->isEmptyString($value)) {
+                return false;
+            }
         }
 
         return true;
@@ -227,7 +255,7 @@ class Request extends SymfonyRequest
     {
         $boolOrArray = is_bool($this->input($key)) || is_array($this->input($key));
 
-        return ! $boolOrArray && trim((string) $this->input($key)) === '';
+        return ! $boolOrArray && (trim((string) $this->input($key)) === '');
     }
 
     /**
@@ -237,7 +265,7 @@ class Request extends SymfonyRequest
      */
     public function all()
     {
-        return array_replace_recursive($this->input(), $this->files->all());
+        return array_replace_recursive($this->input(), $this->allFiles());
     }
 
     /**
@@ -268,8 +296,7 @@ class Request extends SymfonyRequest
 
         $input = $this->all();
 
-        foreach ($keys as $key)
-        {
+        foreach ($keys as $key) {
             array_set($results, $key, array_get($input, $key));
         }
 
@@ -329,15 +356,54 @@ class Request extends SymfonyRequest
     }
 
     /**
+     * Get an array of all of the files on the request.
+     *
+     * @return array
+     */
+    public function allFiles()
+    {
+        $files = $this->files->all();
+
+        if (is_null($this->convertedFiles)) {
+            $this->convertedFiles = $this->convertUploadedFiles($files);
+        }
+
+        return $this->convertedFiles;
+    }
+
+    /**
+     * Convert the given array of Symfony UploadedFiles to custom Nova UploadedFiles.
+     *
+     * @param  array  $files
+     * @return array
+     */
+    protected function convertUploadedFiles(array $files)
+    {
+        return array_map(function ($file)
+        {
+            if (is_null($file) || (is_array($file) && empty(array_filter($file)))) {
+                return $file;
+            }
+
+            if (is_array($file)) {
+                return $this->convertUploadedFiles($file);
+            }
+
+            return UploadedFile::createFromBase($file);
+
+        }, $files);
+    }
+
+    /**
      * Retrieve a file from the request.
      *
      * @param  string  $key
      * @param  mixed   $default
-     * @return \Symfony\Component\HttpFoundation\File\UploadedFile|array
+     * @return \Nova\Http\UploadedFile|array
      */
     public function file($key = null, $default = null)
     {
-        return array_get($this->files->all(), $key, $default);
+        return array_get($this->allFiles(), $key, $default);
     }
 
     /**
@@ -348,7 +414,9 @@ class Request extends SymfonyRequest
      */
     public function hasFile($key)
     {
-        if (! is_array($files = $this->file($key))) $files = array($files);
+        if (! is_array($files = $this->file($key))) {
+            $files = array($files);
+        }
 
         foreach ($files as $file) {
             if ($this->isValidFile($file)) return true;
@@ -365,7 +433,7 @@ class Request extends SymfonyRequest
      */
     protected function isValidFile($file)
     {
-        return $file instanceof SplFileInfo && $file->getPath() != '';
+        return ($file instanceof SplFileInfo) && ($file->getPath() != '');
     }
 
     /**
@@ -521,7 +589,7 @@ class Request extends SymfonyRequest
     {
         if ($this->isJson()) return $this->json();
 
-        return $this->getMethod() == 'GET' ? $this->query : $this->request;
+        return ($this->getMethod() == 'GET') ? $this->query : $this->request;
     }
 
     /**
@@ -543,7 +611,7 @@ class Request extends SymfonyRequest
     {
         $acceptable = $this->getAcceptableContentTypes();
 
-        return isset($acceptable[0]) && $acceptable[0] == 'application/json';
+        return isset($acceptable[0]) && ($acceptable[0] == 'application/json');
     }
 
     /**
@@ -554,12 +622,25 @@ class Request extends SymfonyRequest
      */
     public function format($default = 'html')
     {
-        foreach ($this->getAcceptableContentTypes() as $type)
-        {
+        foreach ($this->getAcceptableContentTypes() as $type) {
             if ($format = $this->getFormat($type)) return $format;
         }
 
         return $default;
+    }
+
+    /**
+     * Get the bearer token from the request headers.
+     *
+     * @return string|null
+     */
+    public function bearerToken()
+    {
+        $header = $this->header('Authorization', '');
+
+        if (Str::startsWith($header, 'Bearer ')) {
+            return Str::substr($header, 7);
+        }
     }
 
     /**
@@ -606,4 +687,156 @@ class Request extends SymfonyRequest
         return $this->getSession();
     }
 
+    /**
+     * Get the user making the request.
+     *
+     * @return mixed
+     */
+    public function user()
+    {
+        return call_user_func($this->getUserResolver());
+    }
+
+    /**
+     * Get the route handling the request.
+     *
+     * @param string|null $param
+     *
+     * @return \Nova\Routing\Route|object|string
+     */
+    public function route($param = null)
+    {
+        $route = call_user_func($this->getRouteResolver());
+
+        if (is_null($route) || is_null($param)) {
+            return $route;
+        } else {
+            return $route->parameter($param);
+        }
+    }
+
+    /**
+     * Get the user resolver callback.
+     *
+     * @return \Closure
+     */
+    public function getUserResolver()
+    {
+        return $this->userResolver ?: function()
+        {
+            //
+        };
+    }
+
+    /**
+     * Set the user resolver callback.
+     *
+     * @param  \Closure  $callback
+     * @return $this
+     */
+    public function setUserResolver(Closure $callback)
+    {
+        $this->userResolver = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Get the route resolver callback.
+     *
+     * @return \Closure
+     */
+    public function getRouteResolver()
+    {
+        return $this->routeResolver ?: function()
+        {
+            //
+        };
+    }
+
+    /**
+     * Set the route resolver callback.
+     *
+     * @param  \Closure  $callback
+     * @return $this
+     */
+    public function setRouteResolver(Closure $callback)
+    {
+        $this->routeResolver = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the given offset exists.
+     *
+     * @param  string  $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return array_key_exists($offset, $this->all());
+    }
+
+    /**
+     * Get the value at the given offset.
+     *
+     * @param  string  $offset
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return Arr::get($this->all(), $offset);
+    }
+
+    /**
+     * Set the value at the given offset.
+     *
+     * @param  string  $offset
+     * @param  mixed  $value
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        return $this->getInputSource()->set($offset, $value);
+    }
+
+    /**
+     * Remove the value at the given offset.
+     *
+     * @param  string  $offset
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->getInputSource()->remove($offset);
+    }
+
+    /**
+     * Check if an input element is set on the request.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        return ! is_null($this->__get($key));
+    }
+
+    /**
+     * Get an input element from the request.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        $all = $this->all();
+
+        if (array_key_exists($key, $all)) {
+            return $all[$key];
+        } else {
+            return $this->route($key);
+        }
+    }
 }

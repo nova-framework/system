@@ -8,6 +8,7 @@
 
 namespace Nova\Routing;
 
+use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
@@ -34,6 +35,8 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->registerRouter();
 
+        $this->registerCustomDispatcher();
+        
         $this->registerUrlGenerator();
 
         $this->registerRedirector();
@@ -49,6 +52,19 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app['router'] = $this->app->share(function($app)
         {
             return new Router($app['events'], $app);
+        });
+    }
+
+    /**
+     * Register the URL generator service.
+     *
+     * @return void
+     */
+    protected function registerCustomDispatcher()
+    {
+        $this->app->singleton('framework.route.dispatcher', function ($app)
+        {
+            return new ControllerDispatcher($app['router'], $app);
         });
     }
 
