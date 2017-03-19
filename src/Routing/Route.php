@@ -93,7 +93,7 @@ class Route
      */
     protected static $validators;
 
-    
+
     /**
      * Create a new Route instance.
      *
@@ -559,50 +559,6 @@ class Route
             new HostValidator,
             new UriValidator,
         );
-    }
-
-    /**
-     * Add before filters to the route.
-     *
-     * @param  string  $filters
-     * @return $this
-     */
-    public function before($filters)
-    {
-        return $this->addFilters('before', $filters);
-    }
-
-    /**
-     * Add after filters to the route.
-     *
-     * @param  string  $filters
-     * @return $this
-     */
-    public function after($filters)
-    {
-        return $this->addFilters('after', $filters);
-    }
-
-    /**
-     * Add the given filters to the route by type.
-     *
-     * @param  string  $type
-     * @param  string  $filters
-     * @return $this
-     */
-    protected function addFilters($type, $filters)
-    {
-        $filters = static::explodeFilters($filters);
-
-        if (isset($this->action[$type])) {
-            $existing = static::explodeFilters($this->action[$type]);
-
-            $this->action[$type] = array_merge($existing, $filters);
-        } else {
-            $this->action[$type] = $filters;
-        }
-
-        return $this;
     }
 
     /**
