@@ -124,7 +124,9 @@ class ModuleSeedCommand extends Command
      */
     protected function getArguments()
     {
-        return [['slug', InputArgument::OPTIONAL, 'Module slug.']];
+        return array(
+            array('slug', InputArgument::OPTIONAL, 'Module slug.')
+        );
     }
 
     /**
