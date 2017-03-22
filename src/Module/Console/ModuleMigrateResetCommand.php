@@ -69,7 +69,9 @@ class ModuleMigrateResetCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $slug = $this->argument('slug');
 
@@ -81,14 +83,16 @@ class ModuleMigrateResetCommand extends Command
             if ($this->module->isEnabled($slug)) {
                 return $this->reset($slug);
             }
-        } else {
-            $modules = $this->module->enabled()->reverse();
 
-            foreach ($modules as $module) {
-                $this->comment('Resetting the migrations of Module: ' .$module['name']);
+            return;
+        }
 
-                $this->reset($module['slug']);
-            }
+        $modules = $this->module->enabled()->reverse();
+
+        foreach ($modules as $module) {
+            $this->comment('Resetting the migrations of Module: ' .$module['name']);
+
+            $this->reset($module['slug']);
         }
     }
 

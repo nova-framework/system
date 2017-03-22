@@ -52,18 +52,20 @@ class ModuleSeedCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $slug = $this->argument('slug');
 
-        if (isset($slug)) {
-            if (!$this->module->exists($slug)) {
+        if (! empty($slug)) {
+            if (! $this->module->exists($slug)) {
                 return $this->error('Module does not exist.');
             }
 
             if ($this->module->isEnabled($slug)) {
                 $this->seed($slug);
-            } elseif ($this->option('force')) {
+            } else if ($this->option('force')) {
                 $this->seed($slug);
             }
 
@@ -77,7 +79,9 @@ class ModuleSeedCommand extends Command
         }
 
         foreach ($modules as $module) {
-            $this->seed($module['slug']);
+            $slug = $module['slug'];
+
+            $this->seed($slug);
         }
     }
 
@@ -92,18 +96,19 @@ class ModuleSeedCommand extends Command
     {
         $module = $this->module->where('slug', $slug);
 
-        $params = array();
+        $className = $module['namespace'] .'\Database\Seeds\DatabaseSeeder';
 
-        $fullPath = $module['namespace'] .'\Database\Seeds\DatabaseSeeder';
-
-        if (! class_exists($fullPath)) {
+        if (! class_exists($className)) {
             return;
         }
+
+        // Prepare the call parameters.
+        $params = array();
 
         if ($this->option('class')) {
             $params['--class'] = $this->option('class');
         } else {
-            $params['--class'] = $fullPath;
+            $params['--class'] = $className;
         }
 
         if ($option = $this->option('database')) {

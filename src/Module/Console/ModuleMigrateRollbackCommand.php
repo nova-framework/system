@@ -54,11 +54,13 @@ class ModuleMigrateRollbackCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $slug = $this->argument('slug');
 
-        if ($slug) {
+        if (! empty($slug)) {
             if (! $this->module->exists($slug)) {
                 return $this->error('Module does not exist.');
             }

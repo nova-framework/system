@@ -52,7 +52,9 @@ class ModuleMigrateRefreshCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $slug = $this->argument('slug');
 
@@ -76,11 +78,7 @@ class ModuleMigrateRefreshCommand extends Command
             $this->runSeeder($slug, $this->option('database'));
         }
 
-        if (isset($slug)) {
-            $this->info('Module has been refreshed.');
-        } else {
-            $this->info('All modules have been refreshed.');
-        }
+        $this->info('Module has been refreshed.');
     }
 
     /**
@@ -114,7 +112,7 @@ class ModuleMigrateRefreshCommand extends Command
     protected function getArguments()
     {
         return array(
-            array('slug', InputArgument::OPTIONAL, 'Module slug.'),
+            array('slug', InputArgument::REQUIRED, 'Module slug.'),
         );
     }
 
@@ -125,11 +123,11 @@ class ModuleMigrateRefreshCommand extends Command
      */
     protected function getOptions()
     {
-        return [
+        return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
             array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
             array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
             array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
-        ];
+        );
     }
 }

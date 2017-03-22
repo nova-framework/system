@@ -61,7 +61,9 @@ class ModuleMigrateCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $this->prepareDatabase();
 
@@ -74,21 +76,21 @@ class ModuleMigrateCommand extends Command
 
             if ($this->module->isEnabled($slug)) {
                 return $this->migrate($slug);
-            } else {
-                return $this->error('Nothing to migrate.');
             }
+
+            return $this->error('Nothing to migrate.');
+        }
+
+        if ($this->option('force')) {
+            $modules = $this->module->all();
         } else {
-            if ($this->option('force')) {
-                $modules = $this->module->all();
-            } else {
-                $modules = $this->module->enabled();
-            }
+            $modules = $this->module->enabled();
+        }
 
-            foreach ($modules as $module) {
-                $this->comment('Migrating the Module: ' .$module['name']);
+        foreach ($modules as $module) {
+            $this->comment('Migrating the Module: ' .$module['name']);
 
-                $this->migrate($module['slug']);
-            }
+            $this->migrate($module['slug']);
         }
     }
 
