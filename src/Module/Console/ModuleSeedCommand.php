@@ -94,9 +94,7 @@ class ModuleSeedCommand extends Command
 
         $params = array();
 
-        $rootSeeder = $module['basename'] .'DatabaseSeeder';
-
-        $fullPath = $module['namespace'] .'\Database\Seeds\\' .$rootSeeder;
+        $fullPath = $module['namespace'] .'\Database\Seeds\DatabaseSeeder';
 
         if (! class_exists($fullPath)) {
             return;
