@@ -6,10 +6,11 @@ use Nova\Session\Store as SessionStore;
 use Nova\Support\MessageBag;
 use Nova\Support\ViewErrorBag;
 use Nova\Support\Contracts\MessageProviderInterface;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 
 class RedirectResponse extends SymfonyRedirectResponse
@@ -17,7 +18,7 @@ class RedirectResponse extends SymfonyRedirectResponse
     /**
      * The request instance.
      *
-     * @var \Nova\Http\Request
+     * @var \Http\Request
      */
     protected $request;
 
@@ -102,7 +103,7 @@ class RedirectResponse extends SymfonyRedirectResponse
 
         $this->session->flashInput(array_filter($input, function ($value)
         {
-            return ! $value instanceof UploadedFile;
+            return ! $value instanceof SymfonyUploadedFile;
         }));
 
         return $this;
@@ -204,7 +205,7 @@ class RedirectResponse extends SymfonyRedirectResponse
     /**
      * Get the session store implementation.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      */
     public function getSession()
     {
@@ -214,7 +215,7 @@ class RedirectResponse extends SymfonyRedirectResponse
     /**
      * Set the session store implementation.
      *
-     * @param  \Nova\Session\Store  $session
+     * @param  \Session\Store  $session
      * @return void
      */
     public function setSession(SessionStore $session)
@@ -234,7 +235,7 @@ class RedirectResponse extends SymfonyRedirectResponse
     public function __call($method, $parameters)
     {
         if (starts_with($method, 'with')) {
-            return $this->with(snake_case(substr($method, 4)), $parameters[0]);
+            return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
         }
 
         throw new \BadMethodCallException("Method [$method] does not exist on Redirect.");

@@ -2,6 +2,8 @@
 
 namespace Nova\Http;
 
+use Nova\Support\Str;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -18,6 +20,13 @@ class Request extends SymfonyRequest implements ArrayAccess
      * @var string
      */
     protected $json;
+
+    /**
+     * All of the converted files for the request.
+     *
+     * @var array
+     */
+    protected $convertedFiles;
 
     /**
      * The user resolver callback.
@@ -40,18 +49,6 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     protected $sessionStore;
 
-
-    /**
-     * Create a new Nova HTTP request from server variables.
-     *
-     * @return static
-     */
-    public static function capture()
-    {
-        static::enableHttpMethodParameterOverride();
-
-        return static::createFromBase(SymfonyRequest::createFromGlobals());
-    }
 
     /**
      * Return the Request instance.
@@ -102,7 +99,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $query = $this->getQueryString();
 
-        return $query ? $this->url() .'?' .$query : $this->url();
+        return $query ? $this->url().'?'.$query : $this->url();
     }
 
     /**
@@ -220,9 +217,10 @@ class Request extends SymfonyRequest implements ArrayAccess
 
         $input = $this->all();
 
-        foreach ($keys as $value)
-        {
-            if (! array_key_exists($value, $input)) return false;
+        foreach ($keys as $value) {
+            if (! array_key_exists($value, $input)) {
+                return false;
+            }
         }
 
         return true;
@@ -238,9 +236,10 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $keys = is_array($key) ? $key : func_get_args();
 
-        foreach ($keys as $value)
-        {
-            if ($this->isEmptyString($value)) return false;
+        foreach ($keys as $value) {
+            if ($this->isEmptyString($value)) {
+                return false;
+            }
         }
 
         return true;
@@ -256,7 +255,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $boolOrArray = is_bool($this->input($key)) || is_array($this->input($key));
 
-        return ! $boolOrArray && trim((string) $this->input($key)) === '';
+        return ! $boolOrArray && (trim((string) $this->input($key)) === '');
     }
 
     /**
@@ -266,7 +265,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function all()
     {
-        return array_replace_recursive($this->input(), $this->files->all());
+        return array_replace_recursive($this->input(), $this->allFiles());
     }
 
     /**
@@ -297,8 +296,7 @@ class Request extends SymfonyRequest implements ArrayAccess
 
         $input = $this->all();
 
-        foreach ($keys as $key)
-        {
+        foreach ($keys as $key) {
             array_set($results, $key, array_get($input, $key));
         }
 
@@ -358,15 +356,54 @@ class Request extends SymfonyRequest implements ArrayAccess
     }
 
     /**
+     * Get an array of all of the files on the request.
+     *
+     * @return array
+     */
+    public function allFiles()
+    {
+        $files = $this->files->all();
+
+        if (is_null($this->convertedFiles)) {
+            $this->convertedFiles = $this->convertUploadedFiles($files);
+        }
+
+        return $this->convertedFiles;
+    }
+
+    /**
+     * Convert the given array of Symfony UploadedFiles to custom Nova UploadedFiles.
+     *
+     * @param  array  $files
+     * @return array
+     */
+    protected function convertUploadedFiles(array $files)
+    {
+        return array_map(function ($file)
+        {
+            if (is_null($file) || (is_array($file) && empty(array_filter($file)))) {
+                return $file;
+            }
+
+            if (is_array($file)) {
+                return $this->convertUploadedFiles($file);
+            }
+
+            return UploadedFile::createFromBase($file);
+
+        }, $files);
+    }
+
+    /**
      * Retrieve a file from the request.
      *
      * @param  string  $key
      * @param  mixed   $default
-     * @return \Symfony\Component\HttpFoundation\File\UploadedFile|array
+     * @return \Nova\Http\UploadedFile|array
      */
     public function file($key = null, $default = null)
     {
-        return array_get($this->files->all(), $key, $default);
+        return array_get($this->allFiles(), $key, $default);
     }
 
     /**
@@ -377,7 +414,9 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function hasFile($key)
     {
-        if (! is_array($files = $this->file($key))) $files = array($files);
+        if (! is_array($files = $this->file($key))) {
+            $files = array($files);
+        }
 
         foreach ($files as $file) {
             if ($this->isValidFile($file)) return true;
@@ -394,7 +433,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     protected function isValidFile($file)
     {
-        return $file instanceof SplFileInfo && $file->getPath() != '';
+        return ($file instanceof SplFileInfo) && ($file->getPath() != '');
     }
 
     /**
@@ -550,7 +589,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         if ($this->isJson()) return $this->json();
 
-        return $this->getMethod() == 'GET' ? $this->query : $this->request;
+        return ($this->getMethod() == 'GET') ? $this->query : $this->request;
     }
 
     /**
@@ -572,7 +611,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $acceptable = $this->getAcceptableContentTypes();
 
-        return isset($acceptable[0]) && $acceptable[0] == 'application/json';
+        return isset($acceptable[0]) && ($acceptable[0] == 'application/json');
     }
 
     /**
@@ -588,6 +627,20 @@ class Request extends SymfonyRequest implements ArrayAccess
         }
 
         return $default;
+    }
+
+    /**
+     * Get the bearer token from the request headers.
+     *
+     * @return string|null
+     */
+    public function bearerToken()
+    {
+        $header = $this->header('Authorization', '');
+
+        if (Str::startsWith($header, 'Bearer ')) {
+            return Str::substr($header, 7);
+        }
     }
 
     /**
@@ -621,7 +674,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     /**
      * Get the session associated with the request.
      *
-     * @return \Nova\Session\Store
+     * @return \Session\Store
      *
      * @throws \RuntimeException
      */
@@ -669,7 +722,8 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function getUserResolver()
     {
-        return $this->userResolver ?: function() {
+        return $this->userResolver ?: function()
+        {
             //
         };
     }
@@ -694,7 +748,8 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function getRouteResolver()
     {
-        return $this->routeResolver ?: function() {
+        return $this->routeResolver ?: function()
+        {
             //
         };
     }
