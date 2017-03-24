@@ -80,7 +80,7 @@ class ModelMakeCommand extends Command
      */
     protected function formatStub($stub)
     {
-        $stub = str_replace('{{class}}', $this->input->getArgument('name'), $stub);
+        $stub = str_replace('{{className}}', $this->input->getArgument('name'), $stub);
 
         return $this->addNamespace($stub);
     }
