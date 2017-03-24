@@ -3,6 +3,7 @@
 namespace Nova\Module\Providers;
 
 use Nova\Module\Console\ModuleListCommand;
+use Nova\Module\Console\ModuleOptimizeCommand;
 
 use Nova\Support\ServiceProvider;
 
@@ -16,7 +17,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
-    
+
     /**
      * Bootstrap the application services.
      */
@@ -32,6 +33,7 @@ class ConsoleServiceProvider extends ServiceProvider
     {
         $commands = array(
             'List',
+            'Optimize'
         );
 
         foreach ($commands as $command) {
@@ -49,5 +51,17 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.module.list');
+    }
+
+    /**
+     * Register the module:list command.
+     */
+    protected function registerOptimizeCommand()
+    {
+        $this->app->singleton('command.module.optimize', function ($app) {
+            return new ModuleOptimizeCommand($app['modules']);
+        });
+
+        $this->commands('command.module.optimize');
     }
 }

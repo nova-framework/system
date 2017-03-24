@@ -228,6 +228,18 @@ class Repository
     */
 
     /**
+     * Update cached repository of module information.
+     *
+     * @return bool
+     */
+    public function optimize()
+    {
+        $modules = $this->getAllModules();
+
+        $this->writeCache($modules);
+    }
+
+    /**
      * Get the contents of the cache file.
      *
      * The cache file lists all module slugs and their
