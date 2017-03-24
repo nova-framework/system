@@ -2,12 +2,12 @@
 
 namespace {{path}}\{{namespace}};
 
-use Nova\Auth\Access\HandlesAuthorization;
+use Nova\Auth\Access\HandlesAuthorizationTrait;
 
 
 class {{classname}}
 {
-    use HandlesAuthorization;
+    use HandlesAuthorizationTrait;
 
     /**
      * Create a new policy instance.

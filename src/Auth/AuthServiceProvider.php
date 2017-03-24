@@ -57,7 +57,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->app->bind('Nova\Auth\UserInterface', function ($app)
         {
-            return $app['auth']->user();
+            $callback = $app['auth']->userResolver();
+
+            return call_user_func($callback);
         });
     }
 
@@ -72,7 +74,9 @@ class AuthServiceProvider extends ServiceProvider
         {
             return new Gate($app, function() use ($app)
             {
-                return $app['auth']->user();
+                $callback = $app['auth']->userResolver();
+
+                return call_user_func($callback);
             });
         });
     }
@@ -88,9 +92,9 @@ class AuthServiceProvider extends ServiceProvider
         {
             $request->setUserResolver(function ($guard = null) use ($app)
             {
-                $resolver = $app['auth']->userResolver();
+                $callback = $app['auth']->userResolver();
 
-                return call_user_func($resolver, $guard);
+                return call_user_func($callback, $guard);
             });
         });
     }

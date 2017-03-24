@@ -181,7 +181,7 @@ class Gate implements GateInterface
      * @param  array|mixed  $arguments
      * @return bool
      */
-    public function allows($ability, $arguments = [])
+    public function allows($ability, $arguments = array())
     {
         return $this->check($ability, $arguments);
     }
@@ -193,7 +193,7 @@ class Gate implements GateInterface
      * @param  array|mixed  $arguments
      * @return bool
      */
-    public function denies($ability, $arguments = [])
+    public function denies($ability, $arguments = array())
     {
         return ! $this->allows($ability, $arguments);
     }
@@ -205,7 +205,7 @@ class Gate implements GateInterface
      * @param  array|mixed  $arguments
      * @return bool
      */
-    public function check($ability, $arguments = [])
+    public function check($ability, $arguments = array())
     {
         try {
             $result = $this->raw($ability, $arguments);
@@ -244,7 +244,7 @@ class Gate implements GateInterface
      * @param  array|mixed  $arguments
      * @return mixed
      */
-    protected function raw($ability, $arguments = [])
+    protected function raw($ability, $arguments = array())
     {
         if (is_null($user = $this->resolveUser())) {
             return false;
@@ -392,12 +392,13 @@ class Gate implements GateInterface
                 $ability = Str::camel($ability);
             }
 
-            if (! is_callable([$instance, $ability])) {
+            $callable = array($instance, $ability);
+
+            if (! is_callable($callable)) {
                 return false;
             }
 
-            return call_user_func_array(array($instance, $ability), array_merge(array($user), $arguments)
-            );
+            return call_user_func_array($callable, array_merge(array($user), $arguments));
         };
     }
 
@@ -441,7 +442,8 @@ class Gate implements GateInterface
      */
     public function forUser($user)
     {
-        $callback = function() use ($user) {
+        $callback = function() use ($user)
+        {
             return $user;
         };
 

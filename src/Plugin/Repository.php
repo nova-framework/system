@@ -187,10 +187,11 @@ class Repository
         {
             $basename = $me->getPackageName($name);
 
+            $slug = (Str::length($basename) > 3) ? Str::snake($basename) : Str::lower($basename);
+
             //
             $properties['name'] = $name;
-
-            $properties['slug'] = Str::snake($basename);
+            $properties['slug'] = $slug;
 
             $properties['namespace'] = str_replace('/', '\\', $name);
 
@@ -229,7 +230,7 @@ class Repository
      */
     public function getPluginPath($slug)
     {
-        $plugin = Str::studly($slug);
+        $plugin = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
         return $this->getPath() .DS .$plugin .DS;
     }
@@ -263,7 +264,7 @@ class Repository
      */
     public function getThemePath($slug)
     {
-        $plugin = Str::studly($slug);
+        $plugin = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
         return $this->getThemesPath() .DS .$plugin .DS;
     }
