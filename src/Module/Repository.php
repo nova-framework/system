@@ -205,7 +205,7 @@ class Repository
      */
     public function getModulePath($slug)
     {
-        $module = Str::studly($slug);
+        $module = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
         return $this->getPath() .DS .$module .DS;
     }

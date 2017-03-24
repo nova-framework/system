@@ -151,8 +151,8 @@ class MakeModuleCommand extends Command
      */
     private function stepOne()
     {
-        $this->container['name']        = $this->ask('Please enter the name of the module:', $this->container['name']);
-        $this->container['slug']        = $this->ask('Please enter the slug for the module:', $this->container['slug']);
+        $this->container['name'] = $this->ask('Please enter the name of the module:', $this->container['name']);
+        $this->container['slug'] = $this->ask('Please enter the slug for the module:', $this->container['slug']);
 
         $this->comment('You have provided the following manifest information:');
 
@@ -174,9 +174,9 @@ class MakeModuleCommand extends Command
     protected function generate()
     {
         $steps = array(
-            'Generating folders...'      => 'generateFolders',
-            'Generating files...'        => 'generateFiles',
-            'Generating .gitkeep...'     => 'generateGitkeep',
+            'Generating folders...'  => 'generateFolders',
+            'Generating files...'    => 'generateFiles',
+            'Generating .gitkeep...' => 'generateGitkeep',
         );
 
         $progress = new ProgressBar($this->output, count($steps));
@@ -325,7 +325,7 @@ return array (
      */
     protected function getDestinationFile($file)
     {
-        return $this->getModulePath($this->container['slug']).$this->formatContent($file);
+        return $this->getModulePath($this->container['slug']) .$this->formatContent($file);
     }
 
     /**
