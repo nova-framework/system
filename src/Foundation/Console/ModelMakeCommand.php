@@ -93,10 +93,12 @@ class ModelMakeCommand extends Command
      */
     protected function addNamespace($stub)
     {
-        if (! is_null($namespace = $this->input->getOption('namespace'))) {
-            return str_replace('{{namespace}}', ' namespace App\Models\\'.$namespace.';', $stub);
+        $namespace = $this->input->getOption('namespace');
+
+        if (! is_null($namespace)) {
+            return str_replace('{{namespace}}', 'App\Models\\' .$namespace, $stub);
         } else {
-            return str_replace('{{namespace}}', ' namespace App\Models;', $stub);
+            return str_replace('{{namespace}}', 'App\Models', $stub);
         }
     }
 
