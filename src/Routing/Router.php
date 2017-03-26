@@ -1118,9 +1118,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function cleanFilterParameters(array $parameters)
     {
-        return array_filter($parameters, function($p)
+        return array_filter($parameters, function($parameter)
         {
-            return ! is_null($p) && ($p !== '');
+            return ! is_null($parameter) && ($parameter !== '');
         });
     }
 
