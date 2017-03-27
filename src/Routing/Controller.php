@@ -23,6 +23,13 @@ abstract class Controller
     private $method;
 
     /**
+     * The currently call parameters.
+     *
+     * @var array
+     */
+    protected $parameters = array();
+
+    /**
      * The middleware registered on the controller.
      *
      * @var array
@@ -70,6 +77,8 @@ abstract class Controller
     {
         $this->method = $method;
 
+        $this->parameters = $parameters;
+        
         // Execute the Before method.
         $response = $this->before();
 
@@ -121,6 +130,16 @@ abstract class Controller
     public function getMethod()
     {
         return $this->method;
+    }
+
+    /**
+     * Returns the currently call parameters.
+     *
+     * @return string|null
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     /**
