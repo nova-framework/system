@@ -20,7 +20,7 @@ abstract class Controller
      *
      * @var mixed
      */
-    private $method = null;
+    private $method;
 
     /**
      * The middleware registered on the controller.
