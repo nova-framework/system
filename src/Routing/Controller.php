@@ -22,6 +22,13 @@ abstract class Controller
     private $method;
 
     /**
+     * The currently call parameters.
+     *
+     * @var array
+     */
+    protected $parameters = array();
+
+    /**
      * The currently used Layout.
      *
      * @var mixed
@@ -243,6 +250,8 @@ abstract class Controller
     {
         $this->method = $method;
 
+        $this->parameters = $parameters;
+
         // Execute the Before method.
         $response = $this->before();
 
@@ -292,7 +301,7 @@ abstract class Controller
     {
         throw new NotFoundHttpException("Controller method not found.");
     }
-    
+
     /**
      * Returns the currently called Method.
      *
@@ -301,6 +310,16 @@ abstract class Controller
     public function getMethod()
     {
         return $this->method;
+    }
+
+    /**
+     * Returns the currently call parameters.
+     *
+     * @return string|null
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     /**
