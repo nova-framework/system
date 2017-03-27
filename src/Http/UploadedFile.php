@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 class UploadedFile extends SymfonyUploadedFile
 {
-    use Macroable;
+    use MacroableTrait;
 
     /**
      * Get the fully qualified path to the file.
