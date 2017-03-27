@@ -15,6 +15,13 @@ use Closure;
 abstract class Controller
 {
     /**
+     * The currently called Method.
+     *
+     * @var mixed
+     */
+    private $method;
+
+    /**
      * The currently used Layout.
      *
      * @var mixed
@@ -234,6 +241,8 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
+        $this->method = $method;
+
         // Execute the Before method.
         $response = $this->before();
 
@@ -282,6 +291,16 @@ abstract class Controller
     public function missingMethod($parameters = array())
     {
         throw new NotFoundHttpException("Controller method not found.");
+    }
+    
+    /**
+     * Returns the currently called Method.
+     *
+     * @return string|null
+     */
+    public function getMethod()
+    {
+        return $this->method;
     }
 
     /**
