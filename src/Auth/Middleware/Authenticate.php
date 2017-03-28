@@ -18,6 +18,13 @@ class Authenticate
      */
     protected $guestUri = 'auth/login';
 
+    /**
+     * The URI where are logged out the authenticated Users.
+     *
+     * @var string
+     */
+    protected $crazyUri = 'auth/logout';
+
 
     /**
      * Handle an incoming request.
@@ -32,6 +39,8 @@ class Authenticate
         if (Auth::guard($guard)->guest()) {
             if ($request->ajax() || $request->wantsJson()) {
                 return Response::make('Unauthorized.', 401);
+            } else if ($request->path() == $this->crazyUri) {
+                return Redirect::to($this->guestUri);
             } else {
                 return Redirect::guest($this->guestUri);
             }
