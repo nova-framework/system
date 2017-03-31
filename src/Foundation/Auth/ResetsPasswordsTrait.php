@@ -69,7 +69,7 @@ trait ResetsPasswords
      * @param  string  $token
      * @return \Nova\Http\Response
      */
-    abstract public function getReset($token = null)
+    public function getReset($token = null)
     {
         if (is_null($token)) {
             throw new NotFoundHttpException;
