@@ -36,7 +36,7 @@ class Authenticate
                 'nonintend' => array(
                     'auth/logout',
                 ),
-            );
+            ));
 
             if (in_array($request->path(), $paths['nonintend'])) {
                 return Redirect::to($paths['authorize']);
