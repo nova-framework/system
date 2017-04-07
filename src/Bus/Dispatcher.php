@@ -4,7 +4,7 @@ namespace Nova\Bus;
 
 use Nova\Bus\Contracts\SelfHandlingInterface;
 use Nova\Bus\Contracts\DispatcherInterface;
-use Nova\Bus\Contracts\HandlerResolverInterface
+use Nova\Bus\Contracts\HandlerResolverInterface;
 use Nova\Bus\Contracts\QueueingDispatcherInterface;
 
 use Nova\Container\Container;
@@ -266,8 +266,8 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
     /**
      * Push the command onto the given queue instance.
      *
-     * @param \Nova\Contracts\Queue\Queue $queue
-     * @param mixed                             $command
+     * @param \Nova\Queue\QueueInterface $queue
+     * @param mixed                      $command
      *
      * @return mixed
      */
@@ -280,7 +280,7 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
         if (isset($command->queue)) {
             return $queue->pushOn($command->queue, $command);
         }
-        
+
         if (isset($command->delay)) {
             return $queue->later($command->delay, $command);
         }
