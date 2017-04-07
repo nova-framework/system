@@ -2,7 +2,6 @@
 
 namespace Nova\Foundation\Auth\Access;
 
-use Nova\Auth\Access\GateInterface as Gate;
 use Nova\Support\Facades\App;
 
 
