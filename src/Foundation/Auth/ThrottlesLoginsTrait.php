@@ -127,4 +127,14 @@ trait ThrottlesLoginsTrait
     {
         return property_exists($this, 'lockoutTime') ? $this->lockoutTime : 60;
     }
+
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function loginUsername()
+    {
+        return property_exists($this, 'username') ? $this->username : 'email';
+    }
 }
