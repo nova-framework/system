@@ -6,6 +6,8 @@ use Nova\Helpers\Inflector;
 
 use Nova\Support\Traits\MacroableTrait;
 
+use Stringy\StaticStringy;
+
 use RuntimeException;
 
 
@@ -41,7 +43,7 @@ class Str
      */
     public static function ascii($value)
     {
-        return \Patchwork\Utf8::toAscii($value);
+        return StaticStringy::toAscii($value);
     }
 
     /**

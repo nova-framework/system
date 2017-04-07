@@ -753,7 +753,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function stripParentheses($expression)
     {
-        if (Str::startsWith($expression, '(')) {
+        if (Str::startsWith($expression, '(') && Str::endsWith($expression, ')')) {
             $expression = substr($expression, 1, -1);
         }
 
