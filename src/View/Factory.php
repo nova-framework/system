@@ -988,7 +988,7 @@ class Factory
             return $this->plugins[$name] = $plugins->resolveClassPath($plugin);
         }
 
-        throw new InvalidArgumentException("Module not found [$name]");
+        throw new InvalidArgumentException("Plugin not found [$name]");
     }
 
     /**

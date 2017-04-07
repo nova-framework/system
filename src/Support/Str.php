@@ -4,6 +4,8 @@ namespace Nova\Support;
 
 use Nova\Support\Pluralizer;
 
+use Stringy\StaticStringy;
+
 use RuntimeException;
 
 
@@ -24,7 +26,7 @@ class Str
      */
     public static function ascii($value)
     {
-        return \Patchwork\Utf8::toAscii($value);
+        return StaticStringy::toAscii($value);
     }
 
     /**
