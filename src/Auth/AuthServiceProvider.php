@@ -2,6 +2,7 @@
 
 namespace Nova\Auth;
 
+use Nova\Auth\Access\Gate;
 use Nova\Support\ServiceProvider;
 
 
@@ -19,6 +20,8 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->registerUserResolver();
 
+        $this->registerAccessGate();
+        
         $this->registerRequestRebindHandler();
     }
 
@@ -57,6 +60,24 @@ class AuthServiceProvider extends ServiceProvider
             $callback = $app['auth']->userResolver();
 
             return call_user_func($callback);
+        });
+    }
+
+    /**
+     * Register the access gate service.
+     *
+     * @return void
+     */
+    protected function registerAccessGate()
+    {
+        $this->app->singleton('Nova\Auth\Access\GateInterface', function ($app)
+        {
+            return new Gate($app, function() use ($app)
+            {
+                $callback = $app['auth']->userResolver();
+
+                return call_user_func($callback);
+            });
         });
     }
 
