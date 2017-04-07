@@ -54,6 +54,7 @@ class MakeModuleCommand extends Command
      */
     protected $moduleFiles = array(
         'Config/Config.php',
+        'Providers/AuthServiceProvider.php',
         'Providers/EventServiceProvider.php',
         'Providers/ModuleServiceProvider.php',
         'Providers/RouteServiceProvider.php',
@@ -70,6 +71,7 @@ class MakeModuleCommand extends Command
      */
     protected $moduleStubs = array(
         'config',
+        'auth-service-provider',
         'event-service-provider',
         'module-service-provider',
         'route-service-provider',
