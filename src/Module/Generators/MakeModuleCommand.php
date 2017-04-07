@@ -42,6 +42,7 @@ class MakeModuleCommand extends Command
         'Controllers/',
         'Language/',
         'Models/',
+        'Policies/',
         'Providers/',
         'Views/',
     );

@@ -1,0 +1,21 @@
+<?php
+
+namespace {{path}}\{{namespace}};
+
+use Nova\Auth\Access\HandlesAuthorizationTrait;
+
+
+class {{classname}}
+{
+    use HandlesAuthorizationTrait;
+
+    /**
+     * Create a new policy instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+}
