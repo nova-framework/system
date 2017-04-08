@@ -73,11 +73,11 @@ class MakeMigrationCommand extends BaseCommand
         if (! $table && is_string($create)) $table = $create;
 
         // Now we are ready to write the migration out to disk. Once we've written
-        // the migration out, we will dump-autoload for the entire framework to
-        // make sure that the migrations are registered by the class loaders.
+        // the migration out, we will optimize for the entire framework to make
+        // sure that the migrations are registered by the class loaders.
         $this->writeMigration($name, $table, $create);
 
-        $this->call('dump-autoload');
+        $this->call('optimize');
     }
 
     /**
