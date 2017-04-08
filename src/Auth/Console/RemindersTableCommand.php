@@ -91,7 +91,12 @@ class RemindersTableCommand extends Command
      */
     protected function getTable()
     {
-        return $this->nova['config']->get('auth.reminder.table');
+        $config = $this->nova['config'];
+
+        //
+        $reminder = $config->get('auth.defaults.reminder');
+
+        return $config->get("auth.reminders.{$reminder}.table");
     }
 
 }
