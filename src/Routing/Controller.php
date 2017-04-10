@@ -3,7 +3,8 @@
 namespace Nova\Routing;
 
 use Nova\Http\Response;
-use Nova\View\View;
+use Nova\Routing\Route;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -113,7 +114,9 @@ abstract class Controller
      */
     protected function registerClosureFilter(Closure $filter)
     {
-        $this->getFilterer()->filter($name = spl_object_hash($filter), $filter);
+        $name = spl_object_hash($filter);
+
+        $this->getFilterer()->filter($name, $filter);
 
         return $name;
     }
@@ -143,10 +146,12 @@ abstract class Controller
      */
     protected function isInstanceFilter($filter)
     {
-        if (is_string($filter) && starts_with($filter, '@')) {
+        if (is_string($filter) && Str::startsWith($filter, '@')) {
             $method = substr($filter, 1);
 
-            if (method_exists($this, $method)) return true;
+            if (method_exists($this, $method)) {
+                return true;
+            }
 
             throw new \InvalidArgumentException("Filter method [$filter] does not exist.");
         }
@@ -237,7 +242,26 @@ abstract class Controller
      *
      * @return void
      */
-    protected function before() {}
+    protected function before()
+    {
+        //
+    }
+
+    /**
+     * Method executed after any action.
+     *
+     * @param mixed $response
+     *
+     * @return \Nova\Http\Response
+     */
+    protected function after($response)
+    {
+        if (! $response instanceof SymfonyResponse) {
+            $response = new Response($response);
+        }
+
+        return $response;
+    }
 
     /**
      * Execute an action on the controller.
@@ -255,38 +279,13 @@ abstract class Controller
         // Execute the Before method.
         $response = $this->before();
 
-        if (! is_null($response)) {
-            return $this->processResponse($response);
-        }
-
-        // Execute the requested Method with the given arguments.
-        $response = call_user_func_array(array($this, $method), $parameters);
-
-        // If no response is returned from the controller action and a layout is being
-        // used we will assume we want to just return the Layout view as any nested
-        // Views were probably bound on this view during this Controller actions.
-        if (is_null($response) && ($this->layout instanceof View)) {
-            $response = $this->layout;
+        if (is_null($response)) {
+            // Execute the requested Method.
+            $response = call_user_func_array(array($this, $method), $parameters);
         }
 
         // Process the Response and return it.
-        return $this->processResponse($response);
-    }
-
-    /**
-     * Process the response given by the controller action.
-     *
-     * @param mixed $response
-     *
-     * @return mixed
-     */
-    protected function processResponse($response)
-    {
-        if (! $response instanceof SymfonyResponse) {
-            $response = new Response($response);
-        }
-
-        return $response;
+        return $this->after($response);
     }
 
     /**
