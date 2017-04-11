@@ -48,6 +48,7 @@ class MakeModuleCommand extends Command
         'Http/Requests/',
         'Language/',
         'Models/',
+        'Policies/',
         'Providers/',
         'Views/',
     );
