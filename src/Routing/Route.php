@@ -17,6 +17,7 @@ use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\RouteDependencyResolverTrait;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 
 use Closure;
