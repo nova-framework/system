@@ -438,7 +438,7 @@ class Router
      *
      * @return string
      */
-    protected function getLastGroupPrefix()
+    public function getLastGroupPrefix()
     {
         if (! empty($this->groupStack)) {
             $last = end($this->groupStack);
