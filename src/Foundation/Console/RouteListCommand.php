@@ -6,9 +6,12 @@ use Nova\Http\Request;
 use Nova\Routing\Route;
 use Nova\Routing\Router;
 use Nova\Console\Command;
+use Nova\Support\Arr;
 
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
+
+use Closure;
 
 
 class RouteListCommand extends Command
@@ -54,7 +57,7 @@ class RouteListCommand extends Command
     * @var array
     */
     protected $headers = array(
-        'Domain', 'URI', 'Name', 'Action', 'Before Filters', 'After Filters'
+        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware'
     );
 
     /**
@@ -113,15 +116,13 @@ class RouteListCommand extends Command
     */
     protected function getRouteInformation(Route $route)
     {
-        $uri = implode('|', $route->methods()).' '.$route->uri();
-
         return $this->filterRoute(array(
             'host'   => $route->domain(),
-            'uri'    => $uri,
+            'method' => implode('|', $route->methods()),
+            'uri'    => $route->uri(),
             'name'   => $route->getName(),
             'action' => $route->getActionName(),
-            'before' => $this->getBeforeFilters($route),
-            'after'  => $this->getAfterFilters($route)
+            'middleware' => $this->getMiddleware($route),
         ));
     }
 
@@ -139,63 +140,74 @@ class RouteListCommand extends Command
     }
 
     /**
-    * Get before filters
-    *
-    * @param  \Nova\Routing\Route  $route
-    * @return string
-    */
-    protected function getBeforeFilters($route)
+     * Get before filters.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @return string
+     */
+    protected function getMiddleware($route)
     {
-        $before = array_keys($route->beforeFilters());
+        $middlewares = array_values($route->middleware());
 
-        $before = array_unique(array_merge($before, $this->getPatternFilters($route)));
+        $actionName = $route->getActionName();
 
-        return implode(', ', $before);
-    }
-
-    /**
-    * Get all of the pattern filters matching the route.
-    *
-    * @param  \Nova\Routing\Route  $route
-    * @return array
-    */
-    protected function getPatternFilters($route)
-    {
-        $patterns = array();
-
-        foreach ($route->methods() as $method) {
-            // For each method supported by the route we will need to gather up the patterned
-            // filters for that method. We will then merge these in with the other filters
-            // we have already gathered up then return them back out to these consumers.
-            $inner = $this->getMethodPatterns($route->uri(), $method);
-
-            $patterns = array_merge($patterns, array_keys($inner));
+        if (! empty($actionName) && ($actionName !== 'Closure')) {
+            $middlewares = array_merge($middlewares, $this->getControllerMiddleware($actionName));
         }
 
-        return $patterns;
+        return implode(', ', $middlewares);
     }
 
     /**
-    * Get the pattern filters for a given URI and method.
-    *
-    * @param  string  $uri
-    * @param  string  $method
-    * @return array
-    */
-    protected function getMethodPatterns($uri, $method)
+     * Get the middleware for the given Controller@action name.
+     *
+     * @param  string  $actionName
+     * @return array
+     */
+    protected function getControllerMiddleware($actionName)
     {
-        return $this->router->findPatternFilters(Request::create($uri, $method));
+        list($controller, $method) = explode('@', $actionName);
+
+        return $this->getControllerMiddlewareFromInstance(
+            $this->nova->make($controller), $method
+        );
     }
 
     /**
-    * Get after filters
-    *
-    * @param  Route  $route
-    * @return string
-    */
-    protected function getAfterFilters($route)
+     * Get the middlewares for the given controller instance and method.
+     *
+     * @param  \Illuminate\Routing\Controller  $controller
+     * @param  string  $method
+     * @return array
+     */
+    protected function getControllerMiddlewareFromInstance($controller, $method)
     {
-        return implode(', ', array_keys($route->afterFilters()));
+        $middlewares = $this->router->getMiddleware();
+
+        $results = array();
+
+        foreach ($controller->getMiddleware() as $name => $options) {
+            if (! $this->methodExcludedByOptions($method, $options)) {
+                $middleware = Arr::get($middlewares, $name, $name);
+
+                $results[] = (! $middleware instanceof Closure) ? $middleware : $name;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $options
+     * @return bool
+     */
+    protected function methodExcludedByOptions($method, array $options)
+    {
+        return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except'])));
     }
 
     /**
@@ -207,12 +219,11 @@ class RouteListCommand extends Command
     protected function filterRoute(array $route)
     {
         if (($this->option('name') && ! str_contains($route['name'], $this->option('name'))) ||
-            $this->option('path') && ! str_contains($route['uri'], $this->option('path')))
-        {
+            $this->option('path') && ! str_contains($route['uri'], $this->option('path'))) {
             return null;
-        } else {
-            return $route;
         }
+
+        return $route;
     }
 
     /**

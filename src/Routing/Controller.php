@@ -3,7 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Http\Response;
-use Nova\Routing\Router;
 use Nova\View\View;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -78,7 +77,7 @@ abstract class Controller
         $this->method = $method;
 
         $this->parameters = $parameters;
-        
+
         // Execute the Before method.
         $response = $this->before();
 
