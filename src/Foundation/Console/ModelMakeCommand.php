@@ -2,13 +2,10 @@
 
 namespace Nova\Foundation\Console;
 
-use Nova\Console\Command;
-use Nova\Filesystem\Filesystem;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
+use Nova\Console\GeneratorCommand;
 
 
-class ModelMakeCommand extends Command
+class ModelMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
@@ -22,125 +19,33 @@ class ModelMakeCommand extends Command
      *
      * @var string
      */
-    protected $description = "Create a new ORM Model";
+    protected $description = 'Create a new ORM Model class';
 
     /**
-     * Create a new command creator command.
+     * The type of class being generated.
      *
-     * @param  \Nova\Filesystem\Filesystem  $files
-     * @return void
+     * @var string
      */
-    public function __construct(Filesystem $files)
-    {
-        parent::__construct();
-
-        $this->files = $files;
-    }
+    protected $type = 'Model';
 
     /**
-     * Execute the console command.
-     *
-     * @return void
-     */
-    public function fire()
-    {
-        $path = $this->getPath();
-
-        $stub = $this->files->get(__DIR__ .DS .'stubs' .DS .'model.stub');
-
-        //
-        $file = $path .DS .$this->input->getArgument('name').'.php';
-
-        $this->writeCommand($file, $stub);
-    }
-
-    /**
-     * Write the finished command file to disk.
-     *
-     * @param  string  $file
-     * @param  string  $stub
-     * @return void
-     */
-    protected function writeCommand($file, $stub)
-    {
-        if (! $this->files->exists($file)) {
-            $this->files->put($file, $this->formatStub($stub));
-
-            $this->info('Model created successfully.');
-        } else {
-            $this->error('Model already exists!');
-        }
-    }
-
-    /**
-     * Format the command class stub.
-     *
-     * @param  string  $stub
-     * @return string
-     */
-    protected function formatStub($stub)
-    {
-        $stub = str_replace('{{className}}', $this->input->getArgument('name'), $stub);
-
-        return $this->addNamespace($stub);
-    }
-
-    /**
-     * Add the proper namespace to the command.
-     *
-     * @param  string  $stub
-     * @return string
-     */
-    protected function addNamespace($stub)
-    {
-        $namespace = $this->input->getOption('namespace');
-
-        if (! is_null($namespace)) {
-            return str_replace('{{namespace}}', 'App\Models\\' .$namespace, $stub);
-        } else {
-            return str_replace('{{namespace}}', 'App\Models', $stub);
-        }
-    }
-
-    /**
-     * Get the path where the command should be stored.
+     * Get the stub file for the generator.
      *
      * @return string
      */
-    protected function getPath()
+    protected function getStub()
     {
-        $path = $this->input->getOption('path');
-
-        if (is_null($path)) {
-            return $this->nova['path'] .DS .'Models';
-        } else {
-            return $this->nova['path.base'] .DS .$path;
-        }
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/model.stub');
     }
 
     /**
-     * Get the console command arguments.
+     * Get the default namespace for the class.
      *
-     * @return array
+     * @param  string  $rootNamespace
+     * @return string
      */
-    protected function getArguments()
+    protected function getDefaultNamespace($rootNamespace)
     {
-        return array(
-            array('name', InputArgument::REQUIRED, 'The name of the Model.'),
-        );
+        return $rootNamespace .'\Models';
     }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path where the Model should be stored.', null),
-            array('namespace', null, InputOption::VALUE_OPTIONAL, 'The Model namespace.', null),
-        );
-    }
-
 }

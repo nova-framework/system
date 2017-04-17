@@ -15,7 +15,7 @@ class {{className}} extends Command
      *
      * @var string
      */
-    protected $name = 'command:name';
+    protected $name = '{{command}}';
 
     /**
      * The Console Command description.

@@ -2,7 +2,7 @@
 
 namespace Nova\Auth\Reminders;
 
-use Nova\Auth\PasswordBrokerManager;
+use Nova\Auth\Reminders\PasswordBrokerManager;
 use Nova\Support\ServiceProvider;
 
 
