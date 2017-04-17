@@ -50,7 +50,7 @@ class UploadedFile extends SymfonyUploadedFile
     public function hashName($path = null)
     {
         if (! is_null($path)) {
-            $path = rtrim($path, '/') .DS;
+            $path = rtrim($path, '/\\') .DS;
         }
 
         return $path .md5_file($this->path()) .'.' .$this->extension();
