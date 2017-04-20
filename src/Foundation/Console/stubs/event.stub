@@ -10,7 +10,7 @@ use {{rootNamespace}}Events\Event;
 
 class {{className}} extends Event
 {
-    use SerializesModels;
+    use SerializesModelsTrait;
 
     /**
      * Create a new Event instance.
