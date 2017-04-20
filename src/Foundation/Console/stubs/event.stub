@@ -1,6 +1,6 @@
 <?php
 
-namespace {namespace};
+namespace {{namespace}};
 
 use Nova\Queue\SerializesModelsTrait;
 use Nova\Broadcasting\Contracts\ShouldBroadcastInterface;
