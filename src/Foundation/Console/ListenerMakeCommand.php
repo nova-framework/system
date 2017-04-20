@@ -56,8 +56,8 @@ class ListenerMakeCommand extends GeneratorCommand
 
         $event = $this->option('event');
 
-        if (! Str::startsWith($event, $this->laravel->getNamespace())) {
-            $event = $this->laravel->getNamespace().'Events\\'.$event;
+        if (! Str::startsWith($event, $this->nova->getNamespace())) {
+            $event = $this->nova->getNamespace().'Events\\'.$event;
         }
 
         $stub = str_replace(
