@@ -261,13 +261,33 @@ class Factory
     /**
      * Check if the view file exists.
      *
-     * @param    string     $view
+     * @param    string      $view
+     * @param    string|null $module
+     * @param    string|null $theme
      * @return    bool
      */
-    public function exists($view, $module = null)
+    public function exists($view, $module = null, $theme = null)
     {
         try {
-            $this->find($view, $module);
+            $this->findViewFile($view, $module, $theme);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the view file exists.
+     *
+     * @param    string      $layout
+     * @param    string|null $theme
+     * @return    bool
+     */
+    public function layoutExists($layout, $theme = null)
+    {
+        try {
+            $this->findLayoutFile($layout, $theme);
         } catch (InvalidArgumentException $e) {
             return false;
         }

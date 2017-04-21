@@ -177,9 +177,10 @@ class MakeModuleCommand extends Command
     protected function generate()
     {
         $steps = array(
-            'Generating folders...'  => 'generateFolders',
-            'Generating files...'    => 'generateFiles',
-            'Generating .gitkeep...' => 'generateGitkeep',
+            'Generating folders...'      => 'generateFolders',
+            'Generating files...'        => 'generateFiles',
+            'Generating .gitkeep...'     => 'generateGitkeep',
+            'Optimizing module cache...' => 'optimizeModules',
         );
 
         $progress = new ProgressBar($this->output, count($steps));
@@ -288,6 +289,14 @@ return array (
 
             $this->files->put($gitkeep, '');
         }
+    }
+
+    /**
+     * Reset module cache of enabled and disabled modules.
+     */
+    protected function optimizeModules()
+    {
+        return $this->callSilent('module:optimize');
     }
 
     /**
