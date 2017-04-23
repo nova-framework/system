@@ -28,9 +28,9 @@ class DownCommand extends Command
      */
     public function fire()
     {
-        $config = $this->nova['config'];
+        $basePath = $this->nova['path.storage'];
 
-        touch($config['path.storage'] .DS .'down');
+        touch($basePath .DS .'down');
 
         $this->comment('Application is now in maintenance mode.');
     }

@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.77.30';
+    const VERSION = '3.77.31';
 
     /**
      * Indicates if the application has "booted".
@@ -865,7 +865,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      */
     public function isDownForMaintenance()
     {
-        return file_exists($this['config']['app.manifest'] .'/down');
+        return file_exists($this['path.storage'] .DS .'down');
     }
 
     /**
