@@ -1,6 +1,7 @@
 <?php
 
 return array (
+  '&laquo; Previous' => '',
   'Console' => 'Konsol',
   'Database' => '',
   'Details' => 'Detaljer',
@@ -21,6 +22,7 @@ return array (
   'Max Execution Time' => 'Maks Eksekverings tid',
   'Memory' => 'Hukommelse',
   'Memory Used' => 'Hukommelse brugt',
+  'Next &raquo;' => '',
   'No GET data exists' => 'Der findes ingen GET data ',
   'No POST data exists' => 'Der findes ingen POST data',
   'POST Variables' => 'POST Variabler',

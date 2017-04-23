@@ -1,6 +1,7 @@
 <?php
 
 return array (
+  '&laquo; Previous' => '',
   'Console' => 'Console',
   'Database' => 'Database',
   'Details' => 'Dettagli',
@@ -21,6 +22,7 @@ return array (
   'Max Execution Time' => 'Tempo massimo di esecuzione',
   'Memory' => 'Memoria',
   'Memory Used' => 'Memoria utilizzata',
+  'Next &raquo;' => '',
   'No GET data exists' => 'Non vi sono dati GET',
   'No POST data exists' => 'Non vi sono dati POST',
   'POST Variables' => 'Variabili POST',
