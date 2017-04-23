@@ -757,9 +757,7 @@ class Application extends Container implements ResponsePreparerInterface
      */
     public function isDownForMaintenance()
     {
-        $config = $this['config'];
-
-        return file_exists($config['path.storage'] .DS. 'framework' .DS .'down');
+        return file_exists($this['path.storage'] .DS. 'framework' .DS .'down');
     }
 
     /**
