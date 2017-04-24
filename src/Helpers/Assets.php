@@ -21,6 +21,40 @@ class Assets
         'css' => '<link href="%s" rel="stylesheet" type="text/css">'
     );
 
+
+    /**
+     * Load js scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $fetch Wheter or not will be returned the result.
+     */
+    public static function js($files, $fetch = false)
+    {
+        return static::resource($files, 'js', $fetch);
+    }
+
+    /**
+     * Load css scripts.
+     *
+     * @param string|array $files The paths to resource files.
+     * @param bool         $fetch Wheter or not will be returned the result.
+     */
+    public static function css($files, $fetch = false)
+    {
+        return static::resource($files, 'css', $fetch);
+    }
+
+    /**
+     * Fetch CSS or JS scripts.
+     *
+     * @param string       $type The resource's type.
+     * @param string|array $files The paths to resource files.
+     */
+    public static function fetch($type, $files)
+    {
+        return static::resource($files, $type, true);
+    }
+
     /**
      * Common templates for assets.
      *
@@ -52,27 +86,5 @@ class Assets
 
         // Output the resulted string (and return null).
         echo $result;
-    }
-
-    /**
-     * Load js scripts.
-     *
-     * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
-     */
-    public static function js($files, $fetch = false)
-    {
-        return static::resource($files, 'js', $fetch);
-    }
-
-    /**
-     * Load css scripts.
-     *
-     * @param string|array $files The paths to resource files.
-     * @param bool         $fetch Wheter or not will be returned the result.
-     */
-    public static function css($files, $fetch = false)
-    {
-        return static::resource($files, 'css', $fetch);
     }
 }

@@ -746,6 +746,19 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the assets statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileAssets($expression)
+    {
+        $expression = $this->stripParentheses($expression);
+
+        return "<?php echo Assets::fetch($expression); ?>";
+    }
+
+    /**
      * Strip the parentheses from the given expression.
      *
      * @param  string  $expression
