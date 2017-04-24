@@ -799,9 +799,9 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        return "<?php echo Assets::fetch($expression); ?>";
+        return "<?php echo \$app['assets']->fetch($expression); ?>";
     }
-    
+
     /**
      * Strip the parentheses from the given expression.
      *
