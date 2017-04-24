@@ -311,7 +311,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         {
             $whitespace = empty($matches[2]) ? '' : $matches[2] .$matches[2];
 
-            return '<?php echo e('.$this->compileEchoDefaults($matches[1]).'); ?>'.$whitespace;
+            return '<?php echo e(' .$this->compileEchoDefaults($matches[1]) .'); ?>' .$whitespace;
         };
 
         return preg_replace_callback($pattern, $callback, $value);
