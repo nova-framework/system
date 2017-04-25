@@ -2,9 +2,8 @@
 <html lang="<?= Config::get('app.locale'); ?>">
 <head>
     <meta charset="utf-8">
-    <title><?= $title .' - ' .Config::get('app.name'); ?></title>
+    <title><?= $title; ?> - <?= Config::get('app.name'); ?></title>
 <?php
-echo isset($meta) ? $meta : '';
 
 Assets::css([
     'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
@@ -12,12 +11,9 @@ Assets::css([
     theme_url('css/style.css', '{{namespace}}'),
 ]);
 
-echo isset($css) ? $css : '';
 ?>
 </head>
 <body>
-
-<?= isset($afterBody) ? $afterBody : ''; ?>
 
 <div class="container">
     <?= $content; ?>
@@ -36,14 +32,12 @@ echo isset($css) ? $css : '';
 </footer>
 
 <?php
+
 Assets::js(array(
     'https://code.jquery.com/jquery-1.12.4.min.js',
     'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'
 ));
 
-echo isset($js) ? $js : '';
-
-echo isset($footer) ? $footer : '';
 ?>
 
 <!-- DO NOT DELETE! - Profiler -->
