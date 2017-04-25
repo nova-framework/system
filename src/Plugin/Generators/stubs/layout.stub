@@ -2,7 +2,7 @@
 <html lang="<?= Config::get('app.locale'); ?>">
 <head>
     <meta charset="utf-8">
-    <title><?= $title; ?> - <?= Config::get('app.name'); ?></title>
+    <title><?= isset($title) ? $title : __d('{{slug}}', 'Page'); ?> - <?= Config::get('app.name'); ?></title>
 <?php
 
 Assets::css(array(
