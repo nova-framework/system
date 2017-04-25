@@ -71,7 +71,7 @@ class MakeThemeCommand extends Command
         'style',
         'config',
         'layout',
-        'rtl-layout',
+        'layout',
         'theme-service-provider',
         'readme',
     );
