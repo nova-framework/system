@@ -139,7 +139,7 @@ class Session extends Facade
         }
 
         // Fetch the associated View fragment and return the result.
-        return View::fetch('Message')->with(compact('type', 'message'));
+        return View::fetch('Message', compact('type', 'message'));
     }
 
     /**
