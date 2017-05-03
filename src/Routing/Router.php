@@ -659,14 +659,12 @@ class Router
         // Create a Pipeline instance.
         $pipeline = new Pipeline($this->container);
 
-        return $pipeline->send($request)
-            ->through($middleware)
-            ->then(function ($request) use ($route)
-            {
-                $response = $route->run($request);
+        return $pipeline->send($request)->through($middleware)->then(function ($request) use ($route)
+        {
+            $response = $route->run($request);
 
-                return $this->prepareResponse($request, $response);
-            });
+            return $this->prepareResponse($request, $response);
+        });
     }
 
     /**

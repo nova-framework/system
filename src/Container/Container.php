@@ -436,7 +436,7 @@ class Container implements ArrayAccess
             return false;
         }
 
-        return strpos($callback, '@') !== false;
+        return (strpos($callback, '@') !== false);
     }
 
     /**
