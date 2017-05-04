@@ -61,7 +61,7 @@ class ClearCommand extends Command
     {
         $this->cache->flush();
 
-        $this->files->delete($this->nova['config']['app.manifest'] .DS .'services.json');
+        $this->files->delete($this->nova['config']['app.manifest'] .DS .'services.php');
 
         $this->info('Application cache cleared!');
     }
