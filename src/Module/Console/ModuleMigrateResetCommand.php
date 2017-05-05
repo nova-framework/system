@@ -154,8 +154,8 @@ class ModuleMigrateResetCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('pretend', null, InputOption::VALUE_OPTIONAL, 'Dump the SQL queries that would be run.'),
             array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
+            array('pretend', null, InputOption::VALUE_OPTIONAL, 'Dump the SQL queries that would be run.'),
         );
     }
 }
