@@ -40,7 +40,7 @@ class ModuleMigrateCommand extends Command
      */
     protected $migrator;
 
-    
+
     /**
      * Create a new command instance.
      *
@@ -108,9 +108,10 @@ class ModuleMigrateCommand extends Command
             return $this->error('Module does not exist.');
         }
 
-        $pretend = Arr::get($this->option(), 'pretend', false);
-
         $path = $this->getMigrationPath($slug);
+
+        //
+        $pretend = $this->input->getOption('pretend');
 
         $this->migrator->run($path, $pretend, $slug);
 

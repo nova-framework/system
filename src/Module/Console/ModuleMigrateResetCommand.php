@@ -6,6 +6,7 @@ use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\Migrations\Migrator;
+use Nova\Module\Console\MigrationTrait;
 use Nova\Module\ModuleManager;
 use Nova\Support\Str;
 
@@ -16,6 +17,7 @@ use Symfony\Component\Console\Input\InputArgument;
 class ModuleMigrateResetCommand extends Command
 {
     use ConfirmableTrait;
+    use MigrationTrait;
 
     /**
      * The console command name.
@@ -49,9 +51,9 @@ class ModuleMigrateResetCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @param Modules    $module
-     * @param Filesystem $files
-     * @param Migrator   $migrator
+     * @param ModuleManager  $modules
+     * @param Filesystem     $files
+     * @param Migrator       $migrator
      */
     public function __construct(ModuleManager $modules, Filesystem $files, Migrator $migrator)
     {
@@ -109,92 +111,26 @@ class ModuleMigrateResetCommand extends Command
      */
     protected function reset($slug)
     {
+        if (! $this->modules->exists($slug)) {
+            return $this->error('Module does not exist.');
+        }
+
+        $this->requireMigrations($slug);
+
+        //
         $this->migrator->setconnection($this->input->getOption('database'));
 
         $pretend = $this->input->getOption('pretend');
 
-        $migrationPath = $this->getMigrationPath($slug);
+        while (true) {
+            $count = $this->migrator->rollback($pretend, $slug);
 
-        $migrations = array_reverse($this->migrator->getMigrationFiles($migrationPath));
+            foreach ($this->migrator->getNotes() as $note) {
+                $this->output->writeln($note);
+            }
 
-        if (empty($migrations)) {
-            return $this->error('Nothing to rollback.');
+            if ($count == 0) break;
         }
-
-        foreach ($migrations as $migration) {
-            $this->info('Migration: '.$migration);
-
-            $this->runDown($slug, $migration, $pretend);
-        }
-    }
-
-    /**
-     * Run "down" a migration instance.
-     *
-     * @param string $slug
-     * @param object $migration
-     * @param bool   $pretend
-     */
-    protected function runDown($slug, $migration, $pretend)
-    {
-        $migrationPath = $this->getMigrationPath($slug);
-
-        $file = (string) $migrationPath .DS .$migration .'.php';
-
-        $classFile = implode('_', array_slice(explode('_', basename($file, '.php')), 4));
-
-        $className = Str::studly($classFile);
-
-        $table = $this->nova['config']['database.migrations'];
-
-        //
-        include $file;
-
-        $instance = new $className();
-
-        $instance->down();
-
-        $this->nova['db']->table($table)
-            ->where('migration', $migration)
-            ->delete();
-    }
-
-    /**
-     * Get the console command parameters.
-     *
-     * @param string $slug
-     *
-     * @return array
-     */
-    protected function getParameters($slug)
-    {
-        $params = array();
-
-        $params['--path'] = $this->getMigrationPath($slug);
-
-        if ($option = $this->option('database')) {
-            $params['--database'] = $option;
-        }
-
-        if ($option = $this->option('pretend')) {
-            $params['--pretend'] = $option;
-        }
-
-        if ($option = $this->option('seed')) {
-            $params['--seed'] = $option;
-        }
-
-        return $params;
-    }
-
-    /**
-     * Get migrations path.
-     *
-     * @return string
-     */
-    protected function getMigrationPath($slug)
-    {
-        return $this->modules->getModulePath($slug) .'Database' .DS .'Migrations';
     }
 
     /**
@@ -219,7 +155,6 @@ class ModuleMigrateResetCommand extends Command
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
             array('pretend', null, InputOption::VALUE_OPTIONAL, 'Dump the SQL queries that would be run.'),
-            array('seed', null, InputOption::VALUE_OPTIONAL, 'Indicates if the seed task should be re-run.'),
             array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
         );
     }

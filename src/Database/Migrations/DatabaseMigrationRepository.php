@@ -101,7 +101,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
      *
      * @return int
      */
-    public function getNextBatchNumber($group = null)
+    public function getNextBatchNumber($group)
     {
         return $this->getLastBatchNumber($group) + 1;
     }

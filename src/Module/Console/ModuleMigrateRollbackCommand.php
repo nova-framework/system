@@ -100,9 +100,9 @@ class ModuleMigrateRollbackCommand extends Command
         $this->requireMigrations($slug);
 
         //
-        $pretend = Arr::get($this->option(), 'pretend', false);
+        $this->migrator->setConnection($this->input->getOption('database'));
 
-        $path = $this->getMigrationPath($slug);
+        $pretend = $this->input->getOption('pretend');
 
         $this->migrator->rollback($pretend, $slug);
 
