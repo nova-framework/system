@@ -59,10 +59,8 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
      *
      * @return array
      */
-    public function getLast($group = null)
+    public function getLast($group)
     {
-        $group = $group ?: 'app';
-
         $query = $this->table()
             ->where('batch', $this->getLastBatchNumber($group))
             ->where('group', $group);
@@ -80,8 +78,6 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
      */
     public function log($file, $batch, $group)
     {
-        $group = $group ?: 'app';
-
         $record = array('migration' => $file, 'batch' => $batch, 'group' => $group);
 
         $this->table()->insert($record);
@@ -101,7 +97,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Get the next migration batch number.
      *
-     * @param  string|null  $group
+     * @param  string  $group
      *
      * @return int
      */
@@ -113,14 +109,12 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Get the last migration batch number.
      *
-     * @param  string|null  $group
+     * @param  string  $group
      *
      * @return int
      */
-    public function getLastBatchNumber($group = null)
+    public function getLastBatchNumber($group)
     {
-        $group = $group ?: 'app';
-
         $query = $this->table()->where('group', $group);
 
         return $query->max('batch');

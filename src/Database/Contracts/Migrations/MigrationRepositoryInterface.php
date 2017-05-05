@@ -15,11 +15,11 @@ interface MigrationRepositoryInterface
     /**
      * Get the last migration batch.
      *
-     * @param  string|null  $group
+     * @param  string  $group
      *
      * @return array
      */
-    public function getLast($group = null);
+    public function getLast($group);
 
     /**
      * Log that a migration was run.
@@ -42,11 +42,11 @@ interface MigrationRepositoryInterface
     /**
      * Get the next migration batch number.
      *
-     * @param  string|null  $group
+     * @param  string  $group
      *
      * @return int
      */
-    public function getNextBatchNumber($group = null);
+    public function getNextBatchNumber($group);
 
     /**
      * Create the migration repository data store.

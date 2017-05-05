@@ -97,10 +97,12 @@ class Migrator
      */
     public function runMigrationList($migrations, $pretend = false, $group = null)
     {
+        $group = $group ?: 'app';
+
         // First we will just make sure that there are any migrations to run. If there
         // aren't, we will just make a note of it to the developer so they're aware
         // that all of the migrations have been run against this database system.
-        if (count($migrations) == 0) {
+        if (count($migrations) === 0) {
             $this->note('<info>Nothing to migrate.</info>');
 
             return;
@@ -155,6 +157,9 @@ class Migrator
      */
     public function rollback($pretend = false, $group = null)
     {
+        $group = $group ?: 'app';
+
+        //
         $this->notes = array();
 
         // We want to pull in the last batch of migrations that ran on the previous
@@ -162,7 +167,7 @@ class Migrator
         // of them "down" to reverse the last migration "operation" which ran.
         $migrations = $this->repository->getLast($group);
 
-        if (count($migrations) == 0) {
+        if (count($migrations) === 0) {
             $this->note('<info>Nothing to rollback.</info>');
 
             return count($migrations);
