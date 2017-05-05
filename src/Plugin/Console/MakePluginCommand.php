@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Plugin\Generators;
+namespace Nova\Plugin\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
@@ -12,39 +12,30 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 
-class MakeThemeCommand extends Command
+class MakePluginCommand extends Command
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:theme';
+    protected $name = 'make:plugin';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Theme';
+    protected $description = 'Create a new Plugin';
 
     /**
      * Plugin folders to be created.
      *
      * @var array
      */
-    protected $themeFolders = array(
-        'Assets/',
-        'Assets/css/',
-        'Assets/images/',
-        'Assets/js/',
+    protected $pluginFolders = array(
         'Config/',
         'Language/',
-        'Layouts/',
-        'Layouts/RTL',
-        'Overrides/',
-        'Overrides/Modules/',
-        'Overrides/Views/',
         'Providers/',
     );
 
@@ -53,12 +44,9 @@ class MakeThemeCommand extends Command
      *
      * @var array
      */
-    protected $themeFiles = array(
-        'Assets/css/style.css',
+    protected $pluginFiles = array(
         'Config/Config.php',
-        'Layouts/Default.php',
-        'Layouts/RTL/Default.php',
-        'Providers/ThemeServiceProvider.php',
+        'Providers/PluginServiceProvider.php',
         'README.md',
     );
 
@@ -67,21 +55,18 @@ class MakeThemeCommand extends Command
      *
      * @var array
      */
-    protected $themeStubs = array(
-        'style',
+    protected $pluginStubs = array(
         'config',
-        'layout',
-        'layout',
-        'theme-service-provider',
+        'plugin-service-provider',
         'readme',
     );
 
     /**
-     * The Plugins Manager instance.
+     * The plugins instance.
      *
      * @var \Nova\Plugin\PluginManager
      */
-    protected $plugins;
+    protected $plugin;
 
     /**
      * The filesystem instance.
@@ -101,15 +86,15 @@ class MakeThemeCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \>Nova\Plugin\PluginManager    $theme
+     * @param \>Nova\Plugin\PluginManager    $plugin
      */
-    public function __construct(Filesystem $files, PluginManager $plugins)
+    public function __construct(Filesystem $files, PluginManager $plugin)
     {
         parent::__construct();
 
         $this->files  = $files;
 
-        $this->plugins = $plugins;
+        $this->plugin = $plugin;
     }
 
     /**
@@ -144,13 +129,13 @@ class MakeThemeCommand extends Command
 
 
     /**
-     * Step 1: Configure theme.
+     * Step 1: Configure plugin.
      *
      * @return mixed
      */
     private function stepOne()
     {
-        $this->container['name'] = $this->ask('Please enter the name of the theme:', $this->container['name']);
+        $this->container['name'] = $this->ask('Please enter the name of the plugin:', $this->container['name']);
 
         $this->comment('You have provided the following information:');
 
@@ -166,7 +151,7 @@ class MakeThemeCommand extends Command
     }
 
     /**
-     * Generate the theme.
+     * Generate the plugin.
      */
     protected function generate()
     {
@@ -190,33 +175,33 @@ class MakeThemeCommand extends Command
 
         $progress->finish();
 
-        $this->info("\nTheme generated successfully.");
+        $this->info("\nPlugin generated successfully.");
     }
 
     /**
-     * Generate defined theme folders.
+     * Generate defined plugin folders.
      */
     protected function generateFolders()
     {
         $slug = $this->container['slug'];
 
         //
-        $path = $this->plugins->getThemesPath();
+        $path = $this->plugin->getPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
         }
 
-        $path = $this->getThemePath($slug, true);
+        $path = $this->getPluginPath($slug, true);
 
         $this->files->makeDirectory($path);
 
         //
-        $themePath = $this->getThemePath($slug);
+        $pluginPath = $this->getPluginPath($slug);
 
         // Generate the Plugin directories.
-        foreach ($this->themeFolders as $folder) {
-            $path = $themePath .$folder;
+        foreach ($this->pluginFolders as $folder) {
+            $path = $pluginPath .$folder;
 
             $this->files->makeDirectory($path);
         }
@@ -225,18 +210,18 @@ class MakeThemeCommand extends Command
         $languageFolders = $this->getLanguagePaths($slug);
 
         foreach ($languageFolders as $folder) {
-            $path = $themePath .$folder;
+            $path = $pluginPath .$folder;
 
             $this->files->makeDirectory($path);
         }
     }
 
     /**
-     * Generate defined theme files.
+     * Generate defined plugin files.
      */
     protected function generateFiles()
     {
-        foreach ($this->themeFiles as $key => $file) {
+        foreach ($this->pluginFiles as $key => $file) {
             $file = $this->formatContent($file);
 
             $this->files->put($this->getDestinationFile($file), $this->getStubContent($key));
@@ -245,7 +230,7 @@ class MakeThemeCommand extends Command
         // Generate the Language files
         $slug = $this->container['slug'];
 
-        $themePath = $this->getThemePath($slug);
+        $pluginPath = $this->getPluginPath($slug);
 
         $content ='<?php
 
@@ -255,7 +240,7 @@ return array (
         $languageFolders = $this->getLanguagePaths($slug);
 
         foreach ($languageFolders as $folder) {
-            $path = $themePath .$folder .DS .'messages.php';
+            $path = $pluginPath .$folder .DS .'messages.php';
 
             $this->files->put($path, $content);
         }
@@ -268,10 +253,10 @@ return array (
     {
         $slug = $this->container['slug'];
 
-        $themePath = $this->getThemePath($slug);
+        $pluginPath = $this->getPluginPath($slug);
 
-        foreach ($this->themeFolders as $folder) {
-            $path = $themePath .$folder;
+        foreach ($this->pluginFolders as $folder) {
+            $path = $pluginPath .$folder;
 
             //
             $files = $this->files->glob($path .'/*');
@@ -285,19 +270,19 @@ return array (
     }
 
     /**
-     * Get the path to the theme.
+     * Get the path to the plugin.
      *
      * @param string $slug
      *
      * @return string
      */
-    protected function getThemePath($slug = null)
+    protected function getPluginPath($slug = null)
     {
         if (! is_null($slug)) {
-            return $this->plugins->getThemePath($slug);
+            return $this->plugin->getPluginPath($slug);
         }
 
-        return $this->plugins->getThemesPath();
+        return $this->plugin->getPath();
     }
 
     protected function getLanguagePaths($slug)
@@ -322,7 +307,7 @@ return array (
      */
     protected function getDestinationFile($file)
     {
-        return $this->getThemePath($this->container['slug']) .$this->formatContent($file);
+        return $this->getPluginPath($this->container['slug']) .$this->formatContent($file);
     }
 
     /**
@@ -334,7 +319,7 @@ return array (
      */
     protected function getStubContent($key)
     {
-        $stub = $this->themeStubs[$key];
+        $stub = $this->pluginStubs[$key];
 
         $path = __DIR__ .DS .'stubs' .DS .$stub .'.stub';
 
@@ -361,7 +346,7 @@ return array (
             $this->container['slug'],
             $this->container['name'],
             $this->container['namespace'],
-            'Themes',
+            $this->plugin->getNamespace(),
         );
 
         return str_replace($searches, $replaces, $content);
@@ -387,7 +372,7 @@ return array (
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:theme Wizard and use default values'),
+            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:plugin Wizard and use default values'),
         );
     }
 }

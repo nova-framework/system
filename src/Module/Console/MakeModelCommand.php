@@ -1,34 +1,34 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeMiddlewareCommand extends MakeCommand
+class MakeModelCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:middleware';
+    protected $name = 'make:module:model';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Middleware class';
+    protected $description = 'Create a new Module Model class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Middleware';
+    protected $type = 'Model';
 
     /**
      * Module folders to be created.
@@ -36,7 +36,7 @@ class MakeMiddlewareCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = [
-        'Http/Middleware/',
+        'Models/',
     ];
 
     /**
@@ -55,7 +55,7 @@ class MakeMiddlewareCommand extends MakeCommand
      */
     protected $listStubs = [
         'default' => [
-            'middleware.stub',
+            'model.stub',
         ],
     ];
 
@@ -108,7 +108,7 @@ class MakeMiddlewareCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Middleware class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
         );
     }
 }

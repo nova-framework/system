@@ -2,8 +2,8 @@
 
 namespace Nova\Plugin\Providers;
 
-use Nova\Plugin\Generators\MakePluginCommand;
-use Nova\Plugin\Generators\MakeThemeCommand;
+use Nova\Plugin\Console\MakePluginCommand;
+use Nova\Plugin\Console\MakeThemeCommand;
 use Nova\Support\ServiceProvider;
 
 

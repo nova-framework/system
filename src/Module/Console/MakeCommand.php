@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
 use Nova\Console\Command as CommandGenerator;
 use Nova\Filesystem\Filesystem;

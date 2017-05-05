@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;

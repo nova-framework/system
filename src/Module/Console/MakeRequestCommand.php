@@ -1,64 +1,63 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeConsoleCommand extends MakeCommand
+class MakeRequestCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:console';
+    protected $name = 'make:module:request';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Forge command';
+    protected $description = 'Create a new Module Request class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Command';
+    protected $type = 'Request';
 
     /**
      * Module folders to be created.
      *
      * @var array
      */
-    protected $listFolders = array(
-        'Console/Commands/',
-    );
+    protected $listFolders = [
+        'Requests/',
+    ];
 
     /**
      * Module files to be created.
      *
      * @var array
      */
-    protected $listFiles = array(
+    protected $listFiles = [
         '{{filename}}.php',
-    );
+    ];
 
     /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = array(
-        'default' => array(
-            'console.stub',
-        ),
-    );
+    protected $listStubs = [
+        'default' => [
+            'request.stub',
+        ],
+    ];
 
     /**
      * Resolve Container after getting file path.
@@ -73,9 +72,6 @@ class MakeConsoleCommand extends MakeCommand
         $this->container['namespace'] = $this->getNamespace($filePath);
         $this->container['path']      = $this->getBaseNamespace();
         $this->container['classname'] = basename($filePath);
-
-        //
-        $this->container['command'] = $this->option('command');
     }
 
     /**
@@ -90,7 +86,6 @@ class MakeConsoleCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{classname}}',
-            '{{command}}',
         );
 
         $replaces = array(
@@ -98,11 +93,11 @@ class MakeConsoleCommand extends MakeCommand
             $this->container['path'],
             $this->container['namespace'],
             $this->container['classname'],
-            $this->container['command'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
+
 
     /**
      * Get the console command arguments.
@@ -113,19 +108,7 @@ class MakeConsoleCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
-        );
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', 'command:name'),
+            array('name', InputArgument::REQUIRED, 'The name of the Request class.'),
         );
     }
 }

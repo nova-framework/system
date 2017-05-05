@@ -2,16 +2,16 @@
 
 namespace Nova\Module\Providers;
 
-use Nova\Module\Generators\MakeModuleCommand;
-use Nova\Module\Generators\MakeConsoleCommand;
-use Nova\Module\Generators\MakeControllerCommand;
-use Nova\Module\Generators\MakeMiddlewareCommand;
-use Nova\Module\Generators\MakeModelCommand;
-use Nova\Module\Generators\MakePolicyCommand;
-use Nova\Module\Generators\MakeRequestCommand;
-use Nova\Module\Generators\MakeMigrationCommand;
-use Nova\Module\Generators\MakeProviderCommand;
-use Nova\Module\Generators\MakeSeederCommand;
+use Nova\Module\Console\MakeModuleCommand;
+use Nova\Module\Console\MakeConsoleCommand;
+use Nova\Module\Console\MakeControllerCommand;
+use Nova\Module\Console\MakeMiddlewareCommand;
+use Nova\Module\Console\MakeModelCommand;
+use Nova\Module\Console\MakePolicyCommand;
+use Nova\Module\Console\MakeRequestCommand;
+use Nova\Module\Console\MakeMigrationCommand;
+use Nova\Module\Console\MakeProviderCommand;
+use Nova\Module\Console\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 

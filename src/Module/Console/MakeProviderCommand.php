@@ -1,63 +1,63 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeModelCommand extends MakeCommand
+class MakeProviderCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:model';
+    protected $name = 'make:module:provider';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Model class';
+    protected $description = 'Create a new Module Service Provider class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Model';
+    protected $type = 'Provider';
 
     /**
      * Module folders to be created.
      *
      * @var array
      */
-    protected $listFolders = [
-        'Models/',
-    ];
+    protected $listFolders = array(
+        'Providers/',
+    );
 
     /**
      * Module files to be created.
      *
      * @var array
      */
-    protected $listFiles = [
+    protected $listFiles = array(
         '{{filename}}.php',
-    ];
+    );
 
     /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = [
-        'default' => [
-            'model.stub',
-        ],
-    ];
+    protected $listStubs = array(
+        'default' => array(
+            'provider.stub',
+        ),
+    );
 
     /**
      * Resolve Container after getting file path.
@@ -98,7 +98,6 @@ class MakeModelCommand extends MakeCommand
         return str_replace($searches, $replaces, $content);
     }
 
-
     /**
      * Get the console command arguments.
      *
@@ -111,4 +110,5 @@ class MakeModelCommand extends MakeCommand
             array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
         );
     }
+
 }
