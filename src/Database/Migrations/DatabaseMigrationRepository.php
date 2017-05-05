@@ -136,8 +136,8 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
             // table to hold the migration file's path as well as the batch ID.
             $table->increments('id');
             $table->string('migration');
-            $table->string('group')->nullable();
             $table->integer('batch');
+            $table->string('group')->nullable();
         });
     }
 
