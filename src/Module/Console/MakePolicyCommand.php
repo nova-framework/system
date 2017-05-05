@@ -1,34 +1,34 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeProviderCommand extends MakeCommand
+class MakePolicyCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:provider';
+    protected $name = 'make:module:policy';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Service Provider class';
+    protected $description = 'Create a new Module Policy class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Provider';
+    protected $type = 'Policy';
 
     /**
      * Module folders to be created.
@@ -36,7 +36,7 @@ class MakeProviderCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Providers/',
+        'Policies/',
     );
 
     /**
@@ -55,7 +55,7 @@ class MakeProviderCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'provider.stub',
+            'policy.stub',
         ),
     );
 
@@ -98,6 +98,7 @@ class MakeProviderCommand extends MakeCommand
         return str_replace($searches, $replaces, $content);
     }
 
+
     /**
      * Get the console command arguments.
      *
@@ -107,8 +108,7 @@ class MakeProviderCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Policy class.'),
         );
     }
-
 }

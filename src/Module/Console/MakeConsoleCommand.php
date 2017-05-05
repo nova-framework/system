@@ -1,34 +1,35 @@
 <?php
 
-namespace Nova\Module\Generators;
+namespace Nova\Module\Console;
 
-use Nova\Module\Generators\MakeCommand;
+use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class MakePolicyCommand extends MakeCommand
+class MakeConsoleCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:policy';
+    protected $name = 'make:module:console';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Policy class';
+    protected $description = 'Create a new Module Forge command';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Policy';
+    protected $type = 'Command';
 
     /**
      * Module folders to be created.
@@ -36,7 +37,7 @@ class MakePolicyCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Policies/',
+        'Console/Commands/',
     );
 
     /**
@@ -55,7 +56,7 @@ class MakePolicyCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'policy.stub',
+            'console.stub',
         ),
     );
 
@@ -72,6 +73,9 @@ class MakePolicyCommand extends MakeCommand
         $this->container['namespace'] = $this->getNamespace($filePath);
         $this->container['path']      = $this->getBaseNamespace();
         $this->container['classname'] = basename($filePath);
+
+        //
+        $this->container['command'] = $this->option('command');
     }
 
     /**
@@ -86,6 +90,7 @@ class MakePolicyCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{classname}}',
+            '{{command}}',
         );
 
         $replaces = array(
@@ -93,11 +98,11 @@ class MakePolicyCommand extends MakeCommand
             $this->container['path'],
             $this->container['namespace'],
             $this->container['classname'],
+            $this->container['command'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
-
 
     /**
      * Get the console command arguments.
@@ -108,7 +113,19 @@ class MakePolicyCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Policy class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', 'command:name'),
         );
     }
 }
