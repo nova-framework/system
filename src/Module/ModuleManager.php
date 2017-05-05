@@ -144,6 +144,16 @@ class ModuleManager
     }
 
     /**
+     * Get the Nova application instance.
+     *
+     * @return \Nova\Foundation\Application
+     */
+    public function getApplication()
+    {
+        return $this->app;
+    }
+
+    /**
      * Dynamically pass methods to the repository.
      *
      * @param string $method

@@ -25,7 +25,7 @@ class ModuleListCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * The table headers for the command.
@@ -39,11 +39,11 @@ class ModuleListCommand extends Command
      *
      * @param \Nova\Module\ModuleManager $module
      */
-    public function __construct(ModuleManager $module)
+    public function __construct(ModuleManager $modules)
     {
         parent::__construct();
 
-        $this->module = $module;
+        $this->modules = $modules;
     }
 
     /**
@@ -53,7 +53,7 @@ class ModuleListCommand extends Command
      */
     public function fire()
     {
-        $modules = $this->module->all();
+        $modules = $this->modules->all();
 
         if (count($modules) == 0) {
             return $this->error("Your application doesn't have any modules.");
@@ -69,7 +69,7 @@ class ModuleListCommand extends Command
      */
     protected function getModules()
     {
-        $modules = $this->module->all();
+        $modules = $this->modules->all();
 
         $results = array();
 
@@ -89,7 +89,7 @@ class ModuleListCommand extends Command
      */
     protected function getModuleInformation($module)
     {
-        $enabled = $this->module->isEnabled($module['slug']);
+        $enabled = $this->modules->isEnabled($module['slug']);
 
         $location = ($module['location'] === 'local') ? 'Local' : 'Vendor';
 

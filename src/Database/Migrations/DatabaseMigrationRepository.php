@@ -55,11 +55,15 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Get the last migration batch.
      *
+     * @param  string|null  $group
+     *
      * @return array
      */
-    public function getLast()
+    public function getLast($group = null)
     {
-        $query = $this->table()->where('batch', $this->getLastBatchNumber());
+        $query = $this->table()
+            ->where('batch', $this->getLastBatchNumber($group))
+            ->where('group', $group);
 
         return $query->orderBy('migration', 'desc')->get();
     }
@@ -69,11 +73,12 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
      *
      * @param  string  $file
      * @param  int     $batch
+     * @param  string  $group
      * @return void
      */
-    public function log($file, $batch)
+    public function log($file, $batch, $group)
     {
-        $record = array('migration' => $file, 'batch' => $batch);
+        $record = array('migration' => $file, 'batch' => $batch, 'group' => $group);
 
         $this->table()->insert($record);
     }
@@ -92,21 +97,27 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Get the next migration batch number.
      *
+     * @param  string|null  $group
+     *
      * @return int
      */
-    public function getNextBatchNumber()
+    public function getNextBatchNumber($group = null)
     {
-        return $this->getLastBatchNumber() + 1;
+        return $this->getLastBatchNumber($group) + 1;
     }
 
     /**
      * Get the last migration batch number.
      *
+     * @param  string|null  $group
+     *
      * @return int
      */
-    public function getLastBatchNumber()
+    public function getLastBatchNumber($group = null)
     {
-        return $this->table()->max('batch');
+        $query = $this->table()->where('group', $group);
+
+        return $query->max('batch');
     }
 
     /**
@@ -124,9 +135,8 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
             // migrations have actually run for the application. We'll create the
             // table to hold the migration file's path as well as the batch ID.
             $table->increments('id');
-
             $table->string('migration');
-
+            $table->string('group')->nullable();
             $table->integer('batch');
         });
     }

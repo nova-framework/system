@@ -3,6 +3,8 @@
 namespace Nova\Module\Console;
 
 use Nova\Console\Command;
+use Nova\Module\ModuleManager;
+
 use Symfony\Component\Console\Input\InputArgument;
 
 
@@ -23,6 +25,24 @@ class ModuleDisableCommand extends Command
     protected $description = 'Disable a module';
 
     /**
+     * @var \Nova\Module\ModuleManager
+     */
+    protected $modules;
+
+
+    /**
+     * Create a new command instance.
+     *
+     * @param \Nova\Module\ModuleManager $module
+     */
+    public function __construct(ModuleManager $modules)
+    {
+        parent::__construct();
+
+        $this->modules = $modules;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -31,8 +51,8 @@ class ModuleDisableCommand extends Command
     {
         $slug = $this->argument('slug');
 
-        if ($this->nova['modules']->isEnabled($slug)) {
-            $this->nova['modules']->disable($slug);
+        if ($this->modules->isEnabled($slug)) {
+            $this->modules->disable($slug);
 
             $this->info('Module was disabled successfully.');
         } else {

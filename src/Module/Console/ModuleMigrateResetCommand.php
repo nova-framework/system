@@ -34,7 +34,7 @@ class ModuleMigrateResetCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * @var Migrator
@@ -53,11 +53,11 @@ class ModuleMigrateResetCommand extends Command
      * @param Filesystem $files
      * @param Migrator   $migrator
      */
-    public function __construct(ModuleManager $module, Filesystem $files, Migrator $migrator)
+    public function __construct(ModuleManager $modules, Filesystem $files, Migrator $migrator)
     {
         parent::__construct();
 
-        $this->module   = $module;
+        $this->modules  = $modules;
         $this->files    = $files;
         $this->migrator = $migrator;
     }
@@ -76,18 +76,18 @@ class ModuleMigrateResetCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->module->exists($slug)) {
+            if (! $this->modules->exists($slug)) {
                 return $this->error('Module does not exist.');
             }
 
-            if ($this->module->isEnabled($slug)) {
+            if ($this->modules->isEnabled($slug)) {
                 return $this->reset($slug);
             }
 
             return;
         }
 
-        $modules = $this->module->enabled()->reverse();
+        $modules = $this->modules->enabled()->reverse();
 
         foreach ($modules as $module) {
             $this->comment('Resetting the migrations of Module: ' .$module['name']);
@@ -194,7 +194,7 @@ class ModuleMigrateResetCommand extends Command
      */
     protected function getMigrationPath($slug)
     {
-        return $this->module->getModulePath($slug) .'Database' .DS .'Migrations';
+        return $this->modules->getModulePath($slug) .'Database' .DS .'Migrations';
     }
 
     /**

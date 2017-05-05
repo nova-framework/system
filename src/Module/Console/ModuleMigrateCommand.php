@@ -33,25 +33,26 @@ class ModuleMigrateCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * @var Migrator
      */
     protected $migrator;
 
+    
     /**
      * Create a new command instance.
      *
      * @param Migrator $migrator
      * @param ModuleManager  $module
      */
-    public function __construct(Migrator $migrator, ModuleManager $module)
+    public function __construct(Migrator $migrator, ModuleManager $modules)
     {
         parent::__construct();
 
         $this->migrator = $migrator;
-        $this->module   = $module;
+        $this->modules   = $modules;
     }
 
     /**
@@ -70,11 +71,11 @@ class ModuleMigrateCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->module->exists($slug)) {
+            if (! $this->modules->exists($slug)) {
                 return $this->error('Module does not exist.');
             }
 
-            if ($this->module->isEnabled($slug)) {
+            if ($this->modules->isEnabled($slug)) {
                 return $this->migrate($slug);
             }
 
@@ -82,9 +83,9 @@ class ModuleMigrateCommand extends Command
         }
 
         if ($this->option('force')) {
-            $modules = $this->module->all();
+            $modules = $this->modules->all();
         } else {
-            $modules = $this->module->enabled();
+            $modules = $this->modules->enabled();
         }
 
         foreach ($modules as $module) {
@@ -103,7 +104,7 @@ class ModuleMigrateCommand extends Command
      */
     protected function migrate($slug)
     {
-        if (! $this->module->exists($slug)) {
+        if (! $this->modules->exists($slug)) {
             return $this->error('Module does not exist.');
         }
 
@@ -111,11 +112,11 @@ class ModuleMigrateCommand extends Command
 
         $path = $this->getMigrationPath($slug);
 
-        $this->migrator->run($path, $pretend);
+        $this->migrator->run($path, $pretend, $slug);
 
         //
         foreach ($this->migrator->getNotes() as $note) {
-            if (!$this->option('quiet')) {
+            if (! $this->option('quiet')) {
                 $this->line($note);
             }
         }
@@ -134,7 +135,7 @@ class ModuleMigrateCommand extends Command
      */
     protected function getMigrationPath($slug)
     {
-        $path = $this->module->getModulePath($slug);
+        $path = $this->modules->getModulePath($slug);
 
         return $path .'Database' .DS .'Migrations' .DS;
     }
@@ -146,7 +147,7 @@ class ModuleMigrateCommand extends Command
     {
         $this->migrator->setConnection($this->option('database'));
 
-        if (!$this->migrator->repositoryExists()) {
+        if (! $this->migrator->repositoryExists()) {
             $options = array('--database' => $this->option('database'));
 
             $this->call('migrate:install', $options);

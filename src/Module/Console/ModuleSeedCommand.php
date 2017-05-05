@@ -31,18 +31,18 @@ class ModuleSeedCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * Create a new command instance.
      *
      * @param \Nova\Module\ModuleManager $module
      */
-    public function __construct(ModuleManager $module)
+    public function __construct(ModuleManager $modules)
     {
         parent::__construct();
 
-        $this->module = $module;
+        $this->modules = $modules;
     }
 
     /**
@@ -59,11 +59,11 @@ class ModuleSeedCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->module->exists($slug)) {
+            if (! $this->modules->exists($slug)) {
                 return $this->error('Module does not exist.');
             }
 
-            if ($this->module->isEnabled($slug)) {
+            if ($this->modules->isEnabled($slug)) {
                 $this->seed($slug);
             } else if ($this->option('force')) {
                 $this->seed($slug);
@@ -73,9 +73,9 @@ class ModuleSeedCommand extends Command
         }
 
         if ($this->option('force')) {
-            $modules = $this->module->all();
+            $modules = $this->modules->all();
         } else {
-            $modules = $this->module->enabled();
+            $modules = $this->modules->enabled();
         }
 
         foreach ($modules as $module) {
@@ -94,7 +94,7 @@ class ModuleSeedCommand extends Command
      */
     protected function seed($slug)
     {
-        $module = $this->module->where('slug', $slug);
+        $module = $this->modules->where('slug', $slug);
 
         $className = $module['namespace'] .'\Database\Seeds\DatabaseSeeder';
 

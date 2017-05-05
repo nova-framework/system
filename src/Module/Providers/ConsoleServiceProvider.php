@@ -52,8 +52,8 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected function registerDisableCommand()
     {
-        $this->app->singleton('command.module.disable', function () {
-            return new ModuleDisableCommand();
+        $this->app->singleton('command.module.disable', function ($app) {
+            return new ModuleDisableCommand($app['modules']);
         });
 
         $this->commands('command.module.disable');
@@ -64,8 +64,8 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected function registerEnableCommand()
     {
-        $this->app->singleton('command.module.enable', function () {
-            return new ModuleEnableCommand();
+        $this->app->singleton('command.module.enable', function ($app) {
+            return new ModuleEnableCommand($app['modules']);
         });
 
         $this->commands('command.module.enable');
@@ -125,7 +125,7 @@ class ConsoleServiceProvider extends ServiceProvider
     protected function registerMigrateRollbackCommand()
     {
         $this->app->singleton('command.module.migrate.rollback', function ($app) {
-            return new ModuleMigrateRollbackCommand($app['modules']);
+            return new ModuleMigrateRollbackCommand($app['migrator'], $app['modules']);
         });
 
         $this->commands('command.module.migrate.rollback');

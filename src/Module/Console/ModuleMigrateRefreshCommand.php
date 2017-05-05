@@ -31,18 +31,18 @@ class ModuleMigrateRefreshCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * Create a new command instance.
      *
      * @param ModuleManager  $module
      */
-    public function __construct(ModuleManager $module)
+    public function __construct(ModuleManager $modules)
     {
         parent::__construct();
 
-        $this->module = $module;
+        $this->modules = $modules;
     }
 
     /**
@@ -58,7 +58,7 @@ class ModuleMigrateRefreshCommand extends Command
 
         $slug = $this->argument('slug');
 
-        if (! $this->module->exists($slug)) {
+        if (! $this->modules->exists($slug)) {
             return $this->error('Module does not exist.');
         }
 

@@ -66,9 +66,10 @@ class Migrator
      *
      * @param  string  $path
      * @param  bool    $pretend
+     * @param  string|null  $group
      * @return void
      */
-    public function run($path, $pretend = false)
+    public function run($path, $pretend = false, $group = null)
     {
         $this->notes = array();
 
@@ -83,7 +84,7 @@ class Migrator
 
         $this->requireFiles($path, $migrations);
 
-        $this->runMigrationList($migrations, $pretend);
+        $this->runMigrationList($migrations, $pretend, $group);
     }
 
     /**
@@ -91,9 +92,10 @@ class Migrator
      *
      * @param  array  $migrations
      * @param  bool   $pretend
+     * @param  string|null  $group
      * @return void
      */
-    public function runMigrationList($migrations, $pretend = false)
+    public function runMigrationList($migrations, $pretend = false, $group = null)
     {
         // First we will just make sure that there are any migrations to run. If there
         // aren't, we will just make a note of it to the developer so they're aware
@@ -104,13 +106,13 @@ class Migrator
             return;
         }
 
-        $batch = $this->repository->getNextBatchNumber();
+        $batch = $this->repository->getNextBatchNumber($group);
 
         // Once we have the array of migrations, we will spin through them and run the
         // migrations "up" so the changes are made to the databases. We'll then log
         // that the migration was run so we don't repeat it next time we execute.
         foreach ($migrations as $file) {
-            $this->runUp($file, $batch, $pretend);
+            $this->runUp($file, $batch, $pretend, $group);
         }
     }
 
@@ -120,9 +122,10 @@ class Migrator
      * @param  string  $file
      * @param  int     $batch
      * @param  bool    $pretend
+     * @param  string  $group
      * @return void
      */
-    protected function runUp($file, $batch, $pretend)
+    protected function runUp($file, $batch, $pretend, $group)
     {
         // First we will resolve a "real" instance of the migration class from this
         // migration file name. Once we have the instances we can run the actual
@@ -138,7 +141,7 @@ class Migrator
         // Once we have run a migrations class, we will log that it was run in this
         // repository so that we don't try to run it next time we do a migration
         // in the application. A migration repository keeps the migrate order.
-        $this->repository->log($file, $batch);
+        $this->repository->log($file, $batch, $group);
 
         $this->note("<info>Migrated:</info> $file");
     }
@@ -147,16 +150,17 @@ class Migrator
      * Rollback the last migration operation.
      *
      * @param  bool  $pretend
+     * @param  string|null  $group
      * @return int
      */
-    public function rollback($pretend = false)
+    public function rollback($pretend = false, $group = null)
     {
         $this->notes = array();
 
         // We want to pull in the last batch of migrations that ran on the previous
         // migration operation. We'll then reverse those migrations and run each
         // of them "down" to reverse the last migration "operation" which ran.
-        $migrations = $this->repository->getLast();
+        $migrations = $this->repository->getLast($group);
 
         if (count($migrations) == 0) {
             $this->note('<info>Nothing to rollback.</info>');
@@ -242,7 +246,9 @@ class Migrator
      */
     public function requireFiles($path, array $files)
     {
-        foreach ($files as $file) $this->files->requireOnce($path.'/'.$file.'.php');
+        foreach ($files as $file) {
+            $this->files->requireOnce($path .DS .$file .'.php');
+        }
     }
 
     /**

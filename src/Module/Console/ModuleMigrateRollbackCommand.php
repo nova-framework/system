@@ -4,8 +4,10 @@ namespace Nova\Module\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
+use Nova\Database\Migrations\Migrator;
 use Nova\Module\Console\MigrationTrait;
 use Nova\Module\ModuleManager;
+use Nova\Support\Arr;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -33,18 +35,25 @@ class ModuleMigrateRollbackCommand extends Command
     /**
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
+
+    /**
+     * @var Migrator
+     */
+    protected $migrator;
+
 
     /**
      * Create a new command instance.
      *
      * @param \Nova\Module\ModuleManager $module
      */
-    public function __construct(ModuleManager $module)
+    public function __construct(Migrator $migrator, ModuleManager $modules)
     {
         parent::__construct();
 
-        $this->module = $module;
+        $this->migrator = $migrator;
+        $this->modules  = $modules;
     }
 
     /**
@@ -61,14 +70,14 @@ class ModuleMigrateRollbackCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->module->exists($slug)) {
+            if (! $this->modules->exists($slug)) {
                 return $this->error('Module does not exist.');
             }
 
             return $this->rollback($slug);
         }
 
-        foreach ($this->module->all() as $module) {
+        foreach ($this->modules->all() as $module) {
             $this->comment('Rollback the last migration from Module: ' .$module['name']);
 
             $this->rollback($module['slug']);
@@ -84,13 +93,25 @@ class ModuleMigrateRollbackCommand extends Command
      */
     protected function rollback($slug)
     {
+        if (! $this->modules->exists($slug)) {
+            return $this->error('Module does not exist.');
+        }
+
         $this->requireMigrations($slug);
 
-        $this->call('migrate:rollback', array(
-            '--database' => $this->option('database'),
-            '--force'    => $this->option('force'),
-            '--pretend'  => $this->option('pretend'),
-        ));
+        //
+        $pretend = Arr::get($this->option(), 'pretend', false);
+
+        $path = $this->getMigrationPath($slug);
+
+        $this->migrator->rollback($pretend, $slug);
+
+        //
+        foreach ($this->migrator->getNotes() as $note) {
+            if (! $this->option('quiet')) {
+                $this->line($note);
+            }
+        }
     }
 
     /**
