@@ -343,11 +343,15 @@ class LocalRepository extends Repository
         $data = array();
 
         foreach ($modules->all() as $key => $module) {
-             $properties = ($module instanceof Collection) ? $module->all() : $module;
+            $properties = ($module instanceof Collection) ? $module->all() : $module;
 
-             ksort($properties);
+            // Normalize to *nix paths.
+            $properties['path'] = str_replace('\\', '/', $properties['path']);
 
-             $data[$key] = $properties;
+            //
+            ksort($properties);
+
+            $data[$key] = $properties;
         }
 
         //
@@ -363,7 +367,7 @@ return $data;
 PHP;
 
         // Normalize to *nix paths.
-        $basePath = rtrim(BASEPATH, DS);
+        $basePath = str_replace('\\', '/', rtrim(BASEPATH, DS));
 
         $content = str_replace('\'' .$basePath, '$baseDir .\'', $content);
 
