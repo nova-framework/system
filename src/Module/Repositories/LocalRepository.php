@@ -351,7 +351,21 @@ class LocalRepository extends Repository
         }
 
         //
-        $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
+        $data = var_export($data, true);
+
+        $content = <<<PHP
+<?php
+
+\$baseDir = dirname(dirname(dirname(__FILE__)));
+
+return $data;
+
+PHP;
+
+        // Normalize to *nix paths.
+        $basePath = rtrim(BASEPATH, DS);
+
+        $content = str_replace('\'' .$basePath, '$baseDir .\'', $content);
 
         $this->files->put($cachePath, $content);
     }

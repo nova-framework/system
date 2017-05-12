@@ -2290,7 +2290,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function getArrayableAppends()
     {
-        if (! count($this->appends)) return [];
+        if (! count($this->appends)) return array();
 
         return $this->getArrayableItems(
             array_combine($this->appends, $this->appends)
