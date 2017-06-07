@@ -7,7 +7,7 @@ return array (
   'Details' => 'Détails',
   'Duplicates' => 'Doublons',
   'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | SQL: <b>{2}</b> {3, plural, one{query} other{queries}} | UMAX: <b>{4}</b>' => '',
-  'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | UMAX: <b>{2}</b>' => 'Temps écoulé: <b>{0}</b> sec | Mémoire utilisée: <b>{1}</b> | UMAX: <b>{4}</b>',
+  'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | UMAX: <b>{2}</b>' => 'Temps écoulé: <b>{0}</b> sec | Mémoire utilisée: <b>{1}</b> | UMAX: <b>{2}</b>',
   'Errors' => 'Erreurs',
   'Forensics - Profiler start displaying the information' => 'Forensics - Début de l\'afficher les informations du Profileur',
   'Forensics - Profiler start gathering the information' => 'Forensics - Début du rassemblement des informations par le Profileur',

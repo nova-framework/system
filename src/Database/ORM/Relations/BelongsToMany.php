@@ -262,7 +262,7 @@ class BelongsToMany extends Relation
 
         $tablePrefix = $this->query->getQuery()->getConnection()->getTablePrefix();
 
-        $query->from($this->table.' as '.$tablePrefix.$hash = $this->getRelationCountHash());
+        $query->from($this->table.' as '.$tablePrefix .$hash = $this->getRelationCountHash());
 
         $key = $this->wrap($this->getQualifiedParentKeyName());
 
@@ -276,7 +276,7 @@ class BelongsToMany extends Relation
      */
     public function getRelationCountHash()
     {
-        return 'self_'.md5(microtime(true));
+        return 'self_' .md5(microtime(true));
     }
 
     /**
