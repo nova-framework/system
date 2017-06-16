@@ -602,7 +602,7 @@ class Route
         );
 
         if (! is_null($this->compiled->getHostRegex())) {
-            $params = $this->bindHostParameters($request, $params);
+            $parameters = $this->bindHostParameters($request, $parameters);
         }
 
         return $this->parameters = $this->replaceDefaults($parameters);
