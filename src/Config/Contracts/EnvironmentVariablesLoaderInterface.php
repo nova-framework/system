@@ -1,6 +1,7 @@
 <?php
 
-namespace Nova\Config;
+namespace Nova\Config\Contracts;
+
 
 interface EnvironmentVariablesLoaderInterface
 {

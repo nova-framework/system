@@ -2,6 +2,9 @@
 
 namespace Nova\Config;
 
+use Nova\Config\Contracts\EnvironmentVariablesLoaderInterface;
+
+
 /**
  * PHP $_ENV loader for protecting sensitive configuration options.
  *
