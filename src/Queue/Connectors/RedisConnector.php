@@ -2,8 +2,9 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Redis\Database;
+use Nova\Queue\Contracts\ConnectorInterface;
 use Nova\Queue\Queues\RedisQueue;
+use Nova\Redis\Database;
 
 
 class RedisConnector implements ConnectorInterface

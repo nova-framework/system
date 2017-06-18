@@ -2,8 +2,9 @@
 
 namespace Nova\Queue\Connectors;
 
-use Aws\Sqs\SqsClient;
+use Nova\Queue\Contracts\ConnectorInterface;
 use Nova\Queue\Queues\SqsQueue;
+use Aws\Sqs\SqsClient;
 
 
 class SqsConnector implements ConnectorInterface

@@ -118,7 +118,7 @@ class QueueManager
 	 * Get the connector for a given driver.
 	 *
 	 * @param  string  $driver
-	 * @return \Nova\Queue\Connectors\ConnectorInterface
+	 * @return \Nova\Queue\Contracts\ConnectorInterface
 	 *
 	 * @throws \InvalidArgumentException
 	 */
