@@ -1,11 +1,11 @@
 <?php
 
-namespace Nova\Routing\Console;
+namespace Mini\Routing\Console;
 
-use Nova\Console\Command;
+use Mini\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Nova\Routing\Generators\MiddlewareGenerator;
+use Mini\Routing\Generators\MiddlewareGenerator;
 
 
 class MiddlewareMakeCommand extends Command
@@ -25,97 +25,42 @@ class MiddlewareMakeCommand extends Command
 	protected $description = 'Create a new Middleware class';
 
 	/**
-	 * The middleware generator instance.
-	 *
-	 * @var \Nova\Routing\Generators\MiddlewareGenerator
-	 */
-	protected $generator;
-
-	/**
-	 * The path to the middleware directory.
+	 * The type of class being generated.
 	 *
 	 * @var string
 	 */
-	protected $path;
+	protected $type = 'Middleware';
+
 
 	/**
-	 * Create a new make middleware command instance.
+	 * Determine if the class already exists.
 	 *
-	 * @param  \Nova\Routing\Generators\MiddlewareGenerator  $generator
-	 * @param  string  $path
-	 * @return void
+	 * @param  string  $rawName
+	 * @return bool
 	 */
-	public function __construct(MiddlewareGenerator $generator, $path)
+	protected function alreadyExists($rawName)
 	{
-		parent::__construct();
-
-		$this->path = $path;
-
-		$this->generator = $generator;
+		return class_exists($rawName);
 	}
 
 	/**
-	 * Execute the console command.
-	 *
-	 * @return void
-	 */
-	public function fire()
-	{
-		$this->generateMiddleware();
-	}
-
-	/**
-	 * Generate a new resourceful middleware file.
-	 *
-	 * @return void
-	 */
-	protected function generateMiddleware()
-	{
-		$middleware = str_replace('/', '\\', $this->input->getArgument('name'));
-
-		$path = $this->getPath();
-
-		$this->generator->make($middleware, $path);
-
-		$this->info('Middleware created successfully!');
-	}
-
-	/**
-	 * Get the path in which to store the middleware.
+	 * Get the stub file for the generator.
 	 *
 	 * @return string
 	 */
-	protected function getPath()
+	protected function getStub()
 	{
-		if (! is_null($this->input->getOption('path'))) {
-			return $this->container['path.base'] .DS .$this->input->getOption('path');
-		}
-
-		return $this->path;
+		return realpath(__DIR__) .str_replace('/', DS, '/stubs/middleware.stub');
 	}
 
 	/**
-	 * Get the console command arguments.
+	 * Get the default namespace for the class.
 	 *
-	 * @return array
+	 * @param  string  $rootNamespace
+	 * @return string
 	 */
-	protected function getArguments()
+	protected function getDefaultNamespace($rootNamespace)
 	{
-		return array(
-			array('name', InputArgument::REQUIRED, 'The name of the Middleware class'),
-		);
+		return $rootNamespace .'\Http\Middleware';
 	}
-
-	/**
-	 * Get the console command options.
-	 *
-	 * @return array
-	 */
-	protected function getOptions()
-	{
-		return array(
-			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to place the Middleware'),
-		);
-	}
-
 }

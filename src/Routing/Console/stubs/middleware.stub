@@ -1,11 +1,11 @@
 <?php
 
-{{namespace}}
+namespace {{namespace}};
 
 use Closure;
 
 
-class {{class}}
+class {{className}}
 {
     /**
      * Handle an incoming request.

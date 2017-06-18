@@ -4,8 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Routing\Console\ControllerMakeCommand;
 use Nova\Routing\Console\MiddlewareMakeCommand;
-use Nova\Routing\Generators\ControllerGenerator;
-use Nova\Routing\Generators\MiddlewareGenerator;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -28,20 +27,12 @@ class ConsoleServiceProvider extends ServiceProvider
 	{
 		$this->app->bindShared('command.controller.make', function($app)
 		{
-			$path = $app['path'] .DS .'Http' .DS .'Controllers';
-
-			$generator = new ControllerGenerator($app['files']);
-
-			return new ControllerMakeCommand($generator, $path);
+			return new ControllerMakeCommand($app['files']);
 		});
 
 		$this->app->bindShared('command.middleware.make', function($app)
 		{
-			$path = $app['path'] .DS .'Http' .DS .'Middleware';
-
-			$generator = new MiddlewareGenerator($app['files']);
-
-			return new MiddlewareMakeCommand($generator, $path);
+			return new MiddlewareMakeCommand($app['files']);
 		});
 
 		$this->commands('command.controller.make', 'command.middleware.make');

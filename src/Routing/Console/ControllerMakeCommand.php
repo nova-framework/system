@@ -1,14 +1,13 @@
 <?php
 
-namespace Nova\Routing\Console;
+namespace Mini\Routing\Console;
 
-use Nova\Console\Command;
+use Mini\Console\GeneratorCommand;
+
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-use Nova\Routing\Generators\ControllerGenerator;
 
 
-class ControllerMakeCommand extends Command
+class ControllerMakeCommand extends GeneratorCommand
 {
 	/**
 	 * The console command name.
@@ -22,119 +21,51 @@ class ControllerMakeCommand extends Command
 	 *
 	 * @var string
 	 */
-	protected $description = 'Create a new Resourceful Controller';
+	protected $description = 'Create a new Controller class';
 
 	/**
-	 * The controller generator instance.
-	 *
-	 * @var \Nova\Routing\Generators\ControllerGenerator
-	 */
-	protected $generator;
-
-	/**
-	 * The path to the controller directory.
+	 * The type of class being generated.
 	 *
 	 * @var string
 	 */
-	protected $path;
+	protected $type = 'Controller';
+
 
 	/**
-	 * Create a new make controller command instance.
+	 * Determine if the class already exists.
 	 *
-	 * @param  \Nova\Routing\Generators\ControllerGenerator  $generator
-	 * @param  string  $path
-	 * @return void
+	 * @param  string  $rawName
+	 * @return bool
 	 */
-	public function __construct(ControllerGenerator $generator, $path)
+	protected function alreadyExists($rawName)
 	{
-		parent::__construct();
-
-		$this->path = $path;
-
-		$this->generator = $generator;
+		return class_exists($rawName);
 	}
 
 	/**
-	 * Execute the console command.
-	 *
-	 * @return void
-	 */
-	public function fire()
-	{
-		$this->generateController();
-	}
-
-	/**
-	 * Generate a new resourceful controller file.
-	 *
-	 * @return void
-	 */
-	protected function generateController()
-	{
-		$controller = str_replace('/', '\\', $this->input->getArgument('name'));
-
-		$path = $this->getPath();
-
-		$options = $this->getBuildOptions();
-
-		$this->generator->make($controller, $path, $options);
-
-		$this->info('Controller created successfully!');
-	}
-
-	/**
-	 * Get the path in which to store the controller.
+	 * Get the stub file for the generator.
 	 *
 	 * @return string
 	 */
-	protected function getPath()
+	protected function getStub()
 	{
-		if (! is_null($this->input->getOption('path'))) {
-			return $this->container['path.base'] .DS .$this->input->getOption('path');
+		if ($this->option('plain')) {
+			return realpath(__DIR__) .str_replace('/', DS, '/stubs/controller.plain.stub');
 		}
 
-		return $this->path;
+		return realpath(__DIR__) .str_replace('/', DS, '/stubs/controller.stub');
 	}
 
 	/**
-	 * Get the options for controller generation.
+	 * Get the default namespace for the class.
 	 *
-	 * @return array
+	 * @param  string  $rootNamespace
+	 * @return string
 	 */
-	protected function getBuildOptions()
+	protected function getDefaultNamespace($rootNamespace)
 	{
-		$only = $this->explodeOption('only');
-
-		$except = $this->explodeOption('except');
-
-		return compact('only', 'except');
+		return $rootNamespace .'\Controllers';
 	}
-
-	/**
-	 * Get and explode a given input option.
-	 *
-	 * @param  string  $name
-	 * @return array
-	 */
-	protected function explodeOption($name)
-	{
-		$option = $this->input->getOption($name);
-
-		return is_null($option) ? array() : explode(',', $option);
-	}
-
-	/**
-	 * Get the console command arguments.
-	 *
-	 * @return array
-	 */
-	protected function getArguments()
-	{
-		return array(
-			array('name', InputArgument::REQUIRED, 'The name of the Controller class'),
-		);
-	}
-
 
 	/**
 	 * Get the console command options.
@@ -144,10 +75,7 @@ class ControllerMakeCommand extends Command
 	protected function getOptions()
 	{
 		return array(
-			array('only', null, InputOption::VALUE_OPTIONAL, 'The methods that should be included'),
-			array('except', null, InputOption::VALUE_OPTIONAL, 'The methods that should be excluded'),
-			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to place the Controller'),
+			array('plain', null, InputOption::VALUE_NONE, 'Generate an empty Controller class.'),
 		);
 	}
-
 }
