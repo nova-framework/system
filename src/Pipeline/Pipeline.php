@@ -110,6 +110,20 @@ class Pipeline implements PipelineInterface
 	}
 
 	/**
+	 * Get the initial slice to begin the stack call.
+	 *
+	 * @param  \Closure  $destination
+	 * @return \Closure
+	 */
+	protected function getInitialSlice(Closure $destination)
+	{
+		return function ($passable) use ($destination)
+		{
+			return call_user_func($destination, $passable);
+		};
+	}
+
+	/**
 	 * Get a Closure that represents a slice of the application onion.
 	 *
 	 * @return \Closure
@@ -148,20 +162,6 @@ class Pipeline implements PipelineInterface
 		return call_user_func_array(array($instance, $this->method),
 			array_merge(array($passable, $stack), $parameters)
 		);
-	}
-
-	/**
-	 * Get the initial slice to begin the stack call.
-	 *
-	 * @param  \Closure  $destination
-	 * @return \Closure
-	 */
-	protected function getInitialSlice(Closure $destination)
-	{
-		return function ($passable) use ($destination)
-		{
-			return call_user_func($destination, $passable);
-		};
 	}
 
 	/**
