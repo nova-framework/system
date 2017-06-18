@@ -3,7 +3,7 @@
 namespace Nova\Events;
 
 use Nova\Container\Container;
-use Nova\Events\DispatcherInterface;
+use Nova\Events\Contracts\DispatcherInterface;
 
 
 class Dispatcher implements DispatcherInterface

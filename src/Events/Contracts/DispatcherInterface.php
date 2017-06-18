@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Events;
+namespace Nova\Events\Contracts;
 
 
 interface DispatcherInterface
