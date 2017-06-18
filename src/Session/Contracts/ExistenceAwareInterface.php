@@ -1,6 +1,7 @@
 <?php
 
-namespace Nova\Session;
+namespace Nova\Session\Contracts;
+
 
 interface ExistenceAwareInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Session;
+namespace Nova\Session\Contracts;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface as BaseSessionInterface;

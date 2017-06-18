@@ -4,7 +4,7 @@ namespace Nova\Session\Middleware;
 
 use Nova\Http\Request;
 use Nova\Session\SessionManager;
-use Nova\Session\SessionInterface;
+use Nova\Session\Contracts\SessionInterface;
 use Nova\Session\CookieSessionHandler;
 use Nova\Support\Arr;
 
@@ -98,7 +98,7 @@ class StartSession
 	 * Start the session for the given request.
 	 *
 	 * @param  \Nova\Http\Request  $request
-	 * @return \Nova\Session\SessionInterface
+	 * @return \Nova\Session\Contracts\SessionInterface
 	 */
 	protected function startSession(Request $request)
 	{
@@ -113,7 +113,7 @@ class StartSession
 	 * Get the session implementation from the manager.
 	 *
 	 * @param  \Nova\Http\Request  $request
-	 * @return \Nova\Session\SessionInterface
+	 * @return \Nova\Session\Contracts\SessionInterface
 	 */
 	public function getSession(Request $request)
 	{
@@ -128,7 +128,7 @@ class StartSession
 	 * Store the current URL for the request if necessary.
 	 *
 	 * @param  \Nova\Http\Request  $request
-	 * @param  \Nova\Session\SessionInterface  $session
+	 * @param  \Nova\Session\Contracts\SessionInterface  $session
 	 * @return void
 	 */
 	protected function storeCurrentUrl(Request $request, $session)
@@ -141,7 +141,7 @@ class StartSession
 	/**
 	 * Remove the garbage from the session if necessary.
 	 *
-	 * @param  \Nova\Session\SessionInterface  $session
+	 * @param  \Nova\Session\Contracts\SessionInterface  $session
 	 * @return void
 	 */
 	protected function collectGarbage(SessionInterface $session)
@@ -171,7 +171,7 @@ class StartSession
 	 * Add the session cookie to the application response.
 	 *
 	 * @param  \Symfony\Component\HttpFoundation\Response  $response
-	 * @param  \Nova\Session\SessionInterface  $session
+	 * @param  \Nova\Session\Contracts\SessionInterface  $session
 	 * @return void
 	 */
 	protected function addCookieToResponse(Response $response, SessionInterface $session)
