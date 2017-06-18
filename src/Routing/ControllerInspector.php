@@ -2,6 +2,8 @@
 
 namespace Nova\Routing;
 
+use Nova\Support\Str;
+
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -37,15 +39,17 @@ class ControllerInspector
 		// is a publicly routable method. If so, we will add it to this listings.
 		foreach ($methods as $method) {
 			if ($this->isRoutable($method)) {
+				$name = $method->name;
+
 				$data = $this->getMethodData($method, $prefix);
 
-				$routable[$method->name][] = $data;
+				$routable[$name][] = $data;
 
 				// If the routable method is an index method, we will create a special index
 				// route which is simply the prefix and the verb and does not contain any
 				// the wildcard place-holders that each "typical" routes would contain.
 				if ($data['plain'] == $prefix .'/index') {
-					$routable[$method->name][] = $this->getIndexData($data, $prefix);
+					$routable[$name][] = $this->getIndexData($data, $prefix);
 				}
 			}
 		}
@@ -61,8 +65,6 @@ class ControllerInspector
 	 */
 	public function isRoutable(ReflectionMethod $method)
 	{
-		//if ($method->class == 'Nova\Routing\Controller') return false;
-
 		switch ($method->class) {
 			case 'Nova\Routing\Controller':
 			case 'App\Controllers\BaseController':
@@ -72,7 +74,7 @@ class ControllerInspector
 				break;
 		}
 
-		return starts_with($method->name, $this->verbs);
+		return Str::startsWith($method->name, $this->verbs);
 	}
 
 	/**
@@ -111,7 +113,7 @@ class ControllerInspector
 	 */
 	public function getVerb($name)
 	{
-		return head(explode('_', snake_case($name)));
+		return head(explode('_', Str::snake($name)));
 	}
 
 	/**
@@ -123,7 +125,7 @@ class ControllerInspector
 	 */
 	public function getPlainUri($name, $prefix)
 	{
-		return $prefix .'/' .implode('-', array_slice(explode('_', snake_case($name)), 1));
+		return $prefix .'/' .implode('-', array_slice(explode('_', Str::snake($name)), 1));
 	}
 
 	/**
