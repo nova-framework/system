@@ -58,7 +58,12 @@ abstract class Presenter
 	 * @param  string  $rel
 	 * @return string
 	 */
-	abstract public function getPageLinkWrapper($url, $page, $rel = null);
+	public function getPageLinkWrapper($url, $page, $rel = null)
+	{
+		$rel = is_null($rel) ? '' : ' class="'.$rel.'"';
+
+		return '<li><a href="'.$url.'"'.$rel.'>'.$page.'</a></li>';
+	}
 
 	/**
 	 * Get HTML wrapper for disabled text.
@@ -66,7 +71,10 @@ abstract class Presenter
 	 * @param  string  $text
 	 * @return string
 	 */
-	abstract public function getDisabledTextWrapper($text);
+	public function getDisabledTextWrapper($text)
+	{
+		return '<li class="disabled"><span>'.$text.'</span></li>';
+	}
 
 	/**
 	 * Get HTML wrapper for active text.
@@ -74,7 +82,10 @@ abstract class Presenter
 	 * @param  string  $text
 	 * @return string
 	 */
-	abstract public function getActivePageWrapper($text);
+	public function getActivePageWrapper($text)
+	{
+		return '<li class="active"><span>'.$text.'</span></li>';
+	}
 
 	/**
 	 * Get HTML wrapper for the entire paginator.
@@ -82,7 +93,10 @@ abstract class Presenter
 	 * @param  string  $content
 	 * @return string
 	 */
-	abstract public function getPaginationWrapper($content);
+	public function getPaginationWrapper($content)
+	{
+		return '<ul class="pagination">' .$content .'</ul>';
+	}
 
 	/**
 	 * Render the Pagination contents.

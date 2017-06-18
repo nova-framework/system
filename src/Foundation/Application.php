@@ -93,13 +93,6 @@ class Application extends Container implements ResponsePreparerInterface
 	protected $deferredServices = array();
 
 	/**
-	 * The request class used by the application.
-	 *
-	 * @var string
-	 */
-	protected static $requestClass = 'Nova\Http\Request';
-
-	/**
 	 * The application namespace.
 	 *
 	 * @var string
@@ -881,19 +874,6 @@ class Application extends Container implements ResponsePreparerInterface
 	}
 
 	/**
-	 * Get or set the request class for the application.
-	 *
-	 * @param  string  $class
-	 * @return string
-	 */
-	public static function requestClass($class = null)
-	{
-		if (! is_null($class)) static::$requestClass = $class;
-
-		return static::$requestClass;
-	}
-
-	/**
 	 * Set the application request for the console environment.
 	 *
 	 * @return void
@@ -905,18 +885,6 @@ class Application extends Container implements ResponsePreparerInterface
 		$parameters = array($url, 'GET', array(), array(), array(), $_SERVER);
 
 		$this->refreshRequest(static::onRequest('create', $parameters));
-	}
-
-	/**
-	 * Call a method on the default request class.
-	 *
-	 * @param  string  $method
-	 * @param  array  $parameters
-	 * @return mixed
-	 */
-	public static function onRequest($method, $parameters = array())
-	{
-		return forward_static_call_array(array(static::requestClass(), $method), $parameters);
 	}
 
 	/**
@@ -952,35 +920,35 @@ class Application extends Container implements ResponsePreparerInterface
 	public function registerCoreContainerAliases()
 	{
 		$aliases = array(
-			'app'			   => 'Nova\Foundation\Application',
-			'forge'			 => 'Nova\Console\Application',
-			'auth'			  => 'Nova\Auth\AuthManager',
-			'cache'			 => 'Nova\Cache\CacheManager',
-			'cache.store'	   => 'Nova\Cache\Repository',
-			'template.compiler' => 'Nova\View\Compilers\TemplateCompiler',
+			'app'				=> 'Nova\Foundation\Application',
+			'forge'				=> 'Nova\Console\Application',
+			'auth'				=> 'Nova\Auth\AuthManager',
+			'cache'				=> 'Nova\Cache\CacheManager',
+			'cache.store'		=> 'Nova\Cache\Repository',
+			'template.compiler'	=> 'Nova\View\Compilers\TemplateCompiler',
 			'config'			=> 'Nova\Config\Repository',
 			'cookie'			=> 'Nova\Cookie\CookieJar',
-			'encrypter'		 => 'Nova\Encryption\Encrypter',
+			'encrypter'			=> 'Nova\Encryption\Encrypter',
 			'db'				=> 'Nova\Database\DatabaseManager',
-			'db.connection'	 => array('Nova\Database\Connection', 'Nova\Database\ConnectionInterface'),
+			'db.connection'		=> array('Nova\Database\Connection', 'Nova\Database\Contracts\ConnectionInterface'),
 			'events'			=> 'Nova\Events\Dispatcher',
-			'files'			 => 'Nova\Filesystem\Filesystem',
-			'hash'			  => 'Nova\Hashing\HasherInterface',
-			'log'			   => array('Nova\Log\Writter', 'Psr\Log\LoggerInterface'),
-			'language'		  => 'Nova\Language\LanguageManager',
+			'files'				=> 'Nova\Filesystem\Filesystem',
+			'hash'				=> 'Nova\Hashing\HasherInterface',
+			'log'				=> array('Nova\Log\Writter', 'Psr\Log\LoggerInterface'),
+			'language'			=> 'Nova\Language\LanguageManager',
 			'mailer'			=> 'Nova\Mail\Mailer',
-			'paginator'		 => 'Nova\Pagination\Environment',
-			'auth.reminder'	 => 'Nova\Auth\Reminders\PasswordBroker',
-			'queue'			 => 'Nova\Queue\QueueManager',
-			'queue.connection'  => 'Nova\Queue\Queue',
-			'redirect'		  => 'Nova\Routing\Redirector',
-			'request'		   => 'Nova\Http\Request',
+			'paginator'			=> 'Nova\Pagination\Factory',
+			'auth.reminder'		=> 'Nova\Auth\Reminders\PasswordBroker',
+			'queue'				=> 'Nova\Queue\QueueManager',
+			'queue.connection'	=> 'Nova\Queue\Queue',
+			'redirect'			=> 'Nova\Routing\Redirector',
+			'request'			=> 'Nova\Http\Request',
 			'router'			=> 'Nova\Routing\Router',
-			'session'		   => 'Nova\Session\SessionManager',
-			'session.store'	 => 'Nova\Session\Store',
-			'url'			   => 'Nova\Routing\UrlGenerator',
-			'validator'		 => 'Nova\Validation\Factory',
-			'view'			  => 'Nova\View\Factory',
+			'session'			=> 'Nova\Session\SessionManager',
+			'session.store'		=> 'Nova\Session\Store',
+			'url'				=> 'Nova\Routing\UrlGenerator',
+			'validator'			=> 'Nova\Validation\Factory',
+			'view'				=> 'Nova\View\Factory',
 		);
 
 		foreach ($aliases as $key => $aliases) {
