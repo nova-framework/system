@@ -65,8 +65,7 @@ class ControllerInspector
 
 		switch ($method->class) {
 			case 'Routing\Controller':
-			case 'App\Core\Controller':
-			case 'App\Core\BackendController':
+			case 'App\Controllers\BaseController':
 				return false;
 
 			default:
