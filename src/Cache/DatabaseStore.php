@@ -2,6 +2,7 @@
 
 namespace Nova\Cache;
 
+use Nova\Cache\Contracts\StoreInterface;
 use Nova\Database\Connection;
 use Nova\Encryption\Encrypter;
 

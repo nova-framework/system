@@ -2,6 +2,8 @@
 
 namespace Nova\Cache;
 
+use Nova\Cache\Contracts\StoreInterface;
+
 
 class NullStore extends TaggableStore implements StoreInterface
 {

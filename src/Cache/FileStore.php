@@ -2,6 +2,7 @@
 
 namespace Nova\Cache;
 
+use Nova\Cache\Contracts\StoreInterface;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Arr;
 

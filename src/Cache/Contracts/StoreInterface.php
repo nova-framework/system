@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Cache;
+namespace Nova\Cache\Contracts;
 
 
 interface StoreInterface

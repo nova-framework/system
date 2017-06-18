@@ -2,8 +2,11 @@
 
 namespace Nova\Cache;
 
-use Closure;
+use Nova\Cache\Contracts\StoreInterface;
 use Nova\Support\Manager;
+
+use Closure;
+
 
 class CacheManager extends Manager
 {
@@ -152,7 +155,7 @@ class CacheManager extends Manager
 	/**
 	 * Create a new cache repository with the given implementation.
 	 *
-	 * @param  \Nova\Cache\StoreInterface  $store
+	 * @param  \Nova\Cache\Contracts\StoreInterface  $store
 	 * @return \Nova\Cache\Repository
 	 */
 	protected function repository(StoreInterface $store)

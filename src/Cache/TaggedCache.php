@@ -2,6 +2,8 @@
 
 namespace Nova\Cache;
 
+use Nova\Cache\Contracts\StoreInterface;
+
 use Carbon\Carbon;
 
 use Closure;
@@ -12,7 +14,7 @@ class TaggedCache implements StoreInterface
 	/**
 	 * The cache store implementation.
 	 *
-	 * @var \Nova\Cache\StoreInterface
+	 * @var \Nova\Cache\Contracts\StoreInterface
 	 */
 	protected $store;
 
@@ -26,7 +28,7 @@ class TaggedCache implements StoreInterface
 	/**
 	 * Create a new tagged cache instance.
 	 *
-	 * @param  \Nova\Cache\StoreInterface  $store
+	 * @param  \Nova\Cache\Contracts\StoreInterface  $store
 	 * @param  \Nova\Cache\TagSet  $tags
 	 * @return void
 	 */

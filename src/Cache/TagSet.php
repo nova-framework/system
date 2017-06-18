@@ -8,7 +8,7 @@ class TagSet
 	/**
 	 * The cache store implementation.
 	 *
-	 * @var \Nova\Cache\StoreInterface
+	 * @var \Nova\Cache\Contracts\StoreInterface
 	 */
 	protected $store;
 
@@ -22,7 +22,7 @@ class TagSet
 	/**
 	 * Create a new TagSet instance.
 	 *
-	 * @param  \Nova\Cache\StoreInterface  $store
+	 * @param  \Nova\Cache\Contracts\StoreInterface  $store
 	 * @param  array  $names
 	 * @return void
 	 */

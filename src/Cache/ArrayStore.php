@@ -2,6 +2,9 @@
 
 namespace Nova\Cache;
 
+use Nova\Cache\Contracts\StoreInterface;
+
+
 class ArrayStore extends TaggableStore implements StoreInterface
 {
 	/**
