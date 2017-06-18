@@ -2,8 +2,9 @@
 
 namespace {{namespace}};
 
-use {{rootNamespace}}Jobs\Job;
 use Nova\Bus\Contracts\SelfHandlingInterface;
+
+use {{rootNamespace}}Jobs\Job;
 
 
 class {{className}} extends Job implements SelfHandlingInterface

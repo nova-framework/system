@@ -6,7 +6,7 @@ use Nova\Database\Query\Expression;
 use Nova\Database\Connection;
 use Nova\Queue\Jobs\DatabaseJob;
 use Nova\Queue\Queue;
-use Nova\Queue\QueueInterface;
+use Nova\Queue\Contracts\QueueInterface;
 
 use Carbon\Carbon;
 

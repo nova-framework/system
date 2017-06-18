@@ -3,7 +3,6 @@
 namespace {{namespace}};
 
 use Nova\Queue\SerializesModelsTrait;
-use Nova\Broadcasting\Contracts\ShouldBroadcastInterface;
 
 use {{rootNamespace}}Events\Event;
 
@@ -20,15 +19,5 @@ class {{className}} extends Event
     public function __construct()
     {
         //
-    }
-
-    /**
-     * Get the channels the event should be broadcast on.
-     *
-     * @return array
-     */
-    public function broadcastOn()
-    {
-        return array();
     }
 }

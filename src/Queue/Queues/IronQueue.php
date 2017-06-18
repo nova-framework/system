@@ -7,7 +7,7 @@ use Nova\Http\Response;
 
 use Nova\Queue\Jobs\IronJob;
 use Nova\Queue\Queue;
-use Nova\Queue\QueueInterface;
+use Nova\Queue\Contracts\QueueInterface;
 
 use IronMQ;
 

@@ -9,8 +9,8 @@ use Nova\Bus\Contracts\QueueingDispatcherInterface;
 
 use Nova\Container\Container;
 use Nova\Pipeline\Pipeline;
-use Nova\Queue\QueueInterface;
-use Nova\Queue\ShouldQueueInterface;
+use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\Contracts\ShouldQueueInterface;
 use Nova\Support\Collection;
 
 use ArrayAccess;
@@ -235,7 +235,7 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 		}
 
 		return (new ReflectionClass($this->getHandlerClass($command)))->implementsInterface(
-			'Nova\Queue\ShouldQueueInterface'
+			'Nova\Queue\Contracts\ShouldQueueInterface'
 		);
 	}
 
@@ -266,7 +266,7 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 	/**
 	 * Push the command onto the given queue instance.
 	 *
-	 * @param \Nova\Queue\QueueInterface $queue
+	 * @param \Nova\Queue\Contracts\QueueInterface $queue
 	 * @param mixed					  $command
 	 *
 	 * @return mixed

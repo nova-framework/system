@@ -2,11 +2,12 @@
 
 namespace {{namespace}};
 
-use {{rootNamespace}}Jobs\Job;
+use Nova\Bus\Contracts\SelfHandlingInterface;
+use Nova\Queue\Contracts\ShouldQueueInterface;
 use Nova\Queue\SerializesModelsTrait;
 use Nova\Queue\InteractsWithQueueTrait;
-use Nova\Bus\Contracts\SelfHandlingInterface;
-use Nova\Queue\ShouldQueueInterface;
+
+use {{rootNamespace}}Jobs\Job;
 
 
 class {{className}} extends Job implements SelfHandlingInterface, ShouldQueueInterface

@@ -81,7 +81,7 @@ class QueueManager
 	 * Resolve a queue connection instance.
 	 *
 	 * @param  string  $name
-	 * @return \Nova\Queue\QueueInterface
+	 * @return \Nova\Queue\Contracts\QueueInterface
 	 */
 	public function connection($name = null)
 	{
@@ -105,7 +105,7 @@ class QueueManager
 	 * Resolve a queue connection.
 	 *
 	 * @param  string  $name
-	 * @return \Nova\Queue\QueueInterface
+	 * @return \Nova\Queue\Contracts\QueueInterface
 	 */
 	protected function resolve($name)
 	{

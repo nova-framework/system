@@ -40,7 +40,7 @@ class RedisConnector implements ConnectorInterface
 	 * Establish a queue connection.
 	 *
 	 * @param  array  $config
-	 * @return \Nova\Queue\QueueInterface
+	 * @return \Nova\Queue\Contracts\QueueInterface
 	 */
 	public function connect(array $config)
 	{

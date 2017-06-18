@@ -4,7 +4,7 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\SqsJob;
 use Nova\Queue\Queue;
-use Nova\Queue\QueueInterface;
+use Nova\Queue\Contracts\QueueInterface;
 
 use Aws\Sqs\SqsClient;
 

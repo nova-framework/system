@@ -4,7 +4,7 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\BeanstalkdJob;
 use Nova\Queue\Queue;
-use Nova\Queue\QueueInterface;
+use Nova\Queue\Contracts\QueueInterface;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
