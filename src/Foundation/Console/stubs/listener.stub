@@ -2,8 +2,8 @@
 
 namespace {{namespace}};
 
-use Nova\Queue\InteractsWithQueueTrait;
 use Nova\Queue\Contracts\ShouldQueueInterface;
+use Nova\Queue\InteractsWithQueueTrait;
 
 use {{fullEvent}};
 
