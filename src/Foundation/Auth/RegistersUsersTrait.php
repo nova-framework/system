@@ -18,7 +18,8 @@ trait RegistersUsersTrait
 	 */
 	public function getRegister()
 	{
-		return $this->createView()->shares('title', __d('nova', 'User Registration'));
+		return $this->createView()
+			->shares('title', __d('nova', 'User Registration'));
 	}
 
 	/**

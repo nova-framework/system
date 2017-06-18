@@ -25,7 +25,7 @@ trait ResetsPasswords
 	 */
 	public function getEmail()
 	{
-		return View::make('Auth/Password')
+		return $this->createView()
 			->shares('title', __d('nova', 'Reset Password'));
 	}
 
@@ -75,7 +75,7 @@ trait ResetsPasswords
 			throw new NotFoundHttpException;
 		}
 
-		return View::make('Auth/Reset')
+		return $this->createView()
 			->shares('title', __d('nova', 'Reset Password'))
 			->with('token', $token);
 	}

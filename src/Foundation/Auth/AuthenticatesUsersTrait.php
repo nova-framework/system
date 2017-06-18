@@ -23,7 +23,8 @@ trait AuthenticatesUsersTrait
 	 */
 	public function login()
 	{
-		return $this->createView()->shares('title', __d('nova', 'User Login'));
+		return $this->createView()
+			->shares('title', __d('nova', 'User Login'));
 	}
 
 	/**
