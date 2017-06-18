@@ -23,9 +23,9 @@ class BusServiceProvider extends ServiceProvider
 	{
 		$this->app->singleton('Nova\Bus\Dispatcher', function ($app)
 		{
-			return new Dispatcher($app, function () use ($app)
+			return new Dispatcher($app, function ($connection = null) use ($app)
 			{
-				return $app['queue'];
+				return $app->make('queue')->connection($connection);
 			});
 		});
 

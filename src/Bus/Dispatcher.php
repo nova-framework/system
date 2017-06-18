@@ -2,26 +2,18 @@
 
 namespace Nova\Bus;
 
-use Nova\Bus\Contracts\SelfHandlingInterface;
-use Nova\Bus\Contracts\DispatcherInterface;
-use Nova\Bus\Contracts\HandlerResolverInterface;
-use Nova\Bus\Contracts\QueueingDispatcherInterface;
 
 use Nova\Container\Container;
 use Nova\Pipeline\Pipeline;
 use Nova\Queue\Contracts\QueueInterface;
 use Nova\Queue\Contracts\ShouldQueueInterface;
-use Nova\Support\Collection;
+use Nova\Contracts\Bus\QueueingDispatcherInterface;
 
-use ArrayAccess;
 use Closure;
-use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionParameter;
 use RuntimeException;
 
 
-class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, HandlerResolverInterface
+class Dispatcher implements QueueingDispatcher
 {
 	/**
 	 * The container implementation.
@@ -45,33 +37,25 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 	protected $pipes = array();
 
 	/**
+	 * The command to handler mapping for non-self-handling events.
+	 *
+	 * @var array
+	 */
+	protected $handlers = array();
+
+	/**
 	 * The queue resolver callback.
 	 *
 	 * @var \Closure|null
 	 */
 	protected $queueResolver;
 
-	/**
-	 * All of the command-to-handler mappings.
-	 *
-	 * @var array
-	 */
-	protected $mappings = array();
-
-	/**
-	 * The fallback mapping Closure.
-	 *
-	 * @var \Closure
-	 */
-	protected $mapper;
-
 
 	/**
 	 * Create a new command dispatcher instance.
 	 *
-	 * @param \Nova\Container\Container $container
-	 * @param \Closure|null			 $queueResolver
-	 *
+	 * @param  \Nova\Container\Container  $container
+	 * @param  \Closure|null  $queueResolver
 	 * @return void
 	 */
 	public function __construct(Container $container, Closure $queueResolver = null)
@@ -84,175 +68,100 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 	}
 
 	/**
-	 * Marshal a command and dispatch it to its appropriate handler.
-	 *
-	 * @param mixed $command
-	 * @param array $array
-	 *
-	 * @return mixed
-	 */
-	public function dispatchFromArray($command, array $array)
-	{
-		return $this->dispatch($this->marshalFromArray($command, $array));
-	}
-
-	/**
-	 * Marshal a command and dispatch it to its appropriate handler.
-	 *
-	 * @param mixed		$command
-	 * @param \ArrayAccess $source
-	 * @param array		$extras
-	 *
-	 * @return mixed
-	 */
-	public function dispatchFrom($command, ArrayAccess $source, array $extras = array())
-	{
-		return $this->dispatch($this->marshal($command, $source, $extras));
-	}
-
-	/**
-	 * Marshal a command from the given array.
-	 *
-	 * @param string $command
-	 * @param array  $array
-	 *
-	 * @return mixed
-	 */
-	protected function marshalFromArray($command, array $array)
-	{
-		return $this->marshal($command, new Collection(), $array);
-	}
-
-	/**
-	 * Marshal a command from the given array accessible object.
-	 *
-	 * @param string	   $command
-	 * @param \ArrayAccess $source
-	 * @param array		$extras
-	 *
-	 * @return mixed
-	 */
-	protected function marshal($command, ArrayAccess $source, array $extras = array())
-	{
-		$injected = array();
-
-		$reflection = new ReflectionClass($command);
-
-		if ($constructor = $reflection->getConstructor()) {
-			$injected = array_map(function ($parameter) use ($command, $source, $extras)
-			{
-				return $this->getParameterValueForCommand($command, $source, $parameter, $extras);
-
-			}, $constructor->getParameters());
-		}
-
-		return $reflection->newInstanceArgs($injected);
-	}
-
-	/**
-	 * Get a parameter value for a marshaled command.
-	 *
-	 * @param string			   $command
-	 * @param \ArrayAccess		 $source
-	 * @param \ReflectionParameter $parameter
-	 * @param array				$extras
-	 *
-	 * @return mixed
-	 */
-	protected function getParameterValueForCommand($command, ArrayAccess $source,  ReflectionParameter $parameter, array $extras = array())
-	{
-		if (array_key_exists($parameter->name, $extras)) {
-			return $extras[$parameter->name];
-		}
-
-		if (isset($source[$parameter->name])) {
-			return $source[$parameter->name];
-		}
-
-		if ($parameter->isDefaultValueAvailable()) {
-			return $parameter->getDefaultValue();
-		}
-
-		MarshalException::whileMapping($command, $parameter);
-	}
-
-	/**
 	 * Dispatch a command to its appropriate handler.
 	 *
-	 * @param mixed		 $command
-	 * @param \Closure|null $afterResolving
-	 *
+	 * @param  mixed  $command
 	 * @return mixed
 	 */
-	public function dispatch($command, Closure $afterResolving = null)
+	public function dispatch($command)
 	{
-		if ($this->queueResolver && $this->commandShouldBeQueued($command)) {
+		if (! is_null($this->queueResolver) && $this->commandShouldBeQueued($command)) {
 			return $this->dispatchToQueue($command);
 		} else {
-			return $this->dispatchNow($command, $afterResolving);
+			return $this->dispatchNow($command);
 		}
 	}
 
 	/**
 	 * Dispatch a command to its appropriate handler in the current process.
 	 *
-	 * @param mixed		 $command
-	 * @param \Closure|null $afterResolving
-	 *
+	 * @param  mixed  $command
+	 * @param  mixed  $handler
 	 * @return mixed
 	 */
-	public function dispatchNow($command, Closure $afterResolving = null)
+	public function dispatchNow($command, $handler = null)
 	{
-		return $this->pipeline->send($command)->through($this->pipes)->then(function ($command) use ($afterResolving)
-		{
-			if ($command instanceof SelfHandlingInterface) {
-				return $this->container->call(array($command, 'handle'));
-			}
+		if (! is_null($handler) || ($handler = $this->getCommandHandler($command))) {
+			$callback = function ($command) use ($handler) {
+				return $handler->handle($command);
+			};
+		} else {
+			$callback = function ($command) {
+				return $this->container->call([$command, 'handle']);
+			};
+		}
 
-			$handler = $this->resolveHandler($command);
+		return $this->pipeline->send($command)->through($this->pipes)->then($callback);
+	}
 
-			if ($afterResolving) {
-				call_user_func($afterResolving, $handler);
-			}
+	/**
+	 * Determine if the given command has a handler.
+	 *
+	 * @param  mixed  $command
+	 * @return bool
+	 */
+	public function hasCommandHandler($command)
+	{
+		$key = get_class($command);
 
-			return call_user_func(
-				array($handler, $this->getHandlerMethod($command)), $command
-			);
-		});
+		return array_key_exists($key, $this->handlers);
+	}
+
+	/**
+	 * Retrieve the handler for a command.
+	 *
+	 * @param  mixed  $command
+	 * @return bool|mixed
+	 */
+	public function getCommandHandler($command)
+	{
+		$key = get_class($command);
+
+		if (array_key_exists($key, $this->handlers)) {
+			$handler = $this->handlers[$key];
+
+			return $this->container->make($handler);
+		}
+
+		return false;
 	}
 
 	/**
 	 * Determine if the given command should be queued.
 	 *
-	 * @param mixed $command
-	 *
+	 * @param  mixed  $command
 	 * @return bool
 	 */
 	protected function commandShouldBeQueued($command)
 	{
-		if ($command instanceof ShouldQueueInterface) {
-			return true;
-		}
-
-		return (new ReflectionClass($this->getHandlerClass($command)))->implementsInterface(
-			'Nova\Queue\Contracts\ShouldQueueInterface'
-		);
+		return ($command instanceof ShouldQueueInterface);
 	}
 
 	/**
 	 * Dispatch a command to its appropriate handler behind a queue.
 	 *
-	 * @param mixed $command
+	 * @param  mixed  $command
+	 * @return mixed
 	 *
 	 * @throws \RuntimeException
-	 *
-	 * @return mixed
 	 */
 	public function dispatchToQueue($command)
 	{
-		$queue = call_user_func($this->queueResolver);
+		$connection = isset($command->connection) ? $command->connection : null;
 
-		if (!$queue instanceof QueueInterface) {
+		$queue = call_user_func($this->queueResolver, $connection);
+
+		if (! $queue instanceof QueueInterface) {
 			throw new RuntimeException('Queue resolver did not return a Queue implementation.');
 		}
 
@@ -266,9 +175,8 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 	/**
 	 * Push the command onto the given queue instance.
 	 *
-	 * @param \Nova\Queue\Contracts\QueueInterface $queue
-	 * @param mixed					  $command
-	 *
+	 * @param  \Nova\Queue\Contracts\QueueInterface  $queue
+	 * @param  mixed  $command
 	 * @return mixed
 	 */
 	protected function pushCommandToQueue($queue, $command)
@@ -289,154 +197,27 @@ class Dispatcher implements DispatcherInterface, QueueingDispatcherInterface, Ha
 	}
 
 	/**
-	 * Get the handler instance for the given command.
-	 *
-	 * @param mixed $command
-	 *
-	 * @return mixed
-	 */
-	public function resolveHandler($command)
-	{
-		if ($command instanceof SelfHandlingInterface) {
-			return $command;
-		}
-
-		return $this->container->make($this->getHandlerClass($command));
-	}
-
-	/**
-	 * Get the handler class for the given command.
-	 *
-	 * @param mixed $command
-	 *
-	 * @return string
-	 */
-	public function getHandlerClass($command)
-	{
-		if ($command instanceof SelfHandlingInterface) {
-			return get_class($command);
-		}
-
-		return $this->inflectSegment($command, 0);
-	}
-
-	/**
-	 * Get the handler method for the given command.
-	 *
-	 * @param mixed $command
-	 *
-	 * @return string
-	 */
-	public function getHandlerMethod($command)
-	{
-		if ($command instanceof SelfHandlingInterface) {
-			return 'handle';
-		}
-
-		return $this->inflectSegment($command, 1);
-	}
-
-	/**
-	 * Get the given handler segment for the given command.
-	 *
-	 * @param mixed $command
-	 * @param int   $segment
-	 *
-	 * @return string
-	 */
-	protected function inflectSegment($command, $segment)
-	{
-		$className = get_class($command);
-
-		if (isset($this->mappings[$className])) {
-			return $this->getMappingSegment($className, $segment);
-		} elseif ($this->mapper) {
-			return $this->getMapperSegment($command, $segment);
-		}
-
-		throw new InvalidArgumentException("No handler registered for command [{$className}]");
-	}
-
-	/**
-	 * Get the given segment from a given class handler.
-	 *
-	 * @param string $className
-	 * @param int	$segment
-	 *
-	 * @return string
-	 */
-	protected function getMappingSegment($className, $segment)
-	{
-		$segments = explode('@', $this->mappings[$className]);
-
-		return $segments[$segment];
-	}
-
-	/**
-	 * Get the given segment from a given class handler using the custom mapper.
-	 *
-	 * @param mixed $command
-	 * @param int   $segment
-	 *
-	 * @return string
-	 */
-	protected function getMapperSegment($command, $segment)
-	{
-		$segments = explode('@', call_user_func($this->mapper, $command));
-
-		return $segments[$segment];
-	}
-
-	/**
-	 * Register command-to-handler mappings.
-	 *
-	 * @param array $commands
-	 *
-	 * @return void
-	 */
-	public function maps(array $commands)
-	{
-		$this->mappings = array_merge($this->mappings, $commands);
-	}
-
-	/**
-	 * Register a fallback mapper callback.
-	 *
-	 * @param \Closure $mapper
-	 *
-	 * @return void
-	 */
-	public function mapUsing(Closure $mapper)
-	{
-		$this->mapper = $mapper;
-	}
-
-	/**
-	 * Map the command to a handler within a given root namespace.
-	 *
-	 * @param mixed  $command
-	 * @param string $commandNamespace
-	 * @param string $handlerNamespace
-	 *
-	 * @return string
-	 */
-	public static function simpleMapping($command, $commandNamespace, $handlerNamespace)
-	{
-		$command = str_replace($commandNamespace, '', get_class($command));
-
-		return $handlerNamespace .'\\' .trim($command, '\\') .'Handler@handle';
-	}
-
-	/**
 	 * Set the pipes through which commands should be piped before dispatching.
 	 *
-	 * @param array $pipes
-	 *
+	 * @param  array  $pipes
 	 * @return $this
 	 */
 	public function pipeThrough(array $pipes)
 	{
 		$this->pipes = $pipes;
+
+		return $this;
+	}
+
+	/**
+	 * Map a command to a handler.
+	 *
+	 * @param  array  $map
+	 * @return $this
+	 */
+	public function map(array $map)
+	{
+		$this->handlers = array_merge($this->handlers, $map);
 
 		return $this;
 	}
