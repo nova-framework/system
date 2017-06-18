@@ -2,6 +2,7 @@
 
 namespace Nova\Auth\Reminders;
 
+use Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface;
 use Nova\Database\Connection;
 
 use Carbon\Carbon;

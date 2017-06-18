@@ -87,7 +87,7 @@ class PasswordBrokerManager
 	 * Create a token repository instance based on the given configuration.
 	 *
 	 * @param  array  $config
-	 * @return \Nova\Auth\Reminders\ReminderRepositoryInterface
+	 * @return \Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface
 	 */
 	protected function createReminderRepository(array $config)
 	{

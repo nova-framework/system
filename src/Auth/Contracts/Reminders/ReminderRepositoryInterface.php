@@ -1,6 +1,8 @@
 <?php
 
-namespace Nova\Auth\Reminders;
+namespace Nova\Auth\Contracts\Reminders;
+
+use Nova\Auth\Contracts\Reminders\RemindableInterface;
 
 
 interface ReminderRepositoryInterface

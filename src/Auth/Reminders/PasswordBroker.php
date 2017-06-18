@@ -2,8 +2,9 @@
 
 namespace Nova\Auth\Reminders;
 
+use Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface;
+use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Mail\Mailer;
-use Nova\Auth\UserProviderInterface;
 
 use Closure;
 
@@ -48,14 +49,14 @@ class PasswordBroker
 	/**
 	 * The password reminder repository.
 	 *
-	 * @var \Nova\Auth\Reminders\ReminderRepositoryInterface  $reminders
+	 * @var \Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface  $reminders
 	 */
 	protected $reminders;
 
 	/**
 	 * The user provider implementation.
 	 *
-	 * @var \Nova\Auth\UserProviderInterface
+	 * @var \Nova\Auth\Contracts\UserProviderInterface
 	 */
 	protected $users;
 
@@ -83,8 +84,8 @@ class PasswordBroker
 	/**
 	 * Create a new password broker instance.
 	 *
-	 * @param  \Nova\Auth\Reminders\ReminderRepositoryInterface  $reminders
-	 * @param  \Nova\Auth\UserProviderInterface  $users
+	 * @param  \Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface  $reminders
+	 * @param  \Nova\Auth\Contracts\UserProviderInterface  $users
 	 * @param  \Nova\Mail\Mailer  $mailer
 	 * @param  string  $reminderView
 	 * @return void
@@ -131,7 +132,7 @@ class PasswordBroker
 	/**
 	 * Send the password reminder e-mail.
 	 *
-	 * @param  \Nova\Auth\Reminders\RemindableInterface  $user
+	 * @param  \Nova\Auth\Contracts\Reminders\RemindableInterface  $user
 	 * @param  string	$token
 	 * @param  \Closure  $callback
 	 * @return int
@@ -249,7 +250,7 @@ class PasswordBroker
 	 * Get the user for the given credentials.
 	 *
 	 * @param  array  $credentials
-	 * @return \Nova\Auth\Reminders\RemindableInterface
+	 * @return \Nova\Auth\Contracts\Reminders\RemindableInterface
 	 *
 	 * @throws \UnexpectedValueException
 	 */
@@ -269,7 +270,7 @@ class PasswordBroker
 	/**
 	 * Get the password reminder repository implementation.
 	 *
-	 * @return \Nova\Auth\Reminders\ReminderRepositoryInterface
+	 * @return \Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface
 	 */
 	protected function getRepository()
 	{
