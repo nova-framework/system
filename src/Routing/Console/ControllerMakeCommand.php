@@ -1,8 +1,8 @@
 <?php
 
-namespace Mini\Routing\Console;
+namespace Nova\Routing\Console;
 
-use Mini\Console\GeneratorCommand;
+use Nova\Console\GeneratorCommand;
 
 use Symfony\Component\Console\Input\InputOption;
 

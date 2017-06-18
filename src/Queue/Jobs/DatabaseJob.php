@@ -3,7 +3,7 @@
 namespace Nova\Queue\Jobs;
 
 use Nova\Container\Container;
-use Nova\Queue\DatabaseQueue;
+use Nova\Queue\Queues\DatabaseQueue;
 
 
 class DatabaseJob extends Job

@@ -8,6 +8,7 @@ use Nova\Queue\Console\FlushFailedCommand;
 use Nova\Queue\Console\FailedTableCommand;
 use Nova\Queue\Console\ForgetFailedCommand;
 use Nova\Queue\Console\TableCommand;
+use Nova\Queue\Console\AsyncCommand;
 
 use Nova\Support\ServiceProvider;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Mini\Routing\Console;
+namespace Nova\Routing\Console;
 
-use Mini\Console\Command;
+use Nova\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Mini\Routing\Generators\MiddlewareGenerator;
+use Nova\Routing\Generators\MiddlewareGenerator;
 
 
 class MiddlewareMakeCommand extends Command

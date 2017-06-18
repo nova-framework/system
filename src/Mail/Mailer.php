@@ -2,7 +2,7 @@
 
 namespace Nova\Mail;
 
-use Nova\Log\Writer;
+use Nova\Log\Writter;
 use Nova\View\Factory;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
@@ -463,7 +463,7 @@ class Mailer
 	 * @param  \Nova\Log\Writer  $logger
 	 * @return $this
 	 */
-	public function setLogger(Writer $logger)
+	public function setLogger(Writter $logger)
 	{
 		$this->logger = $logger;
 
