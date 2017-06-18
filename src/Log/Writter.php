@@ -2,7 +2,7 @@
 
 namespace Nova\Log;
 
-use Nova\Events\DispatcherInterface;
+use Nova\Events\Contracts\DispatcherInterface;
 use Nova\Support\Contracts\JsonableInterface as Jsonable;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 
@@ -32,7 +32,7 @@ class Writter implements PsrLoggerInterface
 	/**
 	 * The event dispatcher instance.
 	 *
-	 * @var \Nova\Events\DispatcherInterface
+	 * @var \Nova\Events\Contracts\DispatcherInterface
 	 */
 	protected $dispatcher;
 
@@ -57,7 +57,7 @@ class Writter implements PsrLoggerInterface
 	 * Create a new log writer instance.
 	 *
 	 * @param  \Monolog\Logger  $monolog
-	 * @param  \Nova\Events\Contracts\Dispatcher  $dispatcher
+	 * @param  \Nova\Events\Contracts\DispatcherInterface  $dispatcher
 	 * @return void
 	 */
 	public function __construct(MonologLogger $monolog, DispatcherInterface $dispatcher = null)
@@ -356,7 +356,7 @@ class Writter implements PsrLoggerInterface
 	/**
 	 * Get the event dispatcher instance.
 	 *
-	 * @return \Nova\Events\DispatcherInterface
+	 * @return \Nova\Events\Contracts\DispatcherInterface
 	 */
 	public function getEventDispatcher()
 	{
@@ -366,7 +366,7 @@ class Writter implements PsrLoggerInterface
 	/**
 	 * Set the event dispatcher instance.
 	 *
-	 * @param  \Nova\Events\DispatcherInterface  $dispatcher
+	 * @param  \Nova\Events\Contracts\DispatcherInterface  $dispatcher
 	 * @return void
 	 */
 	public function setEventDispatcher(DispatcherInterface $dispatcher)
