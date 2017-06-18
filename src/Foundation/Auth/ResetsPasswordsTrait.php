@@ -13,7 +13,7 @@ use Nova\Support\Facades\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
-trait ResetsPasswords
+trait ResetsPasswordsTrait
 {
 	use RedirectsUsers;
 
@@ -46,7 +46,7 @@ trait ResetsPasswords
 
 		switch ($response) {
 			case Password::REMINDER_SENT:
-				return Redirect::back()->withStatus(__d('nova', 'Reset instructions have been sent to your email address'));
+				return Redirect::back()->with('success', __d('nova', 'Reset instructions have been sent to your email address'));
 
 			case Password::INVALID_USER:
 				return Redirect::back()->withErrors(array('email' => __d('nova', 'We can\'t find a User with that e-mail address.')));
@@ -120,16 +120,16 @@ trait ResetsPasswords
 			case Password::PASSWORD_RESET:
 				$status = __d('users', 'You have successfully reset your Password.');
 
-				return Redirect::to($this->redirectPath())->withStatus($status);
+				return Redirect::to($this->redirectPath())->with('success', $status);
 		}
 
-		return Redirect::back()->withStatus($status, 'danger');
+		return Redirect::back()->with('danger', $status);
 	}
 
 	/**
 	 * Reset the given user's password.
 	 *
-	 * @param  \Nova\Contracts\Auth\CanResetPassword  $user
+	 * @param  \Nova\Auth\Contracts\Reminders\RemindableInterface  $user
 	 * @param  string  $password
 	 * @return void
 	 */
