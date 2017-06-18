@@ -20,30 +20,30 @@ use ReflectionException;
 
 class Language extends Facade
 {
-    public static function initialize()
-    {
-        $accessor = static::getFacadeAccessor();
+	public static function initialize()
+	{
+		$accessor = static::getFacadeAccessor();
 
-        $instance = static::resolveFacadeInstance($accessor);
+		$instance = static::resolveFacadeInstance($accessor);
 
-        //
-        $locale = static::$app['config']['app.locale'];
+		//
+		$locale = static::$app['config']['app.locale'];
 
-        if (Session::has('language')) {
-            $locale = Session::get('language', $locale);
-        } else if(Cookie::has(PREFIX .'language')) {
-            $locale = Cookie::get(PREFIX .'language', $locale);
+		if (Session::has('language')) {
+			$locale = Session::get('language', $locale);
+		} else if(Cookie::has(PREFIX .'language')) {
+			$locale = Cookie::get(PREFIX .'language', $locale);
 
-            Session::set('language', $locale);
-        }
+			Session::set('language', $locale);
+		}
 
-        $instance->setLocale($locale);
-    }
+		$instance->setLocale($locale);
+	}
 
-    /**
-     * Get the registered name of the component.
-     *
-     * @return string
-     */
-    protected static function getFacadeAccessor() { return 'language'; }
+	/**
+	 * Get the registered name of the component.
+	 *
+	 * @return string
+	 */
+	protected static function getFacadeAccessor() { return 'language'; }
 }

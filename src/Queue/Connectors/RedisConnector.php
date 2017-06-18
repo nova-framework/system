@@ -9,48 +9,48 @@ use Nova\Queue\Queues\RedisQueue;
 class RedisConnector implements ConnectorInterface
 {
 
-    /**
-    * The Redis database instance.
-    *
-     * @var \Nova\Redis\Database
-     */
-    protected $redis;
+	/**
+	* The Redis database instance.
+	*
+	 * @var \Nova\Redis\Database
+	 */
+	protected $redis;
 
-    /**
-     * The connection name.
-     *
-     * @var string
-     */
-    protected $connection;
+	/**
+	 * The connection name.
+	 *
+	 * @var string
+	 */
+	protected $connection;
 
-    /**
-     * Create a new Redis queue connector instance.
-     *
-     * @param  \Nova\Redis\Database  $redis
-     * @param  string|null  $connection
-     * @return void
-     */
-    public function __construct(Database $redis, $connection = null)
-    {
-        $this->redis = $redis;
-        $this->connection = $connection;
-    }
+	/**
+	 * Create a new Redis queue connector instance.
+	 *
+	 * @param  \Nova\Redis\Database  $redis
+	 * @param  string|null  $connection
+	 * @return void
+	 */
+	public function __construct(Database $redis, $connection = null)
+	{
+		$this->redis = $redis;
+		$this->connection = $connection;
+	}
 
-    /**
-     * Establish a queue connection.
-     *
-     * @param  array  $config
-     * @return \Nova\Queue\QueueInterface
-     */
-    public function connect(array $config)
-    {
-        $queue = new RedisQueue(
-            $this->redis, $config['queue'], array_get($config, 'connection', $this->connection)
-        );
+	/**
+	 * Establish a queue connection.
+	 *
+	 * @param  array  $config
+	 * @return \Nova\Queue\QueueInterface
+	 */
+	public function connect(array $config)
+	{
+		$queue = new RedisQueue(
+			$this->redis, $config['queue'], array_get($config, 'connection', $this->connection)
+		);
 
-        $queue->setExpire(array_get($config, 'expire', 60));
+		$queue->setExpire(array_get($config, 'expire', 60));
 
-        return $queue;
-    }
+		return $queue;
+	}
 
 }

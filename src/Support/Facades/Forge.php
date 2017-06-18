@@ -8,11 +8,11 @@ namespace Nova\Support\Facades;
  */
 class Forge extends Facade
 {
-    /**
-     * Get the registered name of the component.
-     *
-     * @return string
-     */
-    protected static function getFacadeAccessor() { return 'Nova\Console\Contracts\KernelInterface'; }
+	/**
+	 * Get the registered name of the component.
+	 *
+	 * @return string
+	 */
+	protected static function getFacadeAccessor() { return 'Nova\Console\Contracts\KernelInterface'; }
 
 }

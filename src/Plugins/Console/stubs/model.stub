@@ -1,0 +1,11 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Database\ORM\Model as BaseModel;
+
+
+class {{className}} extends BaseModel
+{
+    //
+}

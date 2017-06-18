@@ -7,5 +7,5 @@ use RuntimeException;
 
 class UnauthorizedException extends RuntimeException
 {
-    //
+	//
 }

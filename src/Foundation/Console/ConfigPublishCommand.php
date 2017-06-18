@@ -4,7 +4,7 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Foundation\ConfigPublisher;
+use Nova\Foundation\Publishers\ConfigPublisher;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,85 +12,86 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class ConfigPublishCommand extends Command
 {
-    use ConfirmableTrait;
+	use ConfirmableTrait;
 
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'config:publish';
+	/**
+	 * The console command name.
+	 *
+	 * @var string
+	 */
+	protected $name = 'config:publish';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = "Publish a package's configuration to the application";
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = "Publish a package's configuration to the application";
 
-    /**
-     * The config publisher instance.
-     *
-     * @var \Nova\Foundation\ConfigPublisher
-     */
-    protected $config;
+	/**
+	 * The config publisher instance.
+	 *
+	 * @var \Nova\Foundation\ConfigPublisher
+	 */
+	protected $publisher;
 
-    /**
-     * Create a new configuration publish command instance.
-     *
-     * @param  \Nova\Foundation\ConfigPublisher  $config
-     * @return void
-     */
-    public function __construct(ConfigPublisher $config)
-    {
-        parent::__construct();
 
-        $this->config = $config;
-    }
+	/**
+	 * Create a new configuration publish command instance.
+	 *
+	 * @param  \Nova\Foundation\ConfigPublisher  $config
+	 * @return void
+	 */
+	public function __construct(ConfigPublisher $publisher)
+	{
+		parent::__construct();
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
-    public function fire()
-    {
-        $package = $this->input->getArgument('package');
+		$this->publisher = $publisher;
+	}
 
-        $proceed = $this->confirmToProceed('Config Already Published!', function() use ($package)
-        {
-            return $this->config->alreadyPublished($package);
-        });
+	/**
+	 * Execute the console command.
+	 *
+	 * @return void
+	 */
+	public function fire()
+	{
+		$package = $this->input->getArgument('package');
 
-        if (! $proceed) return;
+		$proceed = $this->confirmToProceed('Config Already Published!', function() use ($package)
+		{
+			return $this->publisher->alreadyPublished($package);
+		});
 
-        $this->config->publishPackage($package);
+		if (! $proceed) return;
 
-        $this->output->writeln('<info>Configuration published for package:</info> '.$package);
-    }
+		$this->publisher->publishPackage($package);
 
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return array(
-            array('package', InputArgument::REQUIRED, 'The configuration namespace of the package being published.'),
-        );
-    }
+		$this->output->writeln('<info>Configuration published for package:</info> '.$package);
+	}
 
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when the file already exists.'),
-        );
-    }
+	/**
+	 * Get the console command arguments.
+	 *
+	 * @return array
+	 */
+	protected function getArguments()
+	{
+		return array(
+			array('package', InputArgument::REQUIRED, 'The configuration namespace of the package being published.'),
+		);
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return array(
+			array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when the file already exists.'),
+		);
+	}
 
 }

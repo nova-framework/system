@@ -8,220 +8,222 @@
 
 namespace Nova\Validation;
 
-use Nova\Validation\Translator;
+use Nova\Config\Repository as Config;
 use Nova\Support\Str;
+use Nova\Validation\Presence\DatabasePresenceVerifier;
 
 use Closure;
 
 
 class Factory
 {
-    /**
-     * The Translator implementation.
-     *
-     * @var \Nova\Validation\Translator
-     */
-    protected $translator;
+	/**
+	 * The Config instance.
+	 *
+	 * @var \Nova\Config\Repository
+	 */
+	protected $config;
 
-    /**
-     * The Database Presence Verifier implementation.
-     *
-     * @var \Nova\Validation\DatabasePresenceVerifier
-     */
-    protected $verifier;
+	/**
+	 * The Database Presence Verifier implementation.
+	 *
+	 * @var \Validation\DatabasePresenceVerifier
+	 */
+	protected $verifier;
 
-    /**
-     * All of the custom validator extensions.
-     *
-     * @var array
-     */
-    protected $extensions = array();
+	/**
+	 * All of the custom validator extensions.
+	 *
+	 * @var array
+	 */
+	protected $extensions = array();
 
-    /**
-     * All of the custom implicit validator extensions.
-     *
-     * @var array
-     */
-    protected $implicitExtensions = array();
+	/**
+	 * All of the custom implicit validator extensions.
+	 *
+	 * @var array
+	 */
+	protected $implicitExtensions = array();
 
-    /**
-     * All of the custom validator message replacers.
-     *
-     * @var array
-     */
-    protected $replacers = array();
+	/**
+	 * All of the custom validator message replacers.
+	 *
+	 * @var array
+	 */
+	protected $replacers = array();
 
-    /**
-     * All of the fallback messages for custom rules.
-     *
-     * @var array
-     */
-    protected $fallbackMessages = array();
+	/**
+	 * All of the fallback messages for custom rules.
+	 *
+	 * @var array
+	 */
+	protected $fallbackMessages = array();
 
-    /**
-     * The Validator resolver instance.
-     *
-     * @var Closure
-     */
-    protected $resolver;
+	/**
+	 * The Validator resolver instance.
+	 *
+	 * @var Closure
+	 */
+	protected $resolver;
 
-    /**
-     * Create a new Validator Factory instance.
-     *
-     * @param  \Nova\Validation\Translator  $translator
-     * @return void
-     */
-    public function __construct(Translator $translator)
-    {
-        $this->translator = $translator;
-    }
 
-    /**
-     * Create a new Validator instance.
-     *
-     * @param  array  $data
-     * @param  array  $rules
-     * @param  array  $messages
-     * @return \Nova\Validation\Validator
-     */
-    public function make(array $data, array $rules, array $messages = array(), array $customAttributes = array())
-    {
-        $validator = $this->resolve($data, $rules, $messages, $customAttributes);
+	/**
+	 * Create a new Validator Factory instance.
+	 *
+	 * @param  \Validation\Translator  $translator
+	 * @return void
+	 */
+	public function __construct(Config $config)
+	{
+		$this->config = $config;
+	}
 
-        if (! is_null($this->verifier)) {
-            $validator->setPresenceVerifier($this->verifier);
-        }
+	/**
+	 * Create a new Validator instance.
+	 *
+	 * @param  array  $data
+	 * @param  array  $rules
+	 * @param  array  $messages
+	 * @return \Validation\Validator
+	 */
+	public function make(array $data, array $rules, array $messages = array(), array $customAttributes = array())
+	{
+		$validator = $this->resolve($data, $rules, $messages, $customAttributes);
 
-        $this->addExtensions($validator);
+		if (! is_null($this->verifier)) {
+			$validator->setPresenceVerifier($this->verifier);
+		}
 
-        return $validator;
-    }
+		$this->addExtensions($validator);
 
-    /**
-     * Add the extensions to a validator instance.
-     *
-     * @param  \Nova\Validation\Validator  $validator
-     * @return void
-     */
-    protected function addExtensions($validator)
-    {
-        $validator->addExtensions($this->extensions);
+		return $validator;
+	}
 
-        $implicit = $this->implicitExtensions;
+	/**
+	 * Add the extensions to a validator instance.
+	 *
+	 * @param  \Validation\Validator  $validator
+	 * @return void
+	 */
+	protected function addExtensions($validator)
+	{
+		$validator->addExtensions($this->extensions);
 
-        $validator->addImplicitExtensions($implicit);
+		$implicit = $this->implicitExtensions;
 
-        $validator->addReplacers($this->replacers);
+		$validator->addImplicitExtensions($implicit);
 
-        $validator->setFallbackMessages($this->fallbackMessages);
-    }
+		$validator->addReplacers($this->replacers);
 
-    /**
-     * Resolve a new Validator instance.
-     *
-     * @param  array  $data
-     * @param  array  $rules
-     * @param  array  $messages
-     * @return \Nova\Validation\Validator
-     */
-    protected function resolve($data, $rules, $messages, $customAttributes)
-    {
-        if (is_null($this->resolver)) {
-            return new Validator($this->translator, $data, $rules, $messages, $customAttributes);
-        } else {
-            return call_user_func($this->resolver, $this->translator, $data, $rules, $messages, $customAttributes);
-        }
-    }
+		$validator->setFallbackMessages($this->fallbackMessages);
+	}
 
-    /**
-     * Register a custom Validator extension.
-     *
-     * @param  string  $rule
-     * @param  \Closure|string  $extension
-     * @param  string  $message
-     * @return void
-     */
-    public function extend($rule, $extension, $message = null)
-    {
-        $this->extensions[$rule] = $extension;
+	/**
+	 * Resolve a new Validator instance.
+	 *
+	 * @param  array  $data
+	 * @param  array  $rules
+	 * @param  array  $messages
+	 * @return \Validation\Validator
+	 */
+	protected function resolve($data, $rules, $messages, $customAttributes)
+	{
+		if (is_null($this->resolver)) {
+			return new Validator($this->config, $data, $rules, $messages, $customAttributes);
+		} else {
+			return call_user_func($this->resolver, $this->config, $data, $rules, $messages, $customAttributes);
+		}
+	}
 
-        if ($message !== null) {
-            $rule = Str::snake($rule);
+	/**
+	 * Register a custom Validator extension.
+	 *
+	 * @param  string  $rule
+	 * @param  \Closure|string  $extension
+	 * @param  string  $message
+	 * @return void
+	 */
+	public function extend($rule, $extension, $message = null)
+	{
+		$this->extensions[$rule] = $extension;
 
-            $this->fallbackMessages[$rule] = $message;
-        }
-    }
+		if ($message !== null) {
+			$rule = Str::snake($rule);
 
-    /**
-     * Register a custom implicit Validator extension.
-     *
-     * @param  string   $rule
-     * @param  \Closure|string  $extension
-     * @param  string  $message
-     * @return void
-     */
-    public function extendImplicit($rule, $extension, $message = null)
-    {
-        $this->implicitExtensions[$rule] = $extension;
+			$this->fallbackMessages[$rule] = $message;
+		}
+	}
 
-        if ($message !== null) {
-            $rule = Str::snake($rule);
+	/**
+	 * Register a custom implicit Validator extension.
+	 *
+	 * @param  string   $rule
+	 * @param  \Closure|string  $extension
+	 * @param  string  $message
+	 * @return void
+	 */
+	public function extendImplicit($rule, $extension, $message = null)
+	{
+		$this->implicitExtensions[$rule] = $extension;
 
-            $this->fallbackMessages[$rule] = $message;
-        }
-    }
+		if ($message !== null) {
+			$rule = Str::snake($rule);
 
-    /**
-     * Register a custom implicit Validator message replacer.
-     *
-     * @param  string   $rule
-     * @param  \Closure|string  $replacer
-     * @return void
-     */
-    public function replacer($rule, $replacer)
-    {
-        $this->replacers[$rule] = $replacer;
-    }
+			$this->fallbackMessages[$rule] = $message;
+		}
+	}
 
-    /**
-     * Set the Validator instance resolver.
-     *
-     * @param  Closure  $resolver
-     * @return void
-     */
-    public function resolver(Closure $resolver)
-    {
-        $this->resolver = $resolver;
-    }
+	/**
+	 * Register a custom implicit Validator message replacer.
+	 *
+	 * @param  string   $rule
+	 * @param  \Closure|string  $replacer
+	 * @return void
+	 */
+	public function replacer($rule, $replacer)
+	{
+		$this->replacers[$rule] = $replacer;
+	}
 
-    /**
-     * Get the Translator implementation.
-     *
-     * @return \Nova\Validation\Translator
-     */
-    public function getTranslator()
-    {
-        return $this->translator;
-    }
+	/**
+	 * Set the Validator instance resolver.
+	 *
+	 * @param  Closure  $resolver
+	 * @return void
+	 */
+	public function resolver(Closure $resolver)
+	{
+		$this->resolver = $resolver;
+	}
 
-    /**
-     * Get the database presence verifier implementation.
-     *
-     * @return \Nova\Validation\DatabasePresenceVerifier
-     */
-    public function getPresenceVerifier()
-    {
-        return $this->verifier;
-    }
+	/**
+	 * Get the Translator implementation.
+	 *
+	 * @return \Validation\Translator
+	 */
+	public function getTranslator()
+	{
+		return $this->config;
+	}
 
-    /**
-     * Set the database presence verifier implementation.
-     *
-     * @param  \Nova\Validation\DatabasePresenceVerifier  $presenceVerifier
-     * @return void
-     */
-    public function setPresenceVerifier(DatabasePresenceVerifier $presenceVerifier)
-    {
-        $this->verifier = $presenceVerifier;
-    }
+	/**
+	 * Get the database presence verifier implementation.
+	 *
+	 * @return \Validation\DatabasePresenceVerifier
+	 */
+	public function getPresenceVerifier()
+	{
+		return $this->verifier;
+	}
+
+	/**
+	 * Set the database presence verifier implementation.
+	 *
+	 * @param  \Validation\DatabasePresenceVerifier  $presenceVerifier
+	 * @return void
+	 */
+	public function setPresenceVerifier(DatabasePresenceVerifier $presenceVerifier)
+	{
+		$this->verifier = $presenceVerifier;
+	}
 }

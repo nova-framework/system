@@ -23,7 +23,6 @@
         "classpreloader/classpreloader": "^3.0",
         "danielstjules/stringy": "~1.8",
         "jeremeamia/superclosure": "~2.2",
-        "paragonie/random_compat": "~1.4",
         "psy/psysh": "0.7.*",
         "symfony/browser-kit": "3.1.*",
         "symfony/console": "3.1.*",
@@ -42,10 +41,8 @@
         "nesbot/carbon": "^1.21",
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
-        "filp/whoops": "^2.1",
         "predis/predis": "0.8.*",
-        "guzzlehttp/guzzle": "^4.0",
-        "tedivm/jshrink": "~1.0"
+        "guzzlehttp/guzzle": "^4.0"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
@@ -53,13 +50,13 @@
     },
     "autoload": {
         "classmap": [
-            "src/Queue/NovaQueueClosure.php"
+            "src/Queue/QueueClosure.php"
         ],
         "psr-4": {
             "Nova\\" : "src/"
         },
         "files": [
-            "scripts/helpers.php"
+            "src/Support/helpers.php"
         ]
     },
     "suggest": {

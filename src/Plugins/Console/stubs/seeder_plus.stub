@@ -1,0 +1,20 @@
+<?php
+
+namespace {{namespace}}\Database\Seeds;
+
+use Nova\Database\ORM\Model;
+use Nova\Database\Seeder;
+
+
+class {{className}} extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        //
+    }
+}

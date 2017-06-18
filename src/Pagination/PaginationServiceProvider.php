@@ -14,39 +14,39 @@ use Nova\Support\ServiceProvider;
 
 class PaginationServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the Provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
+	/**
+	 * Indicates if loading of the Provider is deferred.
+	 *
+	 * @var bool
+	 */
+	protected $defer = true;
 
 
-    /**
-     * Register the Service Provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->bindShared('paginator', function($app)
-        {
-            $paginator = new Factory($app['request']);
+	/**
+	 * Register the Service Provider.
+	 *
+	 * @return void
+	 */
+	public function register()
+	{
+		$this->app->bindShared('paginator', function($app)
+		{
+			$paginator = new Factory($app['request']);
 
-            $app->refresh('request', $paginator, 'setRequest');
+			$app->refresh('request', $paginator, 'setRequest');
 
-            return $paginator;
-        });
-    }
+			return $paginator;
+		});
+	}
 
-    /**
-     * Get the services provided by the Provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return array('paginator');
-    }
+	/**
+	 * Get the services provided by the Provider.
+	 *
+	 * @return array
+	 */
+	public function provides()
+	{
+		return array('paginator');
+	}
 
 }

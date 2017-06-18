@@ -11,220 +11,220 @@ use Closure;
 
 class Builder
 {
-    /**
-     * The base Query Builder instance.
-     *
-     * @var \Nova\Database\Query\Builder
-     */
-    protected $query;
+	/**
+	 * The base Query Builder instance.
+	 *
+	 * @var \Nova\Database\Query\Builder
+	 */
+	protected $query;
 
-    /**
-     * The model being queried.
-     *
-     * @var \Nova\Database\Model
-     */
-    protected $model;
+	/**
+	 * The model being queried.
+	 *
+	 * @var \Nova\Database\Model
+	 */
+	protected $model;
 
 
-    /**
-     * Create a new Model Query Builder instance.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return void
-     */
-    public function __construct(QueryBuilder $query)
-    {
-        $this->query = $query;
-    }
+	/**
+	 * Create a new Model Query Builder instance.
+	 *
+	 * @param  \Nova\Database\Query\Builder  $query
+	 * @return void
+	 */
+	public function __construct(QueryBuilder $query)
+	{
+		$this->query = $query;
+	}
 
-    /**
-     * Find a model by its primary key.
-     *
-     * @param  mixed  $id
-     * @param  array  $columns
-     * @return mixed|static|null
-     */
-    public function find($id, $columns = array('*'))
-    {
-        if (is_array($id)) {
-            return $this->findMany($id, $columns);
-        }
+	/**
+	 * Find a model by its primary key.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return mixed|static|null
+	 */
+	public function find($id, $columns = array('*'))
+	{
+		if (is_array($id)) {
+			return $this->findMany($id, $columns);
+		}
 
-        $query = $this->query->where($this->model->getKeyName(), '=', $id);
+		$query = $this->query->where($this->model->getKeyName(), '=', $id);
 
-        return $query->first($columns);
-    }
+		return $query->first($columns);
+	}
 
-    /**
-     * Find a model by its primary key.
-     *
-     * @param  array  $ids
-     * @param  array  $columns
-     * @return array|null|static
-     */
-    public function findMany($ids, $columns = array('*'))
-    {
-        if (empty($ids)) return null;
+	/**
+	 * Find a model by its primary key.
+	 *
+	 * @param  array  $ids
+	 * @param  array  $columns
+	 * @return array|null|static
+	 */
+	public function findMany($ids, $columns = array('*'))
+	{
+		if (empty($ids)) return null;
 
-        $query = $this->query->whereIn($this->model->getKeyName(), $ids);
+		$query = $this->query->whereIn($this->model->getKeyName(), $ids);
 
-        return $query->get($columns);
-    }
+		return $query->get($columns);
+	}
 
-    /**
-     * Get a paginator for the "select" statement.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    public function paginate($perPage = null, $columns = array('*'))
-    {
-        // Get the Pagination Factory instance.
-        $paginator = $this->query->getConnection()->getPaginator();
+	/**
+	 * Get a paginator for the "select" statement.
+	 *
+	 * @param  int	$perPage
+	 * @param  array  $columns
+	 * @return \Nova\Pagination\Paginator
+	 */
+	public function paginate($perPage = null, $columns = array('*'))
+	{
+		// Get the Pagination Factory instance.
+		$paginator = $this->query->getConnection()->getPaginator();
 
-        $perPage = $perPage ?: $this->model->getPerPage();
+		$perPage = $perPage ?: $this->model->getPerPage();
 
-        if (isset($this->query->groups)) {
-            return $this->groupedPaginate($paginator, $perPage, $columns);
-        } else {
-            return $this->ungroupedPaginate($paginator, $perPage, $columns);
-        }
-    }
+		if (isset($this->query->groups)) {
+			return $this->groupedPaginate($paginator, $perPage, $columns);
+		} else {
+			return $this->ungroupedPaginate($paginator, $perPage, $columns);
+		}
+	}
 
-    /**
-     * Get a paginator for a grouped statement.
-     *
-     * @param  \Nova\Pagination\Environment  $paginator
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    protected function groupedPaginate($paginator, $perPage, $columns)
-    {
-        $results = $this->get($columns);
+	/**
+	 * Get a paginator for a grouped statement.
+	 *
+	 * @param  \Nova\Pagination\Environment  $paginator
+	 * @param  int	$perPage
+	 * @param  array  $columns
+	 * @return \Nova\Pagination\Paginator
+	 */
+	protected function groupedPaginate($paginator, $perPage, $columns)
+	{
+		$results = $this->get($columns);
 
-        return $this->query->buildRawPaginator($paginator, $results, $perPage);
-    }
+		return $this->query->buildRawPaginator($paginator, $results, $perPage);
+	}
 
-    /**
-     * Get a paginator for an ungrouped statement.
-     *
-     * @param  \Nova\Pagination\Environment  $paginator
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    protected function ungroupedPaginate($paginator, $perPage, $columns)
-    {
-        $total = $this->query->getPaginationCount();
+	/**
+	 * Get a paginator for an ungrouped statement.
+	 *
+	 * @param  \Nova\Pagination\Environment  $paginator
+	 * @param  int	$perPage
+	 * @param  array  $columns
+	 * @return \Nova\Pagination\Paginator
+	 */
+	protected function ungroupedPaginate($paginator, $perPage, $columns)
+	{
+		$total = $this->query->getPaginationCount();
 
-        $page = $paginator->getCurrentPage($total);
+		$page = $paginator->getCurrentPage($total);
 
-        $query = $this->query->forPage($page, $perPage);
+		$query = $this->query->forPage($page, $perPage);
 
-        // Retrieve the results from database.
-        $results = $query->get($columns);
+		// Retrieve the results from database.
+		$results = $query->get($columns);
 
-        return $paginator->make($results, $total, $perPage);
-    }
+		return $paginator->make($results, $total, $perPage);
+	}
 
-    /**
-     * Get a Paginator only supporting simple next and previous links.
-     *
-     * This is more efficient on larger data-sets, etc.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    public function simplePaginate($perPage = null, $columns = array('*'))
-    {
-        // Get the Pagination Factory instance.
-        $paginator = $this->connection->getPaginator();
+	/**
+	 * Get a Paginator only supporting simple next and previous links.
+	 *
+	 * This is more efficient on larger data-sets, etc.
+	 *
+	 * @param  int	$perPage
+	 * @param  array  $columns
+	 * @return \Nova\Pagination\Paginator
+	 */
+	public function simplePaginate($perPage = null, $columns = array('*'))
+	{
+		// Get the Pagination Factory instance.
+		$paginator = $this->connection->getPaginator();
 
-        $perPage = $perPage ?: $this->model->getPerPage();
+		$perPage = $perPage ?: $this->model->getPerPage();
 
-        $page = $paginator->getCurrentPage();
+		$page = $paginator->getCurrentPage();
 
-        $query = $this->skip(($page - 1) * $perPage)->take($perPage + 1);
+		$query = $this->skip(($page - 1) * $perPage)->take($perPage + 1);
 
-        // Retrieve the results from database.
-        $results = $query->get($columns);
+		// Retrieve the results from database.
+		$results = $query->get($columns);
 
-        return $paginator->make($results, $perPage);
-    }
+		return $paginator->make($results, $perPage);
+	}
 
-    /**
-     * Get the underlying query builder instance.
-     *
-     * @return \Nova\Database\Query\Builder|static
-     */
-    public function getQuery()
-    {
-        return $this->query;
-    }
+	/**
+	 * Get the underlying query builder instance.
+	 *
+	 * @return \Nova\Database\Query\Builder|static
+	 */
+	public function getQuery()
+	{
+		return $this->query;
+	}
 
-    /**
-     * Set the underlying query builder instance.
-     *
-     * @param  \Nova\Database\Query\Builder  $query
-     * @return void
-     */
-    public function setQuery($query)
-    {
-        $this->query = $query;
-    }
+	/**
+	 * Set the underlying query builder instance.
+	 *
+	 * @param  \Nova\Database\Query\Builder  $query
+	 * @return void
+	 */
+	public function setQuery($query)
+	{
+		$this->query = $query;
+	}
 
-    /**
-     * Get the model instance being queried.
-     *
-     * @return \Nova\Database\ORM\Model
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
+	/**
+	 * Get the model instance being queried.
+	 *
+	 * @return \Nova\Database\ORM\Model
+	 */
+	public function getModel()
+	{
+		return $this->model;
+	}
 
-    /**
-     * Set a model instance for the model being queried.
-     *
-     * @param  \Nova\Database\ORM\Model  $model
-     * @return \Nova\Database\ORM\Builder
-     */
-    public function setModel(Model $model)
-    {
-        $this->model = $model;
+	/**
+	 * Set a model instance for the model being queried.
+	 *
+	 * @param  \Nova\Database\ORM\Model  $model
+	 * @return \Nova\Database\ORM\Builder
+	 */
+	public function setModel(Model $model)
+	{
+		$this->model = $model;
 
-        $this->query->from($model->getTable());
+		$this->query->from($model->getTable());
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Dynamically handle calls into the query instance.
-     *
-     * @param  string  $method
-     * @param  array   $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        $result = call_user_func_array(array($this->query, $method), $parameters);
+	/**
+	 * Dynamically handle calls into the query instance.
+	 *
+	 * @param  string  $method
+	 * @param  array   $parameters
+	 * @return mixed
+	 */
+	public function __call($method, $parameters)
+	{
+		$result = call_user_func_array(array($this->query, $method), $parameters);
 
-        if ($result === $this->query) return $this;
+		if ($result === $this->query) return $this;
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * Force a clone of the underlying query builder when cloning.
-     *
-     * @return void
-     */
-    public function __clone()
-    {
-        $this->query = clone $this->query;
-    }
+	/**
+	 * Force a clone of the underlying query builder when cloning.
+	 *
+	 * @return void
+	 */
+	public function __clone()
+	{
+		$this->query = clone $this->query;
+	}
 
 }

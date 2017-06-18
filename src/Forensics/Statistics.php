@@ -16,80 +16,80 @@ use Nova\Support\Facades\Request;
 
 class Statistics
 {
-    /**
-     * Array holding the configuration.
-     */
-    protected $config = array();
+	/**
+	 * Array holding the configuration.
+	 */
+	protected $config = array();
 
 
-    protected function __construct()
-    {
-        $this->config = Config::get('profiler', array());
-    }
+	protected function __construct()
+	{
+		$this->config = Config::get('profiler', array());
+	}
 
-    protected function getReport()
-    {
-        $withDatabase = $this->withDatabase();
+	protected function getReport()
+	{
+		$withDatabase = $this->withDatabase();
 
-        // Calculate the variables.
-        $memoryUsage = Profiler::getReadableSize(memory_get_usage());
+		// Calculate the variables.
+		$memoryUsage = Profiler::getReadableSize(memory_get_usage());
 
-        $elapsedTime = $this->getElapsedTime();
+		$elapsedTime = $this->getElapsedTime();
 
-        $elapsedStr = sprintf("%01.4f", $elapsedTime);
+		$elapsedStr = sprintf("%01.4f", $elapsedTime);
 
-        $umax = sprintf("%0d", intval(25 / $elapsedTime));
+		$umax = sprintf("%0d", intval(25 / $elapsedTime));
 
-        if ($withDatabase) {
-            $queries = $this->getSqlQueries();
+		if ($withDatabase) {
+			$queries = $this->getSqlQueries();
 
-            $result = __d('nova', 'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | SQL: <b>{2}</b> {3, plural, one{query} other{queries}} | UMAX: <b>{4}</b>', $elapsedStr, $memoryUsage, $queries, $queries, $umax);
-        } else {
-            $result = __d('nova', 'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | UMAX: <b>{2}</b>', $elapsedStr, $memoryUsage, $umax);
-        }
+			$result = __d('nova', 'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | SQL: <b>{2}</b> {3, plural, one{query} other{queries}} | UMAX: <b>{4}</b>', $elapsedStr, $memoryUsage, $queries, $queries, $umax);
+		} else {
+			$result = __d('nova', 'Elapsed Time: <b>{0}</b> sec | Memory Usage: <b>{1}</b> | UMAX: <b>{2}</b>', $elapsedStr, $memoryUsage, $umax);
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    protected function getElapsedTime()
-    {
-        $timestamp = microtime(true);
+	protected function getElapsedTime()
+	{
+		$timestamp = microtime(true);
 
-        $requestTime = Request::server('REQUEST_TIME_FLOAT');
+		$requestTime = Request::server('REQUEST_TIME_FLOAT');
 
-        return ($timestamp - $requestTime);
-    }
+		return ($timestamp - $requestTime);
+	}
 
-    protected function getSqlQueries()
-    {
-        $withDatabase = $this->withDatabase();
+	protected function getSqlQueries()
+	{
+		$withDatabase = $this->withDatabase();
 
-        if (! $withDatabase) return 0;
+		if (! $withDatabase) return 0;
 
-        // Calculate and return the total SQL Queries.
-        $connection = DB::connection();
+		// Calculate and return the total SQL Queries.
+		$connection = DB::connection();
 
-        $queries = $connection->getQueryLog();
+		$queries = $connection->getQueryLog();
 
-        return count($queries);
-    }
+		return count($queries);
+	}
 
-    protected function withDatabase()
-    {
-        return array_get($this->config, 'withDatabase', false);
-    }
+	protected function withDatabase()
+	{
+		return array_get($this->config, 'withDatabase', false);
+	}
 
-    /**
-     * Magic Method for handling dynamic functions.
-     *
-     * @param  string  $method
-     * @param  array   $params
-     * @return void|mixed
-     */
-    public static function __callStatic($method, $params)
-    {
-        $instance = new static();
+	/**
+	 * Magic Method for handling dynamic functions.
+	 *
+	 * @param  string  $method
+	 * @param  array   $params
+	 * @return void|mixed
+	 */
+	public static function __callStatic($method, $params)
+	{
+		$instance = new static();
 
-        return call_user_func_array(array($instance, $method), $params);
-    }
+		return call_user_func_array(array($instance, $method), $params);
+	}
 }

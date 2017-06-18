@@ -2,156 +2,185 @@
 
 namespace Nova\Foundation\Auth;
 
+use Nova\Foundation\Auth\RedirectsUsersTrait;
+use Nova\Foundation\Auth\ThrottlesLoginsTrait;
 use Nova\Http\Request;
 use Nova\Support\Facades\Auth;
 use Nova\Support\Facades\Redirect;
+use Nova\Support\Facades\Validator;
 use Nova\Support\Facades\View;
+use Nova\Validation\ValidationException;
 
 
 trait AuthenticatesUsersTrait
 {
-    use RedirectsUsersTrait;
+	use RedirectsUsersTrait, ThrottlesLoginsTrait;
 
+	/**
+	 * Show the application login form.
+	 *
+	 * @return \Nova\Http\Response
+	 */
+	public function login()
+	{
+		return $this->createView()->shares('title', __d('nova', 'User Login'));
+	}
 
-    /**
-     * Show the application login form.
-     *
-     * @return \Nova\Http\Response
-     */
-    public function getLogin()
-    {
-        View::share('title', __d('nova', 'User Login'));
+	/**
+	 * Handle a login request to the application.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @return \Nova\Http\Response
+	 */
+	public function postLogin(Request $request)
+	{
+		$this->validateLogin($request);
 
-        if (View::exists('Auth/Authenticate')) {
-            return View::make('Auth/Authenticate');
-        }
+		if ($this->hasTooManyLoginAttempts($request)) {
+			return $this->sendLockoutResponse($request);
+		}
 
-        return View::make('Auth/Login');
-    }
+		if ($this->attemptLogin($request)) {
+			return $this->sendLoginResponse($request);
+		}
 
-    /**
-     * Handle a login request to the application.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return \Nova\Http\Response
-     */
-    public function postLogin(Request $request)
-    {
-        $this->validate($request, array(
-            $this->loginUsername() => 'required', 'password' => 'required',
-        ));
+		$this->incrementLoginAttempts($request);
 
-        // If the class is using the ThrottlesLogins trait, we can automatically throttle
-        // the login attempts for this application. We'll key this by the username and
-        // the IP address of the client making these requests into this application.
-        $throttles = $this->isUsingThrottlesLoginsTrait();
+		return $this->sendFailedLoginResponse($request);
+	}
 
-        if ($throttles && $this->hasTooManyLoginAttempts($request)) {
-            return $this->sendLockoutResponse($request);
-        }
+	/**
+	 * Validate the user login request.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return void
+	 */
+	protected function validateLogin(Request $request)
+	{
+		$this->validate($request, array(
+			$this->username() => 'required', 'password' => 'required',
+		));
+	}
 
-        $credentials = $this->getCredentials($request);
+	/**
+	 * Attempt to log the user into the application.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @return bool
+	 */
+	protected function attemptLogin(Request $request)
+	{
+		$credentials = $this->credentials($request);
 
-        if (Auth::attempt($credentials, $request->has('remember'))) {
-            return $this->handleUserWasAuthenticated($request, $throttles);
-        }
+		return Auth::guard($this->getGuard())->attempt($credentials, $request->has('remember'));
+	}
 
-        // If the login attempt was unsuccessful we will increment the number of attempts
-        // to login and redirect the user back to the login form. Of course, when this
-        // user surpasses their maximum number of attempts they will get locked out.
-        if ($throttles) {
-            $this->incrementLoginAttempts($request);
-        }
+	/**
+	 * Send the response after the user was authenticated.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @param  bool  $throttles
+	 * @return \Nova\Http\Response
+	 */
+	protected function sendLoginResponse(Request $request)
+	{
+		$this->clearLoginAttempts($request);
 
-        return Redirect::to($this->loginPath())
-            ->withInput($request->only($this->loginUsername(), 'remember'))
-            ->withErrors(array(
-                $this->loginUsername() => $this->getFailedLoginMessage(),
-            ));
-    }
+		//
+		$guard = Auth::guard($this->getGuard());
 
-    /**
-     * Send the response after the user was authenticated.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @param  bool  $throttles
-     * @return \Nova\Http\Response
-     */
-    protected function handleUserWasAuthenticated(Request $request, $throttles)
-    {
-        if ($throttles) {
-            $this->clearLoginAttempts($request);
-        }
+		$response = $this->authenticated($request, $guard->user());
 
-        if (method_exists($this, 'authenticated')) {
-            return $this->authenticated($request, Auth::user());
-        }
+		return  $response ?: Redirect::intended($this->redirectPath());
+	}
 
-        return Redirect::intended($this->redirectPath());
-    }
+	/**
+	 * The user has been authenticated.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @param  mixed  $user
+	 * @return mixed
+	 */
+	protected function authenticated(Request $request, $user)
+	{
+		//
+	}
 
-    /**
-     * Get the needed authorization credentials from the request.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return array
-     */
-    protected function getCredentials(Request $request)
-    {
-        return $request->only($this->loginUsername(), 'password');
-    }
+	/**
+	 * Get the failed login response instance.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @return \Nova\Http\RedirectResponse
+	 */
+	protected function sendFailedLoginResponse(Request $request)
+	{
+		$error = __d('nova', 'These credentials do not match our records.');
 
-    /**
-     * Get the failed login message.
-     *
-     * @return string
-     */
-    protected function getFailedLoginMessage()
-    {
-        return __d('nova', 'These credentials do not match our records.');
-    }
+		$errors = array($this->username() => $error);
 
-    /**
-     * Log the user out of the application.
-     *
-     * @return \Nova\Http\Response
-     */
-    public function getLogout()
-    {
-        Auth::logout();
+		if ($request->json() || $request->expectsJson()) {
+			return Response::json($errors, 422);
+		}
 
-        return Redirect::to(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/');
-    }
+		return Redirect::back()
+			->withInput($request->only($this->username(), 'remember'))
+			->withErrors($errors);
+	}
 
-    /**
-     * Get the path to the login route.
-     *
-     * @return string
-     */
-    public function loginPath()
-    {
-        return property_exists($this, 'loginPath') ? $this->loginPath : '/auth/login';
-    }
+	/**
+	 * Get the needed authorization credentials from the request.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @return array
+	 */
+	protected function credentials(Request $request)
+	{
+		return $request->only($this->username(), 'password');
+	}
 
-    /**
-     * Get the login username to be used by the controller.
-     *
-     * @return string
-     */
-    public function loginUsername()
-    {
-        return property_exists($this, 'username') ? $this->username : 'email';
-    }
+	/**
+	 * Log the user out of the application.
+	 *
+	 * @return \Nova\Http\Response
+	 */
+	public function logout(Request $request)
+	{
+		Auth::guard($this->getGuard())->logout();
 
-    /**
-     * Determine if the class is using the ThrottlesLogins trait.
-     *
-     * @return bool
-     */
-    protected function isUsingThrottlesLoginsTrait()
-    {
-        return in_array(
-            ThrottlesLogins::class, class_uses_recursive(get_class($this))
-        );
-    }
+		$uri = property_exists($this, 'redirectAfterLogout')
+			? $this->redirectAfterLogout
+			: $this->loginPath();
+
+		return Redirect::to($uri);
+	}
+
+	/**
+	 * Get the path to the login route.
+	 *
+	 * @return string
+	 */
+	public function loginPath()
+	{
+		return property_exists($this, 'loginPath') ? $this->loginPath : '/auth/login';
+	}
+
+	/**
+	 * Get the login username to be used by the controller.
+	 *
+	 * @return string
+	 */
+	public function username()
+	{
+		return 'username';
+	}
+
+	/**
+	 * Get the guard to be used during authentication.
+	 *
+	 * @return string|null
+	 */
+	protected function getGuard()
+	{
+		return property_exists($this, 'guard') ? $this->guard : null;
+	}
 }

@@ -5,5 +5,5 @@ namespace Nova\Console\Contracts;
 
 interface KernelInterface
 {
-    //
+	//
 }

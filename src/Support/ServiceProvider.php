@@ -16,167 +16,203 @@ use ReflectionClass;
 
 abstract class ServiceProvider
 {
-    /**
-     * The Application instance.
-     *
-     * @var \Nova\Foundation\Application
-     */
-    protected $app;
+	/**
+	 * The Application instance.
+	 *
+	 * @var \Nova\Foundation\Application
+	 */
+	protected $app;
 
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
+	/**
+	 * Indicates if loading of the provider is deferred.
+	 *
+	 * @var bool
+	 */
+	protected $defer = false;
 
 
-    /**
-     * Create a new service provider instance.
-     *
-     * @param  \Nova\Foundation\Application     $app
-     * @return void
-     */
-    public function __construct($app)
-    {
-        $this->app = $app;
-    }
+	/**
+	 * Create a new service provider instance.
+	 *
+	 * @param  \Nova\Foundation\Application	 $app
+	 * @return void
+	 */
+	public function __construct($app)
+	{
+		$this->app = $app;
+	}
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    abstract public function register();
+	/**
+	 * Register the service provider.
+	 *
+	 * @return void
+	 */
+	abstract public function register();
 
-    /**
-     * Register the package's component namespaces.
-     *
-     * @param  string  $package
-     * @param  string  $namespace
-     * @param  string  $path
-     * @return void
-     */
-    public function package($package, $namespace = null, $path = null)
-    {
-        $namespace = $this->getPackageNamespace($package, $namespace);
+	/**
+	 * Register the package's component namespaces.
+	 *
+	 * @param  string  $package
+	 * @param  string  $namespace
+	 * @param  string  $path
+	 * @return void
+	 */
+	public function package($package, $namespace = null, $path = null)
+	{
+		$namespace = $this->getPackageNamespace($package, $namespace);
 
-        // In this method we will register the configuration package for the package
-        // so that the configuration options cleanly cascade into the application
-        // folder to make the developers lives much easier in maintaining them.
-        $path = $path ?: $this->guessPackagePath();
+		//
+		$files = $this->app['files'];
 
-        // Determine the Package Configuration path.
-        $config = $path .DS .'Config';
+		// In this method we will register the configuration package for the package
+		// so that the configuration options cleanly cascade into the application
+		// folder to make the developers lives much easier in maintaining them.
+		$path = $path ?: $this->guessPackagePath();
 
-        if ($this->app['files']->isDirectory($config)) {
-            $this->app['config']->package($package, $config, $namespace);
-        }
+		// Register the Package Config path.
+		$config = $path .DS .'Config';
 
-        // Determine the Package Language path.
-        $language = $path .DS .'Language';
+		if ($files->isDirectory($config)) {
+			$this->app['config']->package($package, $config, $namespace);
+		}
 
-        if ($this->app['files']->isDirectory($language)) {
-            $this->app['language']->package($package, $language, $namespace);
-        }
-    }
+		// Register the Package Language path.
+		$language = $path .DS .'Language';
 
-    /**
-     * Guess the package path for the provider.
-     *
-     * @return string
-     */
-    public function guessPackagePath()
-    {
-        $reflection = new ReflectionClass($this);
+		if ($files->isDirectory($language)) {
+			$this->app['language']->package($package, $language, $namespace);
+		}
 
-        $path = $reflection->getFileName();
+		// Register the Package Views path.
+		$views = $this->app['view'];
 
-        return realpath(dirname($path) .'/../');
-    }
+		$appView = $this->getAppViewPath($package);
 
-    /**
-     * Determine the namespace for a package.
-     *
-     * @param  string  $package
-     * @param  string  $namespace
-     * @return string
-     */
-    protected function getPackageNamespace($package, $namespace)
-    {
-        if (is_null($namespace)) {
-            list($vendor, $namespace) = explode('/', $package);
+		if ($files->isDirectory($appView)) {
+			$views->addNamespace($package, $appView);
+		}
 
-            return Str::snake($namespace);
-        }
+		$viewPath = $path .DS .'Views';
 
-        return $namespace;
-    }
+		if ($files->isDirectory($viewPath)) {
+			$views->addNamespace($package, $viewPath);
+		}
 
-    /**
-     * Register the package's custom Forge commands.
-     *
-     * @param  array  $commands
-     * @return void
-     */
-    public function commands($commands)
-    {
-        $commands = is_array($commands) ? $commands : func_get_args();
+		// Register the Package Assets path.
+		$webroot = dirname($path) .DS .'webroot';
 
-        // To register the commands with Forge, we will grab each of the arguments
-        // passed into the method and listen for Forge "start" event which will
-        // give us the Forge console instance which we will give commands to.
-        $events = $this->app['events'];
+		if ($files->isDirectory($webroot)) {
+			$this->app['asset.dispatcher']->package($package, $webroot, $namespace);
+		}
+	}
 
-        $events->listen('forge.start', function($forge) use ($commands)
-        {
-            $forge->resolveCommands($commands);
-        });
-    }
+	/**
+	 * Guess the package path for the provider.
+	 *
+	 * @return string
+	 */
+	public function guessPackagePath()
+	{
+		$reflection = new ReflectionClass($this);
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return array();
-    }
+		$path = $reflection->getFileName();
 
-    /**
-     * Get the events that trigger this service provider to register.
-     *
-     * @return array
-     */
-    public function when()
-    {
-        return array();
-    }
+		return realpath(dirname($path) .'/../');
+	}
 
-    /**
-     * Determine if the provider is deferred.
-     *
-     * @return bool
-     */
-    public function isDeferred()
-    {
-        return $this->defer;
-    }
+	/**
+	 * Determine the namespace for a package.
+	 *
+	 * @param  string  $package
+	 * @param  string  $namespace
+	 * @return string
+	 */
+	protected function getPackageNamespace($package, $namespace)
+	{
+		if (is_null($namespace)) {
+			list($vendor, $namespace) = explode('/', $package);
 
-    /**
-     * Dynamically handle missing method calls.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        if ($method == 'boot') {
-            return;
-        }
+			return Str::snake($namespace);
+		}
 
-        throw new BadMethodCallException("Call to undefined method [{$method}]");
-    }
+		return $namespace;
+	}
+
+	/**
+	 * Register the package's custom Forge commands.
+	 *
+	 * @param  array  $commands
+	 * @return void
+	 */
+	public function commands($commands)
+	{
+		$commands = is_array($commands) ? $commands : func_get_args();
+
+		// To register the commands with Forge, we will grab each of the arguments
+		// passed into the method and listen for Forge "start" event which will
+		// give us the Forge console instance which we will give commands to.
+		$events = $this->app['events'];
+
+		$events->listen('forge.start', function($forge) use ($commands)
+		{
+			$forge->resolveCommands($commands);
+		});
+	}
+
+	/**
+	 * Get the application package view path.
+	 *
+	 * @param  string  $package
+	 * @return string
+	 */
+	protected function getAppViewPath($package)
+	{
+		return $this->app['path'] .str_replace('/', DS, "/Views/Packages/{$package}");
+	}
+
+	/**
+	 * Get the services provided by the provider.
+	 *
+	 * @return array
+	 */
+	public function provides()
+	{
+		return array();
+	}
+
+	/**
+	 * Get the events that trigger this service provider to register.
+	 *
+	 * @return array
+	 */
+	public function when()
+	{
+		return array();
+	}
+
+	/**
+	 * Determine if the provider is deferred.
+	 *
+	 * @return bool
+	 */
+	public function isDeferred()
+	{
+		return $this->defer;
+	}
+
+	/**
+	 * Dynamically handle missing method calls.
+	 *
+	 * @param  string  $method
+	 * @param  array  $parameters
+	 * @return mixed
+	 */
+	public function __call($method, $parameters)
+	{
+		if ($method == 'boot') {
+			return;
+		}
+
+		throw new BadMethodCallException("Call to undefined method [{$method}]");
+	}
 }

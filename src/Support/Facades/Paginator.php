@@ -10,23 +10,23 @@ use Nova\Support\Facades\Facade;
  */
 class Paginator extends Facade
 {
-    /**
-     * Return the Application instance.
-     *
-     * @return \Nova\Pagination\Factory
-     */
-    public static function instance()
-    {
-        $accessor = static::getFacadeAccessor();
+	/**
+	 * Return the Application instance.
+	 *
+	 * @return \Nova\Pagination\Factory
+	 */
+	public static function instance()
+	{
+		$accessor = static::getFacadeAccessor();
 
-        return static::resolveFacadeInstance($accessor);
-    }
+		return static::resolveFacadeInstance($accessor);
+	}
 
-    /**
-     * Get the registered name of the component.
-     *
-     * @return string
-     */
-    protected static function getFacadeAccessor() { return 'paginator'; }
+	/**
+	 * Get the registered name of the component.
+	 *
+	 * @return string
+	 */
+	protected static function getFacadeAccessor() { return 'paginator'; }
 
 }
