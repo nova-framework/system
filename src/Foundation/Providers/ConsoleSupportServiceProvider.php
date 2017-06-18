@@ -13,6 +13,7 @@ class ConsoleSupportServiceProvider extends AggregateServiceProvider
 	 * @var array
 	 */
 	protected $providers = array(
+		'Nova\Console\Scheduling\ScheduleServiceProvider',
 		'Nova\Foundation\Providers\ComposerServiceProvider',
 		'Nova\Foundation\Providers\PublisherServiceProvider',
 		'Nova\Queue\ConsoleServiceProvider',
