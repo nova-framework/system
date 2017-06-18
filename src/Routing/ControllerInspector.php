@@ -64,7 +64,7 @@ class ControllerInspector
 		//if ($method->class == 'Nova\Routing\Controller') return false;
 
 		switch ($method->class) {
-			case 'Routing\Controller':
+			case 'Nova\Routing\Controller':
 			case 'App\Controllers\BaseController':
 				return false;
 
