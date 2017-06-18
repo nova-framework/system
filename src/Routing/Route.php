@@ -95,6 +95,13 @@ class Route
 	protected $compiled;
 
 	/**
+	 * The computed gathered middleware.
+	 *
+	 * @var array|null
+	 */
+	public $computedMiddleware;
+
+	/**
 	 * The container instance used by the route.
 	 *
 	 * @var \Nova\Container\Container

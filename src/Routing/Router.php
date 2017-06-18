@@ -336,6 +336,10 @@ class Router
 	 */
 	public function group(array $attributes, Closure $callback)
 	{
+		if (isset($attributes['middleware']) && is_string($attributes['middleware'])) {
+			$attributes['middleware'] = explode('|', $attributes['middleware']);
+		}
+
 		$this->updateGroupStack($attributes);
 
 		// Once we have updated the group stack, we will execute the user Closure and
@@ -487,6 +491,10 @@ class Router
 			$action = $this->convertToControllerAction($action);
 		}
 
+		if (isset($action['middleware']) && is_string($action['middleware'])) {
+			$action['middleware'] = explode('|', $action['middleware']);
+		}
+
 		$route = $this->newRoute(
 			$methods, $uri = $this->prefix($uri), $action
 		);
@@ -513,7 +521,8 @@ class Router
 	 */
 	protected function newRoute($methods, $uri, $action)
 	{
-		return (new Route($methods, $uri, $action))->setContainer($this->container);
+		return with(new Route($methods, $uri, $action))
+			->setContainer($this->container);
 	}
 
 	/**

@@ -97,14 +97,16 @@ class Pipeline implements PipelineInterface
 	 */
 	public function then(Closure $destination)
 	{
-		$firstSlice = $this->getInitialSlice($destination);
-
 		$pipes = array_reverse($this->pipes);
 
 		//
-		$callback = array_reduce($pipes, $this->getSlice(), $firstSlice);
+		$slice = $this->getInitialSlice($destination);
 
-		return call_user_func($callback, $this->passable);
+		foreach ($pipes as $pipe) {
+			$slice = $this->getSlice($slice, $pipe);
+		}
+
+		return call_user_func($slice, $this->passable);
 	}
 
 	/**
@@ -112,40 +114,40 @@ class Pipeline implements PipelineInterface
 	 *
 	 * @return \Closure
 	 */
-	protected function getSlice()
+	protected function getSlice($stack, $pipe)
 	{
-		return function ($stack, $pipe)
+		return function ($passable) use ($stack, $pipe)
 		{
-			return function ($passable) use ($stack, $pipe)
-			{
-				// If the pipe is an instance of a Closure, we will just call it directly but
-				// otherwise we'll resolve the pipes out of the container and call it with
-				// the appropriate method and arguments, returning the results back out.
-				if ($pipe instanceof Closure) {
-					return call_user_func($pipe, $passable, $stack);
-				} else if (is_array($pipe)) {
-					list($callback, $parameters) = array_values($pipe);
-
-					if (is_string($parameters)) {
-						$parameters = explode(',', $parameters);
-					} else {
-						$parameters = $parameters ?: array();
-					}
-
-					$parameters = array_merge(array($passable, $stack), $parameters);
-
-					return call_user_func_array($callback, $parameters);
-				} else {
-					list($name, $parameters) = $this->parsePipeString($pipe);
-
-					$parameters = array_merge(array($passable, $stack), $parameters);
-
-					$instance = $this->container->make($name);
-
-					return call_user_func_array(array($instance, $this->method), $parameters);
-				}
-			};
+			return $this->call($pipe, $passable, $stack);
 		};
+	}
+
+	/**
+	 * Call a Closure or the method 'handle' in a class instance.
+	 *
+	 * @param  mixed  $pipe
+	 * @param  mixed  $passable
+	 * @param  \Closure  $stack
+	 * @return \Closure
+	 * @throws \BadMethodCallException
+	 */
+	protected function call($pipe, $passable, $stack)
+	{
+		// If the pipe is an instance of a Closure, we will just call it directly but
+		// otherwise we'll resolve the pipes out of the container and call it with
+		// the appropriate method and arguments, returning the results back out.
+
+		if ($pipe instanceof Closure) {
+			return call_user_func($pipe, $passable, $stack);
+		}
+
+		list($name, $parameters) = $this->parsePipe($pipe);
+
+		$instance = $this->container->make($name);
+
+		return call_user_func_array(array($instance, $this->method),
+			array_merge(array($passable, $stack), $parameters)
+		);
 	}
 
 	/**
@@ -168,7 +170,7 @@ class Pipeline implements PipelineInterface
 	 * @param  string $pipe
 	 * @return array
 	 */
-	protected function parsePipeString($pipe)
+	protected function parsePipe($pipe)
 	{
 		list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, array());
 
