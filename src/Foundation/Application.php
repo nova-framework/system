@@ -562,6 +562,7 @@ class Application extends Container
 		// Once the application has booted we will also fire some "booted" callbacks
 		// for any listeners that need to do work after this initial booting gets
 		// finished. This is useful when ordering the boot-up processes we run.
+
 		$this->fireAppCallbacks($this->bootingCallbacks);
 
 		$this->booted = true;

@@ -30,7 +30,7 @@ class UpCommand extends Command
 	{
 		$basePath = $this->container['path.storage'];
 
-		@unlink($basePath .DS .'framework' .DS .'down');
+		@unlink($basePath .DS .'down');
 
 		$this->info('Application is now live.');
 	}

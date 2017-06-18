@@ -30,7 +30,7 @@ class DownCommand extends Command
 	{
 		$basePath = $this->container['path.storage'];
 
-		touch($basePath .DS .'framework' .DS .'down');
+		touch($basePath .DS .'down');
 
 		$this->comment('Application is now in maintenance mode.');
 	}
