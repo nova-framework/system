@@ -2,22 +2,20 @@
 
 namespace Nova\Foundation;
 
-use Nova\Http\Request;
-use Nova\Http\Response;
+use Nova\Config\FileEnvironmentVariablesLoader;
 use Nova\Config\FileLoader;
 use Nova\Container\Container;
+use Nova\Events\EventServiceProvider;
 use Nova\Filesystem\Filesystem;
 use Nova\Foundation\Http\Kernel;
+use Nova\Http\Request;
+use Nova\Http\Response;
+use Nova\Routing\RoutingServiceProvider;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
-use Nova\Events\EventServiceProvider;
-use Nova\Routing\RoutingServiceProvider;
-use Nova\Config\FileEnvironmentVariablesLoader;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Debug\Exception\FatalErrorException;
-
-use Nova\Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -27,7 +25,7 @@ use Closure;
 use RuntimeException;
 
 
-class Application extends Container implements ResponsePreparerInterface
+class Application extends Container
 {
 	/**
 	 * The Nova framework version.
@@ -248,7 +246,7 @@ class Application extends Container implements ResponsePreparerInterface
 	{
 		$args = isset($_SERVER['argv']) ? $_SERVER['argv'] : null;
 
-		return $this['env'] = (new EnvironmentDetector())->detect($envs, $args);
+		return $this['env'] = with(new EnvironmentDetector())->detect($envs, $args);
 	}
 
 	/**
@@ -596,26 +594,6 @@ class Application extends Container implements ResponsePreparerInterface
 	}
 
 	/**
-	 * Run the application and send the response.
-	 *
-	 * @param  \Symfony\Component\HttpFoundation\Request  $request
-	 * @return void
-	 */
-	public function run(SymfonyRequest $request = null)
-	{
-		$request = $request ?: $this['request'];
-
-		$response = with($kernel = $this->getKernel())->handle($request);
-
-		//
-		$response = $this->prepareResponse($response, $request);
-
-		$response->send();
-
-		$kernel->terminate($request, $response);
-	}
-
-	/**
 	 * Determine if middleware has been disabled for the application.
 	 *
 	 * @return bool
@@ -652,33 +630,6 @@ class Application extends Container implements ResponsePreparerInterface
 	}
 
 	/**
-	 * Refresh the bound request instance in the container.
-	 *
-	 * @param  \Nova\Http\Request  $request
-	 * @return void
-	 */
-	protected function refreshRequest(Request $request)
-	{
-		$this->instance('request', $request);
-
-		Facade::clearResolvedInstance('request');
-	}
-
-	/**
-	 * Call the "finish" callbacks assigned to the application.
-	 *
-	 * @param  \Symfony\Component\HttpFoundation\Request  $request
-	 * @param  \Symfony\Component\HttpFoundation\Response  $response
-	 * @return void
-	 */
-	public function callFinishCallbacks(SymfonyRequest $request, SymfonyResponse $response)
-	{
-		foreach ($this->finishCallbacks as $callback) {
-			call_user_func($callback, $request, $response);
-		}
-	}
-
-	/**
 	 * Call the booting callbacks for the application.
 	 *
 	 * @param  array  $callbacks
@@ -689,34 +640,6 @@ class Application extends Container implements ResponsePreparerInterface
 		foreach ($callbacks as $callback) {
 			call_user_func($callback, $this);
 		}
-	}
-
-	/**
-	 * Prepare the request by injecting any services.
-	 *
-	 * @param  \Nova\Http\Request  $request
-	 * @return \Nova\Http\Request
-	 */
-	public function prepareRequest(Request $request)
-	{
-		if (! is_null($this['config']['session.driver']) && ! $request->hasSession()) {
-			$request->setSession($this['session']->driver());
-		}
-
-		return $request;
-	}
-
-	/**
-	 * Prepare the given value as a Response object.
-	 *
-	 * @param  mixed  $value
-	 * @return \Symfony\Component\HttpFoundation\Response
-	 */
-	public function prepareResponse($value)
-	{
-		if (! $value instanceof SymfonyResponse) $value = new Response($value);
-
-		return $value->prepare($this['request']);
 	}
 
 	/**
@@ -736,7 +659,7 @@ class Application extends Container implements ResponsePreparerInterface
 	 */
 	public function isDownForMaintenance()
 	{
-		return file_exists($this['path.storage'] .DS. 'framework' .DS .'down');
+		return file_exists($this['path.storage'] .DS .'down');
 	}
 
 	/**
@@ -760,63 +683,15 @@ class Application extends Container implements ResponsePreparerInterface
 	}
 
 	/**
-	 * Register a 404 error handler.
-	 *
-	 * @param  \Closure  $callback
-	 * @return void
-	 */
-	public function missing(Closure $callback)
-	{
-		$this->error(function(NotFoundHttpException $e) use ($callback)
-		{
-			return call_user_func($callback, $e);
-		});
-	}
-
-	/**
-	 * Register an application error handler.
-	 *
-	 * @param  \Closure  $callback
-	 * @return void
-	 */
-	public function error(Closure $callback)
-	{
-		$this['exception']->error($callback);
-	}
-
-	/**
-	 * Register an error handler at the bottom of the stack.
-	 *
-	 * @param  \Closure  $callback
-	 * @return void
-	 */
-	public function pushError(Closure $callback)
-	{
-		$this['exception']->pushError($callback);
-	}
-
-	/**
-	 * Register an error handler for fatal errors.
-	 *
-	 * @param  \Closure  $callback
-	 * @return void
-	 */
-	public function fatal(Closure $callback)
-	{
-		$this->error(function(FatalErrorException $e) use ($callback)
-		{
-			return call_user_func($callback, $e);
-		});
-	}
-
-	/**
 	 * Get the configuration loader instance.
 	 *
 	 * @return \Nova\Config\LoaderInterface
 	 */
 	public function getConfigLoader()
 	{
-		return new FileLoader(new Filesystem, $this['path'] .DS .'Config');
+		$files = new Filesystem();
+
+		return new FileLoader($files, $this['path'] .DS .'Config');
 	}
 
 	/**
@@ -826,7 +701,9 @@ class Application extends Container implements ResponsePreparerInterface
 	 */
 	public function getEnvironmentVariablesLoader()
 	{
-		return new FileEnvironmentVariablesLoader(new Filesystem, $this['path.base']);
+		$files = new Filesystem();
+
+		return new FileEnvironmentVariablesLoader($files, $this['path.base']);
 	}
 
 	/**
@@ -836,9 +713,11 @@ class Application extends Container implements ResponsePreparerInterface
 	 */
 	public function getProviderRepository()
 	{
+		$files = new Filesystem();
+
 		$manifest = $this['config']['app.manifest'];
 
-		return new ProviderRepository(new Filesystem, $manifest, $this->runningInConsole());
+		return new ProviderRepository($files, $manifest, $this->runningInConsole());
 	}
 
 	/**
@@ -871,20 +750,6 @@ class Application extends Container implements ResponsePreparerInterface
 	public function isDeferredService($service)
 	{
 		return isset($this->deferredServices[$service]);
-	}
-
-	/**
-	 * Set the application request for the console environment.
-	 *
-	 * @return void
-	 */
-	public function setRequestForConsoleEnvironment()
-	{
-		$url = $this['config']->get('app.url', 'http://localhost');
-
-		$parameters = array($url, 'GET', array(), array(), array(), $_SERVER);
-
-		$this->refreshRequest(static::onRequest('create', $parameters));
 	}
 
 	/**
