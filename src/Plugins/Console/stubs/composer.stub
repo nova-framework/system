@@ -1,7 +1,7 @@
 {
     "name": "{{lower_package}}",
     "type": "nova-plugin",
-    "description": "{{name}} is a plugin for Mini MVC Framework",
+    "description": "{{name}} is a plugin for Nova Framework",
     "license": "{{license}}",
     "authors": [
         {
