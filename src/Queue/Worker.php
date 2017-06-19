@@ -202,8 +202,7 @@ class Worker
 			return $this->logFailedJob($connection, $job);
 		}
 
-		try
-		{
+		try {
 			// First we will fire off the job. Once it is done we will see if it will
 			// be auto-deleted after processing and if so we will go ahead and run
 			// the delete method on the job. Otherwise we will just keep moving.
@@ -216,8 +215,7 @@ class Worker
 
 			return ['job' => $job, 'failed' => false];
 		}
-
-		catch (\Exception $e) {
+		catch (Exception $e) {
 			// If we catch an exception, we will attempt to release the job back onto
 			// the queue so it is not lost. This will let is be retried at a later
 			// time by another listener (or the same one). We will do that here.
@@ -228,7 +226,7 @@ class Worker
 
 			throw $e;
 		}
-		catch (\Throwable $e)
+		catch (Throwable $e)
 		{
 			if ( ! $job->isDeleted()) {
 				$job->release($delay);
