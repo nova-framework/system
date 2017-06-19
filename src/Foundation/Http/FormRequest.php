@@ -9,7 +9,7 @@ use Nova\Http\Response;
 use Nova\Http\JsonResponse;
 use Nova\Routing\Redirector;
 use Nova\Validation\Validator;
-use Nova\Validation\ValidatesWhenResolvedInterface as ValidatesWhenResolved;
+use Nova\Validation\Contracts\ValidatesWhenResolvedInterface as ValidatesWhenResolved;
 use Nova\Validation\ValidatesWhenResolvedTrait;
 use Nova\Contracts\Validation\Factory as ValidationFactory;
 

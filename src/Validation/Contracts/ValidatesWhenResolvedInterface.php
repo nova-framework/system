@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Validation;
+namespace Nova\Validation\Contracts;
 
 
 interface ValidatesWhenResolvedInterface
