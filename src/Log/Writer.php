@@ -20,7 +20,7 @@ use RuntimeException;
 use InvalidArgumentException;
 
 
-class Writter implements PsrLoggerInterface
+class Writer implements PsrLoggerInterface
 {
 	/**
 	 * The Monolog logger instance.

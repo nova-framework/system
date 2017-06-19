@@ -800,7 +800,7 @@ class Application extends Container
 			'events'			=> 'Nova\Events\Dispatcher',
 			'files'				=> 'Nova\Filesystem\Filesystem',
 			'hash'				=> 'Nova\Hashing\HasherInterface',
-			'log'				=> array('Nova\Log\Writter', 'Psr\Log\LoggerInterface'),
+			'log'				=> array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
 			'language'			=> 'Nova\Language\LanguageManager',
 			'mailer'			=> 'Nova\Mail\Mailer',
 			'paginator'			=> 'Nova\Pagination\Factory',
