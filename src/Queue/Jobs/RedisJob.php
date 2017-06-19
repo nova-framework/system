@@ -4,6 +4,7 @@ namespace Nova\Queue\Jobs;
 
 use Nova\Container\Container;
 use Nova\Queue\Queues\RedisQueue;
+use Nova\Queue\Job;
 
 
 class RedisJob extends Job

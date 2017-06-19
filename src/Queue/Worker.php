@@ -2,10 +2,10 @@
 
 namespace Nova\Queue;
 
-use Nova\Events\Dispatcher;
-use Nova\Queue\Jobs\Job;
 use Nova\Cache\Repository as CacheRepository;
+use Nova\Events\Dispatcher;
 use Nova\Queue\Contracts\FailedJobProviderInterface;
+use Nova\Queue\Job;
 
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 

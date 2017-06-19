@@ -3,6 +3,7 @@
 namespace Nova\Queue\Jobs;
 
 use Nova\Container\Container;
+use Nova\Queue\Job;
 
 use Aws\Sqs\SqsClient;
 

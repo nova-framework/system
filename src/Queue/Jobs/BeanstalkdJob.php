@@ -3,6 +3,7 @@
 namespace Nova\Queue\Jobs;
 
 use Nova\Container\Container;
+use Nova\Queue\Job;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;

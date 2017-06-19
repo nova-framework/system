@@ -4,6 +4,7 @@ namespace Nova\Queue\Jobs;
 
 use Nova\Container\Container;
 use Nova\Queue\Queues\IronQueue;
+use Nova\Queue\Job;
 
 
 class IronJob extends Job

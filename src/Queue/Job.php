@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Queue\Jobs;
+namespace Nova\Queue;
 
 use DateTime;
 
@@ -121,7 +121,7 @@ abstract class Job
 	{
 		$segments = explode('@', $job);
 
-		return count($segments) > 1 ? $segments : array($segments[0], 'fire');
+		return (count($segments) > 1) ? $segments : array($segments[0], 'fire');
 	}
 
 	/**
@@ -142,8 +142,7 @@ abstract class Job
 	 */
 	protected function getSeconds($delay)
 	{
-		if ($delay instanceof DateTime)
-		{
+		if ($delay instanceof DateTime) {
 			return max(0, $delay->getTimestamp() - $this->getTime());
 		}
 
