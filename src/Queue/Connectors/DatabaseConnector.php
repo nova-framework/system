@@ -36,8 +36,10 @@ class DatabaseConnector implements ConnectorInterface
 	 */
 	public function connect(array $config)
 	{
+		$connection = Arr::get($config, 'connection');
+
 		return new DatabaseQueue(
-			$this->connections->connection(Arr::get($config, 'connection')),
+			$this->connections->connection($connection),
 			$config['table'],
 			$config['queue'],
 			Arr::get($config, 'expire', 60)
