@@ -2,7 +2,6 @@
 
 namespace {{namespace}};
 
-use Nova\Bus\Contracts\SelfHandlingInterface;
 use Nova\Queue\Contracts\ShouldQueueInterface;
 use Nova\Queue\SerializesModelsTrait;
 use Nova\Queue\InteractsWithQueueTrait;
@@ -10,7 +9,7 @@ use Nova\Queue\InteractsWithQueueTrait;
 use {{rootNamespace}}Jobs\Job;
 
 
-class {{className}} extends Job implements SelfHandlingInterface, ShouldQueueInterface
+class {{className}} extends Job implements ShouldQueueInterface
 {
     use InteractsWithQueueTrait, SerializesModelsTrait;
 

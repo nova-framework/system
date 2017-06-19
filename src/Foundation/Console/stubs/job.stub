@@ -2,12 +2,10 @@
 
 namespace {{namespace}};
 
-use Nova\Bus\Contracts\SelfHandlingInterface;
-
 use {{rootNamespace}}Jobs\Job;
 
 
-class {{className}} extends Job implements SelfHandlingInterface
+class {{className}} extends Job
 {
     /**
      * Create a new job instance.

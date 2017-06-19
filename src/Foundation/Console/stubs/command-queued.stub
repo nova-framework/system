@@ -2,7 +2,6 @@
 
 namespace {{namespace}};
 
-use Nova\Bus\Contracts\SelfHandlingInterface;
 use Nova\Queue\Contracts\ShouldQueueInterface;
 use Nova\Queue\InteractsWithQueueTrait;
 use Nova\Queue\SerializesModelsTrait;
@@ -10,7 +9,7 @@ use Nova\Queue\SerializesModelsTrait;
 use {{rootNamespace}}Commands\Command;
 
 
-class DummyClass extends Command implements SelfHandlingInterface, ShouldQueueInterface
+class DummyClass extends Command implements ShouldQueueInterface
 {
     use InteractsWithQueueTrait, SerializesModelsTrait;
 
