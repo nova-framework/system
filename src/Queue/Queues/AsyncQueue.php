@@ -38,7 +38,13 @@ class AsyncQueue extends DatabaseQueue
 	 * @param  string  $binary
 	 * @param  string|array  $binaryArgs
 	 */
-	public function __construct(Connection $database, $table, $default = 'default', $expire = 60, $binary = 'php', $binaryArgs = '', $connectionName = '')
+	public function __construct(Connection $database,
+								$table,
+								$default = 'default',
+								$expire = 60,
+								$binary = 'php',
+								$binaryArgs = '',
+								$connectionName = '')
 	{
 		parent::__construct($database, $table, $default, $expire);
 

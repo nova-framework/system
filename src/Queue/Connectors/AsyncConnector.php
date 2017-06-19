@@ -22,12 +22,14 @@ class AsyncConnector extends DatabaseConnector
 
 		return new AsyncQueue(
 			$this->connections->connection($connection),
+
 			$config['table'],
 			$config['queue'],
+
 			Arr::get($config, 'expire', 60),
 			Arr::get($config, 'binary', 'php'),
-			Arr::get($config, 'binary_args', ''),
-			Arr::get($config, 'connection_name', '')
+			Arr::get($config, 'binaryArgs', ''),
+			Arr::get($config, 'connectionName', '')
 		);
 	}
 }
