@@ -13,8 +13,6 @@ use Nova\Queue\Connectors\SyncConnector;
 use Nova\Queue\Connectors\IronConnector;
 use Nova\Queue\Connectors\RedisConnector;
 use Nova\Queue\Connectors\BeanstalkdConnector;
-use Nova\Queue\Console\AsyncCommand;
-use Nova\Queue\Connectors\AsyncConnector;
 use Nova\Queue\Failed\DatabaseFailedJobProvider;
 use Nova\Queue\Failed\NullFailedJobProvider;
 use Nova\Queue\QueueClosure;
@@ -46,8 +44,6 @@ class QueueServiceProvider extends ServiceProvider
 		$this->registerListener();
 
 		$this->registerSubscriber();
-
-		$this->registerAsyncCommand();
 
 		$this->registerFailedJobServices();
 
@@ -171,21 +167,6 @@ class QueueServiceProvider extends ServiceProvider
 	}
 
 	/**
-	 * Register the queue async command.
-	 *
-	 * @return void
-	 */
-	protected function registerAsyncCommand()
-	{
-		$this->app->bindShared('command.queue.async', function()
-		{
-			return new AsyncCommand($this->app['queue.worker']);
-		});
-
-		$this->commands('command.queue.async');
-	}
-
-	/**
 	 * Register the connectors on the queue manager.
 	 *
 	 * @param  \Nova\Queue\QueueManager  $manager
@@ -193,8 +174,7 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	public function registerConnectors($manager)
 	{
-		foreach (array('Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs', 'Iron', 'Async') as $connector)
-		{
+		foreach (array('Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs', 'Iron') as $connector) {
 			$this->{"register{$connector}Connector"}($manager);
 		}
 	}
@@ -317,20 +297,6 @@ class QueueServiceProvider extends ServiceProvider
 	}
 
 	/**
-	 * Register the database queue connector.
-	 *
-	 * @param  \Nova\Queue\QueueManager  $manager
-	 * @return void
-	 */
-	protected function registerAsyncConnector($manager)
-	{
-		$manager->addConnector('async', function ()
-		{
-            return new AsyncConnector($this->app['db']);
-        });
-	}
-
-	/**
 	 * Register the failed job services.
 	 *
 	 * @return void
@@ -372,7 +338,7 @@ class QueueServiceProvider extends ServiceProvider
 		return array(
 			'queue', 'queue.worker', 'queue.listener', 'queue.failer',
 			'command.queue.work', 'command.queue.listen', 'command.queue.restart',
-			'command.queue.subscribe', 'queue.connection', 'command.queue.async'
+			'command.queue.subscribe', 'queue.connection'
 		);
 	}
 

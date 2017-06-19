@@ -52,6 +52,7 @@ class Listener
 	 */
 	protected $outputHandler;
 
+
 	/**
 	 * Create a new queue listener.
 	 *
@@ -61,7 +62,8 @@ class Listener
 	public function __construct($commandPath)
 	{
 		$this->commandPath = $commandPath;
-		$this->workerCommand =  '"'.PHP_BINARY.'" artisan queue:work %s --queue="%s" --delay=%s --memory=%s --sleep=%s --tries=%s';
+
+		$this->workerCommand = '"' .PHP_BINARY .'" artisan queue:work %s --queue="%s" --delay=%s --memory=%s --sleep=%s --tries=%s';
 	}
 
 	/**
@@ -78,8 +80,7 @@ class Listener
 	{
 		$process = $this->makeProcess($connection, $queue, $delay, $memory, $timeout);
 
-		while(true)
-		{
+		while(true) {
 			$this->runProcess($process, $memory);
 		}
 	}
@@ -101,9 +102,11 @@ class Listener
 		// Once we have run the job we'll go check if the memory limit has been
 		// exceeded for the script. If it has, we will kill this script so a
 		// process managers will restart this with a clean slate of memory.
-		if ($this->memoryExceeded($memory))
-		{
-			$this->stop(); return;
+
+		if ($this->memoryExceeded($memory)) {
+			$this->stop();
+
+			return;
 		}
 	}
 
@@ -124,9 +127,9 @@ class Listener
 		// If the environment is set, we will append it to the command string so the
 		// workers will run under the specified environment. Otherwise, they will
 		// just run under the production environment which is not always right.
-		if (isset($this->environment))
-		{
-			$string .= ' --env='.$this->environment;
+
+		if (isset($this->environment)) {
+			$string .= ' --env=' .$this->environment;
 		}
 
 		// Next, we will just format out the worker commands with all of the various
@@ -149,8 +152,7 @@ class Listener
 	 */
 	protected function handleWorkerOutput($type, $line)
 	{
-		if (isset($this->outputHandler))
-		{
+		if (isset($this->outputHandler)) {
 			call_user_func($this->outputHandler, $type, $line);
 		}
 	}
