@@ -2,6 +2,9 @@
 
 namespace Nova\Queue\Failed;
 
+use Nova\Queue\Contracts\FailedJobProviderInterface;
+
+
 
 class NullFailedJobProvider implements FailedJobProviderInterface
 {

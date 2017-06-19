@@ -5,7 +5,7 @@ namespace Nova\Queue;
 use Nova\Events\Dispatcher;
 use Nova\Queue\Jobs\Job;
 use Nova\Cache\Repository as CacheRepository;
-use Nova\Queue\Failed\FailedJobProviderInterface;
+use Nova\Queue\Contracts\FailedJobProviderInterface;
 
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
@@ -26,7 +26,7 @@ class Worker
 	/**
 	 * The failed job provider implementation.
 	 *
-	 * @var \Nova\Queue\Failed\FailedJobProviderInterface
+	 * @var \Nova\Queue\Contracts\FailedJobProviderInterface
 	 */
 	protected $failer;
 
@@ -55,7 +55,7 @@ class Worker
 	 * Create a new queue worker.
 	 *
 	 * @param  \Nova\Queue\QueueManager  $manager
-	 * @param  \Nova\Queue\Failed\FailedJobProviderInterface  $failer
+	 * @param  \Nova\Queue\Contracts\FailedJobProviderInterface  $failer
 	 * @param  \Nova\Events\Dispatcher  $events
 	 * @return void
 	 */

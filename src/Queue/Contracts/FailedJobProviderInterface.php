@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Queue\Failed;
+namespace Nova\Queue\Contracts;
 
 
 interface FailedJobProviderInterface

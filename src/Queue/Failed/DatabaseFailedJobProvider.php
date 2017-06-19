@@ -3,6 +3,7 @@
 namespace Nova\Queue\Failed;
 
 use Nova\Database\Contracts\ConnectionResolverInterface;
+use Nova\Queue\Contracts\FailedJobProviderInterface;
 
 use Carbon\Carbon;
 

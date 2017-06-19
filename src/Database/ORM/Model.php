@@ -16,7 +16,7 @@ use Nova\Database\ORM\Relations\BelongsToMany;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
-use Nova\Queue\QueueableEntityInterface as QueueableEntity;
+use Nova\Queue\Contracts\QueueableEntityInterface as QueueableEntity;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\ArrayableInterface;
 
