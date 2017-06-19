@@ -92,11 +92,12 @@ class WorkCommand extends Command
 	 */
 	protected function runWorker($connection, $queue, $delay, $memory, $daemon = false)
 	{
-		if ($daemon)
-		{
-			$this->worker->setCache($this->container['cache']->driver());
+		$this->worker->setDaemonExceptionHandler(
+			$this->container['Nova\Foundation\Contracts\ExceptionHandler']
+		);
 
-			$this->worker->setDaemonExceptionHandler($this->container['exception']);
+		if ($daemon) {
+			$this->worker->setCache($this->container['cache']->driver());
 
 			return $this->worker->daemon(
 				$connection, $queue, $delay, $memory,
@@ -119,12 +120,9 @@ class WorkCommand extends Command
 	 */
 	protected function writeOutput(Job $job, $failed)
 	{
-		if ($failed)
-		{
+		if ($failed) {
 			$this->output->writeln('<error>Failed:</error> '.$job->getName());
-		}
-		else
-		{
+		} else {
 			$this->output->writeln('<info>Processed:</info> '.$job->getName());
 		}
 	}
@@ -136,7 +134,9 @@ class WorkCommand extends Command
 	 */
 	protected function downForMaintenance()
 	{
-		if ($this->option('force')) return false;
+		if ($this->option('force')) {
+			return false;
+		}
 
 		return $this->container->isDownForMaintenance();
 	}

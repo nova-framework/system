@@ -7,6 +7,11 @@ use Nova\Queue\Jobs\Job;
 use Nova\Cache\Repository as CacheRepository;
 use Nova\Queue\Failed\FailedJobProviderInterface;
 
+use Symfony\Component\Debug\Exception\FatalThrowableError;
+
+use Exception;
+use Throwable;
+
 
 class Worker
 {
@@ -42,7 +47,7 @@ class Worker
 	/**
 	 * The exception handler instance.
 	 *
-	 * @var \Nova\Exception\Handler
+	 * @var \Nova\Foundation\Exceptions\Handler
 	 */
 	protected $exceptions;
 
@@ -54,13 +59,11 @@ class Worker
 	 * @param  \Nova\Events\Dispatcher  $events
 	 * @return void
 	 */
-	public function __construct(QueueManager $manager,
-								FailedJobProviderInterface $failer = null,
-								Dispatcher $events = null)
+	public function __construct(QueueManager $manager, FailedJobProviderInterface $failer = null, Dispatcher $events = null)
 	{
-		$this->failer = $failer;
-		$this->events = $events;
-		$this->manager = $manager;
+		$this->failer	= $failer;
+		$this->events	= $events;
+		$this->manager	= $manager;
 	}
 
 	/**
@@ -105,15 +108,18 @@ class Worker
 	 */
 	protected function runNextJobForDaemon($connectionName, $queue, $delay, $sleep, $maxTries)
 	{
-		try
-		{
+		try {
 			$this->pop($connectionName, $queue, $delay, $sleep, $maxTries);
 		}
-		catch (\Exception $e) {
-			if ($this->exceptions) $this->exceptions->handleException($e);
+		catch (Exception $e) {
+			if ($this->exceptions) {
+				$this->exceptions->report($e);
+			}
 		}
-		catch (\Throwable $e) {
-			if ($this->exceptions) $this->exceptions->handleException($e);
+		catch (Throwable $e) {
+			if ($this->exceptions) {
+				$this->exceptions->report(new FatalThrowableError($e));
+			}
 		}
 	}
 
@@ -170,7 +176,9 @@ class Worker
 	 */
 	protected function getNextJob($connection, $queue)
 	{
-		if (is_null($queue)) return $connection->pop();
+		if (is_null($queue)) {
+			return $connection->pop();
+		}
 
 		foreach (explode(',', $queue) as $queue) {
 			if ( ! is_null($job = $connection->pop($queue))) return $job;
@@ -190,7 +198,7 @@ class Worker
 	 */
 	public function process($connection, Job $job, $maxTries = 0, $delay = 0)
 	{
-		if ($maxTries > 0 && $job->attempts() > $maxTries) {
+		if (($maxTries > 0) && ($job->attempts() > $maxTries)) {
 			return $this->logFailedJob($connection, $job);
 		}
 
@@ -199,9 +207,12 @@ class Worker
 			// First we will fire off the job. Once it is done we will see if it will
 			// be auto-deleted after processing and if so we will go ahead and run
 			// the delete method on the job. Otherwise we will just keep moving.
+
 			$job->fire();
 
-			if ($job->autoDelete()) $job->delete();
+			if ($job->autoDelete()) {
+				$job->delete();
+			}
 
 			return ['job' => $job, 'failed' => false];
 		}
@@ -210,13 +221,18 @@ class Worker
 			// If we catch an exception, we will attempt to release the job back onto
 			// the queue so it is not lost. This will let is be retried at a later
 			// time by another listener (or the same one). We will do that here.
-			if ( ! $job->isDeleted()) $job->release($delay);
+
+			if ( ! $job->isDeleted()) {
+				$job->release($delay);
+			}
 
 			throw $e;
 		}
 		catch (\Throwable $e)
 		{
-			if ( ! $job->isDeleted()) $job->release($delay);
+			if ( ! $job->isDeleted()) {
+				$job->release($delay);
+			}
 
 			throw $e;
 		}
