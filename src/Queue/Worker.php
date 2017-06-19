@@ -156,7 +156,8 @@ class Worker
 		// If we're able to pull a job off of the stack, we will process it and
 		// then immediately return back out. If there is no job on the queue
 		// we will "sleep" the worker for the specified number of seconds.
-		if ( ! is_null($job)) {
+
+		if (! is_null($job)) {
 			return $this->process(
 				$this->manager->getName($connectionName), $job, $maxTries, $delay
 			);
@@ -220,15 +221,14 @@ class Worker
 			// the queue so it is not lost. This will let is be retried at a later
 			// time by another listener (or the same one). We will do that here.
 
-			if ( ! $job->isDeleted()) {
+			if (! $job->isDeleted()) {
 				$job->release($delay);
 			}
 
 			throw $e;
 		}
-		catch (Throwable $e)
-		{
-			if ( ! $job->isDeleted()) {
+		catch (Throwable $e) {
+			if (! $job->isDeleted()) {
 				$job->release($delay);
 			}
 

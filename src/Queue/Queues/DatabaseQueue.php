@@ -114,10 +114,12 @@ class DatabaseQueue extends Queue implements QueueInterface
 
 		$availableAt = $this->getAvailableAt(0);
 
-		$records = array_map(function ($job) use ($queue, $data, $availableAt) {
+		$records = array_map(function ($job) use ($queue, $data, $availableAt)
+		{
 			return $this->buildDatabaseRecord(
 				$queue, $this->createPayload($job, $data), $availableAt
 			);
+
 		}, (array) $jobs);
 
 		return $this->getQuery()->insert($records);
@@ -192,9 +194,9 @@ class DatabaseQueue extends Queue implements QueueInterface
 		$expired = Carbon::now()->subSeconds($this->expire)->getTimestamp();
 
 		$data = array(
-			'reserved' => 0,
-			'reserved_at' => null,
-			'attempts'	=> new Expression('attempts + 1'),
+			'reserved'		=> 0,
+			'reserved_at'	=> null,
+			'attempts'		=> new Expression('attempts + 1'),
 		);
 
 		$this->getQuery()
@@ -234,7 +236,8 @@ class DatabaseQueue extends Queue implements QueueInterface
 	protected function markJobAsReserved($id)
 	{
 		$this->getQuery()->where('id', $id)->update(array(
-			'reserved' => 1, 'reserved_at' => $this->getTime(),
+			'reserved'		=> 1,
+			'reserved_at'	=> $this->getTime(),
 		));
 	}
 
@@ -275,13 +278,13 @@ class DatabaseQueue extends Queue implements QueueInterface
 	protected function buildDatabaseRecord($queue, $payload, $availableAt, $attempts = 0)
 	{
 		return array(
-			'queue'		=> $queue,
-			'payload'	  => $payload,
-			'attempts'	 => $attempts,
-			'reserved'	 => 0,
-			'reserved_at'  => null,
-			'available_at' => $availableAt,
-			'created_at'   => $this->getTime(),
+			'queue'			=> $queue,
+			'payload'		=> $payload,
+			'attempts'		=> $attempts,
+			'reserved'		=> 0,
+			'reserved_at'	=> null,
+			'available_at'	=> $availableAt,
+			'created_at'	=> $this->getTime(),
 		);
 	}
 

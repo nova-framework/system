@@ -123,7 +123,7 @@ class AsyncQueue extends DatabaseQueue
 			'created_at'	=> $this->getTime(),
 		);
 
-		return $this->database->table($this->table)->insertGetId($attributes);
+		return $this->getQuery()->insertGetId($attributes);
 	}
 
 	/**
