@@ -8,7 +8,7 @@
 
 namespace Nova\Validation;
 
-use Nova\Validation\Presence\DatabasePresenceVerifier;
+use Nova\Validation\DatabasePresenceVerifier;
 use Nova\Validation\Factory;
 use Nova\Support\ServiceProvider;
 

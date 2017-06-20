@@ -6,11 +6,11 @@
  * @version 3.0
  */
 
-namespace Nova\Validation\Presence;
+namespace Nova\Validation;
 
 use Nova\Database\Connection;
 use Nova\Database\Query\Builder as QueryBuilder;
-use Nova\Validation\Presence\PresenceVerifierInterface;
+use Nova\Validation\Contracts\PresenceVerifierInterface;
 
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface

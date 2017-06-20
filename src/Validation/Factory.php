@@ -10,7 +10,7 @@ namespace Nova\Validation;
 
 use Nova\Config\Repository as Config;
 use Nova\Support\Str;
-use Nova\Validation\Presence\DatabasePresenceVerifier;
+use Nova\Validation\DatabasePresenceVerifier;
 
 use Closure;
 
