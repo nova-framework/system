@@ -106,10 +106,10 @@ class BroadcastManager implements FactoryInterface
 		if (isset($this->customCreators[$driver])) {
 			return $this->callCustomCreator($config);
 		} else {
-			$method = 'create'.ucfirst($driver) .'Driver';
+			$driverMethod = 'create'.ucfirst($driver) .'Driver';
 
-			if (method_exists($this, $method)) {
-				return call_user_func(array($this, $method), $config);
+			if (method_exists($this, $driverMethod)) {
+				return call_user_func(array($this, $driverMethod), $config);
 			} else {
 				throw new InvalidArgumentException("Driver [{$driver}] not supported.");
 			}
