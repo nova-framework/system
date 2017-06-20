@@ -49,9 +49,9 @@ class ClearCommand extends Command
 	 */
 	public function fire()
 	{
-		$path = $this->container['path.storage'] .DS .'logs' .DS .'error.log';
+		$path = $this->container['path.storage'] .DS .'logs' .DS .'framework.log';
 
-		$this->files->put($path, "\n");
+		$this->files->delete($path);
 
 		//
 		$this->info('The Application logs was cleared!');
