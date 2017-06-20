@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View\Engines;
+namespace Nova\View\Contracts;
 
 
 interface EngineInterface

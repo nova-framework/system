@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View\Compilers;
+namespace Nova\View\Contracts;
 
 
 interface CompilerInterface

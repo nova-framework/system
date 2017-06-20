@@ -10,8 +10,9 @@ namespace Nova\View;
 
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
+use Nova\Support\Contracts\MessageProviderInterface as MessageProvider;
 use Nova\Support\MessageBag;
-use Nova\View\Engines\EngineInterface;
+use Nova\View\Contracts\EngineInterface;
 use Nova\View\Factory;
 
 use ArrayAccess;
@@ -216,7 +217,7 @@ class View implements ArrayAccess, Renderable
 	 */
 	public function withErrors($provider)
 	{
-		if ($provider instanceof MessageProviderInterface) {
+		if ($provider instanceof MessageProvider) {
 			$this->with('errors', $provider->getMessageBag());
 		} else {
 			$this->with('errors', new MessageBag((array) $provider));
