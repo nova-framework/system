@@ -6,6 +6,7 @@ use Nova\Container\Container;
 use Nova\Events\Contracts\DispatcherInterface;
 use Nova\Support\Str;
 
+use Exception;
 use ReflectionClass;
 
 
