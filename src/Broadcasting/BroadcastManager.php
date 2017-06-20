@@ -3,6 +3,7 @@
 namespace Nova\Broadcasting;
 
 use Nova\Broadcasting\Broadcasters\LogBroadcaster;
+use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
 use Nova\Broadcasting\Contracts\FactoryInterface;
@@ -166,6 +167,17 @@ class BroadcastManager implements FactoryInterface
 			$this->app->make('Psr\Log\LoggerInterface')
 		);
 	}
+
+    /**
+     * Create an instance of the driver.
+     *
+     * @param  array  $config
+     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     */
+    protected function createNullDriver(array $config)
+    {
+        return new NullBroadcaster();
+    }
 
 	/**
 	 * Get the connection configuration.

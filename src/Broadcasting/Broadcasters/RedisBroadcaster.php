@@ -33,6 +33,7 @@ class RedisBroadcaster implements Broadcaster
 	public function __construct(RedisDatabase $redis, $connection = null)
 	{
 		$this->redis = $redis;
+
 		$this->connection = $connection;
 	}
 
