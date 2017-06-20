@@ -2,6 +2,9 @@
 
 namespace Nova\Foundation\Bus;
 
+use Nova\Bus\Contracts\DispatcherInterface as Dispatcher;
+use Nova\Support\Facades\App;
+
 use ArrayAccess;
 
 
@@ -15,7 +18,9 @@ trait DispatchesJobsTrait
 	 */
 	protected function dispatch($job)
 	{
-		return app('Nova\Bus\Contracts\DispatcherInterface')->dispatch($job);
+		$dispatcher = App::make(Dispatcher::class);
+
+		return $dispatcher->dispatch($job);
 	}
 
 	/**
@@ -27,7 +32,9 @@ trait DispatchesJobsTrait
 	 */
 	protected function dispatchFromArray($job, array $array)
 	{
-		return app('Nova\Bus\Contracts\DispatcherInterface')->dispatchFromArray($job, $array);
+		$dispatcher = App::make(Dispatcher::class);
+
+		return $dispatcher->dispatchFromArray($job, $array);
 	}
 
 	/**
@@ -40,6 +47,8 @@ trait DispatchesJobsTrait
 	 */
 	protected function dispatchFrom($job, ArrayAccess $source, $extras = array())
 	{
-		return app('Nova\Bus\Contracts\DispatcherInterface')->dispatchFrom($job, $source, $extras);
+		$dispatcher = App::make(Dispatcher::class);
+
+		return $dispatcher->dispatchFrom($job, $source, $extras);
 	}
 }
