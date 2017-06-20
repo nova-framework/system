@@ -27,7 +27,7 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @var array
      */
-    protected $extensions = array('tpl', 'php');
+    protected $extensions = array('tpl', 'php', 'md');
 
 
     /**

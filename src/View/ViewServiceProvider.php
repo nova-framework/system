@@ -2,6 +2,7 @@
 
 namespace Nova\View;
 
+use Nova\View\Compilers\MarkdownCompiler;
 use Nova\View\Compilers\TemplateCompiler;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\Engines\CompilerEngine;
@@ -48,7 +49,7 @@ class ViewServiceProvider extends ServiceProvider
         {
             $resolver = new EngineResolver();
 
-            foreach (array('php', 'template') as $engine) {
+            foreach (array('php', 'template', 'markdown') as $engine) {
                 $method = 'register' .ucfirst($engine) .'Engine';
 
                 call_user_func(array($this, $method), $resolver);
@@ -97,6 +98,32 @@ class ViewServiceProvider extends ServiceProvider
             return new CompilerEngine($app['template.compiler'], $app['files']);
         });
     }
+
+	/**
+	 * Register the Markdown engine implementation.
+	 *
+	 * @param  \Nova\View\Engines\EngineResolver  $resolver
+	 * @return void
+	 */
+	public function registerMarkdownEngine($resolver)
+	{
+		$app = $this->app;
+
+		// The Compiler engine requires an instance of the CompilerInterface, which in
+		// this case will be the Markdown compiler, so we'll first create the compiler
+		// instance to pass into the engine so it can compile the views properly.
+		$app->bindShared('markdown.compiler', function($app)
+		{
+			$cachePath = $app['config']['view.compiled'];
+
+			return new MarkdownCompiler($app['files'], $cachePath);
+		});
+
+		$resolver->register('markdown', function() use ($app)
+		{
+			return new CompilerEngine($app['markdown.compiler'], $app['files']);
+		});
+	}
 
     /**
      * Register the View Factory.

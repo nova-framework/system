@@ -34,7 +34,8 @@
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
         "predis/predis": "1.1.*",
-        "filp/whoops": "^2.1"
+        "filp/whoops": "^2.1",
+        "erusev/parsedown": "~1.6"
     },
     "autoload": {
         "psr-4": {
