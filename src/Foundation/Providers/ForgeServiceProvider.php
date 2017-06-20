@@ -13,7 +13,6 @@ use Nova\Foundation\Console\EventMakeCommand;
 use Nova\Foundation\Console\ModelMakeCommand;
 use Nova\Foundation\Console\ViewClearCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
-use Nova\Foundation\Console\CommandMakeCommand;
 use Nova\Foundation\Console\ConsoleMakeCommand;
 use Nova\Foundation\Console\EnvironmentCommand;
 use Nova\Foundation\Console\KeyGenerateCommand;
@@ -43,7 +42,6 @@ class ForgeServiceProvider extends ServiceProvider
 	 */
 	protected $commands = array(
 		'ClearCompiled'  => 'command.clear-compiled',
-		'CommandMake'	=> 'command.command.make',
 		'ConsoleMake'	=> 'command.console.make',
 		'EventMake'	  => 'command.event.make',
 		'Down'		   => 'command.down',
@@ -90,18 +88,6 @@ class ForgeServiceProvider extends ServiceProvider
 	{
 		$this->app->singleton('command.clear-compiled', function () {
 			return new ClearCompiledCommand;
-		});
-	}
-
-	/**
-	 * Register the command.
-	 *
-	 * @return void
-	 */
-	protected function registerCommandMakeCommand()
-	{
-		$this->app->singleton('command.command.make', function ($app) {
-			return new CommandMakeCommand($app['files']);
 		});
 	}
 
