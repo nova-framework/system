@@ -4,6 +4,9 @@ namespace Nova\Events;
 
 use Nova\Container\Container;
 use Nova\Events\Contracts\DispatcherInterface;
+use Nova\Support\Str;
+
+use ReflectionClass;
 
 
 class Dispatcher implements DispatcherInterface
@@ -44,6 +47,14 @@ class Dispatcher implements DispatcherInterface
 	protected $firing = array();
 
 	/**
+	 * The queue resolver instance.
+	 *
+	 * @var callable
+	 */
+	protected $queueResolver;
+
+
+	/**
 	 * Create a new event dispatcher instance.
 	 *
 	 * @param  \Nova\Container\Container  $container
@@ -51,7 +62,7 @@ class Dispatcher implements DispatcherInterface
 	 */
 	public function __construct(Container $container = null)
 	{
-		$this->container = $container ?: new Container;
+		$this->container = $container ?: new Container();
 	}
 
 	/**
@@ -99,15 +110,15 @@ class Dispatcher implements DispatcherInterface
 	}
 
 	/**
-	 * Register a queued event and payload.
+	 * Register an event and payload to be fired later.
 	 *
 	 * @param  string  $event
 	 * @param  array   $payload
 	 * @return void
 	 */
-	public function queue($event, $payload = array())
+	public function push($event, $payload = array())
 	{
-		$this->listen($event.'_queue', function() use ($event, $payload)
+		$this->listen($event.'_pushed', function() use ($event, $payload)
 		{
 			$this->fire($event, $payload);
 		});
@@ -161,7 +172,7 @@ class Dispatcher implements DispatcherInterface
 	 */
 	public function flush($event)
 	{
-		$this->fire($event.'_queue');
+		$this->fire($event .'_pushed');
 	}
 
 	/**
@@ -325,15 +336,18 @@ class Dispatcher implements DispatcherInterface
 	 * Create the class based event callable.
 	 *
 	 * @param  string  $listener
-	 * @param  \Illuminate\Container\Container  $container
+	 * @param  \Nova\Container\Container  $container
 	 * @return callable
 	 */
 	protected function createClassCallable($listener, $container)
 	{
-		list($class, $method) = $this->parseClassCallable($listener);
+		list($className, $method) = $this->parseClassCallable($listener);
 
-		// Create a specified class instance.
-		$instance = $container->make($class);
+		if ($this->handlerShouldBeQueued($className)) {
+			return $this->createQueuedHandlerCallable($className, $method);
+		}
+
+		$instance = $container->make($className);
 
 		return array($instance, $method);
 	}
@@ -349,11 +363,81 @@ class Dispatcher implements DispatcherInterface
 		// If the listener has an @ sign, we will assume it is being used to delimit
 		// the class name from the handle method name. This allows for handlers
 		// to run multiple handler methods in a single class for convenience.
-		$segments = explode('@', $listener);
 
-		$method = (count($segments) == 2) ? $segments[1] : 'handle';
+		return array_pad(explode('@', $listener, 2), 2, 'handle');
+	}
 
-		return [$segments[0], $method];
+	/**
+	 * Determine if the event handler class should be queued.
+	 *
+	 * @param  string  $className
+	 * @return bool
+	 */
+	protected function handlerShouldBeQueued($className)
+	{
+		try {
+			return with(new ReflectionClass($className))->implementsInterface(
+				'Nova\Queue\Contracts\ShouldQueueInterface'
+			);
+		}
+		catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Create a callable for putting an event handler on the queue.
+	 *
+	 * @param  string  $className
+	 * @param  string  $method
+	 * @return \Closure
+	 */
+	protected function createQueuedHandlerCallable($className, $method)
+	{
+		return function () use ($className, $method)
+		{
+			$arguments = $this->cloneArgumentsForQueueing(func_get_args());
+
+			if (method_exists($className, 'queue')) {
+				$this->callQueueMethodOnHandler($className, $method, $arguments);
+			} else {
+				$this->resolveQueue()->push('Nova\Events\CallQueuedHandler@call', array(
+					'class' => $className, 'method' => $method, 'data' => serialize($arguments),
+				));
+			}
+		};
+	}
+
+	/**
+	 * Clone the given arguments for queueing.
+	 *
+	 * @param  array  $arguments
+	 * @return array
+	 */
+	protected function cloneArgumentsForQueueing(array $arguments)
+	{
+		return array_map(function ($a)
+		{
+			return is_object($a) ? clone $a : $a;
+
+		}, $arguments);
+	}
+
+	/**
+	 * Call the queue method on the handler class.
+	 *
+	 * @param  string  $className
+	 * @param  string  $method
+	 * @param  array  $arguments
+	 * @return void
+	 */
+	protected function callQueueMethodOnHandler($className, $method, $arguments)
+	{
+		$handler = with(new ReflectionClass($class))->newInstanceWithoutConstructor();
+
+		$handler->queue($this->resolveQueue(), 'Nova\Events\CallQueuedHandler@call', array(
+			'class' => $className, 'method' => $method, 'data' => serialize($arguments),
+		));
 	}
 
 	/**
@@ -375,8 +459,32 @@ class Dispatcher implements DispatcherInterface
 	public function forgetQueued()
 	{
 		foreach ($this->listeners as $key => $value) {
-			if (ends_with($key, '_queue')) $this->forget($key);
+			if (Str::endsWith($key, '_pushed')) {
+				$this->forget($key);
+			}
 		}
 	}
 
+	/**
+	 * Get the queue implementation from the resolver.
+	 *
+	 * @return \Nova\Queue\Contracts\QueueInterface
+	 */
+	protected function resolveQueue()
+	{
+		return call_user_func($this->queueResolver);
+	}
+
+	/**
+	 * Set the queue resolver implementation.
+	 *
+	 * @param  callable  $resolver
+	 * @return $this
+	 */
+	public function setQueueResolver(callable $resolver)
+	{
+		$this->queueResolver = $resolver;
+
+		return $this;
+	}
 }

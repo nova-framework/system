@@ -22,7 +22,6 @@ use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\HandlerEventCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\EventGenerateCommand;
-use Nova\Foundation\Console\HandlerCommandCommand;
 use Nova\Support\ServiceProvider;
 
 
@@ -46,7 +45,6 @@ class ForgeServiceProvider extends ServiceProvider
 		'EventMake'	  => 'command.event.make',
 		'Down'		   => 'command.down',
 		'Environment'	=> 'command.environment',
-		'HandlerCommand' => 'command.handler.command',
 		'HandlerEvent'   => 'command.handler.event',
 		'JobMake'		=> 'command.job.make',
 		'KeyGenerate'	=> 'command.key.generate',
@@ -148,18 +146,6 @@ class ForgeServiceProvider extends ServiceProvider
 	{
 		$this->app->singleton('command.environment', function () {
 			return new EnvironmentCommand;
-		});
-	}
-
-	/**
-	 * Register the command.
-	 *
-	 * @return void
-	 */
-	protected function registerHandlerCommandCommand()
-	{
-		$this->app->singleton('command.handler.command', function ($app) {
-			return new HandlerCommandCommand($app['files']);
 		});
 	}
 

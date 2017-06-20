@@ -24,13 +24,13 @@ interface DispatcherInterface
 	public function hasListeners($eventName);
 
 	/**
-	 * Register an event and payload to be fired later.
+	 * Register an event and payload to be fired later.s
 	 *
 	 * @param  string  $event
 	 * @param  array  $payload
 	 * @return void
 	 */
-	public function queue($event, $payload = array());
+	public function push($event, $payload = array());
 
 	/**
 	 * Register an event subscriber with the dispatcher.
