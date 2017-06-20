@@ -53,6 +53,7 @@ class PluginMakeCommand extends Command
 			'src/Database/Seeds/',
 			'src/Language/',
 			'src/Models/',
+			'src/Policies/',
 			'src/Providers/',
 			'src/Views/',
 			'webroot/'
