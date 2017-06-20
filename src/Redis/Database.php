@@ -2,7 +2,11 @@
 
 namespace Nova\Redis;
 
+use Nova\Support\Arr;
+
 use Predis\Client;
+
+use Closure;
 
 
 class Database
@@ -22,7 +26,11 @@ class Database
 	 */
 	public function __construct(array $servers = array())
 	{
-		if (isset($servers['cluster']) && $servers['cluster']) {
+		$cluster = Arr::pull($servers, 'cluster');
+
+		$options = array_merge(array('timeout' => 10.0), (array) Arr::pull($servers, 'options'));
+
+		if ($cluster) {
 			$this->clients = $this->createAggregateClient($servers);
 		} else {
 			$this->clients = $this->createSingleClients($servers);
@@ -37,7 +45,7 @@ class Database
 	 */
 	protected function createAggregateClient(array $servers)
 	{
-		$servers = array_except($servers, array('cluster'));
+		$servers = Arr::except($servers, array('cluster'));
 
 		return array('default' => new Client(array_values($servers)));
 	}
@@ -67,7 +75,11 @@ class Database
 	 */
 	public function connection($name = 'default')
 	{
-		return $this->clients[$name ?: 'default'];
+		if (is_null($name)) {
+			$name = 'default';
+		}
+
+		return $this->clients[$name];
 	}
 
 	/**
@@ -79,7 +91,46 @@ class Database
 	 */
 	public function command($method, array $parameters = array())
 	{
-		return call_user_func_array(array($this->clients['default'], $method), $parameters);
+		$instance = $this->clients['default'];
+
+		return call_user_func_array(array($instance, $method), $parameters);
+	}
+
+	/**
+	 * Subscribe to a set of given channels for messages.
+	 *
+	 * @param  array|string  $channels
+	 * @param  \Closure  $callback
+	 * @param  string  $connection
+	 * @param  string  $method
+	 * @return void
+	 */
+	public function subscribe($channels, Closure $callback, $connection = null, $method = 'subscribe')
+	{
+		$loop = $this->connection($connection)->pubSubLoop();
+
+		call_user_func_array(array($loop, $method), (array) $channels);
+
+		foreach ($loop as $message) {
+			if (($message->kind === 'message') || ($message->kind === 'pmessage')) {
+				call_user_func($callback, $message->payload, $message->channel);
+			}
+		}
+
+		unset($loop);
+	}
+
+	/**
+	 * Subscribe to a set of given channels with wildcards.
+	 *
+	 * @param  array|string  $channels
+	 * @param  \Closure  $callback
+	 * @param  string  $connection
+	 * @return void
+	 */
+	public function psubscribe($channels, Closure $callback, $connection = null)
+	{
+		return $this->subscribe($channels, $callback, $connection, __FUNCTION__);
 	}
 
 	/**
