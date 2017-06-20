@@ -2,6 +2,8 @@
 
 namespace Nova\Events;
 
+use Nova\Broadcasting\Contracts\ShouldBroadcastInterface as ShouldBroadcast;
+use Nova\Broadcasting\Contracts\ShouldBroadcastNowInterface as ShouldBroadcastNow;
 use Nova\Container\Container;
 use Nova\Events\Contracts\DispatcherInterface;
 use Nova\Support\Str;
@@ -214,6 +216,10 @@ class Dispatcher implements DispatcherInterface
 
 		$this->firing[] = $event;
 
+		if (isset($payload[0]) && (($instance = $payload[0]) instanceof ShouldBroadcast)) {
+			$this->broadcastEvent($instance);
+		}
+
 		foreach ($this->getListeners($event) as $listener) {
 			$response = call_user_func_array($listener, $payload);
 
@@ -239,6 +245,27 @@ class Dispatcher implements DispatcherInterface
 		array_pop($this->firing);
 
 		return $halt ? null : $responses;
+	}
+
+	/**
+	 * Broadcast the given event class.
+	 *
+	 * @param  \Illuminate\Contracts\Broadcasting\ShouldBroadcast  $event
+	 * @return void
+	 */
+	protected function broadcastEvent($event)
+	{
+		if (! issset($this->queueResolver)) {
+			return;
+		}
+
+		$connection = ($event instanceof ShouldBroadcastNow) ? 'sync' : null;
+
+		$queue = method_exists($event, 'onQueue') ? $event->onQueue() : null;
+
+		$this->resolveQueue()->connection($connection)->pushOn($queue, 'Nova\Broadcasting\BroadcastEvent', array(
+			'event' => serialize(clone $event),
+		));
 	}
 
 	/**

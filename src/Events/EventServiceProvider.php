@@ -18,8 +18,8 @@ class EventServiceProvider extends ServiceProvider
 		{
 			return with(new Dispatcher($app))->setQueueResolver(function () use ($app)
 			{
-                return $app['queue'];
-            });
+				return $app['queue'];
+			});
 		});
 	}
 
