@@ -2,14 +2,10 @@
 
 namespace Nova\View\Compilers;
 
-use Nova\Support\Arr;
-use Nova\Support\Str;
 use Nova\View\Compilers\Compiler;
 use Nova\View\Compilers\CompilerInterface;
 
 use Parsedown;
-
-use Closure;
 
 
 class MarkdownCompiler extends Compiler implements CompilerInterface
