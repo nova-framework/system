@@ -2,8 +2,9 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Psr\Log\LoggerInterface;
 use Nova\Broadcasting\Contracts\BroadcasterInterface;
+
+use Psr\Log\LoggerInterface;
 
 
 class LogBroadcaster implements BroadcasterInterface
