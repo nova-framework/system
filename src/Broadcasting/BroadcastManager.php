@@ -7,6 +7,7 @@ use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
 use Nova\Broadcasting\Contracts\FactoryInterface;
+use Nova\Broadcasting\PendingBroadcast;
 use Nova\Support\Arr;
 
 use Pusher;
@@ -48,6 +49,17 @@ class BroadcastManager implements FactoryInterface
 	public function __construct($app)
 	{
 		$this->app = $app;
+	}
+
+	/**
+	 * Begin broadcasting an event.
+	 *
+	 * @param  mixed|null  $event
+	 * @return \Nova\Broadcasting\PendingBroadcast|void
+	 */
+	public function event($event = null)
+	{
+		return new PendingBroadcast($this->app->make('events'), $event);
 	}
 
 	/**
@@ -168,16 +180,16 @@ class BroadcastManager implements FactoryInterface
 		);
 	}
 
-    /**
-     * Create an instance of the driver.
-     *
-     * @param  array  $config
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
-     */
-    protected function createNullDriver(array $config)
-    {
-        return new NullBroadcaster();
-    }
+	/**
+	 * Create an instance of the driver.
+	 *
+	 * @param  array  $config
+	 * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+	 */
+	protected function createNullDriver(array $config)
+	{
+		return new NullBroadcaster();
+	}
 
 	/**
 	 * Get the connection configuration.
