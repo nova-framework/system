@@ -2,15 +2,11 @@
 
 namespace {{namespace}};
 
-use Nova\Bus\QueueableTrait;
-
 use {{rootNamespace}}Jobs\Job;
 
 
 class {{className}} extends Job
 {
-	use QueueableTrait;
-
 
     /**
      * Create a new job instance.
