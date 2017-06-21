@@ -903,6 +903,24 @@ class Router
 	}
 
 	/**
+	 * Add a new route parameter binder.
+	 *
+	 * @param  string  $key
+	 * @param  string|callable  $binder
+	 * @return void
+	 */
+	public function bind($key, $binder)
+	{
+		if (is_string($binder)) {
+			$binder = $this->createClassBinding($binder);
+		}
+
+		$key = str_replace('-', '_', $key);
+
+		$this->binders[$key] = $binder;
+	}
+
+	/**
 	 * Register a model binder for a wildcard.
 	 *
 	 * @param  string  $key
@@ -937,21 +955,18 @@ class Router
 	}
 
 	/**
-	 * Add a new route parameter binder.
+	 * Get the binding callback for a given binding.
 	 *
 	 * @param  string  $key
-	 * @param  string|callable  $binder
-	 * @return void
+	 * @return \Closure|null
 	 */
-	public function bind($key, $binder)
+	public function getBindingCallback($key)
 	{
-		if (is_string($binder)) {
-			$binder = $this->createClassBinding($binder);
-		}
-
 		$key = str_replace('-', '_', $key);
 
-		$this->binders[$key] = $binder;
+		if (isset($this->binders[$key])) {
+			return $this->binders[$key];
+		}
 	}
 
 	/**

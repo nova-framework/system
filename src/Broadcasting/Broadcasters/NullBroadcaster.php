@@ -2,11 +2,27 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\Contracts\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 
 
-class NullBroadcaster implements BroadcasterInterface
+class NullBroadcaster extends Broadcaster
 {
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function authenticate($request)
+	{
+		//
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function validAuthenticationResponse($request, $result)
+	{
+		//
+	}
 
 	/**
 	 * {@inheritdoc}

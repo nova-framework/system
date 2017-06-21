@@ -797,6 +797,7 @@ class Application extends Container
 			'encrypter'			=> 'Nova\Encryption\Encrypter',
 			'db'				=> 'Nova\Database\DatabaseManager',
 			'db.connection'		=> array('Nova\Database\Connection', 'Nova\Database\Contracts\ConnectionInterface'),
+			'broadcast'			=> array('Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\Contracts\FactoryInterface'),
 			'events'			=> 'Nova\Events\Dispatcher',
 			'files'				=> 'Nova\Filesystem\Filesystem',
 			'hash'				=> 'Nova\Hashing\HasherInterface',

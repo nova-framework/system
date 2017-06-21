@@ -2,12 +2,12 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Contracts\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 use Nova\Redis\Database as RedisDatabase;
 use Nova\Support\Arr;
 
 
-class RedisBroadcaster implements Broadcaster
+class RedisBroadcaster extends Broadcaster
 {
 	/**
 	 * The Redis instance.
@@ -39,20 +39,81 @@ class RedisBroadcaster implements Broadcaster
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Authenticate the incoming request for a given channel.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @return mixed
+	 */
+	public function authenticate($request)
+	{
+		$channelName = $request->input('channel_name');
+
+		//
+		$count = 0;
+
+		$channel = preg_replace('/^(private|presence)\-/', '', $channelName, -1, $count);
+
+		if (($count > 0) && is_null($user = $request->user())) {
+			throw new HttpException(403);
+		}
+
+		return $this->verifyUserCanAccessChannel($request, $channel);
+	}
+
+	/**
+	 * Return the valid authentication response.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @param  mixed  $result
+	 * @return mixed
+	 */
+	public function validAuthenticationResponse($request, $result)
+	{
+		if (is_bool($result)) {
+			return json_encode($result);
+		}
+
+		return json_encode(array(
+			'channel_data' => array(
+				'user_id'   => $request->user()->getAuthIdentifier(),
+				'user_info' => $result,
+			),
+		));
+	}
+
+	/**
+	 * Broadcast the given event.
+	 *
+	 * @param  array  $channels
+	 * @param  string  $event
+	 * @param  array  $payload
+	 * @return void
 	 */
 	public function broadcast(array $channels, $event, array $payload = array())
 	{
-		$connection = $this->redis->connection($this->connection);
+		$connection = $this->getConnection();
+
+		//
+		$socket = Arr::pull($payload, 'socket');
 
 		$payload = json_encode(array(
 			'event'  => $event,
 			'data'   => $payload,
-			'socket' => Arr::pull($payload, 'socket'),
+			'socket' => $socket,
 		));
 
 		foreach ($channels as $channel) {
 			$connection->publish($channel, $payload);
 		}
+	}
+
+	/**
+	 * Get the Redis single connection implementation.
+	 *
+	 * @return \Predis\Connection\SingleConnectionInterface
+	 */
+	public function getConnection()
+	{
+		return $this->redis->connection($this->connection);
 	}
 }

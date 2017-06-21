@@ -22,19 +22,15 @@ class BroadcastServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('Nova\Broadcasting\BroadcastManager', function ($app)
+		$this->app->bindShared('broadcast', function ($app)
 		{
 			return new BroadcastManager($app);
 		});
 
 		$this->app->singleton('Nova\Broadcasting\Contracts\BroadcasterInterface', function ($app)
 		{
-			return $app->make('Nova\Broadcasting\BroadcastManager')->connection();
+			return $app->make('broadcast')->connection();
 		});
-
-		$this->app->alias(
-			'Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\Contracts\FactoryInterface'
-		);
 	}
 
 	/**
@@ -44,10 +40,6 @@ class BroadcastServiceProvider extends ServiceProvider
 	 */
 	public function provides()
 	{
-		return array(
-			'Nova\Broadcasting\BroadcastManager',
-			'Nova\Broadcasting\Contracts\FactoryInterface',
-			'Nova\Broadcasting\Contracts\BroadcasterInterface',
-		);
+		return array('broadcast', 'Nova\Broadcasting\Contracts\BroadcasterInterface');
 	}
 }

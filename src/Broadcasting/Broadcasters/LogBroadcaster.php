@@ -2,12 +2,12 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\Contracts\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 
 use Psr\Log\LoggerInterface;
 
 
-class LogBroadcaster implements BroadcasterInterface
+class LogBroadcaster extends Broadcaster
 {
 	/**
 	 * The logger implementation.
@@ -30,12 +30,28 @@ class LogBroadcaster implements BroadcasterInterface
 	/**
 	 * {@inheritdoc}
 	 */
+	public function authenticate($request)
+	{
+		//
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function validAuthenticationResponse($request, $result)
+	{
+		//
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function broadcast(array $channels, $event, array $payload = array())
 	{
 		$channels = implode(', ', $channels);
 
 		$payload = json_encode($payload, JSON_PRETTY_PRINT);
 
-		$this->logger->info('Broadcasting ['.$event.'] on channels ['.$channels.'] with payload:' .PHP_EOL .$payload);
+		$this->logger->info('Broadcasting [' .$event .'] on channels [' .$channels .'] with payload:' .PHP_EOL .$payload);
 	}
 }

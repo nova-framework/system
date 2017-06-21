@@ -7,6 +7,7 @@ use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
 use Nova\Broadcasting\Contracts\FactoryInterface;
+use Nova\Broadcasting\Contracts\ShouldBroadcastNowInterface;
 use Nova\Broadcasting\PendingBroadcast;
 use Nova\Support\Arr;
 
@@ -79,6 +80,33 @@ class BroadcastManager implements FactoryInterface
 	public function event($event = null)
 	{
 		return new PendingBroadcast($this->app->make('events'), $event);
+	}
+
+	/**
+	 * Queue the given event for broadcast.
+	 *
+	 * @param  mixed  $event
+	 * @return void
+	 */
+	public function queue($event)
+	{
+		$connection = ($event instanceof ShouldBroadcastNowInterface) ? 'sync' : null;
+
+		if (is_null($connection) && isset($event->connection)) {
+			$connection = $event->connection;
+		}
+
+		$queue = null;
+
+		if (isset($event->broadcastQueue)) {
+			$queue = $event->broadcastQueue;
+		} else if (isset($event->queue)) {
+			$queue = $event->queue;
+		}
+
+		$this->app->make('queue')->connection($connection)->pushOn(
+			$queue, 'Nova\Broadcasting\BroadcastEvent', array('event' => serialize(clone $event))
+		);
 	}
 
 	/**
