@@ -29,6 +29,6 @@ class {{className}} extends Event
      */
     public function broadcastOn()
     {
-        return array('private-channel-name');
+        return array('channel-name');
     }
 }
