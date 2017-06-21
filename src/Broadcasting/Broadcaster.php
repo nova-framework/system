@@ -54,7 +54,7 @@ abstract class Broadcaster implements BroadcasterInterface
 		foreach ($this->channels as $pattern => $callback) {
 			$parameters = array();
 
-			if (! $this->matches($pattern, $channel, $parameters))) {
+			if (! $this->channelMatches($pattern, $channel, $parameters))) {
 				continue;
 			}
 
@@ -75,7 +75,7 @@ abstract class Broadcaster implements BroadcasterInterface
 	 * @param  string  $pattern
 	 * @return array|null
 	 */
-	protected function matches($pattern, $channel, array &$parameters)
+	protected function channelMatches($pattern, $channel, array &$parameters)
 	{
 		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
