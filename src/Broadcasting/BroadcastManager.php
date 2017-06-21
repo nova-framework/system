@@ -52,6 +52,25 @@ class BroadcastManager implements FactoryInterface
 	}
 
 	/**
+	 * Get the socket ID for the given request.
+	 *
+	 * @param  \Nova\Http\Request|null  $request
+	 * @return string|null
+	 */
+	public function socket($request = null)
+	{
+		if (is_null($request) && ! $this->app->bound('request')) {
+			return;
+		}
+
+		$request = $request ?: $this->app['request'];
+
+		if ($request->hasHeader('X-Socket-ID')) {
+			return $request->header('X-Socket-ID');
+		}
+	}
+
+	/**
 	 * Begin broadcasting an event.
 	 *
 	 * @param  mixed|null  $event
