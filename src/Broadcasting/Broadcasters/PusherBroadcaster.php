@@ -3,6 +3,7 @@
 namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Contracts\BroadcasterInterface;
+use Nova\Support\Arr;
 
 use Pusher;
 
@@ -32,7 +33,9 @@ class PusherBroadcaster implements BroadcasterInterface
 	 */
 	public function broadcast(array $channels, $event, array $payload = array())
 	{
-		$this->pusher->trigger($channels, $event, $payload);
+		$socket = Arr::pull($payload, 'socket');
+
+		$this->pusher->trigger($channels, $event, $payload, $socket);
 	}
 
 	/**

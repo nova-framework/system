@@ -4,6 +4,7 @@ namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Contracts\Broadcasting\BroadcasterInterface;
 use Nova\Redis\Database as RedisDatabase;
+use Nova\Support\Arr;
 
 
 class RedisBroadcaster implements Broadcaster
@@ -44,7 +45,11 @@ class RedisBroadcaster implements Broadcaster
 	{
 		$connection = $this->redis->connection($this->connection);
 
-		$payload = json_encode(['event' => $event, 'data' => $payload]);
+		$payload = json_encode(array(
+			'event'  => $event,
+			'data'   => $payload,
+			'socket' => Arr::pull($payload, 'socket'),
+		));
 
 		foreach ($channels as $channel) {
 			$connection->publish($channel, $payload);

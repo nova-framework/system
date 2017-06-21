@@ -35,6 +35,20 @@ class PendingBroadcast
 	}
 
 	/**
+	 * Broadcast the event to everyone except the current user.
+	 *
+	 * @return $this
+	 */
+	public function toOthers()
+	{
+		if (method_exists($this->event, 'dontBroadcastToCurrentUser')) {
+			$this->event->dontBroadcastToCurrentUser();
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Handle the object's destruction.
 	 *
 	 * @return void
