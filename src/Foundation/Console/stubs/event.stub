@@ -2,6 +2,7 @@
 
 namespace {{namespace}};
 
+use Nova\Broadcasting\InteractsWithSockets;
 use Nova\Queue\SerializesModelsTrait;
 
 use {{rootNamespace}}Events\Event;
@@ -9,7 +10,7 @@ use {{rootNamespace}}Events\Event;
 
 class {{className}} extends Event
 {
-    use SerializesModelsTrait;
+    use InteractsWithSockets, SerializesModelsTrait;
 
     /**
      * Create a new Event instance.
