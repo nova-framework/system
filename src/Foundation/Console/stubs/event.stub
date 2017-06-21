@@ -2,6 +2,7 @@
 
 namespace {{namespace}};
 
+use Nova\Broadcasting\Contracts\ShouldBroadcastInterface;
 use Nova\Broadcasting\Channel;
 use Nova\Broadcasting\InteractsWithSockets;
 use Nova\Broadcasting\PrivateChannel;
