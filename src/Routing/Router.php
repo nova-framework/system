@@ -483,11 +483,22 @@ class Router
 	 */
 	protected function createRoute($methods, $uri, $action)
 	{
+		if (is_callable($action)) {
+			$action = array('uses' => $action);
+		}
+
 		// If the route is routing to a controller we will parse the route action into
 		// an acceptable array format before registering it and creating this route
 		// instance itself. We need to build the Closure that will call this out.
-		if ($this->actionReferencesController($action)) {
+		else if ($this->actionReferencesController($action)) {
 			$action = $this->convertToControllerAction($action);
+		}
+
+		// If no "uses" property has been set, we will dig through the array to find a
+		// Closure instance within this list. We will set the first Closure we come
+		// across into the "uses" property that will get fired off by this route.
+		else if (! isset($action['uses'])) {
+			$action['uses'] = $this->findActionClosure($action);
 		}
 
 		if (isset($action['middleware']) && is_string($action['middleware'])) {
@@ -508,6 +519,20 @@ class Router
 		$this->addWhereClausesToRoute($route);
 
 		return $route;
+	}
+
+	/**
+	 * Find the Closure in an action array.
+	 *
+	 * @param  array  $action
+	 * @return \Closure
+	 */
+	protected function findActionClosure(array $action)
+	{
+		return Arr::first($action, function($key, $value)
+		{
+			return is_callable($value) && is_numeric($key);
+		});
 	}
 
 	/**
@@ -586,7 +611,9 @@ class Router
 	 */
 	protected function convertToControllerAction($action)
 	{
-		if (is_string($action)) $action = array('uses' => $action);
+		if (is_string($action)) {
+			$action = array('uses' => $action);
+		}
 
 		// Here we'll get an instance of this controller dispatcher and hand it off to
 		// the Closure so it will be used to resolve the class instances out of our

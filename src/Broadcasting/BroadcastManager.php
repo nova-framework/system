@@ -53,22 +53,6 @@ class BroadcastManager implements FactoryInterface
 	}
 
 	/**
-	 * Register the routes for handling broadcast authentication and sockets.
-	 *
-	 * @param  array|null  $attributes
-	 * @return void
-	 */
-	public function routes(array $attributes = null)
-	{
-		$attributes = $attributes ?: array('middleware' => array('web'));
-
-		$this->app['router']->group($attributes, function ($router)
-		{
-			$router->post('broadcasting/auth', 'Nova\Broadcasting\BroadcastController@authenticate');
-		});
-	}
-
-	/**
 	 * Get the socket ID for the given request.
 	 *
 	 * @param  \Nova\Http\Request|null  $request

@@ -130,7 +130,7 @@ class Route
 
 		$this->methods = (array) $methods;
 
-		$this->action = $this->parseAction($action);
+		$this->action = $action;
 
 		if (in_array('GET', $this->methods) && ! in_array('HEAD', $this->methods)) {
 			$this->methods[] = 'HEAD';
@@ -556,45 +556,6 @@ class Route
 		}
 
 		return $parameters;
-	}
-
-	/**
-	 * Parse the route action into a standard array.
-	 *
-	 * @param  callable|array  $action
-	 * @return array
-	 */
-	protected function parseAction($action)
-	{
-		// If the action is already a Closure instance, we will just set that instance
-		// as the "uses" property, because there is nothing else we need to do when
-		// it is available. Otherwise we will need to find it in the action list.
-		if (is_callable($action)) {
-			return array('uses' => $action);
-		}
-
-		// If no "uses" property has been set, we will dig through the array to find a
-		// Closure instance within this list. We will set the first Closure we come
-		// across into the "uses" property that will get fired off by this route.
-		else if (! isset($action['uses'])) {
-			$action['uses'] = $this->findClosure($action);
-		}
-
-		return $action;
-	}
-
-	/**
-	 * Find the Closure in an action array.
-	 *
-	 * @param  array  $action
-	 * @return \Closure
-	 */
-	protected function findClosure(array $action)
-	{
-		return array_first($action, function($key, $value)
-		{
-			return is_callable($value);
-		});
 	}
 
 	/**
