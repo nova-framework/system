@@ -102,7 +102,7 @@ class RedisBroadcaster extends Broadcaster
 			'socket' => $socket,
 		));
 
-		foreach ($channels as $channel) {
+		foreach ($this->formatChannels($channels) as $channel) {
 			$connection->publish($channel, $payload);
 		}
 	}

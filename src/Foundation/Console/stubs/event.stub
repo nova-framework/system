@@ -2,7 +2,10 @@
 
 namespace {{namespace}};
 
+use Nova\Broadcasting\Channel;
 use Nova\Broadcasting\InteractsWithSockets;
+use Nova\Broadcasting\PrivateChannel;
+use Nova\Broadcasting\PresenceChannel;
 use Nova\Queue\SerializesModelsTrait;
 
 use {{rootNamespace}}Events\Event;
@@ -29,6 +32,6 @@ class {{className}} extends Event
      */
     public function broadcastOn()
     {
-        return array('channel-name');
+        return new PrivateChannel('channel-name');
     }
 }
