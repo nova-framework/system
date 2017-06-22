@@ -67,14 +67,27 @@ class PusherBroadcaster extends Broadcaster
 
 		$socketId = $request->input('socket_id');
 
-		if (Str::startsWith($channel, 'presence')) {
-			$authId = $request->user()->getAuthIdentifier();
-
-			$response = $this->pusher->presence_auth($channel, $socketId, $authId, $result);
-		} else {
-			$response = $this->pusher->socket_auth($channel, $socketId);
+		if (Str::startsWith($channel, 'private')) {
+			return $this->decodePusherResponse(
+				$this->pusher->socket_auth($channel, $socketId)
+			);
 		}
 
+		$authId = $request->user()->getKey();
+
+		return $this->decodePusherResponse(
+			$this->pusher->presence_auth($channel, $socketId, $authId, $result)
+		);
+	}
+
+	/**
+	 * Decode the given Pusher response.
+	 *
+	 * @param  mixed  $response
+	 * @return array
+	 */
+	protected function decodePusherResponse($response)
+	{
 		return json_decode($response, true);
 	}
 
@@ -100,7 +113,7 @@ class PusherBroadcaster extends Broadcaster
 		}
 
 		throw new BroadcastException(
-			is_bool($response) ? 'Failed to connect to Pusher.' : $response['body']
+			is_array($response) ? $response['body'] : 'Failed to connect to Pusher.'
 		);
 	}
 
