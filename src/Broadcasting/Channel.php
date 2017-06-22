@@ -24,6 +24,16 @@ class Channel
 	}
 
 	/**
+	 * Gets the channel name.
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	/**
 	 * Convert the channel instance to a string.
 	 *
 	 * @return string

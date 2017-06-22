@@ -54,13 +54,15 @@ abstract class Broadcaster implements BroadcasterInterface
 		foreach ($this->channels as $pattern => $callback) {
 			$parameters = array();
 
-			if (! $this->channelMatches($pattern, $channel, $parameters))) {
+			if (! $this->channelMatch($pattern, $channel, $parameters))) {
 				continue;
 			}
 
-			$parameters = array_merge(array($user), $parameters);
+			$result = call_user_func_array(
+				$callback, array_merge(array($user), $parameters)
+			);
 
-			if (! is_null($result = call_user_func_array($callback, $parameters)) {
+			if (! is_null($result) {
 				return $this->validAuthenticationResponse($request, $result);
 			}
 		}
@@ -75,26 +77,37 @@ abstract class Broadcaster implements BroadcasterInterface
 	 * @param  string  $pattern
 	 * @return array|null
 	 */
-	protected function channelMatches($pattern, $channel, array &$parameters)
+	protected function channelMatch($pattern, $channel, array &$parameters)
 	{
-		if ($pattern == $channel) {
+		if ($pattern === $channel) {
 			// Direct match with no parameters.
 			return true;
 		}
 
 		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
-		if (preg_match('/^'. $regexp .'$/', , $channel, $matches) !== 1) {
-			return false;
+		if (preg_match('/^'. $regexp .'$/', , $channel, $matches) === 1) {
+			$parameters = $this->gatherChannelParameters($matches);
+
+			return true;
 		}
 
-		$parameters = array_filter($matches, function ($value)
+		return false;
+	}
+
+	/**
+	 *  Gather the channel parameters from a matches array.
+	 *
+	 * @param  array  $matches
+	 * @return array
+	 */
+	protected function gatherChannelParameters(array $matches)
+	{
+		return array_filter($matches, function ($key)
 		{
-			return ! is_numeric($value);
+			return ! is_numeric($key);
 
 		}, ARRAY_FILTER_USE_KEY);
-
-		return true;
 	}
 
 	/**
@@ -107,7 +120,7 @@ abstract class Broadcaster implements BroadcasterInterface
 	{
 		return array_map(function ($channel)
 		{
-			return (string) $channel;
+			return $channel->getName();
 
 		}, $channels);
 	}
