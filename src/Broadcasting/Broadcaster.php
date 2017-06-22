@@ -84,9 +84,14 @@ abstract class Broadcaster implements BroadcasterInterface
 			return true;
 		}
 
-		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
+		$count = 0;
 
-		if (preg_match('/^'. $regexp .'$/', , $channel, $matches) === 1) {
+		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern, -1, $count);
+
+		if ($count === 0) {
+			// The pattern has no parameters, then the matching will always fail.
+			return false;
+		} else if (preg_match('/^'. $regexp .'$/', , $channel, $matches) === 1) {
 			$parameters = $this->gatherChannelParameters($matches);
 
 			return true;
