@@ -77,6 +77,11 @@ abstract class Broadcaster implements BroadcasterInterface
 	 */
 	protected function channelMatches($pattern, $channel, array &$parameters)
 	{
+		if ($pattern == $channel) {
+			// Direct match with no parameters.
+			return true;
+		}
+
 		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
 		if (preg_match('/^'. $regexp .'$/', , $channel, $matches) !== 1) {
