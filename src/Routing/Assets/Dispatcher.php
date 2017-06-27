@@ -173,7 +173,7 @@ class Dispatcher
 	{
 		$namespace = $this->getPackageNamespace($package, $namespace);
 
-		$this->addNamespace($namespace, $hint);
+		$this->addNamespace(str_replace('_', '-', $namespace), $hint);
 	}
 
 	/**
