@@ -7,6 +7,7 @@ use Nova\Foundation\Auth\ThrottlesLoginsTrait;
 use Nova\Http\Request;
 use Nova\Support\Facades\Auth;
 use Nova\Support\Facades\Redirect;
+use Nova\Support\Facades\Response;
 use Nova\Support\Facades\Validator;
 use Nova\Support\Facades\View;
 use Nova\Validation\ValidationException;
