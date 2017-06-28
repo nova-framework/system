@@ -49,7 +49,7 @@ class Pipeline extends BasePipeline
 		return function ($passable) use ($stack, $pipe)
 		{
 			try {
-				return $this->call($pipe, $passable, $stack);
+				return $this->callPipe($pipe, $passable, $stack);
 			}
 			catch (Exception $e) {
 				return $this->handleException($passable, $e);
