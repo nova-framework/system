@@ -7,7 +7,6 @@ use Nova\Foundation\Auth\ThrottlesLoginsTrait;
 use Nova\Http\Request;
 use Nova\Support\Facades\Auth;
 use Nova\Support\Facades\Redirect;
-use Nova\Support\Facades\Response;
 use Nova\Support\Facades\Validator;
 use Nova\Support\Facades\View;
 use Nova\Validation\ValidationException;
@@ -116,13 +115,9 @@ trait AuthenticatesUsersTrait
 	 */
 	protected function sendFailedLoginResponse(Request $request)
 	{
-		$error = __d('nova', 'These credentials do not match our records.');
-
-		$errors = array($this->username() => $error);
-
-		if ($request->json() || $request->expectsJson()) {
-			return Response::json($errors, 422);
-		}
+		$errors = array(
+			$this->username() => __d('nova', 'These credentials do not match our records.')
+		);
 
 		return Redirect::back()
 			->withInput($request->only($this->username(), 'remember'))
@@ -149,9 +144,7 @@ trait AuthenticatesUsersTrait
 	{
 		Auth::guard($this->getGuard())->logout();
 
-		$uri = property_exists($this, 'redirectAfterLogout')
-			? $this->redirectAfterLogout
-			: $this->loginPath();
+		$uri = property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : $this->loginPath();
 
 		return Redirect::to($uri);
 	}
