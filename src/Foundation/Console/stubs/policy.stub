@@ -9,6 +9,7 @@ class {{className}}
 {
     use HandlesAuthorizationTrait;
 
+
     /**
      * Create a new policy instance.
      *
