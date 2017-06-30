@@ -6,7 +6,6 @@ use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
 use Nova\Support\ServiceProvider;
 
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
@@ -70,6 +69,10 @@ class VendorPublishCommand extends Command
 		$paths = ServiceProvider::pathsToPublish($group);
 
 		if (empty($paths)) {
+			if (is_null($group)) {
+				return $this->comment("Nothing to publish.");
+			}
+
 			return $this->comment("Nothing to publish for group [{$group}].");
 		}
 
@@ -81,6 +84,10 @@ class VendorPublishCommand extends Command
 			} else {
 				$this->error("Can't locate path: <{$from}>");
 			}
+		}
+
+		if (is_null($group)) {
+			return $this->info("Publishing complete!");
 		}
 
 		$this->info("Publishing complete for group [{$group}]!");
@@ -95,10 +102,6 @@ class VendorPublishCommand extends Command
 	 */
 	protected function publishFile($from, $to)
 	{
-		if ($this->files->exists($to) && ! $this->option('force')) {
-			return;
-		}
-
 		$this->createParentDirectory(dirname($to));
 
 		$this->files->copy($from, $to);
@@ -115,10 +118,6 @@ class VendorPublishCommand extends Command
 	 */
 	protected function publishDirectory($from, $to)
 	{
-		if ($this->files->isDirectory($to) && ! $this->option('force')) {
-			return;
-		}
-
 		$this->createParentDirectory(dirname($to));
 
 		$this->files->copyDirectory($from, $to);
@@ -165,18 +164,6 @@ class VendorPublishCommand extends Command
 	{
 		return array(
 			array('group', InputArgument::OPTIONAL, 'The name of assets group being published.'),
-		);
-	}
-
-	/**
-	 * Get the console command options.
-	 *
-	 * @return array
-	 */
-	protected function getOptions()
-	{
-		return array(
-			array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
 		);
 	}
 }
