@@ -37,6 +37,7 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	protected $dontReport = array();
 
+
 	/**
 	 * Create a new exception handler instance.
 	 *
@@ -133,9 +134,7 @@ class Handler implements ExceptionHandlerInterface
 	{
 		$response = new HttpResponse($response->getContent(), $response->getStatusCode(), $response->headers->all());
 
-		$response->exception = $e;
-
-		return $response;
+		return $response->withException($e);
 	}
 
 	/**
@@ -187,7 +186,7 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	protected function isUnauthorizedException(Exception $e)
 	{
-		return $e instanceof UnauthorizedException;
+		return ($e instanceof UnauthorizedException);
 	}
 
 	/**
@@ -198,6 +197,6 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	protected function isHttpException(Exception $e)
 	{
-		return $e instanceof HttpException;
+		return ($e instanceof HttpException);
 	}
 }
