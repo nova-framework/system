@@ -12,6 +12,7 @@ use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
 use Nova\Support\Contracts\MessageProviderInterface as MessageProvider;
 use Nova\Support\MessageBag;
+use Nova\Support\Str;
 use Nova\View\Contracts\EngineInterface;
 use Nova\View\Factory;
 
@@ -361,8 +362,8 @@ class View implements ArrayAccess, Renderable
 	public function __call($method, $params)
 	{
 		// Add the support for the dynamic withX Methods.
-		if (starts_with($method, 'with')) {
-			$name = lcfirst(substr($method, 4));
+		if (Str::startsWith($method, 'with')) {
+			$name = Str::camel(substr($method, 4));
 
 			return $this->with($name, array_shift($params));
 		}
