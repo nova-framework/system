@@ -2,11 +2,21 @@
 
 namespace Nova\Http;
 
+use Nova\Http\Exceptions\HttpResponseException;
+
 use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 
 
 trait ResponseTrait
 {
+	/**
+	 * The exception that triggered the error response (if applicable).
+	 *
+	 * @var \Exception|null
+	 */
+	public $exception;
+
+
 	/**
 	 * Set a header on the Response.
 	 *
@@ -35,4 +45,26 @@ trait ResponseTrait
 		return $this;
 	}
 
+	/**
+	 * Set the exception to attach to the response.
+	 *
+	 * @param  \Exception  $e
+	 * @return $this
+	 */
+	public function withException(Exception $e)
+	{
+		$this->exception = $e;
+
+		return $this;
+	}
+
+	/**
+	 * Throws the response in a HttpResponseException instance.
+	 *
+	 * @throws \Nova\Http\Exceptions\HttpResponseException
+	 */
+	public function throwResponse()
+	{
+		throw new HttpResponseException($this);
+	}
 }
