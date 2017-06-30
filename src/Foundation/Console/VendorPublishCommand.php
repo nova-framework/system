@@ -55,16 +55,24 @@ class VendorPublishCommand extends Command
 	{
 		$group = $this->input->getArgument('group');
 
-		$this->publishGroup($group);
+		if (is_null($group)) {
+			return $this->publish();
+		}
+
+		$groups = explode(',', $group);
+
+		foreach($groups as $group) {
+			$this->publish($group);
+		}
 	}
 
 	/**
-	 * Publish the assets for a given package name.
+	 * Publish the assets for a given group name.
 	 *
-	 * @param  string  $package
+	 * @param  string|null  $group
 	 * @return void
 	 */
-	protected function publishGroup($group)
+	protected function publish($group = null)
 	{
 		$paths = ServiceProvider::pathsToPublish($group);
 
