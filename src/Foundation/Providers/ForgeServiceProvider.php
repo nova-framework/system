@@ -295,18 +295,18 @@ class ForgeServiceProvider extends ServiceProvider
 		});
 	}
 
-    /**
-     * Register the vendor publish console command.
-     *
-     * @return void
-     */
-    protected function registerVendorPublishCommand()
-    {
-        $this->app->singleton('command.vendor.publish', function ($app)
-        {
-            return new VendorPublishCommand($app['files']);
-        });
-    }
+	/**
+	 * Register the vendor publish console command.
+	 *
+	 * @return void
+	 */
+	protected function registerVendorPublishCommand()
+	{
+		$this->app->singleton('command.vendor.publish', function ($app)
+		{
+			return new VendorPublishCommand($app['files']);
+		});
+	}
 
 	/**
 	 * Register the command.
