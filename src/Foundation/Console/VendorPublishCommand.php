@@ -7,6 +7,9 @@ use Nova\Filesystem\Filesystem;
 use Nova\Support\ServiceProvider;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+
+use FilesystemIterator;
 
 
 class VendorPublishCommand extends Command
@@ -110,7 +113,15 @@ class VendorPublishCommand extends Command
 	 */
 	protected function publishFile($from, $to)
 	{
-		$this->createParentDirectory(dirname($to));
+		if ($this->files->exists($to) && ! $this->option('force')) {
+			return;
+		}
+
+		$directory = dirname($to);
+
+		if (! $this->files->isDirectory($directory)) {
+			$this->files->makeDirectory($directory, 0755, true);
+		}
 
 		$this->files->copy($from, $to);
 
@@ -126,24 +137,51 @@ class VendorPublishCommand extends Command
 	 */
 	protected function publishDirectory($from, $to)
 	{
-		$this->createParentDirectory(dirname($to));
-
-		$this->files->copyDirectory($from, $to);
+		$this->copyDirectory($from, $to);
 
 		$this->status($from, $to, 'Directory');
 	}
 
 	/**
-	 * Create the directory to house the published files if needed.
+	 * Copy a directory from one location to another.
 	 *
 	 * @param  string  $directory
-	 * @return void
+	 * @param  string  $destination
+	 * @param  bool  $force
+	 * @return bool
 	 */
-	protected function createParentDirectory($directory)
+	public function copyDirectory($directory, $destination)
 	{
-		if (! $this->files->isDirectory($directory)) {
-			$this->files->makeDirectory($directory, 0755, true);
+		if (! $this->isDirectory($directory)) {
+			return false;
 		}
+
+		if (! $this->files->isDirectory($destination)) {
+			$this->makeDirectory($destination, 0777, true);
+		}
+
+		$items = new FilesystemIterator($directory, FilesystemIterator::SKIP_DOTS);
+
+		foreach ($items as $item) {
+			$target = $destination .DS .$item->getBasename();
+
+			if ($item->isDir()) {
+				if (! $this->copyDirectory($item->getPathname(), $target)) {
+					return false;
+				}
+
+				continue;
+			}
+
+			// The current item is a file.
+			if ($this->files->exists($target) && ! $this->option('force')) {
+				continue;
+			} else if (! $this->files->copy($item->getPathname(), $target)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -172,6 +210,18 @@ class VendorPublishCommand extends Command
 	{
 		return array(
 			array('group', InputArgument::OPTIONAL, 'The name of assets group being published.'),
+		);
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return array(
+			array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
 		);
 	}
 }
