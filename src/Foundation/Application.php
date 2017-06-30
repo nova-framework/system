@@ -10,6 +10,7 @@ use Nova\Filesystem\Filesystem;
 use Nova\Foundation\Http\Kernel;
 use Nova\Http\Request;
 use Nova\Http\Response;
+use Nova\Log\LogServiceProvider;
 use Nova\Routing\RoutingServiceProvider;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
@@ -144,6 +145,8 @@ class Application extends Container
 	protected function registerBaseServiceProviders()
 	{
 		$this->register(new EventServiceProvider($this));
+
+		$this->register(new LogServiceProvider($this));
 
 		$this->register(new RoutingServiceProvider($this));
 	}
