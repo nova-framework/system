@@ -6,6 +6,14 @@ namespace Nova\Foundation\Bus;
 class PendingDispatch
 {
 	/**
+	 * The job.
+	 *
+	 * @var mixed
+	 */
+	protected $job;
+
+
+	/**
 	 * Create a new pending job dispatch.
 	 *
 	 * @param  mixed  $job

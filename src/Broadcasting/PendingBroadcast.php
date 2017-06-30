@@ -21,6 +21,7 @@ class PendingBroadcast
 	 */
 	protected $event;
 
+
 	/**
 	 * Create a new pending broadcast instance.
 	 *
