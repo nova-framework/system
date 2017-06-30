@@ -39,6 +39,8 @@ trait ValidatesRequestsTrait
 		if ($validator->fails()) {
 			$this->throwValidationException($request, $validator);
 		}
+
+		return $request->only(array_keys($rules));
 	}
 
 	/**
@@ -59,6 +61,8 @@ trait ValidatesRequestsTrait
 		{
 			$this->validate($request, $rules, $messages, $customAttributes);
 		});
+
+		return $request->only(array_keys($rules));
 	}
 
 	/**

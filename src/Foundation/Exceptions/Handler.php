@@ -2,6 +2,7 @@
 
 namespace Nova\Foundation\Exceptions;
 
+use Nova\Auth\Access\UnauthorizedException;
 use Nova\Container\Container;
 use Nova\Http\Response as HttpResponse;
 use Nova\Foundation\Contracts\ExceptionHandlerInterface;
@@ -59,6 +60,10 @@ class Handler implements ExceptionHandlerInterface
 			return;
 		}
 
+		if (method_exists($e, 'report')) {
+			return $e->report();
+		}
+
 		try {
 			$logger = $this->container->make(LoggerInterface::class);
 		}
@@ -106,7 +111,11 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	public function render($request, Exception $e)
 	{
-		if ($e instanceof HttpException) {
+		if ($this->isUnauthorizedException($e)) {
+			$e = new HttpException(403, $e->getMessage());
+		}
+
+		if ($this->isHttpException($e)) {
 			return $this->createResponse($this->renderHttpException($e), $e);
 		}
 
@@ -114,7 +123,7 @@ class Handler implements ExceptionHandlerInterface
 	}
 
 	/**
-	 * Map exception into an Mini-me response.
+	 * Map exception into a Nova response.
 	 *
 	 * @param  \Symfony\Component\HttpFoundation\Response  $response
 	 * @param  \Exception  $e
@@ -168,5 +177,27 @@ class Handler implements ExceptionHandlerInterface
 	public function renderForConsole($output, Exception $e)
 	{
 		with(new ConsoleApplication)->renderException($e, $output);
+	}
+
+	/**
+	 * Determine if the given exception is an access unauthorized exception.
+	 *
+	 * @param  \Exception  $e
+	 * @return bool
+	 */
+	protected function isUnauthorizedException(Exception $e)
+	{
+		return $e instanceof UnauthorizedException;
+	}
+
+	/**
+	 * Determine if the given exception is an HTTP exception.
+	 *
+	 * @param  \Exception  $e
+	 * @return bool
+	 */
+	protected function isHttpException(Exception $e)
+	{
+		return $e instanceof HttpException;
 	}
 }
