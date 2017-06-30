@@ -136,7 +136,11 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		return $this->filter(function ($item) use ($key, $value, $strict)
 		{
-			return ($strict ? (data_get($item, $key) === $value) : (data_get($item, $key) == $value));
+			if ($strict) {
+				return (data_get($item, $key) === $value);
+			}
+
+			return (data_get($item, $key) == $value);
 		});
 	}
 

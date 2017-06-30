@@ -375,16 +375,19 @@ class Arr
 	 * @param  \Closure  $callback
 	 * @return array
 	 */
-	public static function where($array, Closure $callback)
+	public static function where($array, callable $callback)
 	{
-		$filtered = array();
-
-		foreach ($array as $key => $value)
-		{
-			if (call_user_func($callback, $key, $value)) $filtered[$key] = $value;
-		}
-
-		return $filtered;
+		return array_filter($array, $callback, ARRAY_FILTER_USE_BOTH);
 	}
 
+	/**
+	 * If the given value is not an array, wrap it in one.
+	 *
+	 * @param  mixed  $value
+	 * @return array
+	 */
+	public static function wrap($value)
+	{
+		return ! is_array($value) ? array($value) : $value;
+	}
 }
