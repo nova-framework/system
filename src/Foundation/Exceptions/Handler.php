@@ -60,25 +60,25 @@ class Handler implements ExceptionHandlerInterface
 		}
 
 		try {
-            $logger = $this->container->make(LoggerInterface::class);
-        }
-        catch (Exception $exception) {
-            throw $e; // Throw the original exception
-        }
+			$logger = $this->container->make(LoggerInterface::class);
+		}
+		catch (Exception $exception) {
+			throw $e; // Throw the original exception
+		}
 
-        $logger->error($e);
+		$logger->error($e);
 	}
 
-    /**
-     * Determine if the exception should be reported.
-     *
-     * @param  \Exception  $e
-     * @return bool
-     */
-    public function shouldReport(Exception $e)
-    {
-        return ! $this->shouldntReport($e);
-    }
+	/**
+	 * Determine if the exception should be reported.
+	 *
+	 * @param  \Exception  $e
+	 * @return bool
+	 */
+	public function shouldReport(Exception $e)
+	{
+		return ! $this->shouldntReport($e);
+	}
 
 	/**
 	 * Determine if the exception should be reported.
