@@ -80,39 +80,23 @@ abstract class Broadcaster implements BroadcasterInterface
 	protected function channelMatch($pattern, $channel, array &$parameters)
 	{
 		if ($pattern === $channel) {
-			// Direct match with no parameters.
+			// Direct match of channel and pattern, with no parameters.
 			return true;
 		}
 
-		$count = 0;
+		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
-		$regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern, -1, $count);
-
-		if ($count === 0) {
-			// The pattern has no parameters, then the matching will always fail.
+		if (! preg_match('/^'. $regexp .'$/', $channel, $matches)) {
 			return false;
-		} else if (preg_match('/^'. $regexp .'$/', , $channel, $matches) === 1) {
-			$parameters = $this->gatherChannelParameters($matches);
-
-			return true;
 		}
 
-		return false;
-	}
-
-	/**
-	 *  Gather the channel parameters from a matches array.
-	 *
-	 * @param  array  $matches
-	 * @return array
-	 */
-	protected function gatherChannelParameters(array $matches)
-	{
-		return array_filter($matches, function ($key)
+		$parameters = array_filter($matches, function ($key)
 		{
 			return ! is_numeric($key);
 
 		}, ARRAY_FILTER_USE_KEY);
+
+		return true;
 	}
 
 	/**
