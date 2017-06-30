@@ -54,7 +54,7 @@ abstract class Broadcaster implements BroadcasterInterface
 		foreach ($this->channels as $pattern => $callback) {
 			$parameters = array();
 
-			if (! $this->channelMatch($pattern, $channel, $parameters))) {
+			if (! $this->channelMatches($pattern, $channel, $parameters))) {
 				continue;
 			}
 
@@ -77,7 +77,7 @@ abstract class Broadcaster implements BroadcasterInterface
 	 * @param  string  $pattern
 	 * @return array|null
 	 */
-	protected function channelMatch($pattern, $channel, array &$parameters)
+	protected function channelMatches($pattern, $channel, array &$parameters)
 	{
 		if ($pattern === $channel) {
 			// Direct match of channel and pattern, with no parameters.
