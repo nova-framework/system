@@ -41,7 +41,7 @@ class Writer implements PsrLoggerInterface
 	 *
 	 * @var array
 	 */
-	protected $levels = [
+	protected $levels = array(
 		'debug'	 	=> MonologLogger::DEBUG,
 		'info'	  	=> MonologLogger::INFO,
 		'notice'	=> MonologLogger::NOTICE,
@@ -50,7 +50,7 @@ class Writer implements PsrLoggerInterface
 		'critical'  => MonologLogger::CRITICAL,
 		'alert'	 	=> MonologLogger::ALERT,
 		'emergency' => MonologLogger::EMERGENCY,
-	];
+	);
 
 
 	/**
@@ -244,7 +244,7 @@ class Writer implements PsrLoggerInterface
 	 * @param  string  $level
 	 * @return \Psr\Log\LoggerInterface
 	 */
-	public function useSyslog($name = 'mini-nova', $level = 'debug')
+	public function useSyslog($name = 'nova', $level = 'debug')
 	{
 		return $this->monolog->pushHandler(new SyslogHandler($name, LOG_USER, $level));
 	}
