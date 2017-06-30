@@ -7,6 +7,7 @@ use Nova\Broadcasting\Channel;
 use Nova\Broadcasting\InteractsWithSockets;
 use Nova\Broadcasting\PrivateChannel;
 use Nova\Broadcasting\PresenceChannel;
+use Nova\Foundation\Events\DispatchableTrait;
 use Nova\Queue\SerializesModelsTrait;
 
 use {{rootNamespace}}Events\Event;
@@ -14,7 +15,7 @@ use {{rootNamespace}}Events\Event;
 
 class {{className}} extends Event
 {
-    use InteractsWithSockets, SerializesModelsTrait;
+    use DispatchableTrait, InteractsWithSockets, SerializesModelsTrait;
 
     /**
      * Create a new Event instance.

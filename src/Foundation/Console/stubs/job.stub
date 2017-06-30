@@ -2,11 +2,16 @@
 
 namespace {{namespace}};
 
+use Nova\Bus\QueueableTrait;
+use Nova\Foundation\Bus\DispatchableTrait;
+
 use {{rootNamespace}}Jobs\Job;
 
 
 class {{className}} extends Job
 {
+    use DispatchableTrait, QueueableTrait;
+
 
     /**
      * Create a new job instance.

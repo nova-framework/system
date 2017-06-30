@@ -3,6 +3,7 @@
 namespace {{namespace}};
 
 use Nova\Bus\QueueableTrait;
+use Nova\Foundation\Bus\DispatchableTrait;
 use Nova\Queue\Contracts\ShouldQueueInterface;
 use Nova\Queue\SerializesModelsTrait;
 use Nova\Queue\InteractsWithQueueTrait;
@@ -12,7 +13,8 @@ use {{rootNamespace}}Jobs\Job;
 
 class {{className}} extends Job implements ShouldQueueInterface
 {
-    use InteractsWithQueueTrait, QueueableTrait, SerializesModelsTrait;
+    use DispatchableTrait, InteractsWithQueueTrait, QueueableTrait, SerializesModelsTrait;
+
 
     /**
      * Create a new job instance.

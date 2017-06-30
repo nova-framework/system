@@ -12,6 +12,7 @@ class {{className}} implements ShouldQueueInterface
 {
     use InteractsWithQueueTrait;
 
+
     /**
      * Create the event listener.
      *
