@@ -2,12 +2,15 @@
 
 namespace Nova\Foundation\Bootstrap;
 
-use Exception;
-use ErrorException;
 use Nova\Foundation\Application;
+
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+
+use ErrorException;
+use Exception;
+
 
 class HandleExceptions
 {
@@ -90,7 +93,7 @@ class HandleExceptions
 	{
 		$this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
 	}
-	
+
 	/**
 	 * Render an exception as an HTTP response and send it.
 	 *
