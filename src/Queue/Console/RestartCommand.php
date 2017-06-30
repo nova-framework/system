@@ -20,7 +20,7 @@ class RestartCommand extends Command
 	 *
 	 * @var string
 	 */
-	protected $description = "Restart queue worker daemons after their current job.";
+	protected $description = "Restart queue worker daemons after their current job";
 
 	/**
 	 * Execute the console command.

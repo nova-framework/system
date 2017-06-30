@@ -22,6 +22,7 @@ use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\HandlerEventCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\EventGenerateCommand;
+use Nova\Foundation\Console\VendorPublishCommand;
 use Nova\Support\ServiceProvider;
 
 
@@ -40,25 +41,26 @@ class ForgeServiceProvider extends ServiceProvider
 	 * @var array
 	 */
 	protected $commands = array(
-		'ClearCompiled'  => 'command.clear-compiled',
-		'ConsoleMake'	=> 'command.console.make',
-		'EventMake'	  => 'command.event.make',
-		'Down'		   => 'command.down',
-		'Environment'	=> 'command.environment',
-		'HandlerEvent'   => 'command.handler.event',
-		'JobMake'		=> 'command.job.make',
-		'KeyGenerate'	=> 'command.key.generate',
-		'ListenerMake'   => 'command.listener.make',
-		'ModelMake'	  => 'command.model.make',
-		'Optimize'	   => 'command.optimize',
-		'PolicyMake'	 => 'command.policy.make',
-		'ProviderMake'   => 'command.provider.make',
-		'RequestMake'	=> 'command.request.make',
-		'RouteList'	  => 'command.route.list',
-		'Serve'		  => 'command.serve',
-		'Tinker'		 => 'command.tinker',
-		'Up'			 => 'command.up',
-		'ViewClear'	  => 'command.view.clear',
+		'ClearCompiled'		=> 'command.clear-compiled',
+		'ConsoleMake'		=> 'command.console.make',
+		'EventMake'			=> 'command.event.make',
+		'Down'				=> 'command.down',
+		'Environment'		=> 'command.environment',
+		'HandlerEvent'		=> 'command.handler.event',
+		'JobMake'			=> 'command.job.make',
+		'KeyGenerate'		=> 'command.key.generate',
+		'ListenerMake'		=> 'command.listener.make',
+		'ModelMake'			=> 'command.model.make',
+		'Optimize'			=> 'command.optimize',
+		'PolicyMake'		=> 'command.policy.make',
+		'ProviderMake'		=> 'command.provider.make',
+		'RequestMake'		=> 'command.request.make',
+		'RouteList'			=> 'command.route.list',
+		'Serve'				=> 'command.serve',
+		'Tinker'			=> 'command.tinker',
+		'Up'				=> 'command.up',
+		'VendorPublish'		=> 'command.vendor.publish',
+		'ViewClear'			=> 'command.view.clear',
 	);
 
 	/**
@@ -292,6 +294,19 @@ class ForgeServiceProvider extends ServiceProvider
 			return new UpCommand;
 		});
 	}
+
+    /**
+     * Register the vendor publish console command.
+     *
+     * @return void
+     */
+    protected function registerVendorPublishCommand()
+    {
+        $this->app->singleton('command.vendor.publish', function ($app)
+        {
+            return new VendorPublishCommand($app['files']);
+        });
+    }
 
 	/**
 	 * Register the command.

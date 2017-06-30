@@ -9,7 +9,6 @@ use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Finder\Finder;
 
 
 class AssetPublishCommand extends Command
@@ -121,8 +120,6 @@ class AssetPublishCommand extends Command
 	 */
 	protected function findAllAssetPackages()
 	{
-		$vendor = $this->container['path.base'] .DS .'vendor';
-
 		$packages = array();
 
 		//

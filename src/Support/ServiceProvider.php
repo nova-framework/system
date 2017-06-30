@@ -30,6 +30,13 @@ abstract class ServiceProvider
 	 */
 	protected $defer = false;
 
+	/**
+	 * The paths that should be published.
+	 *
+	 * @var array
+	 */
+	protected static $publishes = array();
+
 
 	/**
 	 * Create a new service provider instance.
@@ -136,6 +143,45 @@ abstract class ServiceProvider
 		}
 
 		return $namespace;
+	}
+
+	/**
+	 * Register paths to be published by the publish command.
+	 *
+	 * @param  array  $paths
+	 * @param  string  $group
+	 * @return void
+	 */
+	protected function publishes(array $paths, $group)
+	{
+		if (! array_key_exists($group, static::$publishes)) {
+			static::$publishes[$group] = array();
+		}
+
+		static::$publishes[$group] = array_merge(static::$publishes[$group], $paths);
+	}
+
+	/**
+	 * Get the paths to publish.
+	 *
+	 * @param  string|null  $group
+	 * @return array
+	 */
+	public static function pathsToPublish($group = null)
+	{
+		if (is_null($group)) {
+			$paths = array();
+
+			foreach (static::$publishes as $class => $publish) {
+				$paths = array_merge($paths, $publish);
+			}
+
+			return array_unique($paths);
+		} else if (array_key_exists($group, static::$publishes)) {
+			return static::$publishes[$group];
+		}
+
+		return array();
 	}
 
 	/**

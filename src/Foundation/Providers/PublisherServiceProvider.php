@@ -34,7 +34,7 @@ class PublisherServiceProvider extends ServiceProvider
 		$this->registerViewPublisher();
 
 		$this->commands(
-			'command.asset.publish', 'command.config.publish', 'command.view.publish'
+			'command.asset.publish', 'command.config.publish', 'command.view.publish', 'command.vendor.publish'
 		);
 	}
 
@@ -153,7 +153,7 @@ class PublisherServiceProvider extends ServiceProvider
 		return array(
 			'asset.publisher', 'command.asset.publish',
 			'config.publisher', 'command.config.publish',
-			'view.publisher', 'command.view.publish'
+			'view.publisher', 'command.view.publish',
 		);
 	}
 
