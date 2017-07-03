@@ -91,10 +91,7 @@ class PasswordBroker
 	 * @param  string  $reminderView
 	 * @return void
 	 */
-	public function __construct(ReminderRepositoryInterface $reminders,
-								UserProviderInterface $users,
-								Mailer $mailer,
-								$reminderView)
+	public function __construct(ReminderRepositoryInterface $reminders, UserProviderInterface $users, Mailer $mailer, $reminderView)
 	{
 		$this->users = $users;
 		$this->mailer = $mailer;
@@ -145,11 +142,13 @@ class PasswordBroker
 		// so that it may be displayed for an user to click for password reset.
 		$view = $this->reminderView;
 
-		return $this->mailer->send($view, compact('token', 'user'), function($m) use ($user, $token, $callback)
+		return $this->mailer->send($view, compact('token', 'user'), function($message) use ($user, $token, $callback)
 		{
-			$m->to($user->getReminderEmail());
+			$message->to($user->getReminderEmail());
 
-			if (! is_null($callback)) call_user_func($callback, $m, $user, $token);
+			if (! is_null($callback)) {
+				call_user_func($callback, $message, $user, $token);
+			}
 		});
 	}
 
@@ -242,9 +241,12 @@ class PasswordBroker
 	 */
 	protected function validatePasswordWithDefaults(array $credentials)
 	{
-		list($password, $confirm) = [$credentials['password'], $credentials['password_confirmation']];
+		list($password, $confirm) = array(
+			$credentials['password'],
+			$credentials['password_confirmation']
+		);
 
-		return $password === $confirm && mb_strlen($password) >= 6;
+		return ($password === $confirm) && (mb_strlen($password) >= 6);
 	}
 
 	/**
@@ -261,7 +263,7 @@ class PasswordBroker
 
 		$user = $this->users->retrieveByCredentials($credentials);
 
-		if ($user && ! $user instanceof RemindableInterface) {
+		if (! is_null($user) && (! $user instanceof RemindableInterface)) {
 			throw new \UnexpectedValueException("User must implement Remindable interface.");
 		}
 
