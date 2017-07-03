@@ -3,6 +3,7 @@
 namespace Nova\Auth\Reminders;
 
 use Nova\Auth\Contracts\Reminders\ReminderRepositoryInterface;
+use Nova\Auth\Contracts\Reminders\RemindableInterface;
 use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Mail\Mailer;
 

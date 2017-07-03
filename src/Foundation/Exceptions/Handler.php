@@ -4,6 +4,7 @@ namespace Nova\Foundation\Exceptions;
 
 use Nova\Auth\Access\UnauthorizedException;
 use Nova\Container\Container;
+use Nova\Http\Exception\HttpResponseException;
 use Nova\Http\Response as HttpResponse;
 use Nova\Foundation\Contracts\ExceptionHandlerInterface;
 use Nova\Support\Facades\Config;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Psr\Log\LoggerInterface;
 
 use Exception;
+use Throwable;
 
 
 class Handler implements ExceptionHandlerInterface
@@ -68,7 +70,7 @@ class Handler implements ExceptionHandlerInterface
 		try {
 			$logger = $this->container->make(LoggerInterface::class);
 		}
-		catch (Exception $exception) {
+		catch (Exception $ex) {
 			throw $e; // Throw the original exception
 		}
 
@@ -94,6 +96,10 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	public function shouldntReport(Exception $e)
 	{
+		$dontReport = array_merge($this->dontReport, array(
+			HttpResponseException::class
+		));
+
 		foreach ($this->dontReport as $type) {
 			if ($e instanceof $type) {
 				return true;
@@ -112,7 +118,9 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	public function render($request, Exception $e)
 	{
-		if ($this->isUnauthorizedException($e)) {
+		if ($e instanceof HttpResponseException) {
+			return $e->getResponse();
+		} else if ($this->isUnauthorizedException($e)) {
 			$e = new HttpException(403, $e->getMessage());
 		}
 

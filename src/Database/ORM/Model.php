@@ -418,6 +418,20 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 	}
 
 	/**
+	 * Fill the model with an array of attributes. Force mass assignment.
+	 *
+	 * @param  array  $attributes
+	 * @return $this
+	 */
+	public function forceFill(array $attributes)
+	{
+		return static::unguarded(function () use ($attributes)
+		{
+			return $this->fill($attributes);
+		});
+	}
+
+	/**
 	 * Get the fillable attributes of a given array.
 	 *
 	 * @param  array  $attributes
@@ -2092,6 +2106,28 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 	public static function reguard()
 	{
 		static::$unguarded = false;
+	}
+
+	/**
+	 * Run the given callable while being unguarded.
+	 *
+	 * @param  callable  $callback
+	 * @return mixed
+	 */
+	public static function unguarded(callable $callback)
+	{
+		if (static::$unguarded) {
+			return call_user_func($callback);
+		}
+
+		static::unguard();
+
+		try {
+			return call_user_func($callback);
+		}
+		finally {
+			static::reguard();
+		}
 	}
 
 	/**

@@ -9,13 +9,6 @@ use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 
 trait ResponseTrait
 {
-	/**
-	 * The exception that triggered the error response (if applicable).
-	 *
-	 * @var \Exception|null
-	 */
-	public $exception;
-
 
 	/**
 	 * Set a header on the Response.
@@ -41,19 +34,6 @@ trait ResponseTrait
 	public function withCookie(SymfonyCookie $cookie)
 	{
 		$this->headers->setCookie($cookie);
-
-		return $this;
-	}
-
-	/**
-	 * Set the exception to attach to the response.
-	 *
-	 * @param  \Exception  $e
-	 * @return $this
-	 */
-	public function withException(Exception $e)
-	{
-		$this->exception = $e;
 
 		return $this;
 	}

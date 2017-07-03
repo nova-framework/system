@@ -5,6 +5,7 @@ namespace Nova\Foundation\Auth;
 use Nova\Foundation\Auth\RedirectsUsersTrait;
 use Nova\Http\Request;
 use Nova\Support\Facades\Auth;
+use Nova\Support\Facades\Redirect;
 
 
 trait RegistersUsersTrait
@@ -41,13 +42,13 @@ trait RegistersUsersTrait
 	 */
 	public function register(Request $request)
 	{
-		$input = $request->all();
-
-		$validator = $this->validator();
+		$validator = $this->validator($request);
 
 		if ($validator->fails()) {
 			$this->throwValidationException($request, $validator);
 		}
+
+		$input = $request->all();
 
 		$user = $this->create($input);
 

@@ -9,6 +9,8 @@ use Nova\Routing\Router;
 use Nova\Support\Facades\Facade;
 
 use Closure;
+use Exception;
+use Throwable;
 
 
 class Kernel implements KernelInterface

@@ -14,14 +14,14 @@ use Nova\Validation\ValidationException;
 
 trait AuthenticatesUsersTrait
 {
-	use RedirectsUsersTrait, ThrottlesLoginsTrait;
+	use RedirectsUsersTrait;
 
 	/**
 	 * Show the application login form.
 	 *
 	 * @return \Nova\Http\Response
 	 */
-	public function login()
+	public function getLogin()
 	{
 		return $this->createView()
 			->shares('title', __d('nova', 'User Login'));
@@ -37,7 +37,10 @@ trait AuthenticatesUsersTrait
 	{
 		$this->validateLogin($request);
 
-		if ($this->hasTooManyLoginAttempts($request)) {
+		//
+		$throttles = $this->isUsingThrottlesLoginsTrait();
+
+		if ($throttles && $this->hasTooManyLoginAttempts($request)) {
 			return $this->sendLockoutResponse($request);
 		}
 
@@ -45,7 +48,9 @@ trait AuthenticatesUsersTrait
 			return $this->sendLoginResponse($request);
 		}
 
-		$this->incrementLoginAttempts($request);
+		if ($throttles) {
+			$this->incrementLoginAttempts($request);
+		}
 
 		return $this->sendFailedLoginResponse($request);
 	}
@@ -53,7 +58,7 @@ trait AuthenticatesUsersTrait
 	/**
 	 * Validate the user login request.
 	 *
-	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \Nova\Http\Request  $request
 	 * @return void
 	 */
 	protected function validateLogin(Request $request)
@@ -167,6 +172,28 @@ trait AuthenticatesUsersTrait
 	public function username()
 	{
 		return 'username';
+	}
+
+	/**
+	 * Determine if the class is using the ThrottlesLogins trait.
+	 *
+	 * @return bool
+	 */
+	protected function isUsingThrottlesLoginsTrait()
+	{
+		return in_array(
+			ThrottlesLoginsTrait::class, class_uses_recursive(static::class)
+		);
+	}
+
+	/**
+	 * Get the guest middleware for the application.
+	 */
+	public function guestMiddleware()
+	{
+		$guard = $this->getGuard();
+
+		return ! is_null($guard) ? 'guest:' .$guard : 'guest';
 	}
 
 	/**
