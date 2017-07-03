@@ -123,7 +123,7 @@ class Handler implements ExceptionHandlerInterface
 	{
 		if ($e instanceof ModelNotFoundException) {
 			$e = new NotFoundHttpException($e->getMessage(), $e);
-		} elseif ($e instanceof AuthorizationException) {
+		} else if ($e instanceof AuthorizationException) {
 			$e = new HttpException(403, $e->getMessage());
 		}
 
