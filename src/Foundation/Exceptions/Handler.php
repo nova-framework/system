@@ -5,15 +5,18 @@ namespace Nova\Foundation\Exceptions;
 use Nova\Auth\Access\UnauthorizedException;
 use Nova\Auth\AuthenticationException;
 use Nova\Container\Container;
+use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Http\Exception\HttpResponseException;
 use Nova\Http\Response as HttpResponse;
 use Nova\Foundation\Contracts\ExceptionHandlerInterface;
 use Nova\Support\Facades\Config;
+use Nova\Support\Facades\Redirect;
 use Nova\Support\Facades\Response;
-use Nova\View\View;
+use Nova\Validation\ValidationException;
 
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -111,6 +114,23 @@ class Handler implements ExceptionHandlerInterface
 	}
 
 	/**
+	 * Prepare exception for rendering.
+	 *
+	 * @param  \Exception  $e
+	 * @return \Exception
+	 */
+	protected function prepareException(Exception $e)
+	{
+		if ($e instanceof ModelNotFoundException) {
+			$e = new NotFoundHttpException($e->getMessage(), $e);
+		} elseif ($e instanceof UnauthorizedException) {
+			$e = new HttpException(403, $e->getMessage());
+		}
+
+		return $e;
+	}
+
+	/**
 	 * Render an exception into a response.
 	 *
 	 * @param  \Nova\Http\Request  $request
@@ -119,19 +139,33 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	public function render($request, Exception $e)
 	{
+		$e = $this->prepareException($e);
+
 		if ($e instanceof HttpResponseException) {
 			return $e->getResponse();
 		} else if ($e instanceof AuthenticationException) {
 			return $this->unauthenticated($request, $e);
-		} else if ($this->isUnauthorizedException($e)) {
-			$e = new HttpException(403, $e->getMessage());
+		} else if ($e instanceof ValidationException) {
+			return $this->convertValidationExceptionToResponse($e, $request);
 		}
 
+		return $this->prepareResponse($request, $e);
+	}
+
+	/**
+	 * Prepare response containing exception render.
+	 *
+	 * @param  \Nova\Http\Request  $request
+	 * @param  \Exception $e
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
+	protected function prepareResponse($request, Exception $e)
+	{
 		if ($this->isHttpException($e)) {
 			return $this->createResponse($this->renderHttpException($e), $e);
+		} else {
+			return $this->createResponse($this->convertExceptionToResponse($e), $e);
 		}
-
-		return $this->createResponse($this->convertExceptionToResponse($e), $e);
 	}
 
 	/**
@@ -157,6 +191,28 @@ class Handler implements ExceptionHandlerInterface
 	protected function renderHttpException(HttpException $e)
 	{
 		return $this->convertExceptionToResponse($e);
+	}
+
+	/**
+	 * Create a response object from the given validation exception.
+	 *
+	 * @param  \Nova\Validation\ValidationException  $e
+	 * @param  \Nova\Http\Request  $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
+	protected function convertValidationExceptionToResponse(ValidationException $e, $request)
+	{
+		if ($e->response) {
+			return $e->response;
+		}
+
+		$errors = $e->validator->errors()->getMessages();
+
+		if ($request->expectsJson()) {
+			return Response::json($errors, 422);
+		}
+
+		return Redirect::back()->withInput($request->input())->withErrors($errors);
 	}
 
 	/**
@@ -190,17 +246,6 @@ class Handler implements ExceptionHandlerInterface
 	}
 
 	/**
-	 * Determine if the given exception is an access unauthorized exception.
-	 *
-	 * @param  \Exception  $e
-	 * @return bool
-	 */
-	protected function isUnauthorizedException(Exception $e)
-	{
-		return ($e instanceof UnauthorizedException);
-	}
-
-	/**
 	 * Determine if the given exception is an HTTP exception.
 	 *
 	 * @param  \Exception  $e
@@ -208,6 +253,6 @@ class Handler implements ExceptionHandlerInterface
 	 */
 	protected function isHttpException(Exception $e)
 	{
-		return ($e instanceof HttpException);
+		return $e instanceof HttpException;
 	}
 }
