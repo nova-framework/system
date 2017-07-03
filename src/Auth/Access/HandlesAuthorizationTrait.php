@@ -3,7 +3,7 @@
 namespace Nova\Auth\Access;
 
 use Nova\Auth\Access\Response;
-use Nova\Auth\Access\UnauthorizedException;
+use Nova\Auth\Access\AuthorizationException;
 
 
 trait HandlesAuthorizationTrait
@@ -25,12 +25,12 @@ trait HandlesAuthorizationTrait
 	 * @param  string  $message
 	 * @return void
 	 *
-	 * @throws \Nova\Auth\Access\UnauthorizedException
+	 * @throws \Nova\Auth\Access\AuthorizationException
 	 */
 	protected function deny($message = null)
 	{
 		$message = $message ?: __d('nova', 'This action is unauthorized.');
 
-		throw new UnauthorizedException($message);
+		throw new AuthorizationException($message);
 	}
 }

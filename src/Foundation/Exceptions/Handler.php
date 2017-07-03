@@ -2,7 +2,7 @@
 
 namespace Nova\Foundation\Exceptions;
 
-use Nova\Auth\Access\UnauthorizedException;
+use Nova\Auth\Access\AuthorizationException;
 use Nova\Auth\AuthenticationException;
 use Nova\Container\Container;
 use Nova\Database\ORM\ModelNotFoundException;
@@ -123,7 +123,7 @@ class Handler implements ExceptionHandlerInterface
 	{
 		if ($e instanceof ModelNotFoundException) {
 			$e = new NotFoundHttpException($e->getMessage(), $e);
-		} elseif ($e instanceof UnauthorizedException) {
+		} elseif ($e instanceof AuthorizationException) {
 			$e = new HttpException(403, $e->getMessage());
 		}
 
