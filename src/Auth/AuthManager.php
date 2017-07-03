@@ -258,7 +258,7 @@ class AuthManager
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['auth.defaults.guard'];
+		return $this->app['config']['auth.default'];
 	}
 
 	/**
@@ -285,7 +285,7 @@ class AuthManager
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['auth.defaults.guard'] = $name;
+		$this->app['config']['auth.default'] = $name;
 	}
 
 	/**
