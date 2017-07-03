@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Auth;
+namespace Nova\Auth\Contracts;
 
 
 interface RegistrarInterface
