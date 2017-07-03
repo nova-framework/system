@@ -3,6 +3,7 @@
 namespace Nova\Foundation\Exceptions;
 
 use Nova\Auth\Access\UnauthorizedException;
+use Nova\Auth\AuthenticationException;
 use Nova\Container\Container;
 use Nova\Http\Exception\HttpResponseException;
 use Nova\Http\Response as HttpResponse;
@@ -120,6 +121,8 @@ class Handler implements ExceptionHandlerInterface
 	{
 		if ($e instanceof HttpResponseException) {
 			return $e->getResponse();
+		} else if ($e instanceof AuthenticationException) {
+			return $this->unauthenticated($request, $e);
 		} else if ($this->isUnauthorizedException($e)) {
 			$e = new HttpException(403, $e->getMessage());
 		}

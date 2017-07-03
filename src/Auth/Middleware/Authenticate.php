@@ -2,49 +2,71 @@
 
 namespace Nova\Auth\Middleware;
 
-use Nova\Support\Facades\Auth;
-use Nova\Support\Facades\Config;
-use Nova\Support\Facades\Response;
-use Nova\Support\Facades\Redirect;
+use Nova\Auth\AuthManager as Auth;
+use Nova\Auth\AuthenticationException;
 
 use Closure;
 
 
 class Authenticate
 {
+	/**
+	 * The authentication factory instance.
+	 *
+	 * @var \Nova\Auth\AuthManager
+	 */
+	protected $auth;
+
+
+	/**
+	 * Create a new middleware instance.
+	 *
+	 * @param  \Nova\Auth\AuthManager  $auth
+	 * @return void
+	 */
+	public function __construct(Auth $auth)
+	{
+		$this->auth = $auth;
+	}
 
 	/**
 	 * Handle an incoming request.
 	 *
 	 * @param  \Nova\Http\Request  $request
 	 * @param  \Closure  $next
-	 * @param  string|null  $guard
 	 * @return mixed
 	 */
-	public function handle($request, Closure $next, $guard = null)
+	public function handle($request, Closure $next)
 	{
-		$guard = $guard ?: Config::get('auth.defaults.guard', 'web');
+		$guards = array_slice(func_get_args(), 2);
 
-		if (Auth::guard($guard)->guest()) {
-			if ($request->ajax() || $request->wantsJson()) {
-				return Response::make('Unauthorized.', 401);
-			}
+		$this->authenticate($guards);
 
-			// Get the Guard's paths from configuration.
-			$paths = Config::get("auth.guards.{$guard}.paths", array(
-				'authorize' => 'auth/login',
-				'nonintend' => array(
-					'auth/logout',
-				),
-			));
+		return $next($request);
+	}
 
-			if (in_array($request->path(), $paths['nonintend'])) {
-				return Redirect::to($paths['authorize']);
-			} else {
-				return Redirect::guest($paths['authorize']);
+	/**
+	 * Determine if the user is logged in to any of the given guards.
+	 *
+	 * @param  array  $guards
+	 * @return void
+	 *
+	 * @throws \Nova\Auth\AuthenticationException
+	 */
+	protected function authenticate(array $guards)
+	{
+		if (empty($guards)) {
+			return $this->auth->authenticate();
+		}
+
+		foreach ($guards as $guard) {
+			$auth = $this->auth->guard($guard);
+
+			if ($auth->check()) {
+				return $this->auth->shouldUse($guard);
 			}
 		}
 
-		return $next($request);
+		throw new AuthenticationException('Unauthenticated.', $guards);
 	}
 }
