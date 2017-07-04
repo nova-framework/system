@@ -29,7 +29,7 @@ class RestartCommand extends Command
 	 */
 	public function fire()
 	{
-		$this->container['cache']->forever('Nova:queue:restart', time());
+		$this->container['cache']->forever('nova:queue:restart', time());
 
 		$this->info('Broadcasting queue restart signal.');
 	}

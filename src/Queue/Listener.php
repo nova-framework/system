@@ -63,7 +63,7 @@ class Listener
 	{
 		$this->commandPath = $commandPath;
 
-		$this->workerCommand = '"' .PHP_BINARY .'" artisan queue:work %s --queue="%s" --delay=%s --memory=%s --sleep=%s --tries=%s';
+		$this->workerCommand = '"' .PHP_BINARY .'" forge queue:work %s --queue="%s" --delay=%s --memory=%s --sleep=%s --tries=%s';
 	}
 
 	/**

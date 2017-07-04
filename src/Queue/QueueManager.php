@@ -22,6 +22,7 @@ class QueueManager
 	 */
 	protected $connections = array();
 
+
 	/**
 	 * Create a new queue manager instance.
 	 *

@@ -30,6 +30,7 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected $defer = true;
 
+
 	/**
 	 * Register the service provider.
 	 *
@@ -175,7 +176,9 @@ class QueueServiceProvider extends ServiceProvider
 	public function registerConnectors($manager)
 	{
 		foreach (array('Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs', 'Iron') as $connector) {
-			$this->{"register{$connector}Connector"}($manager);
+			$method = "register{$connector}Connector";
+
+			$this->{$method}($manager);
 		}
 	}
 

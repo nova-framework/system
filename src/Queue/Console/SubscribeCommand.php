@@ -139,8 +139,7 @@ class SubscribeCommand extends Command
 	{
 		return array(
 			array('queue', InputArgument::REQUIRED, 'The name of Iron.io queue.'),
-
-			array('url', InputArgument::REQUIRED, 'The URL to be subscribed.'),
+			array('url',   InputArgument::REQUIRED, 'The URL to be subscribed.'),
 		);
 	}
 
