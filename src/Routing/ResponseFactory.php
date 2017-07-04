@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResponseFactory
 {
+	use MacroableTrait;
+
 
 	/**
 	 * Return a new response from the application.
