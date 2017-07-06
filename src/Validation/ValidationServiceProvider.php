@@ -55,7 +55,7 @@ class ValidationServiceProvider extends ServiceProvider
 	{
 		$this->app->bindShared('validation.presence', function($app)
 		{
-			return new DatabasePresenceVerifier( $app['db']);
+			return new DatabasePresenceVerifier($app['db']);
 		});
 	}
 
