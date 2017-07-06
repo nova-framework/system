@@ -8,7 +8,7 @@
 
 namespace Nova\Validation;
 
-use Nova\Database\Connection;
+use Nova\Database\Contracts\ConnectionResolverInterface;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Validation\Contracts\PresenceVerifierInterface;
 
@@ -16,9 +16,9 @@ use Nova\Validation\Contracts\PresenceVerifierInterface;
 class DatabasePresenceVerifier implements PresenceVerifierInterface
 {
 	/**
-	 * The database Connection instance.
+	 * The Database Connection Resolver implementation.
 	 *
-	 * @var  \Nova\Database\Connection
+	 * @var  \Nova\Database\Contracts\ConnectionResolverInterface
 	 */
 	protected $db;
 
@@ -35,7 +35,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	 *
 	 * @return void
 	 */
-	public function __construct(Connection $db)
+	public function __construct(ConnectionResolverInterface $db)
 	{
 		$this->db = $db;
 	}
