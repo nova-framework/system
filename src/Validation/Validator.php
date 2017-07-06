@@ -1033,8 +1033,11 @@ class Validator implements MessageProviderInterface
 	{
 		$this->requireParameterCount(1, $parameters, 'exists');
 
-		$table = $parameters[0];
+		list($connection, $table) = $this->parseTable($parameters[0]);
 
+		// The second parameter position holds the name of the column that should be
+		// verified as existing. If this parameter is not specified we will guess
+		// that the columns being "verified" shares the given attribute's name.
 		$column = isset($parameters[1]) ? $parameters[1] : $attribute;
 
 		$expected = (is_array($value)) ? count($value) : 1;
