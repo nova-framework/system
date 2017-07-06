@@ -58,7 +58,9 @@ class Kernel implements KernelInterface
 	protected $bootstrappers = array(
 		'Nova\Foundation\Bootstrap\LoadConfiguration',
 		'Nova\Foundation\Bootstrap\HandleExceptions',
-		'Nova\Foundation\Bootstrap\BootApplication',
+		'Nova\Foundation\Bootstrap\RegisterFacades',
+		'Nova\Foundation\Bootstrap\RegisterProviders',
+		'Nova\Foundation\Bootstrap\BootProviders',
 	);
 
 

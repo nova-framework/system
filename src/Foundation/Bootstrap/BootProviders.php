@@ -5,7 +5,7 @@ namespace Nova\Foundation\Bootstrap;
 use Nova\Foundation\Application;
 
 
-class BootApplication
+class BootProviders
 {
 	/**
 	 * Bootstrap the given application.
@@ -15,8 +15,6 @@ class BootApplication
 	 */
 	public function bootstrap(Application $app)
 	{
-		$app->registerConfiguredProviders();
-
 		$app->boot();
 	}
 }

@@ -24,14 +24,9 @@ class LoadConfiguration
 		));
 
 		// Set the default Timezone.
-		date_default_timezone_set($config['app.timezone']);
+		date_default_timezone_set($config->get('app.timezone', 'UTC'));
 
-		// Register the Facades.
-		Facade::clearResolvedInstances();
-
-		Facade::setFacadeApplication($app);
-
-		// Register the class aliases.
-		AliasLoader::getInstance($config->get('app.aliases'))->register();
+		// Set the internal encoding.
+		mb_internal_encoding('UTF-8');
 	}
 }
