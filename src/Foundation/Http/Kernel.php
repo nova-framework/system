@@ -56,6 +56,7 @@ class Kernel implements KernelInterface
 	 * @var array
 	 */
 	protected $bootstrappers = array(
+		'Nova\Foundation\Bootstrap\LoadEnvironmentVariables',
 		'Nova\Foundation\Bootstrap\LoadConfiguration',
 		'Nova\Foundation\Bootstrap\HandleExceptions',
 		'Nova\Foundation\Bootstrap\RegisterFacades',
