@@ -23,6 +23,14 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	protected $db;
 
 	/**
+	 * The database connection to use.
+	 *
+	 * @var string
+	 */
+	protected $connection = null;
+
+
+	/**
 	 * Create a new Database Presence Verifier.
 	 *
 	 * @return void
@@ -105,6 +113,19 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	 */
 	protected function table($table)
 	{
-		return $this->db->table($table);
+		$connection = $this->db->connection($this->connection);
+
+		return $connection->table($table);
+	}
+
+	/**
+	 * Set the connection to be used.
+	 *
+	 * @param  string  $connection
+	 * @return void
+	 */
+	public function setConnection($connection)
+	{
+		$this->connection = $connection;
 	}
 }

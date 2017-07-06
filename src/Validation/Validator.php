@@ -946,8 +946,11 @@ class Validator implements MessageProviderInterface
 	{
 		$this->requireParameterCount(1, $parameters, 'unique');
 
-		$table = $parameters[0];
+		list($connection, $table) = $this->parseTable($parameters[0]);
 
+		// The second parameter position holds the name of the column that needs to
+		// be verified as unique. If this parameter isn't specified we will just
+		// assume that this column to be verified shares the attribute's name.
 		$column = isset($parameters[1]) ? $parameters[1] : $attribute;
 
 		list($idColumn, $id) = array(null, null);
@@ -958,15 +961,36 @@ class Validator implements MessageProviderInterface
 			if (strtolower($id) == 'null') $id = null;
 		}
 
+		// The presence verifier is responsible for counting rows within this store
+		// mechanism which might be a relational database or any other permanent
+		// data store like Redis, etc. We will use it to determine uniqueness.
 		$verifier = $this->getPresenceVerifier();
+
+		if (! is_null($connection)) {
+			$verifier->setConnection($connection);
+		}
 
 		$extra = $this->getUniqueExtra($parameters);
 
 		return $verifier->getCount(
-
 			$table, $column, $value, $id, $idColumn, $extra
 
 		) == 0;
+	}
+
+	/**
+	 * Parse the connection / table for the unique / exists rules.
+	 *
+	 * @param  string  $table
+	 * @return array
+	 */
+	protected function parseTable($table)
+	{
+		if (Str::contains($table, '.')) {
+			return explode('.', $table, 2);
+		}
+
+		return array(null, $table);
 	}
 
 	/**
