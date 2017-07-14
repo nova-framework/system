@@ -19,17 +19,6 @@ class ControllerInspector
 
 
     /**
-     * ControllerInspector constructor.
-     *
-     * @param bool $namedParams Wheter or not are used the Named Parameters
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Get the routable methods for a controller.
      *
      * @param  string  $controller

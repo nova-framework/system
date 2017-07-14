@@ -3,8 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
-use Nova\Routing\Legacy\RouteParser;
-use Nova\Support\Facades\Config;
 use Nova\Support\Str;
 
 use InvalidArgumentException;
@@ -18,13 +16,6 @@ class UrlGenerator
      * @var \Nova\Routing\RouteCollection
      */
     protected $routes;
-
-    /**
-     * Flag signaling the Routing on legacy mode.
-     *
-     * @var string
-     */
-    protected $legacyRouting = false;
 
     /**
      * The request instance.
@@ -77,11 +68,6 @@ class UrlGenerator
         $this->routes = $routes;
 
         $this->setRequest($request);
-
-        // Wheter or not are used the Unnamed Parameters.
-        if ('unnamed' == Config::get('routing.parameters', 'named')) {
-            $this->legacyRouting = true;
-        }
     }
 
     /**
@@ -250,10 +236,6 @@ class UrlGenerator
     protected function toRoute($route, array $parameters, $absolute)
     {
         $pattern = $route->uri();
-
-        if ($this->legacyRouting && (preg_match('#\(:\w+\)#', $pattern) === 1)) {
-            list($pattern) = RouteParser::parse($pattern);
-        }
 
         $domain = $this->getRouteDomain($route, $parameters);
 
