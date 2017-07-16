@@ -208,7 +208,7 @@ class Handler implements ExceptionHandlerInterface
 
 		$errors = $e->validator->errors()->getMessages();
 
-		if ($request->expectsJson()) {
+		if ($request->ajax() || $request->wantsJson()) {
 			return Response::json($errors, 422);
 		}
 
