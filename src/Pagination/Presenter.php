@@ -11,7 +11,7 @@ namespace Nova\Pagination;
 use Nova\Pagination\Paginator;
 
 
-abstract class Presenter
+class Presenter
 {
 	/**
 	 * The Paginator instance.
