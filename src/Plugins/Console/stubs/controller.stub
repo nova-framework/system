@@ -2,7 +2,7 @@
 
 namespace {{namespace}};
 
-use {{rootNamespace}}\Controllers\BaseController;
+use {{rootNamespace}}Controllers\BaseController;
 
 
 class {{className}} extends BaseController
