@@ -1460,6 +1460,8 @@ class Validator implements MessageProviderInterface
 			return $value;
 		}
 
+		$lowerRule = Str::snake($rule);
+
 		return $this->getInlineMessage(
 			$attribute, $lowerRule, $this->fallbackMessages
 
