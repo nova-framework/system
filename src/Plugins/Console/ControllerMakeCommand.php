@@ -50,6 +50,15 @@ class ControllerMakeCommand extends MakeCommand
 	);
 
 	/**
+	 * Plugin signature option.
+	 *
+	 * @var array
+	 */
+	protected $signOption = array(
+		'resource',
+	);
+
+	/**
 	 * Plugin stubs used to populate defined files.
 	 *
 	 * @var array
