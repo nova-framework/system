@@ -10,22 +10,22 @@ use Nova\Support\Facades\Facade;
  */
 class App extends Facade
 {
-	/**
-	 * Return the Application instance.
-	 *
-	 * @return \Nova\Foundation\Application
-	 */
-	public static function instance()
-	{
-		$accessor = static::getFacadeAccessor();
+    /**
+     * Return the Application instance.
+     *
+     * @return \Nova\Foundation\Application
+     */
+    public static function instance()
+    {
+        $accessor = static::getFacadeAccessor();
 
-		return static::resolveFacadeInstance($accessor);
-	}
+        return static::resolveFacadeInstance($accessor);
+    }
 
-	/**
-	 * Get the registered name of the component.
-	 *
-	 * @return string
-	 */
-	protected static function getFacadeAccessor() { return 'app'; }
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor() { return 'app'; }
 }

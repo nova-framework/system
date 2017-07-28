@@ -16,39 +16,39 @@ use Nova\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
 {
-	/**
-	 * Bootstrap the Application events.
-	 *
-	 * @return void
-	 */
-	public function boot()
-	{
-		$db = $this->app['db'];
+    /**
+     * Bootstrap the Application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $db = $this->app['db'];
 
-		$events = $this->app['events'];
+        $events = $this->app['events'];
 
-		// Setup the ORM Model.
-		Model::setConnectionResolver($db);
+        // Setup the ORM Model.
+        Model::setConnectionResolver($db);
 
-		Model::setEventDispatcher($events);
-	}
+        Model::setEventDispatcher($events);
+    }
 
-	/**
-	 * Register the Service Provider.
-	 *
-	 * @return void
-	 */
-	public function register()
-	{
-		$this->app->bindShared('db.factory', function($app)
-		{
-			return new ConnectionFactory($app);
-		});
+    /**
+     * Register the Service Provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->bindShared('db.factory', function($app)
+        {
+            return new ConnectionFactory($app);
+        });
 
-		$this->app->bindShared('db', function($app)
-		{
-			return new DatabaseManager($app, $app['db.factory']);
-		});
-	}
+        $this->app->bindShared('db', function($app)
+        {
+            return new DatabaseManager($app, $app['db.factory']);
+        });
+    }
 
 }

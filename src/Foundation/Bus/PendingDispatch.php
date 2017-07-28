@@ -5,71 +5,71 @@ namespace Nova\Foundation\Bus;
 
 class PendingDispatch
 {
-	/**
-	 * The job.
-	 *
-	 * @var mixed
-	 */
-	protected $job;
+    /**
+     * The job.
+     *
+     * @var mixed
+     */
+    protected $job;
 
 
-	/**
-	 * Create a new pending job dispatch.
-	 *
-	 * @param  mixed  $job
-	 * @return void
-	 */
-	public function __construct($job)
-	{
-		$this->job = $job;
-	}
+    /**
+     * Create a new pending job dispatch.
+     *
+     * @param  mixed  $job
+     * @return void
+     */
+    public function __construct($job)
+    {
+        $this->job = $job;
+    }
 
-	/**
-	 * Set the desired connection for the job.
-	 *
-	 * @param  string|null  $connection
-	 * @return $this
-	 */
-	public function onConnection($connection)
-	{
-		$this->job->onConnection($connection);
+    /**
+     * Set the desired connection for the job.
+     *
+     * @param  string|null  $connection
+     * @return $this
+     */
+    public function onConnection($connection)
+    {
+        $this->job->onConnection($connection);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set the desired queue for the job.
-	 *
-	 * @param  string|null  $queue
-	 * @return $this
-	 */
-	public function onQueue($queue)
-	{
-		$this->job->onQueue($queue);
+    /**
+     * Set the desired queue for the job.
+     *
+     * @param  string|null  $queue
+     * @return $this
+     */
+    public function onQueue($queue)
+    {
+        $this->job->onQueue($queue);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set the desired delay for the job.
-	 *
-	 * @param  \DateTime|int|null  $delay
-	 * @return $this
-	 */
-	public function delay($delay)
-	{
-		$this->job->delay($delay);
+    /**
+     * Set the desired delay for the job.
+     *
+     * @param  \DateTime|int|null  $delay
+     * @return $this
+     */
+    public function delay($delay)
+    {
+        $this->job->delay($delay);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Handle the object's destruction.
-	 *
-	 * @return void
-	 */
-	public function __destruct()
-	{
-		dispatch($this->job);
-	}
+    /**
+     * Handle the object's destruction.
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        dispatch($this->job);
+    }
 }

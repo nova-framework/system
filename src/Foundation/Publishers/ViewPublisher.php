@@ -7,114 +7,114 @@ use Nova\Filesystem\Filesystem;
 
 class ViewPublisher
 {
-	/**
-	 * The filesystem instance.
-	 *
-	 * @var \Nova\Filesystem\Filesystem
-	 */
-	protected $files;
+    /**
+     * The filesystem instance.
+     *
+     * @var \Nova\Filesystem\Filesystem
+     */
+    protected $files;
 
-	/**
-	 * The destination of the view files.
-	 *
-	 * @var string
-	 */
-	protected $publishPath;
+    /**
+     * The destination of the view files.
+     *
+     * @var string
+     */
+    protected $publishPath;
 
-	/**
-	 * The path to the application's packages.
-	 *
-	 * @var string
-	 */
-	protected $packagePath;
+    /**
+     * The path to the application's packages.
+     *
+     * @var string
+     */
+    protected $packagePath;
 
 
-	/**
-	 * Create a new view publisher instance.
-	 *
-	 * @param  \Nova\Filesystem\Filesystem  $files
-	 * @param  string  $publishPath
-	 * @return void
-	 */
-	public function __construct(Filesystem $files, $publishPath)
-	{
-		$this->files = $files;
+    /**
+     * Create a new view publisher instance.
+     *
+     * @param  \Nova\Filesystem\Filesystem  $files
+     * @param  string  $publishPath
+     * @return void
+     */
+    public function __construct(Filesystem $files, $publishPath)
+    {
+        $this->files = $files;
 
-		$this->publishPath = $publishPath;
-	}
+        $this->publishPath = $publishPath;
+    }
 
-	/**
-	 * Publish view files from a given path.
-	 *
-	 * @param  string  $package
-	 * @param  string  $source
-	 * @return void
-	 */
-	public function publish($package, $source)
-	{
-		$destination = $this->publishPath .str_replace('/', DS, "/Packages/{$package}");
+    /**
+     * Publish view files from a given path.
+     *
+     * @param  string  $package
+     * @param  string  $source
+     * @return void
+     */
+    public function publish($package, $source)
+    {
+        $destination = $this->publishPath .str_replace('/', DS, "/Packages/{$package}");
 
-		$this->makeDestination($destination);
+        $this->makeDestination($destination);
 
-		return $this->files->copyDirectory($source, $destination);
-	}
+        return $this->files->copyDirectory($source, $destination);
+    }
 
-	/**
-	 * Publish the view files for a package.
-	 *
-	 * @param  string  $package
-	 * @param  string  $packagePath
-	 * @return void
-	 */
-	public function publishPackage($package, $packagePath = null)
-	{
-		$source = $this->getSource($package, $packagePath ?: $this->packagePath);
+    /**
+     * Publish the view files for a package.
+     *
+     * @param  string  $package
+     * @param  string  $packagePath
+     * @return void
+     */
+    public function publishPackage($package, $packagePath = null)
+    {
+        $source = $this->getSource($package, $packagePath ?: $this->packagePath);
 
-		return $this->publish($package, $source);
-	}
+        return $this->publish($package, $source);
+    }
 
-	/**
-	 * Get the source views directory to publish.
-	 *
-	 * @param  string  $package
-	 * @param  string  $packagePath
-	 * @return string
-	 *
-	 * @throws \InvalidArgumentException
-	 */
-	protected function getSource($package, $packagePath)
-	{
-		$source = $packagePath .str_replace('/', DS, "/{$package}/src/Views");
+    /**
+     * Get the source views directory to publish.
+     *
+     * @param  string  $package
+     * @param  string  $packagePath
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function getSource($package, $packagePath)
+    {
+        $source = $packagePath .str_replace('/', DS, "/{$package}/src/Views");
 
-		if (! $this->files->isDirectory($source)) {
-			throw new \InvalidArgumentException("Views not found.");
-		}
+        if (! $this->files->isDirectory($source)) {
+            throw new \InvalidArgumentException("Views not found.");
+        }
 
-		return $source;
-	}
+        return $source;
+    }
 
-	/**
-	 * Create the destination directory if it doesn't exist.
-	 *
-	 * @param  string  $destination
-	 * @return void
-	 */
-	protected function makeDestination($destination)
-	{
-		if (! $this->files->isDirectory($destination)) {
-			$this->files->makeDirectory($destination, 0777, true);
-		}
-	}
+    /**
+     * Create the destination directory if it doesn't exist.
+     *
+     * @param  string  $destination
+     * @return void
+     */
+    protected function makeDestination($destination)
+    {
+        if (! $this->files->isDirectory($destination)) {
+            $this->files->makeDirectory($destination, 0777, true);
+        }
+    }
 
-	/**
-	 * Set the default package path.
-	 *
-	 * @param  string  $packagePath
-	 * @return void
-	 */
-	public function setPackagePath($packagePath)
-	{
-		$this->packagePath = $packagePath;
-	}
+    /**
+     * Set the default package path.
+     *
+     * @param  string  $packagePath
+     * @return void
+     */
+    public function setPackagePath($packagePath)
+    {
+        $this->packagePath = $packagePath;
+    }
 
 }

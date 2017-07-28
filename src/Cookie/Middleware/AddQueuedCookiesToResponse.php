@@ -9,39 +9,39 @@ use Closure;
 
 class AddQueuedCookiesToResponse
 {
-	/**
-	 * The cookie jar instance.
-	 *
-	 * @var \Nova\Cookie\CookieJar
-	 */
-	protected $cookies;
+    /**
+     * The cookie jar instance.
+     *
+     * @var \Nova\Cookie\CookieJar
+     */
+    protected $cookies;
 
-	/**
-	 * Create a new CookieQueue instance.
-	 *
-	 * @param  \Nova\Foundation\Application  $app
-	 * @return void
-	 */
-	public function __construct(Application $app)
-	{
-		$this->cookies = $app['cookie'];
-	}
+    /**
+     * Create a new CookieQueue instance.
+     *
+     * @param  \Nova\Foundation\Application  $app
+     * @return void
+     */
+    public function __construct(Application $app)
+    {
+        $this->cookies = $app['cookie'];
+    }
 
-	/**
-	 * Handle an incoming request.
-	 *
-	 * @param  \Nova\Http\Request  $request
-	 * @param  \Closure  $next
-	 * @return mixed
-	 */
-	public function handle($request, Closure $next)
-	{
-		$response = $next($request);
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        $response = $next($request);
 
-		foreach ($this->cookies->getQueuedCookies() as $cookie) {
-			$response->headers->setCookie($cookie);
-		}
+        foreach ($this->cookies->getQueuedCookies() as $cookie) {
+            $response->headers->setCookie($cookie);
+        }
 
-		return $response;
-	}
+        return $response;
+    }
 }

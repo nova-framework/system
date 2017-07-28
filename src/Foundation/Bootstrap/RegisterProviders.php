@@ -7,14 +7,14 @@ use Nova\Foundation\Application;
 
 class RegisterProviders
 {
-	/**
-	 * Bootstrap the given application.
-	 *
-	 * @param  \Nova\Foundation\Application  $app
-	 * @return void
-	 */
-	public function bootstrap(Application $app)
-	{
-		$app->registerConfiguredProviders();
-	}
+    /**
+     * Bootstrap the given application.
+     *
+     * @param  \Nova\Foundation\Application  $app
+     * @return void
+     */
+    public function bootstrap(Application $app)
+    {
+        $app->registerConfiguredProviders();
+    }
 }

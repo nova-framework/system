@@ -10,17 +10,17 @@ use Aws\Sqs\SqsClient;
 class SqsConnector implements ConnectorInterface
 {
 
-	/**
-	 * Establish a queue connection.
-	 *
-	 * @param  array  $config
-	 * @return \Nova\Queue\Contracts\QueueInterface
-	 */
-	public function connect(array $config)
-	{
-		$sqs = SqsClient::factory($config);
+    /**
+     * Establish a queue connection.
+     *
+     * @param  array  $config
+     * @return \Nova\Queue\Contracts\QueueInterface
+     */
+    public function connect(array $config)
+    {
+        $sqs = SqsClient::factory($config);
 
-		return new SqsQueue($sqs, $config['queue']);
-	}
+        return new SqsQueue($sqs, $config['queue']);
+    }
 
 }

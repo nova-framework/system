@@ -13,83 +13,83 @@ use ReflectionProperty;
 
 class BroadcastEvent
 {
-	/**
-	 * The broadcaster implementation.
-	 *
-	 * @var \Nova\Broadcasting\Contracts\BroadcasterInterface
-	 */
-	protected $broadcaster;
+    /**
+     * The broadcaster implementation.
+     *
+     * @var \Nova\Broadcasting\Contracts\BroadcasterInterface
+     */
+    protected $broadcaster;
 
 
-	/**
-	 * Create a new job handler instance.
-	 *
-	 * @param  \Nova\Broadcasting\Contracts\BroadcasterInterface  $broadcaster
-	 * @return void
-	 */
-	public function __construct(Broadcaster $broadcaster)
-	{
-		$this->broadcaster = $broadcaster;
-	}
+    /**
+     * Create a new job handler instance.
+     *
+     * @param  \Nova\Broadcasting\Contracts\BroadcasterInterface  $broadcaster
+     * @return void
+     */
+    public function __construct(Broadcaster $broadcaster)
+    {
+        $this->broadcaster = $broadcaster;
+    }
 
-	/**
-	 * Handle the queued job.
-	 *
-	 * @param  \Nova\Queue\Job  $job
-	 * @param  array  $data
-	 * @return void
-	 */
-	public function fire(Job $job, array $data)
-	{
-		$event = unserialize($data['event']);
+    /**
+     * Handle the queued job.
+     *
+     * @param  \Nova\Queue\Job  $job
+     * @param  array  $data
+     * @return void
+     */
+    public function fire(Job $job, array $data)
+    {
+        $event = unserialize($data['event']);
 
-		$name = method_exists($event, 'broadcastAs') ? $event->broadcastAs() : get_class($event);
+        $name = method_exists($event, 'broadcastAs') ? $event->broadcastAs() : get_class($event);
 
-		$this->broadcaster->broadcast(
-			$event->broadcastOn(), $name, $this->getPayloadFromEvent($event)
-		);
+        $this->broadcaster->broadcast(
+            $event->broadcastOn(), $name, $this->getPayloadFromEvent($event)
+        );
 
-		$job->delete();
-	}
+        $job->delete();
+    }
 
-	/**
-	 * Get the payload for the given event.
-	 *
-	 * @param  mixed  $event
-	 * @return array
-	 */
-	protected function getPayloadFromEvent($event)
-	{
-		if (method_exists($event, 'broadcastWith')) {
-			return $event->broadcastWith();
-		}
+    /**
+     * Get the payload for the given event.
+     *
+     * @param  mixed  $event
+     * @return array
+     */
+    protected function getPayloadFromEvent($event)
+    {
+        if (method_exists($event, 'broadcastWith')) {
+            return $event->broadcastWith();
+        }
 
-		$payload = array();
+        $payload = array();
 
-		//
-		$properties = with(new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC);
+        //
+        $properties = with(new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC);
 
-		foreach ($properties as $property) {
-			$name = $property->getName();
+        foreach ($properties as $property) {
+            $name = $property->getName();
 
-			$payload[$name] = $this->formatProperty($property->getValue($event));
-		}
+            $payload[$name] = $this->formatProperty($property->getValue($event));
+        }
 
-		return $payload;
-	}
+        return $payload;
+    }
 
-	/**
-	 * Format the given value for a property.
-	 *
-	 * @param  mixed  $value
-	 * @return mixed
-	 */
-	protected function formatProperty($value)
-	{
-		if ($value instanceof Arrayable) {
-			return $value->toArray();
-		}
+    /**
+     * Format the given value for a property.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function formatProperty($value)
+    {
+        if ($value instanceof Arrayable) {
+            return $value->toArray();
+        }
 
-		return $value;
-	}
+        return $value;
+    }
 }

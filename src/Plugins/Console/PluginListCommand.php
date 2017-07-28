@@ -8,111 +8,111 @@ use Nova\Plugins\PluginManager;
 
 class PluginListCommand extends Command
 {
-	/**
-	 * The console command name.
-	 *
-	 * @var string
-	 */
-	protected $name = 'plugin:list';
+    /**
+     * The console command name.
+     *
+     * @var string
+     */
+    protected $name = 'plugin:list';
 
-	/**
-	 * The console command description.
-	 *
-	 * @var string
-	 */
-	protected $description = 'List all Framework Plugins';
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'List all Framework Plugins';
 
-	/**
-	 * @var \Nova\Plugins\PluginManager
-	 */
-	protected $plugins;
+    /**
+     * @var \Nova\Plugins\PluginManager
+     */
+    protected $plugins;
 
-	/**
-	 * The table headers for the command.
-	 *
-	 * @var array
-	 */
-	protected $headers = ['Package', 'Slug', 'Order', 'Location', 'Status'];
+    /**
+     * The table headers for the command.
+     *
+     * @var array
+     */
+    protected $headers = ['Package', 'Slug', 'Order', 'Location', 'Status'];
 
-	/**
-	 * Create a new command instance.
-	 *
-	 * @param \Nova\Plugins\PluginManager $plugin
-	 */
-	public function __construct(PluginManager $plugins)
-	{
-		parent::__construct();
+    /**
+     * Create a new command instance.
+     *
+     * @param \Nova\Plugins\PluginManager $plugin
+     */
+    public function __construct(PluginManager $plugins)
+    {
+        parent::__construct();
 
-		$this->plugins = $plugins;
-	}
+        $this->plugins = $plugins;
+    }
 
-	/**
-	 * Execute the console command.
-	 *
-	 * @return mixed
-	 */
-	public function fire()
-	{
-		$plugins = $this->plugins->all();
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function fire()
+    {
+        $plugins = $this->plugins->all();
 
-		if ($plugins->isEmpty()) {
-			return $this->error("Your application doesn't have any plugins.");
-		}
+        if ($plugins->isEmpty()) {
+            return $this->error("Your application doesn't have any plugins.");
+        }
 
-		$this->displayPlugins($this->getPlugins());
-	}
+        $this->displayPlugins($this->getPlugins());
+    }
 
-	/**
-	 * Get all plugins.
-	 *
-	 * @return array
-	 */
-	protected function getPlugins()
-	{
-		$plugins = $this->plugins->all();
+    /**
+     * Get all plugins.
+     *
+     * @return array
+     */
+    protected function getPlugins()
+    {
+        $plugins = $this->plugins->all();
 
-		$results = array();
+        $results = array();
 
-		foreach ($plugins as $plugin) {
-			$results[] = $this->getPluginInformation($plugin);
-		}
+        foreach ($plugins as $plugin) {
+            $results[] = $this->getPluginInformation($plugin);
+        }
 
-		return array_filter($results);
-	}
+        return array_filter($results);
+    }
 
-	/**
-	 * Returns plugin manifest information.
-	 *
-	 * @param string $plugin
-	 *
-	 * @return array
-	 */
-	protected function getPluginInformation($plugin)
-	{
-		if ($plugin['location'] === 'local') {
-			$location = 'Local';
-		} else {
-			$location = 'Vendor';
-		}
+    /**
+     * Returns plugin manifest information.
+     *
+     * @param string $plugin
+     *
+     * @return array
+     */
+    protected function getPluginInformation($plugin)
+    {
+        if ($plugin['location'] === 'local') {
+            $location = 'Local';
+        } else {
+            $location = 'Vendor';
+        }
 
-		$enabled = $this->plugins->isEnabled($plugin['slug']);
+        $enabled = $this->plugins->isEnabled($plugin['slug']);
 
-		return array(
-			'name'	 	=> $plugin['name'],
-			'slug'	 	=> $plugin['slug'],
-			'order'		=> $plugin['order'],
-			'location'	=> $location,
-			'status'	=> $enabled ? 'Enabled' : 'Disabled',
-		);
-	}
+        return array(
+            'name'         => $plugin['name'],
+            'slug'         => $plugin['slug'],
+            'order'        => $plugin['order'],
+            'location'    => $location,
+            'status'    => $enabled ? 'Enabled' : 'Disabled',
+        );
+    }
 
-	/**
-	 * Display the plugin information on the console.
-	 *
-	 * @param array $plugins
-	 */
-	protected function displayPlugins(array $plugins)
-	{
-		$this->table($this->headers, $plugins);
-	}
+    /**
+     * Display the plugin information on the console.
+     *
+     * @param array $plugins
+     */
+    protected function displayPlugins(array $plugins)
+    {
+        $this->table($this->headers, $plugins);
+    }
 }

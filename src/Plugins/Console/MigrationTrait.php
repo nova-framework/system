@@ -7,42 +7,42 @@ use InvalidArgumentException;
 
 trait MigrationTrait
 {
-	/**
-	 * Require (once) all migration files for the supplied plugin.
-	 *
-	 * @param string $plugin
-	 */
-	protected function requireMigrations($plugin)
-	{
-		$files = $this->container['files'];
+    /**
+     * Require (once) all migration files for the supplied plugin.
+     *
+     * @param string $plugin
+     */
+    protected function requireMigrations($plugin)
+    {
+        $files = $this->container['files'];
 
-		//
-		$path = $this->getMigrationPath($plugin);
+        //
+        $path = $this->getMigrationPath($plugin);
 
-		$migrations = $files->glob($path.'*_*.php');
+        $migrations = $files->glob($path.'*_*.php');
 
-		foreach ($migrations as $migration) {
-			$files->requireOnce($migration);
-		}
-	}
+        foreach ($migrations as $migration) {
+            $files->requireOnce($migration);
+        }
+    }
 
-	/**
-	 * Get migration directory path.
-	 *
-	 * @param string $slug
-	 *
-	 * @return string
-	 * @throws \InvalidArgumentException
-	 */
-	protected function getMigrationPath($slug)
-	{
-		$plugins = $this->container['plugins'];
+    /**
+     * Get migration directory path.
+     *
+     * @param string $slug
+     *
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    protected function getMigrationPath($slug)
+    {
+        $plugins = $this->container['plugins'];
 
-		//
-		$plugin = $plugins->where('slug', $slug);
+        //
+        $plugin = $plugins->where('slug', $slug);
 
-		$path = $plugins->resolveClassPath($plugin);
+        $path = $plugins->resolveClassPath($plugin);
 
-		return $path .'Database' .DS .'Migrations' .DS;
-	}
+        return $path .'Database' .DS .'Migrations' .DS;
+    }
 }
