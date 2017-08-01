@@ -7,5 +7,5 @@ use {{rootNamespace}}Controllers\BaseController;
 
 class {{className}} extends BaseController
 {
-	//
+    //
 }
