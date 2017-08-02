@@ -1,7 +1,7 @@
 <?php
 
 return array (
-  '&laquo; Previous' => '',
+  '&laquo; Previous' => '&laquo; Sidste',
   'Console' => 'Konsol',
   'Database' => '',
   'Details' => 'Detaljer',
@@ -22,7 +22,7 @@ return array (
   'Max Execution Time' => 'Maks Eksekverings tid',
   'Memory' => 'Hukommelse',
   'Memory Used' => 'Hukommelse brugt',
-  'Next &raquo;' => '',
+  'Next &raquo;' => 'Næste &raquo;',
   'No GET data exists' => 'Der findes ingen GET data ',
   'No POST data exists' => 'Der findes ingen POST data',
   'POST Variables' => 'POST Variabler',
@@ -75,7 +75,7 @@ return array (
   'The :attribute must have at least :min items.' => ':attribute skal indeholde mindst :min genstande.',
   'The :attribute must have between :min and :max items.' => ':attribute skal indeholde mellem :min og :max genstande.',
   'The selected :attribute is invalid.' => 'Den valgte :attribute er ugyldig.',
-  'This action is unauthorized.' => '',
+  'This action is unauthorized.' => 'Denne handling er uautoriseret.',
   'This panel has no log items.' => 'Dette panel har ingen log elementer.',
   'Too many login attempts. Please try again in {0} seconds.' => '',
   'Total Available' => 'Antal tilgængelige',
@@ -83,7 +83,7 @@ return array (
   'Total Queries' => 'Antal queries',
   'Total Size' => 'Samlet størrelse',
   'Total Time' => 'Samlet tid',
-  'Type: <b>{0}</b>' => '',
+  'Type: <b>{0}</b>' => 'Type: <b>{0}</b>',
   'Variables' => 'Variabler',
   '{0} Files' => '{0} Filer',
   '{0} Queries' => '',
