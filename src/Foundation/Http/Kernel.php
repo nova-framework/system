@@ -8,6 +8,8 @@ use Nova\Pipeline\Pipeline;
 use Nova\Routing\Router;
 use Nova\Support\Facades\Facade;
 
+use Symfony\Component\Debug\Exception\FatalErrorException;
+
 use Closure;
 use Exception;
 use Throwable;

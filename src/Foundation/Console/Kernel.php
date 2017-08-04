@@ -8,6 +8,8 @@ use Nova\Console\Application as Forge;
 use Nova\Events\Dispatcher;
 use Nova\Foundation\Application;
 
+use Symfony\Component\Debug\Exception\FatalErrorException;
+
 use Exception;
 use Throwable;
 
