@@ -10,7 +10,6 @@ use Nova\View\Engines\PhpEngine;
 use Nova\View\Factory;
 use Nova\View\FileViewFinder;
 use Nova\View\Section;
-use Nova\Support\MessageBag;
 use Nova\Support\ServiceProvider;
 
 
@@ -35,8 +34,6 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerViewFinder();
 
         $this->registerFactory();
-
-        $this->registerSessionBinder();
 
         $this->registerSection();
     }
@@ -170,45 +167,6 @@ class ViewServiceProvider extends ServiceProvider
 
             return new FileViewFinder($app['files'], $paths);
         });
-    }
-
-    /**
-     * Register the session binder for the view environment.
-     *
-     * @return void
-     */
-    protected function registerSessionBinder()
-    {
-        list($app, $me) = array($this->app, $this);
-
-        $app->booted(function() use ($app, $me)
-        {
-            // If the current session has an "errors" variable bound to it, we will share
-            // its value with all view instances so the views can easily access errors
-            // without having to bind. An empty bag is set when there aren't errors.
-            if ($me->sessionHasErrors($app)) {
-                $errors = $app['session.store']->get('errors');
-
-                $app['view']->share('errors', $errors);
-            } else {
-                $app['view']->share('errors', new MessageBag());
-            }
-        });
-    }
-
-    /**
-     * Determine if the application session has errors.
-     *
-     * @param  \Nova\Foundation\Application  $app
-     * @return bool
-     */
-    public function sessionHasErrors($app)
-    {
-        $config = $app['config']['session'];
-
-        if (isset($app['session.store']) && ! is_null($config['driver'])) {
-            return $app['session.store']->has('errors');
-        }
     }
 
     /**
