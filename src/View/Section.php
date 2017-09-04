@@ -41,7 +41,7 @@ class Section
     }
 
     /**
-     * Stop injecting content into a section and print its contents.
+     * Stop injecting content into a section and output its contents.
      *
      * @return string
      */
