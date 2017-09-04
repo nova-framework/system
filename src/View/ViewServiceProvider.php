@@ -11,6 +11,7 @@ use Nova\View\Factory;
 use Nova\View\FileViewFinder;
 use Nova\Support\MessageBag;
 use Nova\Support\ServiceProvider;
+use Nova\View\Section;
 
 
 class ViewServiceProvider extends ServiceProvider
@@ -36,6 +37,8 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerFactory();
 
         $this->registerSessionBinder();
+        
+        $this->registerSection();
     }
 
     /**
@@ -207,6 +210,19 @@ class ViewServiceProvider extends ServiceProvider
             return $app['session.store']->has('errors');
         }
     }
+        
+    /**
+     * Register the View Section instance.
+     *
+     * @return void
+     */
+    public function registerSection()
+    {
+        $this->app->bindShared('view.section', function($app)
+        {
+            return new Section($app['view']);
+        });
+    }
 
     /**
      * Get the services provided by the provider.
@@ -218,7 +234,8 @@ class ViewServiceProvider extends ServiceProvider
         return array(
             'view', 'view.finder', 'view.engine.resolver',
             'template', 'template.compiler',
-            'markdown', 'markdown.compiler'
+            'markdown', 'markdown.compiler',
+            'section'
         );
     }
 }
