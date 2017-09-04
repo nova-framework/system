@@ -9,9 +9,9 @@ use Nova\View\Engines\CompilerEngine;
 use Nova\View\Engines\PhpEngine;
 use Nova\View\Factory;
 use Nova\View\FileViewFinder;
+use Nova\View\Section;
 use Nova\Support\MessageBag;
 use Nova\Support\ServiceProvider;
-use Nova\View\Section;
 
 
 class ViewServiceProvider extends ServiceProvider
@@ -37,7 +37,7 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerFactory();
 
         $this->registerSessionBinder();
-        
+
         $this->registerSection();
     }
 
@@ -210,7 +210,7 @@ class ViewServiceProvider extends ServiceProvider
             return $app['session.store']->has('errors');
         }
     }
-        
+
     /**
      * Register the View Section instance.
      *

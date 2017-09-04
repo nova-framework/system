@@ -6,7 +6,6 @@ use Nova\Container\Container;
 use Nova\Events\Dispatcher;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\Engines\EngineResolver;
-use Nova\View\Layout;
 use Nova\View\View;
 use Nova\View\Contracts\ViewFinderInterface;
 
@@ -185,9 +184,7 @@ class Factory
      */
     public function fetch($view, $data = array(), Closure $callback = null)
     {
-        $instance = $this->make($view, $data);
-
-        return $instance->render($callback);
+        return $this->make($view, $data)->render($callback);
     }
 
     /**
