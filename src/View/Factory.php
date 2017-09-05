@@ -526,12 +526,10 @@ class Factory
      */
     public function startSection($section, $content = '')
     {
-        if ($content === '') {
-            if (ob_start()) {
-                $this->sectionStack[] = $section;
-            }
-        } else {
+        if (! empty($content)) {
             $this->extendSection($section, $content);
+        } else if (ob_start()) {
+            $this->sectionStack[] = $section;
         }
     }
 

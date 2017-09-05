@@ -31,16 +31,6 @@ class Section
     }
 
     /**
-     * Stop injecting content into a section and return its contents.
-     *
-     * @return string
-     */
-    public function get()
-    {
-        return $this->factory->yieldSection();
-    }
-
-    /**
      * Stop injecting content into a section and output its contents.
      *
      * @return string
@@ -51,14 +41,33 @@ class Section
     }
 
     /**
-     * Stop injecting content into a section.
+     * Stop injecting content into a section and return its contents.
      *
-     * @param  bool  $overwrite
      * @return string
      */
-    public function stop($overwrite = false)
+    public function fetch()
     {
-        return $this->factory->stopSection($overwrite);
+        return $this->factory->yieldSection();
+    }
+
+    /**
+     * Stop injecting content into a section.
+     *
+     * @return string
+     */
+    public function end()
+    {
+        return $this->factory->stopSection();
+    }
+
+    /**
+     * Stop injecting content into a section.
+     *
+     * @return string
+     */
+    public function stop()
+    {
+        return $this->factory->stopSection();
     }
 
     /**
@@ -100,7 +109,7 @@ class Section
      * @param  string  $default
      * @return string
      */
-    public function getContent($section, $default = '')
+    public function render($section, $default = '')
     {
         return $this->factory->yieldContent($section, $default);
     }
