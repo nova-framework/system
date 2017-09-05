@@ -91,18 +91,6 @@ class Section
     }
 
     /**
-     * Append content to a given section.
-     *
-     * @param  string  $section
-     * @param  string  $content
-     * @return void
-     */
-    public function extend($section, $content)
-    {
-        $this->factory->extendSection($section, $content);
-    }
-
-    /**
      * Get the string contents of a section.
      *
      * @param  string  $section
