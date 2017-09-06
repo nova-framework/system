@@ -55,8 +55,8 @@ class Kernel implements KernelInterface
         'Nova\Foundation\Bootstrap\HandleExceptions',
         'Nova\Foundation\Bootstrap\RegisterFacades',
         'Nova\Foundation\Bootstrap\RegisterProviders',
-        'Nova\Foundation\Bootstrap\BootProviders',
         'Nova\Foundation\Bootstrap\SetRequestForConsole',
+        'Nova\Foundation\Bootstrap\BootProviders',
     );
 
     /**
