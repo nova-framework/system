@@ -62,7 +62,7 @@ abstract class Broadcaster implements BroadcasterInterface
                 $callback, array_merge(array($user), $parameters)
             );
 
-            if (! is_null($result) {
+            if (! is_null($result)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
