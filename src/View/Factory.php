@@ -168,7 +168,9 @@ class Factory
             throw new BadMethodCallException("File path [$path] does not exist");
         }
 
-        $data = array_merge($mergeData, $this->parseData($data));
+        $data = array_except(
+            array_merge($mergeData, $this->parseData($data)), array('__data', '__path')
+        );
 
         $this->callCreator(
             $view = new View($this, $this->getEngineFromPath($path), $view, $path, $data)
