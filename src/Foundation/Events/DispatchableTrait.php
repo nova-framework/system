@@ -5,6 +5,7 @@ namespace Nova\Foundation\Events;
 
 trait DispatchableTrait
 {
+
     /**
      * Dispatch the event with the given arguments.
      *

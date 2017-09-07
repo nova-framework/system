@@ -10,6 +10,7 @@ use ArrayAccess;
 
 trait DispatchesJobsTrait
 {
+
     /**
      * Dispatch a job to its appropriate handler.
      *

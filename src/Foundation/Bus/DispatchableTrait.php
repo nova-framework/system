@@ -7,6 +7,7 @@ use Nova\Foundation\Bus\PendingDispatch;
 
 trait DispatchableTrait
 {
+
     /**
      * Dispatch the job with the given arguments.
      *
