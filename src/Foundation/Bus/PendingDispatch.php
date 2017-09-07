@@ -25,6 +25,16 @@ class PendingDispatch
     }
 
     /**
+     * Handle the object's destruction.
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        dispatch($this->job);
+    }
+
+    /**
      * Set the desired connection for the job.
      *
      * @param  string|null  $connection
@@ -61,15 +71,5 @@ class PendingDispatch
         $this->job->delay($delay);
 
         return $this;
-    }
-
-    /**
-     * Handle the object's destruction.
-     *
-     * @return void
-     */
-    public function __destruct()
-    {
-        dispatch($this->job);
     }
 }

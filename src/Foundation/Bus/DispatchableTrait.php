@@ -2,6 +2,8 @@
 
 namespace Nova\Foundation\Bus;
 
+use Nova\Foundation\Bus\PendingDispatch;
+
 
 trait DispatchableTrait
 {

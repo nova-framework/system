@@ -18,7 +18,7 @@ trait DispatchableTrait
     /**
      * Broadcast the event with the given arguments.
      *
-     * @return \Illuminate\Broadcasting\PendingBroadcast
+     * @return \Nova\Broadcasting\PendingBroadcast
      */
     public static function broadcast()
     {

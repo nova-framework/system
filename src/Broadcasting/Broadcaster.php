@@ -18,13 +18,6 @@ abstract class Broadcaster implements BroadcasterInterface
      */
     protected $channels = array();
 
-    /**
-     * The binding registrar (router) instance.
-     *
-     * @var BindingRegistrar
-     */
-    protected $bindingRegistrar;
-
 
     /**
      * Register a channel authenticator.

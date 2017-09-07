@@ -789,40 +789,41 @@ class Application extends Container
     public function registerCoreContainerAliases()
     {
         $aliases = array(
-            'app'                => 'Nova\Foundation\Application',
-            'forge'                => 'Nova\Console\Application',
-            'auth'                => 'Nova\Auth\AuthManager',
-            'cache'                => 'Nova\Cache\CacheManager',
-            'cache.store'        => 'Nova\Cache\Repository',
-            'template.compiler'    => 'Nova\View\Compilers\TemplateCompiler',
+            'app'               => 'Nova\Foundation\Application',
+            'forge'             => 'Nova\Console\Application',
+            'auth'              => 'Nova\Auth\AuthManager',
+            'broadcast'         => 'Nova\Broadcasting\BroadcastManager',
+            'cache'             => 'Nova\Cache\CacheManager',
+            'cache.store'       => 'Nova\Cache\Repository',
+            'template.compiler' => 'Nova\View\Compilers\TemplateCompiler',
             'config'            => 'Nova\Config\Repository',
             'cookie'            => 'Nova\Cookie\CookieJar',
-            'encrypter'            => 'Nova\Encryption\Encrypter',
+            'encrypter'         => 'Nova\Encryption\Encrypter',
             'db'                => 'Nova\Database\DatabaseManager',
-            'db.connection'        => array('Nova\Database\Connection', 'Nova\Database\Contracts\ConnectionInterface'),
-            'broadcast'            => array('Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\Contracts\FactoryInterface'),
+            'db.connection'     => array('Nova\Database\Connection', 'Nova\Database\Contracts\ConnectionInterface'),
+            'broadcast'         => array('Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\Contracts\FactoryInterface'),
             'events'            => 'Nova\Events\Dispatcher',
-            'files'                => 'Nova\Filesystem\Filesystem',
-            'hash'                => 'Nova\Hashing\HasherInterface',
-            'log'                => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
-            'language'            => 'Nova\Language\LanguageManager',
+            'files'             => 'Nova\Filesystem\Filesystem',
+            'hash'              => 'Nova\Hashing\HasherInterface',
+            'log'               => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
+            'language'          => 'Nova\Language\LanguageManager',
             'mailer'            => 'Nova\Mail\Mailer',
-            'paginator'            => 'Nova\Pagination\Factory',
-            'auth.reminder'        => 'Nova\Auth\Reminders\PasswordBroker',
-            'queue'                => 'Nova\Queue\QueueManager',
-            'queue.connection'    => 'Nova\Queue\Queue',
-            'redirect'            => 'Nova\Routing\Redirector',
-            'request'            => 'Nova\Http\Request',
+            'paginator'         => 'Nova\Pagination\Factory',
+            'auth.reminder'     => 'Nova\Auth\Reminders\PasswordBroker',
+            'queue'             => 'Nova\Queue\QueueManager',
+            'queue.connection'  => 'Nova\Queue\Queue',
+            'redirect'          => 'Nova\Routing\Redirector',
+            'request'           => 'Nova\Http\Request',
             'router'            => 'Nova\Routing\Router',
-            'session'            => 'Nova\Session\SessionManager',
-            'session.store'        => 'Nova\Session\Store',
-            'url'                => 'Nova\Routing\UrlGenerator',
-            'validator'            => 'Nova\Validation\Factory',
-            'view'                => 'Nova\View\Factory',
+            'session'           => 'Nova\Session\SessionManager',
+            'session.store'     => 'Nova\Session\Store',
+            'url'               => 'Nova\Routing\UrlGenerator',
+            'validator'         => 'Nova\Validation\Factory',
+            'view'              => 'Nova\View\Factory',
         );
 
-        foreach ($aliases as $key => $aliases) {
-            foreach ((array) $aliases as $alias) {
+        foreach ($aliases as $key => $value) {
+            foreach ((array) $value as $alias) {
                 $this->alias($key, $alias);
             }
         }
