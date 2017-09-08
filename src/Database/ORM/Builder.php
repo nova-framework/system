@@ -81,7 +81,9 @@ class Builder
             return $this->findMany($id, $columns);
         }
 
-        $this->query->where($this->model->getQualifiedKeyName(), '=', $id);
+        $keyName = $this->model->getQualifiedKeyName();
+
+        $this->query->where($keyName, '=', $id);
 
         return $this->first($columns);
     }
@@ -89,15 +91,19 @@ class Builder
     /**
      * Find a model by its primary key.
      *
-     * @param  array  $id
+     * @param  array  $ids
      * @param  array  $columns
      * @return \Nova\Database\ORM\Model|Collection|static
      */
-    public function findMany($id, $columns = array('*'))
+    public function findMany($ids, $columns = array('*'))
     {
-        if (empty($id)) return $this->model->newCollection();
+        if (empty($ids)) {
+            return $this->model->newCollection();
+        }
 
-        $this->query->whereIn($this->model->getQualifiedKeyName(), $id);
+        $keyName = $this->model->getQualifiedKeyName();
+
+        $this->query->whereIn($keyName, $ids);
 
         return $this->get($columns);
     }
@@ -113,9 +119,13 @@ class Builder
      */
     public function findOrFail($id, $columns = array('*'))
     {
-        if (! is_null($model = $this->find($id, $columns))) return $model;
+        if (! is_null($model = $this->find($id, $columns))) {
+            return $model;
+        }
 
-        throw (new ModelNotFoundException)->setModel(get_class($this->model));
+        $className = get_class($this->model);
+
+        throw (new ModelNotFoundException)->setModel($className);
     }
 
     /**
@@ -139,9 +149,35 @@ class Builder
      */
     public function firstOrFail($columns = array('*'))
     {
-        if (! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) {
+            return $model;
+        }
 
-        throw (new ModelNotFoundException)->setModel(get_class($this->model));
+        $className = get_class($this->model);
+
+        throw (new ModelNotFoundException)->setModel($className);
+    }
+
+    /**
+     * Execute the query and get the first result or call a callback.
+     *
+     * @param  \Closure|array  $columns
+     * @param  \Closure|null  $callback
+     * @return \Nova\Database\ORM\Model|static|mixed
+     */
+    public function firstOr($columns = array('*'), Closure $callback = null)
+    {
+        if ($columns instanceof Closure) {
+            $callback = $columns;
+
+            $columns = array('*');
+        }
+
+        if (! is_null($model = $this->first($columns))) {
+            return $model;
+        }
+
+        return call_user_func($callback);
     }
 
     /**
