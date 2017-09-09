@@ -10,6 +10,9 @@ namespace Nova\Helpers;
 
 use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Request;
+use Nova\Support\Arr;
+
+use InvalidArgumentException;
 
 
 /**
@@ -18,19 +21,126 @@ use Nova\Support\Facades\Request;
 class ReCaptcha
 {
     /**
-     * Constant holding the Googe API url.
+     * Whether or not the verification is active.
+     *
+     * @var bool
      */
-    const GOOGLEHOST = 'https://www.google.com/recaptcha/api/siteverify';
+    protected $active = true;
 
     /**
-     * Array holding the configuration.
+     * The site key.
+     *
+     * @var string
      */
-    protected $config;
+    protected $siteKey;
+
+    /**
+     * The secret key.
+     *
+     * @var string
+     */
+    protected $secret;
+
+    /**
+     * Constant holding the Googe API url.
+     */
+    const SITE_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
 
-    public function __construct()
+    /**
+     * Create a new ReCaptcha instance.
+     *
+     * @param array|null $config
+     *
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    public function __construct($config = null)
     {
-        $this->config = Config::get('reCaptcha', array());
+        if (is_null($config)) {
+            $config = Config::get('reCaptcha', array());
+        } else if (! is_array($config)) {
+            throw new InvalidArgumentException('The [config] argument should be an array or null');
+        }
+
+        $this->active = $active = (bool) Arr::get($config, 'active' , false);
+
+        if ($active) {
+            $this->siteKey = Arr::get($config, 'siteKey');
+            $this->secret  = Arr::get($config, 'secret');
+        }
+    }
+
+    /**
+     * Compare given answer against the generated session.
+     *
+     * @param  string|null $response
+     * @param  string|null $remoteIp
+     * @return boolean
+     */
+    public static check($response = null, $remoteIp = null)
+    {
+        $instance = new static();
+
+        return $instance->verify($response, $remoteIp);
+    }
+
+    /**
+     * Compare given answer against the generated session.
+     *
+     * @param  string|null $response
+     * @param  string|null $remoteIp
+     * @return boolean
+     */
+    public function verify($response = null, $remoteIp = null)
+    {
+        if (! $this->isActive()) {
+            return true;
+        }
+
+        // Build the request parameters.
+        $parameters = array(
+            'secret'   => $this->getSecret(),
+            'response' => $response ?: Request::input('g-recaptcha-response', ''),
+            'remoteip' => $remoteIp ?: Request::ip(),
+        );
+
+        // Submit the POST request.
+        $response = $this->submit($parameters);
+
+        // Evaluate the Google server response.
+        $result = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return false;
+        } else if (is_array($result) && isset($result['success'])) {
+            return $result['success'];
+        }
+
+        return false;
+    }
+
+    /**
+     * Submit the POST request with the specified parameters.
+     *
+     * @param  array $parameters
+     * @return mixed
+     */
+    protected function submit(array $parameters)
+    {
+        $options = array(
+            'http' => array(
+                'header'    => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'    => 'POST',
+                'content'   => http_build_query($parameters, '', '&'),
+                // Force the peer validation to use www.google.com
+                'peer_name' => 'www.google.com',
+            ),
+        );
+
+        $context = stream_context_create($options);
+
+        return file_get_contents(static::SITE_VERIFY_URL, false, $context);
     }
 
     /**
@@ -38,9 +148,9 @@ class ReCaptcha
      *
      * @return string
      */
-    protected function isActive()
+    public static function isActive()
     {
-        return array_get($this->config, 'active' , false);
+        return $this->active;
     }
 
     /**
@@ -48,9 +158,9 @@ class ReCaptcha
      *
      * @return string
      */
-    protected function getSiteKey()
+    public function getSiteKey()
     {
-        return array_get($this->config, 'siteKey' , null);
+        return $this->siteKey;
     }
 
     /**
@@ -58,60 +168,8 @@ class ReCaptcha
      *
      * @return string
      */
-    protected function getSecretkey()
+    public function getSecret()
     {
-        return array_get($this->config, 'secret' , null);
-    }
-
-    /**
-     * Compare given answer against the generated session.
-     *
-     * @param  string $response
-     * @return boolean
-     */
-    protected function check($response = null)
-    {
-        if (! $this->isActive()) return true;
-
-        // Get the recaptcha response value.
-        $response = $response ?: Request::input('g-recaptcha-response', '');
-
-        // Build the query string.
-        $query = http_build_query(array(
-            'secret'   => $this->getSecretKey(),
-            'response' => $response,
-            'remoteip' => Request::ip()
-        ));
-
-        // Calculate the (complete) request URL.
-        $url = static::GOOGLEHOST .'?' .$query;
-
-        // Perform the request to Google server.
-        $result = file_get_contents($url);
-
-        // Evaluate the Google server response.
-        if ($result !== false) {
-            $data = json_decode($result, true);
-
-            if (is_array($data)) {
-                return ($data['success'] === true);
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Magic Method for handling dynamic functions.
-     *
-     * @param  string  $method
-     * @param  array   $params
-     * @return void|mixed
-     */
-    public static function __callStatic($method, $params)
-    {
-        $instance = new static();
-
-        return call_user_func_array(array($instance, $method), $params);
+        return $this->secret;
     }
 }
