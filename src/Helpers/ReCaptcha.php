@@ -72,6 +72,18 @@ class ReCaptcha
     }
 
     /**
+     * Create a new ReCaptcha instance.
+     *
+     * @param array|null $config
+     *
+     * @return \Nova\Helpers\ReCaptcha
+     */
+    public static function make($config = null)
+    {
+        return new static($config);
+    }
+
+    /**
      * Compare given answer against the generated session.
      *
      * @param  string|null $response
@@ -148,7 +160,7 @@ class ReCaptcha
      *
      * @return string
      */
-    public static function isActive()
+    public function isActive()
     {
         return $this->active;
     }
