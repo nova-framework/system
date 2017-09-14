@@ -146,6 +146,21 @@ if (! function_exists('collect'))
     }
 }
 
+if (! function_exists('event')) {
+    /**
+     * Fire an event and call the listeners.
+     *
+     * @param  string|object  $event
+     * @param  mixed  $payload
+     * @param  bool  $halt
+     * @return array|null
+     */
+    function event($event, $payload = array(), $halt = false)
+    {
+        return app('events')->fire($event, $payload, $halt);
+    }
+}
+
 if (! function_exists('action'))
 {
     /**

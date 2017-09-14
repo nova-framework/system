@@ -92,9 +92,7 @@ class ReCaptcha
      */
     public static check($response = null, $remoteIp = null)
     {
-        $instance = new static();
-
-        return $instance->verify($response, $remoteIp);
+        return static::make()->verify($response, $remoteIp);
     }
 
     /**

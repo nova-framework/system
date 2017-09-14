@@ -11,7 +11,9 @@ use Nova\Foundation\Console\ModelMakeCommand;
 use Nova\Foundation\Console\ViewClearCommand;
 use Nova\Foundation\Console\ConsoleMakeCommand;
 use Nova\Foundation\Console\EnvironmentCommand;
+use Nova\Foundation\Console\EventMakeCommand;
 use Nova\Foundation\Console\KeyGenerateCommand;
+use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Support\ServiceProvider;
@@ -32,18 +34,20 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
-        'ConsoleMake'    => 'command.console.make',
-        'Down'           => 'command.down',
-        'Environment'    => 'command.environment',
-        'KeyGenerate'    => 'command.key.generate',
-        'ModelMake'      => 'command.model.make',
-        'Optimize'       => 'command.optimize',
-        'PolicyMake'     => 'command.policy.make',
-        'ProviderMake'   => 'command.provider.make',
-        'RouteList'      => 'command.route.list',
-        'Serve'          => 'command.serve',
-        'Up'             => 'command.up',
-        'ViewClear'      => 'command.view.clear',
+        'ConsoleMake'  => 'command.console.make',
+        'Down'         => 'command.down',
+        'Environment'  => 'command.environment',
+        'EventMake'    => 'command.event.make',
+        'KeyGenerate'  => 'command.key.generate',
+        'ListenerMake' => 'command.listener.make',
+        'ModelMake'    => 'command.model.make',
+        'Optimize'     => 'command.optimize',
+        'PolicyMake'   => 'command.policy.make',
+        'ProviderMake' => 'command.provider.make',
+        'RouteList'    => 'command.route.list',
+        'Serve'        => 'command.serve',
+        'Up'           => 'command.up',
+        'ViewClear'    => 'command.view.clear',
     );
 
     /**
@@ -106,11 +110,37 @@ class ForgeServiceProvider extends ServiceProvider
      *
      * @return void
      */
+    protected function registerEventMakeCommand()
+    {
+        $this->app->singleton('command.event.make', function ($app)
+        {
+            return new EventMakeCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
     protected function registerKeyGenerateCommand()
     {
         $this->app->singleton('command.key.generate', function ($app)
         {
             return new KeyGenerateCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerListenerMakeCommand()
+    {
+        $this->app->singleton('command.listener.make', function ($app)
+        {
+            return new ListenerMakeCommand($app['files']);
         });
     }
 

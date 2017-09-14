@@ -1,0 +1,24 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Foundation\Events\DispatchableTrait;
+
+use {{rootNamespace}}Events\Event;
+
+
+class {{className}} extends Event
+{
+    use DispatchableTrait;
+
+    /**
+     * Create a new Event instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+}
