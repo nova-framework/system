@@ -23,7 +23,7 @@ class {{className}}
     /**
      * Handle the event.
      *
-     * @param  DummyEvent  $event
+     * @param  {{fullEvent}}  $event
      * @return void
      */
     public function handle({{event}} $event)

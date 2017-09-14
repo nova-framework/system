@@ -107,7 +107,8 @@ class ListenerMakeCommand extends GeneratorCommand
     protected function getOptions()
     {
         return array(
-            array('event', null, InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
+            array('event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
+
             array('queued', null, InputOption::VALUE_NONE, 'Indicates the event listener should be queued.'),
         );
     }

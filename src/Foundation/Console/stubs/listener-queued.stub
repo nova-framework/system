@@ -26,7 +26,7 @@ class {{className}} implements ShouldQueueInterface
     /**
      * Handle the event.
      *
-     * @param  DummyEvent  $event
+     * @param  {{fullEvent}}  $event
      * @return void
      */
     public function handle({{event}} $event)

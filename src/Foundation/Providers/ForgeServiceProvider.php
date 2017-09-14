@@ -19,9 +19,7 @@ use Nova\Foundation\Console\KeyGenerateCommand;
 use Nova\Foundation\Console\RequestMakeCommand;
 use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
-use Nova\Foundation\Console\HandlerEventCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
-use Nova\Foundation\Console\EventGenerateCommand;
 use Nova\Foundation\Console\VendorPublishCommand;
 use Nova\Support\ServiceProvider;
 
@@ -41,26 +39,25 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
-        'ClearCompiled'        => 'command.clear-compiled',
-        'ConsoleMake'        => 'command.console.make',
-        'EventMake'            => 'command.event.make',
-        'Down'                => 'command.down',
-        'Environment'        => 'command.environment',
-        'HandlerEvent'        => 'command.handler.event',
-        'JobMake'            => 'command.job.make',
-        'KeyGenerate'        => 'command.key.generate',
-        'ListenerMake'        => 'command.listener.make',
-        'ModelMake'            => 'command.model.make',
-        'Optimize'            => 'command.optimize',
-        'PolicyMake'        => 'command.policy.make',
-        'ProviderMake'        => 'command.provider.make',
-        'RequestMake'        => 'command.request.make',
-        'RouteList'            => 'command.route.list',
-        'Serve'                => 'command.serve',
-        'Tinker'            => 'command.tinker',
-        'Up'                => 'command.up',
-        'VendorPublish'        => 'command.vendor.publish',
-        'ViewClear'            => 'command.view.clear',
+        'ClearCompiled' => 'command.clear-compiled',
+        'ConsoleMake'   => 'command.console.make',
+        'EventMake'     => 'command.event.make',
+        'Down'          => 'command.down',
+        'Environment'   => 'command.environment',
+        'JobMake'       => 'command.job.make',
+        'KeyGenerate'   => 'command.key.generate',
+        'ListenerMake'  => 'command.listener.make',
+        'ModelMake'     => 'command.model.make',
+        'Optimize'      => 'command.optimize',
+        'PolicyMake'    => 'command.policy.make',
+        'ProviderMake'  => 'command.provider.make',
+        'RequestMake'   => 'command.request.make',
+        'RouteList'     => 'command.route.list',
+        'Serve'         => 'command.serve',
+        'Tinker'        => 'command.tinker',
+        'Up'            => 'command.up',
+        'VendorPublish' => 'command.vendor.publish',
+        'ViewClear'     => 'command.view.clear',
     );
 
     /**
@@ -86,7 +83,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerClearCompiledCommand()
     {
-        $this->app->singleton('command.clear-compiled', function () {
+        $this->app->singleton('command.clear-compiled', function ()
+        {
             return new ClearCompiledCommand;
         });
     }
@@ -98,20 +96,9 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerConsoleMakeCommand()
     {
-        $this->app->singleton('command.console.make', function ($app) {
+        $this->app->singleton('command.console.make', function ($app)
+        {
             return new ConsoleMakeCommand($app['files']);
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerEventGenerateCommand()
-    {
-        $this->app->singleton('command.event.generate', function () {
-            return new EventGenerateCommand;
         });
     }
 
@@ -122,7 +109,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerEventMakeCommand()
     {
-        $this->app->singleton('command.event.make', function ($app) {
+        $this->app->singleton('command.event.make', function ($app)
+        {
             return new EventMakeCommand($app['files']);
         });
     }
@@ -134,7 +122,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerDownCommand()
     {
-        $this->app->singleton('command.down', function () {
+        $this->app->singleton('command.down', function ()
+        {
             return new DownCommand;
         });
     }
@@ -146,20 +135,9 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerEnvironmentCommand()
     {
-        $this->app->singleton('command.environment', function () {
+        $this->app->singleton('command.environment', function ()
+        {
             return new EnvironmentCommand;
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerHandlerEventCommand()
-    {
-        $this->app->singleton('command.handler.event', function ($app) {
-            return new HandlerEventCommand($app['files']);
         });
     }
 
@@ -170,7 +148,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerJobMakeCommand()
     {
-        $this->app->singleton('command.job.make', function ($app) {
+        $this->app->singleton('command.job.make', function ($app)
+        {
             return new JobMakeCommand($app['files']);
         });
     }
@@ -182,7 +161,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerKeyGenerateCommand()
     {
-        $this->app->singleton('command.key.generate', function ($app) {
+        $this->app->singleton('command.key.generate', function ($app)
+        {
             return new KeyGenerateCommand($app['files']);
         });
     }
@@ -194,7 +174,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerListenerMakeCommand()
     {
-        $this->app->singleton('command.listener.make', function ($app) {
+        $this->app->singleton('command.listener.make', function ($app)
+        {
             return new ListenerMakeCommand($app['files']);
         });
     }
@@ -206,7 +187,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerModelMakeCommand()
     {
-        $this->app->singleton('command.model.make', function ($app) {
+        $this->app->singleton('command.model.make', function ($app)
+        {
             return new ModelMakeCommand($app['files']);
         });
     }
@@ -218,7 +200,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerOptimizeCommand()
     {
-        $this->app->singleton('command.optimize', function ($app) {
+        $this->app->singleton('command.optimize', function ($app)
+        {
             return new OptimizeCommand($app['composer']);
         });
     }
@@ -230,7 +213,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerProviderMakeCommand()
     {
-        $this->app->singleton('command.provider.make', function ($app) {
+        $this->app->singleton('command.provider.make', function ($app)
+        {
             return new ProviderMakeCommand($app['files']);
         });
     }
@@ -242,7 +226,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerRequestMakeCommand()
     {
-        $this->app->singleton('command.request.make', function ($app) {
+        $this->app->singleton('command.request.make', function ($app)
+        {
             return new RequestMakeCommand($app['files']);
         });
     }
@@ -254,7 +239,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerRouteListCommand()
     {
-        $this->app->singleton('command.route.list', function ($app) {
+        $this->app->singleton('command.route.list', function ($app)
+        {
             return new RouteListCommand($app['router']);
         });
     }
@@ -266,7 +252,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerServeCommand()
     {
-        $this->app->singleton('command.serve', function () {
+        $this->app->singleton('command.serve', function ()
+        {
             return new ServeCommand;
         });
     }
@@ -278,7 +265,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerTinkerCommand()
     {
-        $this->app->singleton('command.tinker', function () {
+        $this->app->singleton('command.tinker', function ()
+        {
             return new TinkerCommand;
         });
     }
@@ -290,7 +278,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerUpCommand()
     {
-        $this->app->singleton('command.up', function () {
+        $this->app->singleton('command.up', function ()
+        {
             return new UpCommand;
         });
     }
@@ -315,7 +304,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerViewClearCommand()
     {
-        $this->app->singleton('command.view.clear', function ($app) {
+        $this->app->singleton('command.view.clear', function ($app)
+        {
             return new ViewClearCommand($app['files']);
         });
     }
@@ -327,7 +317,8 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerPolicyMakeCommand()
     {
-        $this->app->singleton('command.policy.make', function ($app) {
+        $this->app->singleton('command.policy.make', function ($app)
+        {
             return new PolicyMakeCommand($app['files']);
         });
     }
