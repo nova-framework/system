@@ -3,6 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Helpers\Inflector;
+use Nova\Support\Str;
 
 use ReflectionClass;
 use ReflectionMethod;
@@ -58,16 +59,17 @@ class ControllerInspector
      */
     public function isRoutable(ReflectionMethod $method)
     {
-        switch ($method->class) {
-            case 'Routing\Controller':
-            case 'App\Core\Controller':
-                return false;
-
-            default:
-                return starts_with($method->name, $this->verbs);
+        if ($method->class == 'Nova\Routing\Controller') {
+            return false;
         }
 
-        return false;
+        $path = str_replace('\\', '/', $method->class);
+
+        if (preg_match('#^.+/Controllers/BaseController$#', $path) === 1) {
+            return false;
+        }
+
+        return Str::startsWith($method->name, $this->verbs);
     }
 
     /**
