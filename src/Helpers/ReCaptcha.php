@@ -90,7 +90,7 @@ class ReCaptcha
      * @param  string|null $remoteIp
      * @return boolean
      */
-    public static check($response = null, $remoteIp = null)
+    public static function check($response = null, $remoteIp = null)
     {
         return static::make()->verify($response, $remoteIp);
     }
