@@ -38,6 +38,7 @@ class MigrateCommand extends BaseCommand
      */
     protected $packagePath;
 
+
     /**
      * Create a new migration command instance.
      *
@@ -119,5 +120,4 @@ class MigrateCommand extends BaseCommand
             array('seed',     null, InputOption::VALUE_NONE,     'Indicates if the seed task should be re-run.'),
         );
     }
-
 }

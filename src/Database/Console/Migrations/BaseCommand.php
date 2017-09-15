@@ -7,6 +7,7 @@ use Nova\Console\Command;
 
 class BaseCommand extends Command
 {
+
     /**
      * Get the path to the migration directory.
      *
@@ -25,5 +26,4 @@ class BaseCommand extends Command
 
         return $this->nova['path'] .DS .'Database' .DS .'Migrations';
     }
-
 }

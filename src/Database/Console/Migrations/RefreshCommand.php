@@ -25,6 +25,7 @@ class RefreshCommand extends Command
      */
     protected $description = 'Reset and re-run all migrations';
 
+
     /**
      * Execute the console command.
      *
@@ -91,5 +92,4 @@ class RefreshCommand extends Command
             array('seeder',   null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder.'),
         );
     }
-
 }

@@ -34,6 +34,7 @@ class RollbackCommand extends Command
      */
     protected $migrator;
 
+
     /**
      * Create a new migration rollback command instance.
      *
@@ -83,5 +84,4 @@ class RollbackCommand extends Command
             array('pretend',  null, InputOption::VALUE_NONE,     'Dump the SQL queries that would be run.'),
         );
     }
-
 }

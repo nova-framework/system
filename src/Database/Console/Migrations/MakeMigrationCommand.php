@@ -38,6 +38,7 @@ class MakeMigrationCommand extends BaseCommand
      */
     protected $packagePath;
 
+
     /**
      * Create a new migration install command instance.
      *
@@ -124,5 +125,4 @@ class MakeMigrationCommand extends BaseCommand
             array('table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
-
 }

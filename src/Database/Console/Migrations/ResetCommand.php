@@ -34,6 +34,7 @@ class ResetCommand extends Command
      */
     protected $migrator;
 
+
     /**
      * Create a new migration rollback command instance.
      *
@@ -87,5 +88,4 @@ class ResetCommand extends Command
             array('pretend',  null, InputOption::VALUE_NONE,     'Dump the SQL queries that would be run.'),
         );
     }
-
 }

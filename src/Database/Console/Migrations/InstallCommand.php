@@ -31,6 +31,7 @@ class InstallCommand extends Command
      */
     protected $repository;
 
+
     /**
      * Create a new migration install command instance.
      *
@@ -69,5 +70,4 @@ class InstallCommand extends Command
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
         );
     }
-
 }
