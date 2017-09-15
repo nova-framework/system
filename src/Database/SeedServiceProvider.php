@@ -2,8 +2,10 @@
 
 namespace Nova\Database;
 
-use Nova\Database\Console\SeedCommand;
-use Nova\Database\Console\Seeder;
+use Nova\Database\Console\Seeds\SeedCommand;
+use Nova\Database\Console\Seeds\SeederMakeCommand;
+use Nova\Database\Seeder;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -25,12 +27,14 @@ class SeedServiceProvider extends ServiceProvider
     {
         $this->registerSeedCommand();
 
+        $this->registerMakeCommand();
+
         $this->app->bindShared('seeder', function($app)
         {
             return new Seeder();
         });
 
-        $this->commands('command.seed');
+        $this->commands('command.seed', 'command.seeder.make');
     }
 
     /**
@@ -47,13 +51,26 @@ class SeedServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the seeder generator command.
+     *
+     * @return void
+     */
+    protected function registerMakeCommand()
+    {
+        $this->app->bindShared('command.seeder.make', function ($app)
+        {
+            return new SeederMakeCommand($app['files'], $app['composer']);
+        });
+    }
+
+    /**
      * Get the services provided by the provider.
      *
      * @return array
      */
     public function provides()
     {
-        return array('seeder', 'command.seed');
+        return array('seeder', 'command.seed', 'command.seeder.make');
     }
 
 }

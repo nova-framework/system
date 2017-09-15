@@ -4,6 +4,7 @@ namespace Nova\Database\Connections;
 
 use Nova\Database\Connection;
 use Nova\Database\Schema\MySqlBuilder;
+
 use Nova\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
 use Nova\Database\Query\Processors\MySqlProcessor as QueryProcessor;
 use Nova\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;

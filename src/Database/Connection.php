@@ -229,7 +229,9 @@ class Connection implements ConnectionInterface
      */
     public function getSchemaBuilder()
     {
-        if (is_null($this->schemaGrammar)) { $this->useDefaultSchemaGrammar(); }
+        if (is_null($this->schemaGrammar)) {
+            $this->useDefaultSchemaGrammar();
+        }
 
         return new Schema\Builder($this);
     }
