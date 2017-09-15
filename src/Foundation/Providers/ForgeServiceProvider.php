@@ -16,6 +16,8 @@ use Nova\Foundation\Console\KeyGenerateCommand;
 use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
+use Nova\Foundation\Console\ClearCompiledCommand;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -34,20 +36,21 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
-        'ConsoleMake'  => 'command.console.make',
-        'Down'         => 'command.down',
-        'Environment'  => 'command.environment',
-        'EventMake'    => 'command.event.make',
-        'KeyGenerate'  => 'command.key.generate',
-        'ListenerMake' => 'command.listener.make',
-        'ModelMake'    => 'command.model.make',
-        'Optimize'     => 'command.optimize',
-        'PolicyMake'   => 'command.policy.make',
-        'ProviderMake' => 'command.provider.make',
-        'RouteList'    => 'command.route.list',
-        'Serve'        => 'command.serve',
-        'Up'           => 'command.up',
-        'ViewClear'    => 'command.view.clear',
+        'ClearCompiled' => 'command.clear-compiled',
+        'ConsoleMake'   => 'command.console.make',
+        'Down'          => 'command.down',
+        'Environment'   => 'command.environment',
+        'EventMake'     => 'command.event.make',
+        'KeyGenerate'   => 'command.key.generate',
+        'ListenerMake'  => 'command.listener.make',
+        'ModelMake'     => 'command.model.make',
+        'Optimize'      => 'command.optimize',
+        'PolicyMake'    => 'command.policy.make',
+        'ProviderMake'  => 'command.provider.make',
+        'RouteList'     => 'command.route.list',
+        'Serve'         => 'command.serve',
+        'Up'            => 'command.up',
+        'ViewClear'     => 'command.view.clear',
     );
 
     /**
@@ -66,6 +69,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->commands(array_values($this->commands));
     }
 
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerClearCompiledCommand()
+    {
+        $this->app->singleton('command.clear-compiled', function ()
+        {
+            return new ClearCompiledCommand;
+        });
+    }
+    
     /**
      * Register the command.
      *

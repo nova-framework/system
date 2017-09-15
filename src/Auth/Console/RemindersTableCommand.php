@@ -4,10 +4,11 @@ namespace Nova\Auth\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
-use Nova\Support\Facades\Config;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
+
+use InvalidArgumentException;
 
 
 class RemindersTableCommand extends Command
@@ -53,17 +54,28 @@ class RemindersTableCommand extends Command
      */
     public function fire()
     {
-        $broker = $this->argument('name');
+        $config = $this->nova['config'];
+
+        $brokers = array_keys(
+            $config->get('auth.reminders', array())
+        );
+
+        $name = $this->argument('name');
 
         if (empty($name)) {
-            $broker = Config::get('auth.defaults.reminder', 'user');
+            $name = $config->get('auth.defaults.reminder', 'users');
+        } else if (! array_key_exists($name, $brokers)) {
+            return $this->error('Password broker does not exist.');
         }
 
-        $name = 'create_' .$broker .'_password_reminders_table';
+        $table = $config->get("auth.reminders.{$name}.table", 'password_reminders');
 
+        $name = 'create_' .$name .'_password_reminders_table';
+
+        //
         $fullPath = $this->createBaseMigration($name);
 
-        $this->files->put($fullPath, $this->getMigrationStub($name, $broker));
+        $this->files->put($fullPath, $this->getMigrationStub($name, $table));
 
         $this->info('Migration created successfully!');
 
@@ -88,39 +100,35 @@ class RemindersTableCommand extends Command
      * Get the contents of the reminder migration stub.
      *
      * @param  string  $name
-     * @param  string  $broker
+     * @param  string  $table
      *
      * @return string
      */
-    protected function getMigrationStub($name, $broker)
+    protected function getMigrationStub($name, $table)
     {
-        $path = realpath(__DIR__) .str_replace('/', DS, '/stubs/reminders.stub');
+        $className = Str::studly($name);
 
-        $stub = $this->files->get($path);
+        // Get the stub contents.
+        $stubPath = $this->getStub();
 
-        return str_replace(
-            array(
-                'CreatePasswordRemindersTable',
-                'password_reminders'
-            ),
-            array(
-                Str::studly($name),
-                $this->getTable($broker)
-            ),
-            $stub
-        );
+        $stub = $this->files->get($stubPath);
+
+        // Replace the class and table names into stub content.
+        $searches = array('CreatePasswordRemindersTable', 'password_reminders');
+
+        $replaces = array($className, $table);
+
+        return str_replace($searches, $replaces, $stub);
     }
 
     /**
-     * Get the password reminder table name.
-     *
-     * @param  string  $name
+     * Get the stub file for the generator.
      *
      * @return string
      */
-    protected function getTable($name)
+    protected function getStub()
     {
-        return $this->nova['config']->get("auth.reminders.{$name}.table");
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/reminders.stub');
     }
 
     /**
