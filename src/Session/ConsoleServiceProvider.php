@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Cache;
+namespace Nova\Session;
 
 use Nova\Support\ServiceProvider;
 
@@ -21,17 +21,12 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('command.cache.clear', function($app)
+        $this->app->bindShared('command.session.database', function($app)
         {
-            return new Console\ClearCommand($app['cache'], $app['files']);
+            return new Console\SessionTableCommand($app['files']);
         });
 
-        $this->app->bindShared('command.cache.table', function($app)
-        {
-            return new Console\CacheTableCommand($app['files']);
-        });
-
-        $this->commands('command.cache.clear', 'command.cache.table');
+        $this->commands('command.session.database');
     }
 
     /**
@@ -41,7 +36,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('command.cache.clear', 'command.cache.table');
+        return array('command.session.database');
     }
 
 }

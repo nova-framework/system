@@ -44,6 +44,13 @@ class Connection implements ConnectionInterface
     protected $queryGrammar;
 
     /**
+     * The schema grammar implementation.
+     *
+     * @var \Nova\Database\Schema\Grammars\Grammar
+     */
+    protected $schemaGrammar;
+
+    /**
      * The query post processor implementation.
      *
      * @var \Nova\Database\Query\Processors\Processor
@@ -174,6 +181,23 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     * Set the schema grammar to the default implementation.
+     *
+     * @return void
+     */
+    public function useDefaultSchemaGrammar()
+    {
+        $this->schemaGrammar = $this->getDefaultSchemaGrammar();
+    }
+
+    /**
+     * Get the default schema grammar instance.
+     *
+     * @return \Nova\Database\Schema\Grammars\Grammar
+     */
+    protected function getDefaultSchemaGrammar() {}
+
+    /**
      * Set the query post processor to the default implementation.
      *
      * @return void
@@ -191,6 +215,20 @@ class Connection implements ConnectionInterface
     protected function getDefaultPostProcessor()
     {
         return new Query\Processor;
+    }
+
+    /**
+     * Get a schema builder instance for the connection.
+     *
+     * @return \Nova\Database\Schema\Builder
+     */
+    public function getSchemaBuilder()
+    {
+        if (is_null($this->schemaGrammar)) {
+            $this->useDefaultSchemaGrammar();
+        }
+
+        return new Schema\Builder($this);
     }
 
     /**

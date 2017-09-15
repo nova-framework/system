@@ -76,8 +76,14 @@ class MorphTo extends BelongsTo
     protected function buildDictionary(Collection $models)
     {
         foreach ($models as $model) {
-            if ($model->{$this->morphType}) {
-                $this->dictionary[$model->{$this->morphType}][$model->{$this->foreignKey}][] = $model;
+            $morphType = $this->morphType;
+
+            if (isset($model->{$morphType})) {
+                $type = $model->{$morphType};
+
+                $key = $model->getAttribute($this->foreignKey);
+
+                $this->dictionary[$type][$key][] = $model;
             }
         }
     }
@@ -136,8 +142,10 @@ class MorphTo extends BelongsTo
     protected function matchToMorphParents($type, Collection $results)
     {
         foreach ($results as $result) {
-            if (isset($this->dictionary[$type][$result->getKey()])) {
-                foreach ($this->dictionary[$type][$result->getKey()] as $model) {
+            $key = $result->getKey();
+
+            if (isset($this->dictionary[$type][$key])) {
+                foreach ($this->dictionary[$type][$key] as $model) {
                     $model->setRelation($this->relation, $result);
                 }
             }
@@ -173,9 +181,14 @@ class MorphTo extends BelongsTo
     {
         $foreign = $this->foreignKey;
 
-        return BaseCollection::make($this->dictionary[$type])->map(function($models) use ($foreign)
+        //
+        $results = $this->dictionary[$type];
+
+        return BaseCollection::make($results)->map(function($models) use ($foreign)
         {
-            return head($models)->{$foreign};
+            $model = head($models);
+
+            return $model->{$foreign};
 
         })->unique();
     }

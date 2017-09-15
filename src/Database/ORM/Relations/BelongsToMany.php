@@ -52,7 +52,15 @@ class BelongsToMany extends Relation
      *
      * @var array
      */
-    protected $pivotWheres = [];
+    protected $pivotWheres = array();
+
+    /**
+     * The class name of the custom pivot model to use for the relationship.
+     *
+     * @var string
+     */
+    protected $using;
+
 
     /**
      * Create a new has many relationship instance.
@@ -73,6 +81,19 @@ class BelongsToMany extends Relation
         $this->relationName = $relationName;
 
         parent::__construct($query, $parent);
+    }
+
+    /**
+     * Specify the custom Pivot Model to use for the relationship.
+     *
+     * @param  string  $className
+     * @return \Nova\Database\ORM\Relations\BelongsToMany
+     */
+    public function using($className)
+    {
+        $this->using = $className;
+
+        return $this;
     }
 
     /**
@@ -860,7 +881,7 @@ class BelongsToMany extends Relation
      */
     public function newPivot(array $attributes = array(), $exists = false)
     {
-        $pivot = $this->related->newPivot($this->parent, $attributes, $this->table, $exists);
+        $pivot = $this->related->newPivot($this->parent, $attributes, $this->table, $exists, $this->using);
 
         return $pivot->setPivotKeys($this->foreignKey, $this->otherKey);
     }

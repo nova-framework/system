@@ -5,6 +5,9 @@ namespace Nova\Database\Connections;
 use Nova\Database\Connection;
 use Nova\Database\Query\Grammars\SqlServerGrammar as QueryGrammar;
 use Nova\Database\Query\Processors\SqlServerProcessor as QueryProcessor;
+use Nova\Database\Schema\Grammars\SqlServerGrammar as SchemaGrammar;
+
+use Doctrine\DBAL\Driver\PDOSqlsrv\Driver as DoctrineDriver;
 
 use Closure;
 
@@ -59,6 +62,16 @@ class SqlServerConnection extends Connection
     }
 
     /**
+     * Get the default schema grammar instance.
+     *
+     * @return \Nova\Database\Schema\Grammars\SqlServerGrammar
+     */
+    protected function getDefaultSchemaGrammar()
+    {
+        return $this->withTablePrefix(new SchemaGrammar);
+    }
+
+    /**
      * Get the default post processor instance.
      *
      * @return \Nova\Database\Query\Processors\Processor
@@ -68,4 +81,13 @@ class SqlServerConnection extends Connection
         return new QueryProcessor();
     }
 
+    /**
+     * Get the Doctrine DBAL Driver.
+     *
+     * @return \Doctrine\DBAL\Driver\PDOSqlsrv\Driver
+     */
+    protected function getDoctrineDriver()
+    {
+        return new DoctrineDriver;
+    }
 }
