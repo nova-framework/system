@@ -21,7 +21,7 @@ class SeederMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $description = 'Create a new seeder class';
+    protected $description = 'Create a new Database Seeder class';
 
     /**
      * The type of class being generated.
