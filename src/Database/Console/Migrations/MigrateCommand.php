@@ -84,7 +84,7 @@ class MigrateCommand extends BaseCommand
         // seed task to re-populate the database, which is convenient when adding
         // a migration and a seed at the same time, as it is only this command.
         if ($this->input->getOption('seed')) {
-            $this->call('db:seed', ['--force' => true]);
+            $this->call('db:seed', array('--force' => true));
         }
     }
 
@@ -113,11 +113,10 @@ class MigrateCommand extends BaseCommand
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
-            array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate.', null),
-            array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
-            array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
+            array('force',    null, InputOption::VALUE_NONE,     'Force the operation to run when in production.'),
+            array('path',     null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
+            array('pretend',  null, InputOption::VALUE_NONE,     'Dump the SQL queries that would be run.'),
+            array('seed',     null, InputOption::VALUE_NONE,     'Indicates if the seed task should be re-run.'),
         );
     }
 
