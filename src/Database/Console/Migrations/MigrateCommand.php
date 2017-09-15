@@ -38,6 +38,7 @@ class MigrateCommand extends BaseCommand
      */
     protected $packagePath;
 
+
     /**
      * Create a new migration command instance.
      *
@@ -113,12 +114,10 @@ class MigrateCommand extends BaseCommand
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
-            array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
-            array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate.', null),
-            array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
-            array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
+            array('force',    null, InputOption::VALUE_NONE,     'Force the operation to run when in production.'),
+            array('path',     null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
+            array('pretend',  null, InputOption::VALUE_NONE,     'Dump the SQL queries that would be run.'),
+            array('seed',     null, InputOption::VALUE_NONE,     'Indicates if the seed task should be re-run.'),
         );
     }
-
 }

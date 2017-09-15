@@ -34,6 +34,7 @@ class ResetCommand extends Command
      */
     protected $migrator;
 
+
     /**
      * Create a new migration rollback command instance.
      *
@@ -83,9 +84,8 @@ class ResetCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
-            array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
+            array('force',    null, InputOption::VALUE_NONE,     'Force the operation to run when in production.'),
+            array('pretend',  null, InputOption::VALUE_NONE,     'Dump the SQL queries that would be run.'),
         );
     }
-
 }
