@@ -271,7 +271,7 @@ class PasswordBroker
      *
      * @return \Nova\Auth\Reminders\ReminderRepositoryInterface
      */
-    protected function getRepository()
+    public function getRepository()
     {
         return $this->reminders;
     }
