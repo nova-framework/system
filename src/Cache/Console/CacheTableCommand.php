@@ -20,7 +20,7 @@ class CacheTableCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a migration for the cache database table';
+    protected $description = 'Create a migration for the Cache database table';
 
     /**
      * The filesystem instance.
