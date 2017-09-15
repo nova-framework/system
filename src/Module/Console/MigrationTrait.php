@@ -14,10 +14,10 @@ trait MigrationTrait
      */
     protected function requireMigrations($module)
     {
-        $files = $this->nova['files'];
+        $path = $this->getMigrationPath($module);
 
         //
-        $path = $this->getMigrationPath($module);
+        $files = $this->nova['files'];
 
         $migrations = $files->glob($path.'*_*.php');
 
@@ -38,7 +38,10 @@ trait MigrationTrait
     {
         $modules = $this->nova['modules'];
 
-        //
+        if (! $modules->exists($slug)) {
+            throw new InvalidArgumentException('Module does not exists.');
+        }
+
         $path = $modules->getModulePath($slug);
 
         return $path .'Database' .DS .'Migrations' .DS;
