@@ -32,7 +32,7 @@ class ClearRemindersCommand extends Command
     {
         $name = $this->argument('name');
 
-        $broker = $this->nova['auth.password']->broker($name);
+        $broker = $this->container['auth.password']->broker($name);
 
         // 
         $broker->getRepository()->deleteExpired();
