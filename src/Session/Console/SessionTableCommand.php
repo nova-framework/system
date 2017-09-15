@@ -19,7 +19,7 @@ class SessionTableCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a migration for the session database table';
+    protected $description = 'Create a migration for the Session database table';
 
     /**
      * The filesystem instance.
