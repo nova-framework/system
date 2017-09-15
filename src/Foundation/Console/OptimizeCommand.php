@@ -61,6 +61,8 @@ class OptimizeCommand extends Command
         } else {
             $this->composer->dumpOptimized();
         }
+
+        $this->call('clear-compiled');
     }
 
     /**
