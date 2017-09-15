@@ -19,6 +19,7 @@ use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
 use Nova\Queue\Contracts\QueueableEntityInterface as QueueableEntity;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\ArrayableInterface;
+use Nova\Support\Str;
 
 use Carbon\Carbon;
 
@@ -298,7 +299,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // need to be fast. This will let us always know the attributes mutate.
         foreach (get_class_methods($class) as $method) {
             if (preg_match('/^get(.+)Attribute$/', $method, $matches)) {
-                if (static::$snakeAttributes) $matches[1] = snake_case($matches[1]);
+                if (static::$snakeAttributes) $matches[1] = Str::snake($matches[1]);
 
                 static::$mutatorCache[$class][] = lcfirst($matches[1]);
             }
@@ -794,7 +795,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // foreign key name by using the name of the relationship function, which
         // when combined with an "_id" should conventionally match the columns.
         if (is_null($foreignKey)) {
-            $foreignKey = snake_case($relation).'_id';
+            $foreignKey = Str::snake($relation).'_id';
         }
 
         $instance = new $related;
@@ -825,7 +826,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         if (is_null($name)) {
             list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
-            $name = snake_case($caller['function']);
+            $name = Str::snake($caller['function']);
         }
 
         list($type, $id) = $this->getMorphs($name, $type, $id);
@@ -988,7 +989,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // appropriate query constraints then entirely manages the hydrations.
         $query = $instance->newQuery();
 
-        $table = $table ?: str_plural($name);
+        $table = $table ?: Str::plural($name);
 
         return new MorphToMany(
             $query, $this, $name, $table, $foreignKey,
@@ -1048,9 +1049,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // The joining table name, by convention, is simply the snake cased models
         // sorted alphabetically and concatenated with an underscore, so we can
         // just sort the models and join them together to get the table name.
-        $base = snake_case(class_basename($this));
+        $base = Str::snake(class_basename($this));
 
-        $related = snake_case(class_basename($related));
+        $related = Str::snake(class_basename($related));
 
         $models = array($related, $base);
 
@@ -1850,11 +1851,14 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      * @param  array   $attributes
      * @param  string  $table
      * @param  bool    $exists
+     * @param  string|null  $using
      * @return \Nova\Database\ORM\Relations\Pivot
      */
-    public function newPivot(Model $parent, array $attributes, $table, $exists)
+    public function newPivot(Model $parent, array $attributes, $table, $exists, $using = null)
     {
-        return new Pivot($parent, $attributes, $table, $exists);
+        $className = $using ?: Pivot::class;
+
+        return new $className($parent, $attributes, $table, $exists);
     }
 
     /**
@@ -1864,9 +1868,13 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getTable()
     {
-        if (isset($this->table)) return $this->table;
+        if (isset($this->table)) {
+            return $this->table;
+        }
 
-        return str_replace('\\', '', snake_case(str_plural(class_basename($this))));
+        $name = class_basename($this);
+
+        return str_replace('\\', '', Str::snake(Str::plural($name)));
     }
 
     /**
@@ -1887,7 +1895,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getKey()
     {
-        return $this->getAttribute($this->getKeyName());
+        $key = $this->getKeyName();
+
+        return $this->getAttribute($key);
     }
 
     /**
@@ -1928,7 +1938,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getQualifiedKeyName()
     {
-        return $this->getTable().'.'.$this->getKeyName();
+        return $this->getTable() .'.' .$this->getKeyName();
     }
 
     /**
@@ -1951,9 +1961,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function getMorphs($name, $type, $id)
     {
-        $type = $type ?: $name.'_type';
+        $type = $type ?: $name .'_type';
 
-        $id = $id ?: $name.'_id';
+        $id = $id ?: $name .'_id';
 
         return array($type, $id);
     }
@@ -1996,7 +2006,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getForeignKey()
     {
-        return snake_case(class_basename($this)).'_id';
+        $name = class_basename($this);
+
+        return sprintf('%s_id', Str::snake($name));
     }
 
     /**
@@ -2149,16 +2161,20 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function isFillable($key)
     {
-        if (static::$unguarded) return true;
+        if (static::$unguarded) {
+            return true;
+        }
 
         // If the key is in the "fillable" array, we can of course assume that it's
         // a fillable attribute. Otherwise, we will check the guarded array when
         // we need to determine if the attribute is black-listed on the model.
-        if (in_array($key, $this->fillable)) return true;
+        else if (in_array($key, $this->fillable)) {
+            return true;
+        } else if ($this->isGuarded($key)) {
+            return false;
+        }
 
-        if ($this->isGuarded($key)) return false;
-
-        return empty($this->fillable) && ! starts_with($key, '_');
+        return empty($this->fillable) && ! Str::startsWith($key, '_');
     }
 
     /**
@@ -2169,7 +2185,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function isGuarded($key)
     {
-        return in_array($key, $this->guarded) || $this->guarded == array('*');
+        return in_array($key, $this->guarded) || ($this->guarded == array('*'));
     }
 
     /**
@@ -2179,7 +2195,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function totallyGuarded()
     {
-        return count($this->fillable) == 0 && $this->guarded == array('*');
+        return (count($this->fillable) == 0) && ($this->guarded == array('*'));
     }
 
     /**
@@ -2190,7 +2206,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function removeTableFromKey($key)
     {
-        if (! str_contains($key, '.')) return $key;
+        if (! Str::contains($key, '.')) {
+            return $key;
+        }
 
         return last(explode('.', $key));
     }
@@ -2283,7 +2301,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // to a DateTime / Carbon instance. This is so we will get some consistent
         // formatting while accessing attributes vs. arraying / JSONing a model.
         foreach ($this->getDates() as $key) {
-            if (! isset($attributes[$key])) continue;
+            if (! isset($attributes[$key])) {
+                continue;
+            }
 
             $attributes[$key] = (string) $this->asDateTime($attributes[$key]);
         }
@@ -2292,11 +2312,11 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // the mutator for the attribute. We cache off every mutated attributes so
         // we don't have to constantly check on attributes that actually change.
         foreach ($this->getMutatedAttributes() as $key) {
-            if (! array_key_exists($key, $attributes)) continue;
+            if (! array_key_exists($key, $attributes)) {
+                continue;
+            }
 
-            $attributes[$key] = $this->mutateAttributeForArray(
-                $key, $attributes[$key]
-            );
+            $attributes[$key] = $this->mutateAttributeForArray($key, $attributes[$key]);
         }
 
         // Here we will grab all of the appended, calculated attributes to this model
@@ -2326,7 +2346,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function getArrayableAppends()
     {
-        if (! count($this->appends)) return array();
+        if (! count($this->appends)) {
+            return array();
+        }
 
         return $this->getArrayableItems(
             array_combine($this->appends, $this->appends)
@@ -2343,7 +2365,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         $attributes = array();
 
         foreach ($this->getArrayableRelations() as $key => $value) {
-            if (in_array($key, $this->hidden)) continue;
+            if (in_array($key, $this->hidden)) {
+                continue;
+            }
 
             // If the values implements the Arrayable interface we can just call this
             // toArray method on the instances which will convert both models and
@@ -2363,7 +2387,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
             // key so that the relation attribute is snake cased in this returned
             // array to the developers, making this consistent with attributes.
             if (static::$snakeAttributes) {
-                $key = snake_case($key);
+                $key = Str::snake($key);
             }
 
             // If the relation value has been set, we will set it on this attributes
@@ -2412,26 +2436,24 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function getAttribute($key)
     {
-        $inAttributes = array_key_exists($key, $this->attributes);
-
         // If the key references an attribute, we can just go ahead and return the
         // plain attribute value from the model. This allows every attribute to
         // be dynamically accessed through the _get method without accessors.
-        if ($inAttributes || $this->hasGetMutator($key)) {
+        if (array_key_exists($key, $this->attributes) || $this->hasGetMutator($key)) {
             return $this->getAttributeValue($key);
         }
 
         // If the key already exists in the relationships array, it just means the
         // relationship has already been loaded, so we'll just return it out of
         // here because there is no need to query within the relations twice.
-        if (array_key_exists($key, $this->relations)) {
+        else if (array_key_exists($key, $this->relations)) {
             return $this->relations[$key];
         }
 
         // If the "attribute" exists as a method on the model, we will just assume
         // it is a relationship and will load and return results from the query
         // and hydrate the relationship's value on the "relationships" array.
-        $camelKey = camel_case($key);
+        $camelKey = Str::camel($key);
 
         if (method_exists($this, $camelKey)) {
             return $this->getRelationshipFromMethod($key, $camelKey);
@@ -2458,8 +2480,8 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // If the attribute is listed as a date, we will convert it to a DateTime
         // instance on retrieval, which makes it quite convenient to work with
         // date fields without having to create a mutator for each property.
-        else if (in_array($key, $this->getDates())) {
-            if ($value) return $this->asDateTime($value);
+        else if (in_array($key, $this->getDates()) && ! empty($value)) {
+            return $this->asDateTime($value);
         }
 
         return $value;
@@ -2489,13 +2511,13 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function getRelationshipFromMethod($key, $camelKey)
     {
-        $relations = $this->$camelKey();
+        $relation = call_user_func(array($this, $camelKey));
 
-        if (! $relations instanceof Relation) {
-            throw new LogicException('Relationship method must return an object of type Nova\Database\ORM\Relations\Relation');
+        if (! $relation instanceof Relation) {
+            throw new LogicException('Relationship method must return an object of type [Nova\Database\ORM\Relations\Relation]');
         }
 
-        return $this->relations[$key] = $relations->getResults();
+        return $this->relations[$key] = $relation->getResults();
     }
 
     /**
@@ -2506,7 +2528,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function hasGetMutator($key)
     {
-        return method_exists($this, 'get'.studly_case($key).'Attribute');
+        $method = 'get' .Str::studly($key) .'Attribute';
+
+        return method_exists($this, $method);
     }
 
     /**
@@ -2518,7 +2542,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function mutateAttribute($key, $value)
     {
-        return $this->{'get'.studly_case($key).'Attribute'}($value);
+        $method = 'get' .Str::studly($key) .'Attribute';
+
+        return call_user_func(array($this, $method), $value);
     }
 
     /**
@@ -2532,7 +2558,11 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         $value = $this->mutateAttribute($key, $value);
 
-        return $value instanceof ArrayableInterface ? $value->toArray() : $value;
+        if ($value instanceof ArrayableInterface) {
+            return $value->toArray();
+        }
+
+        return $value;
     }
 
     /**
@@ -2548,9 +2578,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         // which simply lets the developers tweak the attribute as it is set on
         // the model, such as "json_encoding" an listing of data for storage.
         if ($this->hasSetMutator($key)) {
-            $method = 'set'.studly_case($key).'Attribute';
+            $method = 'set' .Str::studly($key) .'Attribute';
 
-            return $this->{$method}($value);
+            return call_user_func(array($this, $method), $value);
         }
 
         // If an attribute is listed as a "date", we'll convert it from a DateTime
@@ -2571,7 +2601,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function hasSetMutator($key)
     {
-        return method_exists($this, 'set'.studly_case($key).'Attribute');
+        $method = 'set' .Str::studly($key) .'Attribute';
+
+        return method_exists($this, $method);
     }
 
     /**

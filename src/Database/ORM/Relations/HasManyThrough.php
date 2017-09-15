@@ -44,7 +44,7 @@ class HasManyThrough extends Relation
      */
     public function __construct(Builder $query, Model $farParent, Model $parent, $firstKey, $secondKey)
     {
-        $this->firstKey = $firstKey;
+        $this->firstKey  = $firstKey;
         $this->secondKey = $secondKey;
         $this->farParent = $farParent;
 
