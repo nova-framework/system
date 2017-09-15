@@ -1,12 +1,11 @@
 <?php
 
-namespace Nova\Database\Console;
+namespace Nova\Database\Console\Seeds;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Database\ConnectionResolverInterface as Resolver;
-
 use Symfony\Component\Console\Input\InputOption;
+use Nova\Database\ConnectionResolverInterface as Resolver;
 
 
 class SeedCommand extends Command
@@ -54,7 +53,9 @@ class SeedCommand extends Command
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) return;
+        if (! $this->confirmToProceed()) {
+            return;
+        }
 
         $this->resolver->setDefaultConnection($this->getDatabase());
 
@@ -94,9 +95,10 @@ class SeedCommand extends Command
     {
         return array(
             array('class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', 'DatabaseSeeder'),
+
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed'),
+
             array('force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'),
         );
     }
-
 }
