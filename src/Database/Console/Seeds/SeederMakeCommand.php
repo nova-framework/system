@@ -75,24 +75,13 @@ class SeederMakeCommand extends GeneratorCommand
     }
 
     /**
-     * Get the destination class path.
+     * Get the default namespace for the class.
      *
-     * @param  string  $name
+     * @param  string  $rootNamespace
      * @return string
      */
-    protected function getPath($name)
+    protected function getDefaultNamespace($rootNamespace)
     {
-        return  $this->nova['path'] .DS .'Database' .DS .'Seeds' .DS .$name .'.php';
-    }
-
-    /**
-     * Parse the name and format according to the root namespace.
-     *
-     * @param  string  $name
-     * @return string
-     */
-    protected function parseName($name)
-    {
-        return $name;
+        return $rootNamespace .'\Database\Seeds';
     }
 }
