@@ -47,11 +47,11 @@ class KeyGenerateCommand extends Command
 
         $key = $this->getRandomKey();
 
-        $contents = str_replace($this->nova['config']['app.key'], $key, $contents);
+        $contents = str_replace($this->container['config']['app.key'], $key, $contents);
 
         $this->files->put($path, $contents);
 
-        $this->nova['config']['app.key'] = $key;
+        $this->container['config']['app.key'] = $key;
 
         $this->info("Application key [$key] set successfully.");
     }
@@ -63,7 +63,7 @@ class KeyGenerateCommand extends Command
      */
     protected function getKeyFile()
     {
-        $path = $this->nova['path'] .DS .'Config' .DS .'App.php';
+        $path = $this->container['path'] .DS .'Config' .DS .'App.php';
 
         $contents = $this->files->get($path);
 

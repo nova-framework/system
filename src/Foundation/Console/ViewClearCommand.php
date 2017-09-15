@@ -54,7 +54,7 @@ class ViewClearCommand extends Command
      */
     public function fire()
     {
-        $path = $this->nova['config']->get('view.compiled');
+        $path = $this->container['config']->get('view.compiled');
 
         if (! $this->files->exists($path)) {
             throw new RuntimeException('View path not found.');

@@ -90,7 +90,7 @@ class ControllerMakeCommand extends Command
     protected function getPath()
     {
         if (! is_null($this->input->getOption('path'))) {
-            return $this->nova['path.base'] .DS .$this->input->getOption('path');
+            return $this->container['path.base'] .DS .$this->input->getOption('path');
         }
 
         return $this->path;

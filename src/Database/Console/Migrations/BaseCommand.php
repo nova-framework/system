@@ -21,9 +21,9 @@ class BaseCommand extends Command
         // we will use the path relative to the root of this installation folder
         // so that migrations may be run for any path within the applications.
         if (! is_null($path)) {
-            return $this->nova['path.base'] .DS .$path;
+            return $this->container['path.base'] .DS .$path;
         }
 
-        return $this->nova['path'] .DS .'Database' .DS .'Migrations';
+        return $this->container['path'] .DS .'Database' .DS .'Migrations';
     }
 }

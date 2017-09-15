@@ -28,7 +28,7 @@ class UpCommand extends Command
      */
     public function fire()
     {
-        $basePath = $this->nova['path.storage'];
+        $basePath = $this->container['path.storage'];
 
         @unlink($basePath .DS .'down');
 

@@ -67,9 +67,9 @@ class SessionTableCommand extends Command
     {
         $name = 'create_session_table';
 
-        $path = $this->nova['path'] .DS .'Database' .DS .'Migrations';
+        $path = $this->container['path'] .DS .'Database' .DS .'Migrations';
 
-        return $this->nova['migration.creator']->create($name, $path);
+        return $this->container['migration.creator']->create($name, $path);
     }
 
 }

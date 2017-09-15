@@ -25,7 +25,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var \Nova\Foundation\Application
      */
-    protected $nova;
+    protected $container;
 
     /**
      * Create and boot a new Console application.
@@ -65,7 +65,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        $path = $this->nova['path'] .DS .'Boot' .DS .'Forge.php';
+        $path = $this->container['path'] .DS .'Boot' .DS .'Forge.php';
 
         if (file_exists($path)) {
             require $path;
@@ -74,8 +74,8 @@ class Application extends \Symfony\Component\Console\Application
         // If the event dispatcher is set on the application, we will fire an event
         // with the Nova instance to provide each listener the opportunity to
         // register their commands on this application before it gets started.
-        if (isset($this->nova['events'])) {
-            $events = $this->nova['events'];
+        if (isset($this->container['events'])) {
+            $events = $this->container['events'];
 
             $events->fire('forge.start', array($this));
         }
@@ -114,7 +114,7 @@ class Application extends \Symfony\Component\Console\Application
     public function add(SymfonyCommand $command)
     {
         if ($command instanceof Command) {
-            $command->setNova($this->nova);
+            $command->setNova($this->container);
         }
 
         return $this->addToParent($command);
@@ -139,7 +139,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function resolve($command)
     {
-        return $this->add($this->nova[$command]);
+        return $this->add($this->container[$command]);
     }
 
     /**
@@ -223,7 +223,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function setNova($nova)
     {
-        $this->nova = $nova;
+        $this->container = $nova;
 
         return $this;
     }

@@ -17,7 +17,7 @@ trait MigrationTrait
         $path = $this->getMigrationPath($module);
 
         //
-        $files = $this->nova['files'];
+        $files = $this->container['files'];
 
         $migrations = $files->glob($path.'*_*.php');
 
@@ -36,7 +36,7 @@ trait MigrationTrait
      */
     protected function getMigrationPath($slug)
     {
-        $modules = $this->nova['modules'];
+        $modules = $this->container['modules'];
 
         if (! $modules->exists($slug)) {
             throw new InvalidArgumentException('Module does not exists.');

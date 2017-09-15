@@ -68,10 +68,10 @@ class MakeProviderCommand extends MakeCommand
      */
     protected function resolveByPath($filePath)
     {
-        $this->container['filename']  = $this->makeFileName($filePath);
-        $this->container['namespace'] = $this->getNamespace($filePath);
-        $this->container['path']      = $this->getBaseNamespace();
-        $this->container['className'] = basename($filePath);
+        $this->data['filename']  = $this->makeFileName($filePath);
+        $this->data['namespace'] = $this->getNamespace($filePath);
+        $this->data['path']      = $this->getBaseNamespace();
+        $this->data['className'] = basename($filePath);
     }
 
     /**
@@ -89,10 +89,10 @@ class MakeProviderCommand extends MakeCommand
         );
 
         $replaces = array(
-            $this->container['filename'],
-            $this->container['path'],
-            $this->container['namespace'],
-            $this->container['className'],
+            $this->data['filename'],
+            $this->data['path'],
+            $this->data['namespace'],
+            $this->data['className'],
         );
 
         return str_replace($searches, $replaces, $content);

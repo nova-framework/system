@@ -19,7 +19,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      *
      * @var \Nova\Foundation\Application
      */
-    protected $nova;
+    protected $container;
 
     /**
      * The input interface implementation.
@@ -372,7 +372,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function getNova()
     {
-        return $this->nova;
+        return $this->container;
     }
 
     /**
@@ -383,7 +383,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     public function setNova($nova)
     {
-        $this->nova = $nova;
+        $this->container = $nova;
     }
 
 }

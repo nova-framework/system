@@ -91,9 +91,9 @@ abstract class GeneratorCommand extends Command
      */
     protected function getPath($name)
     {
-        $name = str_replace($this->nova->getNamespace(), '', $name);
+        $name = str_replace($this->container->getNamespace(), '', $name);
 
-        return $this->nova['path'] .DS .str_replace('\\', DS, $name) .'.php';
+        return $this->container['path'] .DS .str_replace('\\', DS, $name) .'.php';
     }
 
     /**
@@ -104,7 +104,7 @@ abstract class GeneratorCommand extends Command
      */
     protected function parseName($name)
     {
-        $rootNamespace = $this->nova->getNamespace();
+        $rootNamespace = $this->container->getNamespace();
 
         if (Str::startsWith($name, $rootNamespace)) {
             return $name;
@@ -165,7 +165,7 @@ abstract class GeneratorCommand extends Command
     {
         $stub = str_replace('{{namespace}}', $this->getNamespace($name), $stub);
 
-        $stub = str_replace('{{rootNamespace}}', $this->nova->getNamespace(), $stub);
+        $stub = str_replace('{{rootNamespace}}', $this->container->getNamespace(), $stub);
 
         return $this;
     }

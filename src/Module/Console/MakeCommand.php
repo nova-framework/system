@@ -71,7 +71,7 @@ class MakeCommand extends CommandGenerator
      *
      * @var array
      */
-    protected $container;
+    protected $data;
 
     /**
      * String to store the command type.
@@ -110,13 +110,13 @@ class MakeCommand extends CommandGenerator
 
             $this->moduleInfo = collect($this->modules->where('slug', $slug));
 
-            $this->container['slug'] = $slug;
-            $this->container['name'] = $name;
+            $this->data['slug'] = $slug;
+            $this->data['name'] = $name;
 
             return $this->generate();
         }
 
-        return $this->error('Module '.$this->container['slug'].' does not exist.');
+        return $this->error('Module '.$this->data['slug'].' does not exist.');
     }
 
     /**
@@ -127,7 +127,7 @@ class MakeCommand extends CommandGenerator
     protected function generate()
     {
         foreach ($this->listFiles as $key => $file) {
-            $filePath = $this->makeFilePath($this->listFolders[$key], $this->container['name']);
+            $filePath = $this->makeFilePath($this->listFolders[$key], $this->data['name']);
 
             $this->resolveByPath($filePath);
 

@@ -28,7 +28,7 @@ class ClearCompiledCommand extends Command
      */
     public function fire()
     {
-        $config = $this->nova['config'];
+        $config = $this->container['config'];
 
         if (file_exists($path = $config->get('app.manifest') .DS .'services.php')) {
             @unlink($path);

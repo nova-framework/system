@@ -136,13 +136,13 @@ class MakeModuleCommand extends Command
             $slug = Str::lower($slug);
         }
 
-        $this->container['slug'] = $slug;
+        $this->data['slug'] = $slug;
 
         //
         $name = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
-        $this->container['name']      = $name;
-        $this->container['namespace'] = $name;
+        $this->data['name']      = $name;
+        $this->data['namespace'] = $name;
 
         if ($this->option('quick')) {
             return $this->generate();
@@ -159,13 +159,13 @@ class MakeModuleCommand extends Command
      */
     private function stepOne()
     {
-        $this->container['name'] = $this->ask('Please enter the name of the module:', $this->container['name']);
-        $this->container['slug'] = $this->ask('Please enter the slug for the module:', $this->container['slug']);
+        $this->data['name'] = $this->ask('Please enter the name of the module:', $this->data['name']);
+        $this->data['slug'] = $this->ask('Please enter the slug for the module:', $this->data['slug']);
 
         $this->comment('You have provided the following manifest information:');
 
-        $this->comment('Name:        '.$this->container['name']);
-        $this->comment('Slug:        '.$this->container['slug']);
+        $this->comment('Name:        '.$this->data['name']);
+        $this->comment('Slug:        '.$this->data['slug']);
 
         if ($this->confirm('Do you wish to continue?')) {
             $this->generate();
@@ -210,7 +210,7 @@ class MakeModuleCommand extends Command
      */
     protected function generateFolders()
     {
-        $slug = $this->container['slug'];
+        $slug = $this->data['slug'];
 
         //
         $path = $this->modules->getPath();
@@ -255,7 +255,7 @@ class MakeModuleCommand extends Command
         }
 
         // Generate the Language files
-        $slug = $this->container['slug'];
+        $slug = $this->data['slug'];
 
         $modulePath = $this->getModulePath($slug);
 
@@ -278,7 +278,7 @@ return array (
      */
     protected function generateGitkeep()
     {
-        $slug = $this->container['slug'];
+        $slug = $this->data['slug'];
 
         $modulePath = $this->getModulePath($slug);
 
@@ -324,7 +324,7 @@ return array (
     {
         $paths = array();
 
-        $languages = $this->nova['config']['languages'];
+        $languages = $this->container['config']['languages'];
 
         foreach (array_keys($languages) as $code) {
             $paths[] = 'Language' .DS .strtoupper($code);
@@ -342,7 +342,7 @@ return array (
      */
     protected function getDestinationFile($file)
     {
-        return $this->getModulePath($this->container['slug']) .$this->formatContent($file);
+        return $this->getModulePath($this->data['slug']) .$this->formatContent($file);
     }
 
     /**
@@ -378,9 +378,9 @@ return array (
         );
 
         $replaces = array(
-            $this->container['slug'],
-            $this->container['name'],
-            $this->container['namespace'],
+            $this->data['slug'],
+            $this->data['name'],
+            $this->data['namespace'],
             $this->modules->getNamespace(),
         );
 

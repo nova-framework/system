@@ -69,9 +69,9 @@ class SeedCommand extends Command
      */
     protected function getSeeder()
     {
-        $class = $this->nova->make($this->input->getOption('class'));
+        $class = $this->container->make($this->input->getOption('class'));
 
-        return $class->setContainer($this->nova)->setCommand($this);
+        return $class->setContainer($this->container)->setCommand($this);
     }
 
     /**
@@ -83,7 +83,7 @@ class SeedCommand extends Command
     {
         $database = $this->input->getOption('database');
 
-        return $database ?: $this->nova['config']['database.default'];
+        return $database ?: $this->container['config']['database.default'];
     }
 
     /**

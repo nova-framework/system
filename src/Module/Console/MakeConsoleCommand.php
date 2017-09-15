@@ -69,13 +69,13 @@ class MakeConsoleCommand extends MakeCommand
      */
     protected function resolveByPath($filePath)
     {
-        $this->container['filename']  = $this->makeFileName($filePath);
-        $this->container['namespace'] = $this->getNamespace($filePath);
-        $this->container['path']      = $this->getBaseNamespace();
-        $this->container['className'] = basename($filePath);
+        $this->data['filename']  = $this->makeFileName($filePath);
+        $this->data['namespace'] = $this->getNamespace($filePath);
+        $this->data['path']      = $this->getBaseNamespace();
+        $this->data['className'] = basename($filePath);
 
         //
-        $this->container['command'] = $this->option('command');
+        $this->data['command'] = $this->option('command');
     }
 
     /**
@@ -94,11 +94,11 @@ class MakeConsoleCommand extends MakeCommand
         );
 
         $replaces = array(
-            $this->container['filename'],
-            $this->container['path'],
-            $this->container['namespace'],
-            $this->container['className'],
-            $this->container['command'],
+            $this->data['filename'],
+            $this->data['path'],
+            $this->data['namespace'],
+            $this->data['className'],
+            $this->data['command'],
         );
 
         return str_replace($searches, $replaces, $content);

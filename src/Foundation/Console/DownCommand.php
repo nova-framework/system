@@ -28,7 +28,7 @@ class DownCommand extends Command
      */
     public function fire()
     {
-        $basePath = $this->nova['path.storage'];
+        $basePath = $this->container['path.storage'];
 
         touch($basePath .DS .'down');
 

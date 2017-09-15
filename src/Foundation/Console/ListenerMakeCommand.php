@@ -59,7 +59,7 @@ class ListenerMakeCommand extends GeneratorCommand
         $event = $this->option('event');
 
         //
-        $namespace = $this->nova->getNamespace();
+        $namespace = $this->container->getNamespace();
 
         if (! Str::startsWith($event, $namespace)) {
             $event = $namespace .'Events\\' .$event;

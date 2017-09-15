@@ -86,15 +86,15 @@ class MakeMigrationCommand extends MakeCommand
      */
     protected function resolveByPath($filePath)
     {
-        $this->container['filename']  = $this->makeFileName($filePath);
-        $this->container['namespace'] = $this->getNamespace($filePath);
+        $this->data['filename']  = $this->makeFileName($filePath);
+        $this->data['namespace'] = $this->getNamespace($filePath);
 
-        $this->container['path'] = $this->getBaseNamespace();
+        $this->data['path'] = $this->getBaseNamespace();
 
-        $this->container['className'] = basename($filePath);
+        $this->data['className'] = basename($filePath);
 
         //
-        $this->container['tableName'] = 'dummy';
+        $this->data['tableName'] = 'dummy';
     }
 
     /**
@@ -137,11 +137,11 @@ class MakeMigrationCommand extends MakeCommand
         );
 
         $replaces = array(
-            $this->container['filename'],
-            $this->container['path'],
-            $this->container['namespace'],
-            $this->container['className'],
-            $this->container['tableName'],
+            $this->data['filename'],
+            $this->data['path'],
+            $this->data['namespace'],
+            $this->data['className'],
+            $this->data['tableName'],
         );
 
         return str_replace($searches, $replaces, $content);
