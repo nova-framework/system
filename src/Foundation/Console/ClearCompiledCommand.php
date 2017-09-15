@@ -28,10 +28,6 @@ class ClearCompiledCommand extends Command
      */
     public function fire()
     {
-        if (file_exists($path = $this->container['path'] .DS .'Boot' .DS .'Compiled.php')) {
-            @unlink($path);
-        }
-
         if (file_exists($path = $this->container['config']['app.manifest'] .DS .'services.php')) {
             @unlink($path);
         }
