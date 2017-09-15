@@ -21,7 +21,7 @@ class Application extends \Symfony\Component\Console\Application
     protected $exceptionHandler;
 
     /**
-     * The Laravel application instance.
+     * The Nova application instance.
      *
      * @var \Nova\Foundation\Application
      */
@@ -49,7 +49,7 @@ class Application extends \Symfony\Component\Console\Application
         $app->boot();
 
         $console = with($console = new static('Nova Framework', $app::VERSION))
-            ->setNova($app)
+            ->setContainer($app)
             ->setExceptionHandler($app['exception'])
             ->setAutoExit(false);
 
@@ -114,7 +114,7 @@ class Application extends \Symfony\Component\Console\Application
     public function add(SymfonyCommand $command)
     {
         if ($command instanceof Command) {
-            $command->setNova($this->container);
+            $command->setContainer($this->container);
         }
 
         return $this->addToParent($command);
@@ -216,12 +216,12 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
-     * Set the Laravel application instance.
+     * Set the Nova application instance.
      *
      * @param  \Nova\Foundation\Application  $nova
      * @return $this
      */
-    public function setNova($nova)
+    public function setContainer($nova)
     {
         $this->container = $nova;
 

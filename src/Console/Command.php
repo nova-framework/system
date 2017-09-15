@@ -15,7 +15,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class Command extends \Symfony\Component\Console\Command\Command
 {
     /**
-     * The Laravel application instance.
+     * The Nova application instance.
      *
      * @var \Nova\Foundation\Application
      */
@@ -366,7 +366,7 @@ class Command extends \Symfony\Component\Console\Command\Command
     }
 
     /**
-     * Get the Laravel application instance.
+     * Get the Nova application instance.
      *
      * @return \Nova\Foundation\Application
      */
@@ -376,12 +376,12 @@ class Command extends \Symfony\Component\Console\Command\Command
     }
 
     /**
-     * Set the Laravel application instance.
+     * Set the Nova application instance.
      *
      * @param  \Nova\Foundation\Application  $nova
      * @return void
      */
-    public function setNova($nova)
+    public function setContainer($nova)
     {
         $this->container = $nova;
     }
