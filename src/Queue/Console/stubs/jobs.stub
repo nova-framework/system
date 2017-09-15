@@ -13,7 +13,8 @@ class Create{{tableClassName}}Table extends Migration
      */
     public function up()
     {
-        Schema::create('{{table}}', function (Blueprint $table) {
+        Schema::create('{{table}}', function (Blueprint $table)
+        {
             $table->bigIncrements('id');
             $table->string('queue');
             $table->longText('payload');
@@ -33,6 +34,6 @@ class Create{{tableClassName}}Table extends Migration
      */
     public function down()
     {
-        Schema::drop('{{table}}');
+        Schema::dropIfExists('{{table}}');
     }
 }
