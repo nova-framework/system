@@ -142,7 +142,7 @@ class RouteListCommand extends Command
     /**
      * Get before filters.
      *
-     * @param  \Illuminate\Routing\Route  $route
+     * @param  \Nova\Routing\Route  $route
      * @return string
      */
     protected function getMiddleware($route)
@@ -176,7 +176,7 @@ class RouteListCommand extends Command
     /**
      * Get the middlewares for the given controller instance and method.
      *
-     * @param  \Illuminate\Routing\Controller  $controller
+     * @param  \Nova\Routing\Controller  $controller
      * @param  string  $method
      * @return array
      */

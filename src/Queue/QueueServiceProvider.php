@@ -185,7 +185,7 @@ class QueueServiceProvider extends ServiceProvider
     /**
      * Register the Null queue connector.
      *
-     * @param  \Illuminate\Queue\QueueManager  $manager
+     * @param  \Nova\Queue\QueueManager  $manager
      * @return void
      */
     protected function registerNullConnector($manager)

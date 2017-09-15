@@ -155,7 +155,7 @@ class Application extends SymfonyApplication
     }
 
     /**
-     * Set the Laravel application instance.
+     * Set the Nova application instance.
      *
      * @param  \Nova\Foundation\Application  $container
      * @return $this

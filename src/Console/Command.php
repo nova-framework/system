@@ -16,7 +16,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class Command extends SymfonyCommand
 {
     /**
-     * The Laravel application instance.
+     * The Nova application instance.
      *
      * @var \Nova\Container\Container
      */

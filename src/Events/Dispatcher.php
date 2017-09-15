@@ -250,7 +250,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * Broadcast the given event class.
      *
-     * @param  \Illuminate\Contracts\Broadcasting\ShouldBroadcast  $event
+     * @param  \Nova\Broadcasting\Contracts\ShouldBroadcastInterface  $event
      * @return void
      */
     protected function broadcastEvent($event)

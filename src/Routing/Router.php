@@ -600,8 +600,8 @@ class Router
     /**
      * Run the given route within a Stack "onion" instance.
      *
-     * @param  \Illuminate\Routing\Route  $route
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Nova\Routing\Route  $route
+     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
     protected function runRouteWithinStack(Route $route, Request $request)

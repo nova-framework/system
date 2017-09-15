@@ -23,7 +23,7 @@ interface KernelInterface
     public function terminate($request, $response);
 
     /**
-     * Get the Laravel application instance.
+     * Get the Nova application instance.
      *
      * @return \Nova\Foundation\Application
      */
