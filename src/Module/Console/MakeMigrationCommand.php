@@ -89,7 +89,7 @@ class MakeMigrationCommand extends MakeCommand
         $this->container['filename']  = $this->makeFileName($filePath);
         $this->container['namespace'] = $this->getNamespace($filePath);
 
-        $this->container['path']      = $this->getBaseNamespace();
+        $this->container['path'] = $this->getBaseNamespace();
 
         $this->container['className'] = basename($filePath);
 
