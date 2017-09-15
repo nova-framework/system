@@ -11,12 +11,12 @@ namespace Nova\Database;
 use Nova\Database\ORM\Model;
 use Nova\Database\ConnectionFactory;
 use Nova\Database\DatabaseManager;
-use Nova\Database\Model as BasicModel;
 use Nova\Support\ServiceProvider;
 
 
 class DatabaseServiceProvider extends ServiceProvider
 {
+
     /**
      * Bootstrap the Application events.
      *
@@ -32,9 +32,6 @@ class DatabaseServiceProvider extends ServiceProvider
         Model::setConnectionResolver($db);
 
         Model::setEventDispatcher($events);
-
-        // Setup the (basic) Model.
-        BasicModel::setConnectionResolver($db);
     }
 
     /**
@@ -54,5 +51,4 @@ class DatabaseServiceProvider extends ServiceProvider
             return new DatabaseManager($app, $app['db.factory']);
         });
     }
-
 }
