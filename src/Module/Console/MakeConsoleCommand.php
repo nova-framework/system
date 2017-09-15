@@ -72,7 +72,7 @@ class MakeConsoleCommand extends MakeCommand
         $this->container['filename']  = $this->makeFileName($filePath);
         $this->container['namespace'] = $this->getNamespace($filePath);
         $this->container['path']      = $this->getBaseNamespace();
-        $this->container['classname'] = basename($filePath);
+        $this->container['className'] = basename($filePath);
 
         //
         $this->container['command'] = $this->option('command');
@@ -89,7 +89,7 @@ class MakeConsoleCommand extends MakeCommand
             '{{filename}}',
             '{{path}}',
             '{{namespace}}',
-            '{{classname}}',
+            '{{className}}',
             '{{command}}',
         );
 
@@ -97,7 +97,7 @@ class MakeConsoleCommand extends MakeCommand
             $this->container['filename'],
             $this->container['path'],
             $this->container['namespace'],
-            $this->container['classname'],
+            $this->container['className'],
             $this->container['command'],
         );
 

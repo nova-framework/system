@@ -5,7 +5,7 @@ namespace {{path}}\{{namespace}};
 use Nova\Routing\Controller as BaseController;
 
 
-class {{classname}} extends BaseController
+class {{className}} extends BaseController
 {
     /**
      * Display a listing of the resource.

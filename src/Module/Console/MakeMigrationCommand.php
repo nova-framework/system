@@ -3,32 +3,34 @@
 namespace Nova\Module\Console;
 
 use Nova\Module\Console\MakeCommand;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeModelCommand extends MakeCommand
+class MakeMigrationCommand extends MakeCommand
 {
     /**
-     * The name of the console command.
+     * The name and signature of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:model';
+    protected $name = 'make:module:migration';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Model class';
+    protected $description = 'Create a new Module Migration file';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Model';
+    protected $type = 'Migration';
 
     /**
      * Module folders to be created.
@@ -36,7 +38,7 @@ class MakeModelCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Models/',
+        'Database/Migrations/',
     );
 
     /**
@@ -49,20 +51,36 @@ class MakeModelCommand extends MakeCommand
     );
 
     /**
+     * Module signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'create',
+        'table',
+    );
+
+    /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
-            'model.stub',
+            'migration.stub',
+        ),
+        'create' => array(
+            'migration_create.stub',
+        ),
+        'table' => array(
+            'migration_table.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $filePath
+     * @param string $FilePath
      *
      * @return array
      */
@@ -70,8 +88,37 @@ class MakeModelCommand extends MakeCommand
     {
         $this->container['filename']  = $this->makeFileName($filePath);
         $this->container['namespace'] = $this->getNamespace($filePath);
+
         $this->container['path']      = $this->getBaseNamespace();
+
         $this->container['className'] = basename($filePath);
+
+        //
+        $this->container['tableName'] = 'dummy';
+    }
+
+    /**
+     * Resolve Container after getting input option.
+     *
+     * @param string $option
+     *
+     * @return array
+     */
+    protected function resolveByOption($option)
+    {
+        $this->data['tableName'] = $option;
+    }
+
+    /**
+     * Make FileName.
+     *
+     * @param string $filePath
+     *
+     * @return string
+     */
+    protected function makeFileName($filePath)
+    {
+        return date('Y_m_d_His') .'_' .strtolower(Str::snake(basename($filePath)));
     }
 
     /**
@@ -86,6 +133,7 @@ class MakeModelCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
+            '{{tablename}}',
         );
 
         $replaces = array(
@@ -93,11 +141,11 @@ class MakeModelCommand extends MakeCommand
             $this->container['path'],
             $this->container['namespace'],
             $this->container['className'],
+            $this->container['tableName'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
-
 
     /**
      * Get the console command arguments.
@@ -108,7 +156,20 @@ class MakeModelCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Migration.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
+            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
         );
     }
 }

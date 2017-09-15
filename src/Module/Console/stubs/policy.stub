@@ -5,7 +5,7 @@ namespace {{path}}\{{namespace}};
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 
 
-class {{classname}}
+class {{className}}
 {
     use HandlesAuthorizationTrait;
 

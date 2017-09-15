@@ -5,9 +5,11 @@ namespace Nova\Module\Providers;
 use Nova\Module\Console\MakeModuleCommand;
 use Nova\Module\Console\MakeConsoleCommand;
 use Nova\Module\Console\MakeControllerCommand;
+use Nova\Module\Console\MakeMigrationCommand;
 use Nova\Module\Console\MakeModelCommand;
 use Nova\Module\Console\MakePolicyCommand;
 use Nova\Module\Console\MakeProviderCommand;
+use Nova\Module\Console\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 
@@ -34,7 +36,16 @@ class GeneratorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $commands = array('MakeModule', 'MakeConsole', 'MakeController', 'MakeModel', 'MakePolicy', 'MakeProvider');
+        $commands = array(
+            'MakeModule',
+            'MakeConsole',
+            'MakeController',
+            'MakeModel',
+            'MakePolicy',
+            'MakeProvider',
+            'MakeMigration',
+            'MakeSeeder'
+        );
 
         foreach ($commands as $command) {
             $method = 'register' .$command .'Command';
@@ -119,5 +130,31 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module.provider');
+    }
+
+    /**
+     * Register the make:plugin:migration command.
+     */
+    private function registerMakeMigrationCommand()
+    {
+        $this->app->bindShared('command.make.plugin.migration', function ($app)
+        {
+            return new MakeMigrationCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.plugin.migration');
+    }
+
+    /**
+     * Register the make:plugin:seeder command.
+     */
+    private function registerMakeSeederCommand()
+    {
+        $this->app->bindShared('command.make.plugin.seeder', function ($app)
+        {
+            return new MakeSeederCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.plugin.seeder');
     }
 }

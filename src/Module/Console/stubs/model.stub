@@ -5,7 +5,7 @@ namespace {{path}}\{{namespace}};
 use Nova\Database\ORM\Model as BaseModel;
 
 
-class {{classname}} extends BaseModel
+class {{className}} extends BaseModel
 {
     //
 }

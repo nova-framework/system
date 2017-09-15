@@ -5,7 +5,7 @@ namespace {{path}}\{{namespace}};
 use Nova\Support\ServiceProvider;
 
 
-class {{classname}} extends ServiceProvider
+class {{className}} extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.

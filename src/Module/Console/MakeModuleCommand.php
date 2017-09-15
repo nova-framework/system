@@ -40,6 +40,9 @@ class MakeModuleCommand extends Command
         'Assets/images/',
         'Assets/js/',
         'Controllers/',
+        'Database/',
+        'Database/Migrations/',
+        'Database/Seeds/',
         'Language/',
         'Models/',
         'Policies/',
@@ -54,6 +57,7 @@ class MakeModuleCommand extends Command
      */
     protected $moduleFiles = array(
         'Config/Config.php',
+        'Database/Seeds/DatabaseSeeder.php',
         'Providers/AuthServiceProvider.php',
         'Providers/EventServiceProvider.php',
         'Providers/ModuleServiceProvider.php',
@@ -71,6 +75,7 @@ class MakeModuleCommand extends Command
      */
     protected $moduleStubs = array(
         'config',
+        'seeder',
         'auth-service-provider',
         'event-service-provider',
         'module-service-provider',
@@ -86,7 +91,7 @@ class MakeModuleCommand extends Command
      *
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * The filesystem instance.
@@ -108,12 +113,12 @@ class MakeModuleCommand extends Command
      * @param Filesystem $files
      * @param \>Nova\Module\ModuleManager    $module
      */
-    public function __construct(Filesystem $files, ModuleManager $module)
+    public function __construct(Filesystem $files, ModuleManager $modules)
     {
         parent::__construct();
 
         $this->files  = $files;
-        $this->module = $module;
+        $this->modules = $modules;
     }
 
     /**
@@ -208,7 +213,7 @@ class MakeModuleCommand extends Command
         $slug = $this->container['slug'];
 
         //
-        $path = $this->module->getPath();
+        $path = $this->modules->getPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
@@ -309,10 +314,10 @@ return array (
     protected function getModulePath($slug = null, $allowNotExists = false)
     {
         if ($slug) {
-            return $this->module->getModulePath($slug, $allowNotExists);
+            return $this->modules->getModulePath($slug, $allowNotExists);
         }
 
-        return $this->module->getPath();
+        return $this->modules->getPath();
     }
 
     protected function getLanguagePaths($slug)
@@ -376,7 +381,7 @@ return array (
             $this->container['slug'],
             $this->container['name'],
             $this->container['namespace'],
-            $this->module->getNamespace(),
+            $this->modules->getNamespace(),
         );
 
         return str_replace($searches, $replaces, $content);

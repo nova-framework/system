@@ -43,7 +43,7 @@ class MakeCommand extends CommandGenerator
      *
      * @var \Nova\Module\ModuleManager
      */
-    protected $module;
+    protected $modules;
 
     /**
      * The modules path.
@@ -84,14 +84,15 @@ class MakeCommand extends CommandGenerator
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \Nova\Module\ModuleManager    $module
+     * @param \Nova\Module\ModuleManager    $modules
      */
-    public function __construct(Filesystem $files, ModuleManager $module)
+    public function __construct(Filesystem $files, ModuleManager $modules)
     {
         parent::__construct();
 
-        $this->files  = $files;
-        $this->module = $module;
+        //
+        $this->files   = $files;
+        $this->modules = $modules;
     }
 
     /**
@@ -104,10 +105,10 @@ class MakeCommand extends CommandGenerator
         $slug = $this->parseSlug($this->argument('slug'));
         $name = $this->parseName($this->argument('name'));
 
-        if ($this->module->exists($slug)) {
-            $this->modulePath = $this->module->getPath();
+        if ($this->modules->exists($slug)) {
+            $this->modulePath = $this->modules->getPath();
 
-            $this->moduleInfo = collect($this->module->where('slug', $slug));
+            $this->moduleInfo = collect($this->modules->where('slug', $slug));
 
             $this->container['slug'] = $slug;
             $this->container['name'] = $name;
@@ -299,7 +300,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function getBaseNamespace()
     {
-        return $this->module->getNamespace();
+        return $this->modules->getNamespace();
     }
 
     /**
