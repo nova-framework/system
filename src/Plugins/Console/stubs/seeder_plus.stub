@@ -8,6 +8,7 @@ use Nova\Database\Seeder;
 
 class {{className}} extends Seeder
 {
+
     /**
      * Run the database seeds.
      *

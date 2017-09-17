@@ -6,6 +6,7 @@ use Nova\Database\Migrations\Migration;
 
 class {{class}} extends Migration
 {
+
     /**
      * Run the migrations.
      *
@@ -25,5 +26,4 @@ class {{class}} extends Migration
     {
         //
     }
-
 }
