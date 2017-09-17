@@ -5,6 +5,7 @@ namespace Nova\Routing;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Http\Response;
+use Nova\Routing\RouteDependencyResolverTrait;
 use Nova\Support\Arr;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -14,6 +15,8 @@ use Closure;
 
 class ControllerDispatcher
 {
+    use RouteDependencyResolverTrait;
+
     /**
      * The routing filterer implementation.
      *
@@ -94,7 +97,9 @@ class ControllerDispatcher
      */
     protected function call($instance, $route, $method)
     {
-        $parameters = $route->parametersWithoutNulls();
+        $parameters = $this->resolveClassMethodDependencies(
+            $route->parametersWithoutNulls(), $instance, $method
+        );
 
         return $instance->callAction($method, $parameters);
     }
