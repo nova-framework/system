@@ -5,6 +5,7 @@ namespace Nova\Routing;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Http\Response;
+use Nova\Support\Arr;
 
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -144,7 +145,13 @@ class ControllerDispatcher
      */
     protected function getAssignableAfter($filter)
     {
-        return ($filter['original'] instanceof Closure) ? $filter['filter'] : $filter['original'];
+        $original = $filter['original'];
+
+        if (! $original instanceof Closure) {
+            return $original;
+        }
+
+        return $filter['filter'];
     }
 
     /**
@@ -216,7 +223,7 @@ class ControllerDispatcher
      */
     protected function filterFailsOn($filter, $request, $method)
     {
-        $on = array_get($filter, 'options.on');
+        $on = Arr::get($filter, 'options.on');
 
         if (is_null($on)) {
             return false;
