@@ -590,9 +590,9 @@ class Router
 
         $this->events->fire('router.matched', array($route, $request));
 
-        return $this->prepareResponse(
-            $request, $this->runRouteWithinStack($route, $request)
-        );
+        $response = $this->runRouteWithinStack($route, $request);
+
+        return $this->prepareResponse($request, $response);
     }
 
     /**
