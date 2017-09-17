@@ -139,7 +139,7 @@ class Route
         $this->container = $this->container ?: new Container();
 
         try {
-            if (! is_string($this->action['uses'])) {
+            if (! $this->isControllerAction()) {
                 return $this->runCallable($request);
             }
 
@@ -152,6 +152,16 @@ class Route
         catch (HttpResponseException $e) {
             return $e->getResponse();
         }
+    }
+
+    /**
+     * Checks whether the route's action is a controller.
+     *
+     * @return bool
+     */
+    protected function isControllerAction()
+    {
+        return is_string($this->action['uses']);
     }
 
     /**
