@@ -71,6 +71,8 @@ class MakeSeederCommand extends MakeCommand
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
 
+        $this->data['path'] = $this->getBaseNamespace();
+
         $this->data['className'] = basename($filePath);
     }
 
@@ -83,12 +85,14 @@ class MakeSeederCommand extends MakeCommand
     {
         $searches = array(
             '{{filename}}',
+            '{{path}}',
             '{{namespace}}',
             '{{className}}',
         );
 
         $replaces = array(
             $this->data['filename'],
+            $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
         );
