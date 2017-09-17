@@ -15,29 +15,11 @@ class ControllerDispatcher
 {
     use RouteDependencyResolverTrait;
 
-    /**
-     * The IoC container instance.
-     *
-     * @var \Nova\Container\Container
-     */
-    protected $container;
-
-
-    /**
-     * Create a new controller dispatcher instance.
-     *
-     * @param  \Nova\Container\Container  $container
-     * @return void
-     */
-    public function __construct(Container $container = null)
-    {
-        $this->container = $container;
-    }
 
     /**
      * Dispatch a request to a given controller and method.
      *
-     * @param  \Mini\Routing\Route  $route
+     * @param  \Nova\Routing\Route  $route
      * @param  mixed  $controller
      * @param  string  $method
      * @return mixed
@@ -58,7 +40,7 @@ class ControllerDispatcher
     /**
      * Get the middleware for the controller instance.
      *
-     * @param  \Mini\Routing\Controller  $controller
+     * @param  \Nova\Routing\Controller  $controller
      * @param  string  $method
      * @return array
      */
