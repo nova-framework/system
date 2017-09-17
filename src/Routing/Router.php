@@ -8,6 +8,7 @@ use Nova\Events\Dispatcher;
 use Nova\Container\Container;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -752,7 +753,9 @@ class Router
      */
     protected function performBinding($key, $value, $route)
     {
-        return call_user_func($this->binders[$key], $value, $route);
+        $callback = $this->binders[$key];
+
+        return call_user_func($callback, $value, $route);
     }
 
     /**
@@ -866,22 +869,22 @@ class Router
      * Register a model binder for a wildcard.
      *
      * @param  string  $key
-     * @param  string  $class
+     * @param  string  $className
      * @param  \Closure  $callback
      * @return void
      *
      * @throws NotFoundHttpException
      */
-    public function model($key, $class, Closure $callback = null)
+    public function model($key, $className, Closure $callback = null)
     {
-        $this->bind($key, function($value) use ($class, $callback)
+        $this->bind($key, function ($value) use ($className, $callback)
         {
             if (is_null($value)) return null;
 
             // For model binders, we will attempt to retrieve the models using the find
             // method on the model instance. If we cannot retrieve the models we'll
             // throw a not found exception otherwise we will return the instance.
-            if ($model = (new $class)->find($value)) {
+            if ($model = with(new $className)->find($value)) {
                 return $model;
             }
 
@@ -919,18 +922,16 @@ class Router
      */
     public function createClassBinding($binding)
     {
-        return function($value, $route) use ($binding)
+        return function ($value, $route) use ($binding)
         {
             // If the binding has an @ sign, we will assume it's being used to delimit
             // the class name from the bind method name. This allows for bindings
             // to run multiple bind methods in a single class for convenience.
-            $segments = explode('@', $binding);
+            list($className, $method) = array_pad(explode('@', $binding, 2), 2, 'bind');
 
-            $method = count($segments) == 2 ? $segments[1] : 'bind';
+            $instance = $this->container->make($className);
 
-            $callable = array($this->container->make($segments[0]), $method);
-
-            return call_user_func($callable, $value, $route);
+            return call_user_func(array($instance, $method), $value, $route);
         };
     }
 
@@ -1056,8 +1057,10 @@ class Router
      */
     public function is()
     {
-        foreach (func_get_args() as $pattern) {
-            if (str_is($pattern, $this->currentRouteName())) {
+        $patterns = func_get_args();
+
+        foreach ($patterns as $pattern) {
+            if (Str::is($pattern, $this->currentRouteName())) {
                 return true;
             }
         }
@@ -1098,8 +1101,10 @@ class Router
      */
     public function uses()
     {
-        foreach (func_get_args() as $pattern) {
-            if (str_is($pattern, $this->currentRouteAction())) {
+        $patterns = func_get_args();
+
+        foreach ($patterns as $pattern) {
+            if (Str::is($pattern, $this->currentRouteAction())) {
                 return true;
             }
         }
