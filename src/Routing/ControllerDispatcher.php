@@ -22,10 +22,10 @@ class ControllerDispatcher
      */
     protected $container;
 
+
     /**
      * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\Router $router
      * @param  \Nova\Container\Container  $container
      * @return void
      */
