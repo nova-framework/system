@@ -277,16 +277,16 @@ class Route
      */
     protected function compileRoute()
     {
-        $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
-
         $optionals = $this->extractOptionalParameters();
+
+        $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
 
         $domain = $this->domain() ?: '';
 
-        // Create a Symfony Route instance.
-        $route = new SymfonyRoute($uri, $optionals, $this->wheres, array(), $domain);
+        $this->compiled = with(
+            new SymfonyRoute($uri, $optionals, $this->wheres, array(), $domain)
 
-        $this->compiled = $route->compile();
+        )->compile();
     }
 
     /**
