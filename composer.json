@@ -49,6 +49,9 @@
         "mockery/mockery": "~0.9",
         "phpunit/phpunit": "~4.0"
     },
+    "suggest": {
+        "doctrine/dbal": "Allow renaming columns and dropping SQLite columns."
+    },
     "autoload": {
         "classmap": [
             "src/Queue/QueueClosure.php"
@@ -59,9 +62,6 @@
         "files": [
             "src/Support/helpers.php"
         ]
-    },
-    "suggest": {
-        "doctrine/dbal": "Allow renaming columns and dropping SQLite columns."
     },
     "prefer-stable": true,
     "minimum-stability": "dev"
