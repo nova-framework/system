@@ -567,9 +567,7 @@ class Router
 
         $response = $this->dispatchToRoute($request);
 
-        $response = $this->prepareResponse($request, $response);
-
-        return $response;
+        return $this->prepareResponse($request, $response);
     }
 
     /**
@@ -592,9 +590,9 @@ class Router
 
         $this->events->fire('router.matched', array($route, $request));
 
-        $response = $this->runRouteWithinStack($route, $request);
-
-        return $this->prepareResponse($request, $response);
+        return $this->prepareResponse(
+            $request, $this->runRouteWithinStack($route, $request)
+        );
     }
 
     /**
@@ -616,7 +614,9 @@ class Router
 
         return $pipeline->send($request)->through($middleware)->then(function ($request) use ($route)
         {
-            return $this->prepareResponse($request, $route->run($request));
+            return $this->prepareResponse(
+                $request, $route->run($request)
+            );
         });
     }
 
