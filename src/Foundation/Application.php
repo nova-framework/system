@@ -604,8 +604,7 @@ class Application extends Container
      */
     public function shouldSkipMiddleware()
     {
-        return $this->bound('middleware.disable') &&
-               ($this->make('middleware.disable') === true);
+        return $this->bound('middleware.disable') && ($this->make('middleware.disable') === true);
     }
 
     /**

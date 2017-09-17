@@ -458,8 +458,7 @@ class Router
      */
     protected function newRoute($methods, $uri, $action)
     {
-        return with(new Route($methods, $uri, $action))
-            ->setContainer($this->container);
+        return with(new Route($methods, $uri, $action))->setContainer($this->container);
     }
 
     /**
@@ -607,19 +606,20 @@ class Router
      */
     protected function runRouteWithinStack(Route $route, Request $request)
     {
-        $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
-                                ($this->container->make('middleware.disable') === true);
-
-        $middleware = $shouldSkipMiddleware ? array() : $this->gatherRouteMiddleware($route);
+        if (! $this->container->shouldSkipMiddleware()) {
+            $middleware = $this->gatherRouteMiddleware($route);
+        } else {
+            $middleware = array();
+        }
 
         // Create a Pipeline instance.
         $pipeline = new Pipeline($this->container);
 
         return $pipeline->send($request)->through($middleware)->then(function ($request) use ($route)
         {
-            return $this->prepareResponse(
-                $request, $route->run()
-            );
+            $response = $route->run($request);
+
+            return $this->prepareResponse($request, $response);
         });
     }
 
@@ -1162,5 +1162,4 @@ class Router
     {
         return $this->patterns;
     }
-
 }
