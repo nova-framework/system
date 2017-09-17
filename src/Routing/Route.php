@@ -148,7 +148,9 @@ class Route
      */
     public function run()
     {
-        $this->container = $this->container ?: new Container();
+        if (! isset($this->container)) {
+            $this->container = new Container();
+        }
 
         try {
             if ($this->isControllerAction()) {
