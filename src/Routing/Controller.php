@@ -37,6 +37,18 @@ abstract class Controller
 
 
     /**
+     * Execute an action on the controller.
+     *
+     * @param string  $method
+     * @param array   $params
+     * @return mixed
+     */
+    public function callAction($method, $parameters)
+    {
+        return call_user_func_array(array($this, $method), $parameters);
+    }
+
+    /**
      * Register a "before" filter on the controller.
      *
      * @param  \Closure|string  $filter
@@ -213,19 +225,6 @@ abstract class Controller
     public static function setFilterer(RouteFiltererInterface $filterer)
     {
         static::$filterer = $filterer;
-    }
-
-
-    /**
-     * Execute an action on the controller.
-     *
-     * @param string  $method
-     * @param array   $params
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function callAction($method, $parameters)
-    {
-        return call_user_func_array(array($this, $method), $parameters);
     }
 
     /**
