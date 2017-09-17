@@ -2,8 +2,11 @@
 
 namespace Nova\Routing;
 
-use Nova\Http\Request;
 use Nova\Container\Container;
+use Nova\Http\Request;
+use Nova\Http\Response;
+
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 use Closure;
 
@@ -58,6 +61,10 @@ class ControllerDispatcher
 
         if (is_null($response)) {
             $response = $this->call($instance, $route, $method);
+        }
+
+        if (! $response instanceof SymfonyResponse) {
+            $response = new Response($response);
         }
 
         return $response;

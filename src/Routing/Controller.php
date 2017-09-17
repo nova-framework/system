@@ -2,40 +2,18 @@
 
 namespace Nova\Routing;
 
-use Nova\Http\Response;
 use Nova\Routing\Route;
 use Nova\Support\Str;
 
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use BadMethodCallException;
 use Closure;
+use BadMethodCallException;
+use InvalidArgumentException;
 
 
 abstract class Controller
 {
-    /**
-     * The currently called Method.
-     *
-     * @var mixed
-     */
-    private $method;
-
-    /**
-     * The currently call parameters.
-     *
-     * @var array
-     */
-    protected $parameters = array();
-
-    /**
-     * The currently used Layout.
-     *
-     * @var mixed
-     */
-    protected $layout;
-
     /**
      * The "before" filters registered on the controller.
      *
@@ -153,7 +131,7 @@ abstract class Controller
                 return true;
             }
 
-            throw new \InvalidArgumentException("Filter method [$filter] does not exist.");
+            throw new InvalidArgumentException("Filter method [$filter] does not exist.");
         }
 
         return false;
@@ -237,31 +215,6 @@ abstract class Controller
         static::$filterer = $filterer;
     }
 
-    /**
-     * Method executed before any action.
-     *
-     * @return void
-     */
-    protected function before()
-    {
-        //
-    }
-
-    /**
-     * Method executed after any action.
-     *
-     * @param mixed $response
-     *
-     * @return \Nova\Http\Response
-     */
-    protected function after($response)
-    {
-        if (! $response instanceof SymfonyResponse) {
-            $response = new Response($response);
-        }
-
-        return $response;
-    }
 
     /**
      * Execute an action on the controller.
@@ -272,20 +225,7 @@ abstract class Controller
      */
     public function callAction($method, $parameters)
     {
-        $this->method = $method;
-
-        $this->parameters = $parameters;
-
-        // Execute the Before method.
-        $response = $this->before();
-
-        if (is_null($response)) {
-            // Execute the requested Method.
-            $response = call_user_func_array(array($this, $method), $parameters);
-        }
-
-        // Process the Response and return it.
-        return $this->after($response);
+        return call_user_func_array(array($this, $method), $parameters);
     }
 
     /**
@@ -302,26 +242,6 @@ abstract class Controller
     }
 
     /**
-     * Returns the currently called Method.
-     *
-     * @return string|null
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
-     * Returns the currently call parameters.
-     *
-     * @return string|null
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    /**
      * Handle calls to missing methods on the Controller.
      *
      * @param  string  $method
@@ -332,7 +252,7 @@ abstract class Controller
      */
     public function __call($method, $parameters)
     {
-        throw new \BadMethodCallException("Method [$method] does not exist.");
+        throw new BadMethodCallException("Method [$method] does not exist.");
     }
 
 }
