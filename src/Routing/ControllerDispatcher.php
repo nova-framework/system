@@ -111,9 +111,7 @@ class ControllerDispatcher
     {
         foreach ($instance->getBeforeFilters() as $filter) {
             if ($this->filterApplies($filter, $request, $method)) {
-                $response = $this->callFilter($filter, $route, $request);
-
-                if (! is_null($response)) {
+                if (! is_null($response = $this->callFilter($filter, $route, $request))) {
                     return $response;
                 }
             }
