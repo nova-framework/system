@@ -194,8 +194,6 @@ class Route
      * Run the route action and return the response.
      *
      * @return mixed
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     protected function runController()
     {

@@ -118,9 +118,9 @@ class Router
 
         $this->container = $container ?: new Container;
 
-        $this->bind('_missing', function($v)
+        $this->bind('_missing', function($value)
         {
-            return explode('/', $v);
+            return explode('/', $value);
         });
     }
 
@@ -441,7 +441,7 @@ class Router
      */
     protected function findActionClosure(array $action)
     {
-        return Arr::first($action, function($key, $value)
+        return Arr::first($action, function ($key, $value)
         {
             return is_callable($value) && is_numeric($key);
         });
@@ -469,7 +469,7 @@ class Router
      */
     protected function prefix($uri)
     {
-        return trim(trim($this->getLastGroupPrefix(), '/').'/'.trim($uri, '/'), '/') ?: '/';
+        return trim(trim($this->getLastGroupPrefix(), '/') .'/' .trim($uri, '/'), '/') ?: '/';
     }
 
     /**
@@ -481,7 +481,7 @@ class Router
     protected function addWhereClausesToRoute($route)
     {
         $route->where(
-            array_merge($this->patterns, array_get($route->getAction(), 'where', []))
+            array_merge($this->patterns, Arr::get($route->getAction(), 'where', array()))
         );
 
         return $route;
@@ -552,7 +552,7 @@ class Router
     {
         $group = last($this->groupStack);
 
-        return isset($group['namespace']) ? $group['namespace'].'\\'.$uses : $uses;
+        return isset($group['namespace']) ? $group['namespace'] .'\\' .$uses : $uses;
     }
 
     /**
@@ -585,7 +585,7 @@ class Router
         // receive access to this route instance for checking of the parameters.
         $route = $this->findRoute($request);
 
-        $request->setRouteResolver(function() use ($route)
+        $request->setRouteResolver(function () use ($route)
         {
             return $route;
         });
@@ -616,9 +616,9 @@ class Router
 
         return $pipeline->send($request)->through($middleware)->then(function ($request) use ($route)
         {
-            $response = $route->run($request);
-
-            return $this->prepareResponse($request, $response);
+            return $this->prepareResponse(
+                $request, $route->run()
+            );
         });
     }
 
@@ -669,18 +669,21 @@ class Router
 
         if (is_null($parameters)) {
             return $callable;
-        } else if (is_string($callable)) {
+        }
+
+        // When the callable is a string, we add the parameters string and return it.
+        else if (is_string($callable)) {
             return $callable .':' .$parameters;
         }
 
-        // A callback with parameters; we should create a proper middleware closure for it.
-        $parameters = explode(',', $parameters);
-
+        // A callback with parameters; we create a proper middleware closure for it.
         return function ($passable, $stack) use ($callable, $parameters)
         {
-            return call_user_func_array(
-                $callable, array_merge(array($passable, $stack), $parameters)
+            $parameters = array_merge(
+                array($passable, $stack), explode(',', $parameters)
             );
+
+            return call_user_func_array($callable, $parameters);
         };
     }
 
