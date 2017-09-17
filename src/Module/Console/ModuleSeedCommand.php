@@ -94,9 +94,12 @@ class ModuleSeedCommand extends Command
      */
     protected function seed($slug)
     {
+        $namespace = $this->modules->getNamespace();
+
         $module = $this->modules->where('slug', $slug);
 
-        $className = $module['namespace'] .'\Database\Seeds\DatabaseSeeder';
+        // Calculate the Seeder class name.
+        $className = $namespace .'\\' .$module['namespace'] .'\Database\Seeds\DatabaseSeeder';
 
         if (! class_exists($className)) {
             return;
