@@ -69,9 +69,9 @@ class SeedCommand extends Command
      */
     protected function getSeeder()
     {
-        $class = $this->container->make($this->input->getOption('class'));
+        $seeder = $this->container->make($this->input->getOption('class'));
 
-        return $class->setContainer($this->container)->setCommand($this);
+        return $seeder->setContainer($this->container)->setCommand($this);
     }
 
     /**
