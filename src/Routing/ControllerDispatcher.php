@@ -113,7 +113,9 @@ class ControllerDispatcher
             if ($this->filterApplies($filter, $request, $method)) {
                 $response = $this->callFilter($filter, $route, $request);
 
-                if (! is_null($response)) return $response;
+                if (! is_null($response)) {
+                    return $response;
+                }
             }
         }
     }
@@ -178,9 +180,13 @@ class ControllerDispatcher
      */
     protected function filterFailsOnly($filter, $request, $method)
     {
-        if (! isset($filter['options']['only'])) return false;
+        $options = $filter['options'];
 
-        return ! in_array($method, (array) $filter['options']['only']);
+        if (! isset($options['only'])) {
+            return false;
+        }
+
+        return ! in_array($method, (array) $options['only']);
     }
 
     /**
@@ -193,9 +199,13 @@ class ControllerDispatcher
      */
     protected function filterFailsExcept($filter, $request, $method)
     {
-        if (! isset($filter['options']['except'])) return false;
+        $options = $filter['options'];
 
-        return in_array($method, (array) $filter['options']['except']);
+        if (! isset($options['except'])) {
+            return false;
+        }
+
+        return in_array($method, (array) $options['except']);
     }
 
     /**
@@ -210,9 +220,11 @@ class ControllerDispatcher
     {
         $on = array_get($filter, 'options.on');
 
-        if (is_null($on)) return false;
-
-        if (is_string($on)) $on = explode('|', $on);
+        if (is_null($on)) {
+            return false;
+        } else if (is_string($on)) {
+            $on = explode('|', $on);
+        }
 
         return ! in_array(strtolower($request->getMethod()), $on);
     }
