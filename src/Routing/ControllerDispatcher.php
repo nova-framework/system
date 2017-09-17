@@ -45,7 +45,7 @@ class ControllerDispatcher
     public function dispatch(Route $route, $controller, $method)
     {
         $parameters = $this->resolveClassMethodDependencies(
-            $route->parameters(), $controller, $method
+            $route->parametersWithoutNulls(), $controller, $method
         );
 
         if (method_exists($controller, 'callAction')) {

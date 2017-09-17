@@ -182,7 +182,7 @@ class Route
         $callable = $this->action['uses'];
 
         $parameters = $this->resolveMethodDependencies(
-            $this->parameters(), new ReflectionFunction($callable)
+            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
         );
 
         return call_user_func_array($callable, $parameters);
@@ -197,7 +197,9 @@ class Route
      */
     protected function runController()
     {
-        return (new ControllerDispatcher($this->container))->dispatch(
+        $dispatcher = new ControllerDispatcher($this->container);
+
+        return $dispatcher->dispatch(
             $this, $this->getController(), $this->getControllerMethod()
         );
     }
@@ -212,7 +214,7 @@ class Route
         if (! isset($this->controller)) {
             list ($controller, $this->method) = $this->parseControllerCallback();
 
-            $this->controller = $this->container->make($controller);
+            return $this->controller = $this->container->make($controller);
         }
 
         return $this->controller;
@@ -256,9 +258,13 @@ class Route
         $this->compileRoute();
 
         foreach ($this->getValidators() as $validator) {
-            if (! $includingMethod && $validator instanceof MethodValidator) continue;
+            if (! $includingMethod && ($validator instanceof MethodValidator)) {
+                continue;
+            }
 
-            if (! $validator->matches($this, $request)) return false;
+            if (! $validator->matches($this, $request)) {
+                return false;
+            }
         }
 
         return true;
@@ -271,13 +277,16 @@ class Route
      */
     protected function compileRoute()
     {
-        $optionals = $this->extractOptionalParameters();
-
         $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
 
-        $this->compiled = with(
-            new SymfonyRoute($uri, $optionals, $this->wheres, array(), $this->domain() ?: '')
-        )->compile();
+        $optionals = $this->extractOptionalParameters();
+
+        $domain = $this->domain() ?: '';
+
+        // Create a Symfony Route instance.
+        $route = new SymfonyRoute($uri, $optionals, $this->wheres, array(), $domain);
+
+        $this->compiled = $route->compile();
     }
 
     /**
@@ -289,7 +298,7 @@ class Route
     {
         preg_match_all('/\{(\w+?)\?\}/', $this->uri, $matches);
 
-        return isset($matches[1]) ? array_fill_keys($matches[1], null) : [];
+        return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
     }
 
     /**
@@ -319,19 +328,27 @@ class Route
      */
     public function middleware($middleware = null)
     {
-        $routeMiddleware = (array) Arr::get($this->action, 'middleware', array());
-
         if (is_null($middleware)) {
-            return $routeMiddleware;
+            return $this->getMiddleware();
         }
 
         if (is_string($middleware)) {
             $middleware = func_get_args();
         }
 
-        $this->action['middleware'] = array_merge($routeMiddleware, $middleware);
+        $this->action['middleware'] = array_merge($this->getMiddleware(), $middleware);
 
         return $this;
+    }
+
+    /**
+     * Get the middlewares attached to the route.
+     *
+     * @return array
+     */
+    public function getMiddleware()
+    {
+        return (array) Arr::get($this->action, 'middleware', array());
     }
 
     /**
@@ -371,7 +388,7 @@ class Route
      */
     public function parameter($name, $default = null)
     {
-        return array_get($this->parameters(), $name, $default);
+        return Arr::get($this->parameters(), $name, $default);
     }
 
     /**
@@ -410,15 +427,15 @@ class Route
      */
     public function parameters()
     {
-        if (isset($this->parameters)) {
-            return array_map(function($value)
-            {
-                return is_string($value) ? rawurldecode($value) : $value;
-
-            }, $this->parameters);
+        if (! isset($this->parameters)) {
+            throw new \LogicException("Route is not bound.");
         }
 
-        throw new \LogicException("Route is not bound.");
+        return array_map(function ($value)
+        {
+            return is_string($value) ? rawurldecode($value) : $value;
+
+        }, $this->parameters);
     }
 
     /**
@@ -428,7 +445,10 @@ class Route
      */
     public function parametersWithoutNulls()
     {
-        return array_filter($this->parameters(), function($p) { return ! is_null($p); });
+        return array_filter($this->parameters(), function ($parameter)
+        {
+            return ! is_null($parameter);
+        });
     }
 
     /**
@@ -438,7 +458,9 @@ class Route
      */
     public function parameterNames()
     {
-        if (isset($this->parameterNames)) return $this->parameterNames;
+        if (isset($this->parameterNames)) {
+            return $this->parameterNames;
+        }
 
         return $this->parameterNames = $this->compileParameterNames();
     }
@@ -450,9 +472,13 @@ class Route
      */
     protected function compileParameterNames()
     {
-        preg_match_all('/\{(.*?)\}/', $this->domain().$this->uri, $matches);
+        preg_match_all('/\{(.*?)\}/', $this->domain() .$this->uri, $matches);
 
-        return array_map(function($m) { return trim($m, '?'); }, $matches[1]);
+        return array_map(function ($match)
+        {
+            return trim($match, '?');
+
+        }, $matches[1]);
     }
 
     /**
@@ -489,9 +515,7 @@ class Route
         // compile that and get the parameter matches for this domain. We will then
         // merge them into this parameters array so that this array is completed.
         if (! is_null($this->compiled->getHostRegex())) {
-            $params = $this->bindHostParameters(
-                $request, $params
-            );
+            $params = $this->bindHostParameters($request, $params);
         }
 
         return $this->parameters = $this->replaceDefaults($params);
@@ -505,7 +529,7 @@ class Route
      */
     protected function bindPathParameters(Request $request)
     {
-        preg_match($this->compiled->getRegex(), '/'.$request->decodedPath(), $matches);
+        preg_match($this->compiled->getRegex(), '/' .$request->decodedPath(), $matches);
 
         return $matches;
     }
@@ -532,13 +556,15 @@ class Route
      */
     protected function matchToKeys(array $matches)
     {
-        if (count($this->parameterNames()) == 0) return array();
+        if (count($this->parameterNames()) == 0) {
+            return array();
+        }
 
         $parameters = array_intersect_key($matches, array_flip($this->parameterNames()));
 
-        return array_filter($parameters, function($value)
+        return array_filter($parameters, function ($value)
         {
-            return is_string($value) && strlen($value) > 0;
+            return is_string($value) && (strlen($value) > 0);
         });
     }
 
@@ -550,9 +576,8 @@ class Route
      */
     protected function replaceDefaults(array $parameters)
     {
-        foreach ($parameters as $key => &$value)
-        {
-            $value = isset($value) ? $value : array_get($this->defaults, $key);
+        foreach ($parameters as $key => &$value) {
+            $value = isset($value) ? $value : Arr::get($this->defaults, $key);
         }
 
         return $parameters;
@@ -565,7 +590,9 @@ class Route
      */
     public static function getValidators()
     {
-        if (isset(static::$validators)) return static::$validators;
+        if (isset(static::$validators)) {
+            return static::$validators;
+        }
 
         // To match the route, we will use a chain of responsibility pattern with the
         // validator implementations. We will spin through each one making sure it
@@ -643,7 +670,7 @@ class Route
      */
     public function prefix($prefix)
     {
-        $this->uri = trim($prefix, '/').'/'.trim($this->uri, '/');
+        $this->uri = trim($prefix, '/') .'/' .trim($this->uri, '/');
 
         return $this;
     }
