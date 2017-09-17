@@ -323,16 +323,6 @@ class Route
     }
 
     /**
-     * Get the middlewares attached to the route.
-     *
-     * @return array
-     */
-    public function getMiddleware()
-    {
-        return (array) Arr::get($this->action, 'middleware', array());
-    }
-
-    /**
      * Get or set the middlewares attached to the route.
      *
      * @param  array|string|null $middleware
@@ -348,9 +338,21 @@ class Route
             $middleware = func_get_args();
         }
 
-        $this->action['middleware'] = array_merge($this->getMiddleware(), $middleware);
+        $this->action['middleware'] = array_merge(
+            $this->getMiddleware(), $middleware
+        );
 
         return $this;
+    }
+
+    /**
+     * Get the middlewares attached to the route.
+     *
+     * @return array
+     */
+    public function getMiddleware()
+    {
+        return (array) Arr::get($this->action, 'middleware', array());
     }
 
     /**
@@ -558,11 +560,13 @@ class Route
      */
     protected function matchToKeys(array $matches)
     {
-        if (count($this->parameterNames()) == 0) {
+        $parameterNames = $this->parameterNames();
+
+        if (count($parameterNames) == 0) {
             return array();
         }
 
-        $parameters = array_intersect_key($matches, array_flip($this->parameterNames()));
+        $parameters = array_intersect_key($matches, array_flip($parameterNames));
 
         return array_filter($parameters, function ($value)
         {
@@ -579,7 +583,9 @@ class Route
     protected function replaceDefaults(array $parameters)
     {
         foreach ($parameters as $key => &$value) {
-            $value = isset($value) ? $value : Arr::get($this->defaults, $key);
+            if (! isset($value)) {
+                $value = Arr::get($this->defaults, $key);
+            }
         }
 
         return $parameters;
@@ -600,10 +606,10 @@ class Route
         // validator implementations. We will spin through each one making sure it
         // passes and then we will know if the route as a whole matches request.
         return static::$validators = array(
-            new MethodValidator,
-            new SchemeValidator,
-            new HostValidator,
-            new UriValidator,
+            new MethodValidator(),
+            new SchemeValidator(),
+            new HostValidator(),
+            new UriValidator(),
         );
     }
 
