@@ -323,6 +323,16 @@ class Route
     }
 
     /**
+     * Get the middlewares attached to the route.
+     *
+     * @return array
+     */
+    public function getMiddleware()
+    {
+        return (array) Arr::get($this->action, 'middleware', array());
+    }
+
+    /**
      * Get or set the middlewares attached to the route.
      *
      * @param  array|string|null $middleware
@@ -341,16 +351,6 @@ class Route
         $this->action['middleware'] = array_merge($this->getMiddleware(), $middleware);
 
         return $this;
-    }
-
-    /**
-     * Get the middlewares attached to the route.
-     *
-     * @return array
-     */
-    public function getMiddleware()
-    {
-        return (array) Arr::get($this->action, 'middleware', array());
     }
 
     /**
