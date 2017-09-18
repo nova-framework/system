@@ -876,12 +876,14 @@ class Router
     {
         $this->bind($key, function ($value) use ($className, $callback)
         {
-            if (is_null($value)) return null;
+            if (is_null($value)) {
+                return;
+            }
 
             // For model binders, we will attempt to retrieve the models using the find
             // method on the model instance. If we cannot retrieve the models we'll
             // throw a not found exception otherwise we will return the instance.
-            if ($model = with(new $className)->find($value)) {
+            if (! is_null($model = with(new $className)->find($value))) {
                 return $model;
             }
 
