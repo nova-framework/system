@@ -94,7 +94,7 @@ class ControllerDispatcher
     protected function before($instance, $route, $request, $method)
     {
         foreach ($instance->getBeforeFilters() as $filter) {
-            if ($this->methodExcludedByFilterOptions($method, $filter)) {
+            if ($this->methodExcludedByOptions($method, $filter)) {
                 continue;
             }
 
@@ -118,7 +118,7 @@ class ControllerDispatcher
     protected function assignAfter($instance, $route, $request, $method)
     {
         foreach ($instance->getAfterFilters() as $filter) {
-            if (! $this->methodExcludedByFilterOptions($method, $filter)) {
+            if (! $this->methodExcludedByOptions($method, $filter)) {
                 $filter = $filter['filter'];
 
                 $route->after($filter);
@@ -133,7 +133,7 @@ class ControllerDispatcher
      * @param  array  $filter
      * @return bool
      */
-    protected function methodExcludedByFilterOptions($method, array $filter)
+    protected function methodExcludedByOptions($method, array $filter)
     {
         $options = $filter['options'];
 
