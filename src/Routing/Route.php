@@ -16,6 +16,8 @@ use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\RouteDependencyResolverTrait;
+use Nova\Support\Arr;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route as SymfonyRoute;
@@ -379,9 +381,10 @@ class Route
      */
     public function beforeFilters()
     {
-        if (! isset($this->action['before'])) return array();
+        if (! isset($this->action['before'])) {
+            return array();
+        }
 
-        //
         $filters = $this->action['before'];
 
         return $this->parseFilters($filters);
@@ -394,9 +397,10 @@ class Route
      */
     public function afterFilters()
     {
-        if (! isset($this->action['after'])) return array();
+        if (! isset($this->action['after'])) {
+            return array();
+        }
 
-        //
         $filters = $this->action['after'];
 
         return $this->parseFilters($filters);
@@ -410,7 +414,7 @@ class Route
      */
     protected function parseFilters($filters)
     {
-        return array_build(static::explodeFilters($filters), function($key, $value)
+        return Arr::build(static::explodeFilters($filters), function ($key, $value)
         {
             return static::parseFilter($value);
         });
@@ -456,7 +460,7 @@ class Route
      */
     public static function parseFilter($filter)
     {
-        if (! str_contains($filter, ':')) {
+        if (! Str::contains($filter, ':')) {
             return array($filter, array());
         }
 
