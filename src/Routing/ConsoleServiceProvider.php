@@ -3,7 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Routing\Console\ControllerMakeCommand;
-use Nova\Routing\Generators\ControllerGenerator;
 use Nova\Support\ServiceProvider;
 
 
@@ -24,13 +23,9 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('command.controller.make', function($app)
+        $this->app->bindShared('command.controller.make', function ($app)
         {
-            $path = $app['path'] .DS .'Controllers';
-
-            $generator = new ControllerGenerator($app['files']);
-
-            return new ControllerMakeCommand($generator, $path);
+            return new ControllerMakeCommand($app['files']);
         });
 
         $this->commands('command.controller.make');
