@@ -428,21 +428,10 @@ class Route
      */
     protected static function explodeFilters($filters)
     {
-        if (is_array($filters)) {
-            return static::explodeArrayFilters($filters);
+        if (! is_array($filters)) {
+            return explode('|', $filters);
         }
 
-        return explode('|', $filters);
-    }
-
-    /**
-     * Flatten out an array of filter declarations.
-     *
-     * @param  array  $filters
-     * @return array
-     */
-    protected static function explodeArrayFilters(array $filters)
-    {
         $results = array();
 
         foreach ($filters as $filter) {
@@ -464,17 +453,6 @@ class Route
             return array($filter, array());
         }
 
-        return static::parseParameterFilter($filter);
-    }
-
-    /**
-     * Parse a filter with parameters.
-     *
-     * @param  string  $filter
-     * @return array
-     */
-    protected static function parseParameterFilter($filter)
-    {
         list($name, $parameters) = explode(':', $filter, 2);
 
         return array($name, explode(',', $parameters));
