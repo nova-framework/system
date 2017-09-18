@@ -195,7 +195,9 @@ class Route
         //
         $dispatcher = $this->container->make('routing.controller.dispatcher');
 
-        return $dispatcher->dispatch($this, $request, $controller, $method);
+        return $dispatcher->dispatch(
+            $this, $request, $this->container->make($controller), $method
+        );
     }
 
     /**
