@@ -94,7 +94,9 @@ class ControllerDispatcher
     protected function before($instance, $route, $request, $method)
     {
         foreach ($instance->getBeforeFilters() as $filter) {
-            if ($this->methodExcludedByOptions($method, $filter)) {
+            $options = $filter['options'];
+
+            if (static::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -118,27 +120,16 @@ class ControllerDispatcher
     protected function assignAfter($instance, $route, $request, $method)
     {
         foreach ($instance->getAfterFilters() as $filter) {
-            if (! $this->methodExcludedByOptions($method, $filter)) {
-                $filter = $filter['filter'];
+            $options = $filter['options'];
 
-                $route->after($filter);
+            if (static::methodExcludedByOptions($method, $options)) {
+                continue;
             }
+
+            $filter = $filter['filter'];
+
+            $route->after($filter);
         }
-    }
-
-    /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $filter
-     * @return bool
-     */
-    protected function methodExcludedByOptions($method, array $filter)
-    {
-        $options = $filter['options'];
-
-        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 
     /**
@@ -154,5 +145,18 @@ class ControllerDispatcher
         extract($filter);
 
         return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $options
+     * @return bool
+     */
+    protected static function methodExcludedByOptions($method, array $options)
+    {
+        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 }
