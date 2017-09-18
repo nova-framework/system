@@ -97,20 +97,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected $filtering = true;
 
     /**
-     * The registered pattern based filters.
-     *
-     * @var array
-     */
-    protected $patternFilters = array();
-
-    /**
-     * The registered regular expression based filters.
-     *
-     * @var array
-     */
-    protected $regexFilters = array();
-
-    /**
      * The registered route value binders.
      *
      * @var array
@@ -833,40 +819,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
-     * Register a pattern-based filter with the router.
-     *
-     * @param  string  $pattern
-     * @param  string  $name
-     * @param  array|null  $methods
-     * @return void
-     */
-    public function when($pattern, $name, $methods = null)
-    {
-        if (! is_null($methods)) {
-            $methods = array_map('strtoupper', (array) $methods);
-        }
-
-        $this->patternFilters[$pattern][] = compact('name', 'methods');
-    }
-
-    /**
-     * Register a regular expression based filter with the router.
-     *
-     * @param  string     $pattern
-     * @param  string     $name
-     * @param  array|null $methods
-     * @return void
-     */
-    public function whenRegex($pattern, $name, $methods = null)
-    {
-        if (! is_null($methods)) {
-            $methods = array_map('strtoupper', (array) $methods);
-        }
-
-        $this->regexFilters[$pattern][] = compact('name', 'methods');
-    }
-
-    /**
      * Register a Model binder for a wildcard.
      *
      * @param  string  $key
@@ -982,105 +934,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @return mixed
      */
     public function callRouteBefore($route, $request)
-    {
-        $response = $this->callPatternFilters($route, $request);
-
-        return $response ?: $this->callAttachedBefores($route, $request);
-    }
-
-    /**
-     * Call the pattern based filters for the request.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed|null
-     */
-    protected function callPatternFilters($route, $request)
-    {
-        foreach ($this->findPatternFilters($request) as $filter => $parameters) {
-            $response = $this->callRouteFilter($filter, $parameters, $route, $request);
-
-            if (! is_null($response)) {
-                return $response;
-            }
-        }
-    }
-
-    /**
-     * Find the patterned filters matching a request.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return array
-     */
-    public function findPatternFilters($request)
-    {
-        $results = array();
-
-        list($path, $method) = array($request->path(), $request->getMethod());
-
-        foreach ($this->patternFilters as $pattern => $filters) {
-            if (Str::is($pattern, $path)) {
-                $merge = $this->patternsByMethod($method, $filters);
-
-                $results = array_merge($results, $merge);
-            }
-        }
-
-        foreach ($this->regexFilters as $pattern => $filters) {
-            if (preg_match($pattern, $path)) {
-                $merge = $this->patternsByMethod($method, $filters);
-
-                $results = array_merge($results, $merge);
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Filter pattern filters that don't apply to the request verb.
-     *
-     * @param  string  $method
-     * @param  array   $filters
-     * @return array
-     */
-    protected function patternsByMethod($method, $filters)
-    {
-        $results = array();
-
-        foreach ($filters as $filter) {
-            if ($this->filterSupportsMethod($filter, $method)) {
-                $name = $filter['name'];
-
-                $results = array_merge($results, Route::parseFilters($name));
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Determine if the given pattern filters applies to a given method.
-     *
-     * @param  array  $filter
-     * @param  array  $method
-     * @return bool
-     */
-    protected function filterSupportsMethod($filter, $method)
-    {
-        $methods = $filter['methods'];
-
-        return is_null($methods) || in_array($method, $methods);
-    }
-
-    /**
-     * Call the given route's before (non-pattern) filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    protected function callAttachedBefores($route, $request)
     {
         foreach ($route->beforeFilters() as $filter => $parameters) {
             $response = $this->callRouteFilter($filter, $parameters, $route, $request);
