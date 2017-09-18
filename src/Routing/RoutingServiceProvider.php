@@ -62,7 +62,7 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerCustomDispatcher()
     {
-        $this->app->singleton('framework.route.dispatcher', function ($app)
+        $this->app->singleton('routing.controller.dispatcher', function ($app)
         {
             return new ControllerDispatcher($app['router'], $app);
         });
