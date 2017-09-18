@@ -884,7 +884,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
                 return;
             }
 
-            if ($model = with(new $className)->find($value)) {
+            if (! is_null($model = with(new $className)->find($value))) {
                 return $model;
             }
 
