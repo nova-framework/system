@@ -35,7 +35,7 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->registerRouter();
 
-        $this->registerCustomDispatcher();
+        $this->registerControllerDispatcher();
 
         $this->registerUrlGenerator();
 
@@ -60,7 +60,7 @@ class RoutingServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerCustomDispatcher()
+    protected function registerControllerDispatcher()
     {
         $this->app->singleton('routing.controller.dispatcher', function ($app)
         {
