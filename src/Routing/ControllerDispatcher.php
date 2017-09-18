@@ -83,8 +83,6 @@ class ControllerDispatcher
      */
     protected function makeController($controller)
     {
-        Controller::setFilterer($this->filterer);
-
         return $this->container->make($controller);
     }
 
@@ -117,7 +115,9 @@ class ControllerDispatcher
     protected function before($instance, $route, $request, $method)
     {
         foreach ($instance->getBeforeFilters() as $filter) {
-            if (! $this->filterApplies($filter, $request, $method)) {
+            $options = $filter['options'];
+
+            if ($this->methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -141,109 +141,27 @@ class ControllerDispatcher
     protected function assignAfter($instance, $route, $request, $method)
     {
         foreach ($instance->getAfterFilters() as $filter) {
-            if (! $this->filterApplies($filter, $request, $method)) {
-                continue;
-            }
+            $options = $filter['options'];
 
-            $route->after($this->getAssignableAfter($filter));
-        }
-    }
+            if (! $this->methodExcludedByOptions($method, $options)) {
+                $filter = $filter['filter'];
 
-    /**
-     * Get the assignable after filter for the route.
-     *
-     * @param  \Closure|string  $filter
-     * @return string
-     */
-    protected function getAssignableAfter($filter)
-    {
-        $original = $filter['original'];
-
-        if (! $original instanceof Closure) {
-            return $original;
-        }
-
-        return $filter['filter'];
-    }
-
-    /**
-     * Determine if the given filter applies to the request.
-     *
-     * @param  array  $filter
-     * @param  \Nova\Http\Request  $request
-     * @param  string  $method
-     * @return bool
-     */
-    protected function filterApplies($filter, $request, $method)
-    {
-        foreach (array('Only', 'Except', 'On') as $type) {
-            $method = "filterFails{$type}";
-
-            if (call_user_func(array($this, $method), $filter, $request, $method)) {
-                return false;
+                $route->after($filter);
             }
         }
-
-        return true;
     }
 
     /**
-     * Determine if the filter fails the "only" constraint.
+     * Determine if the given options exclude a particular method.
      *
-     * @param  array  $filter
-     * @param  \Nova\Http\Request  $request
      * @param  string  $method
+     * @param  array  $options
      * @return bool
      */
-    protected function filterFailsOnly($filter, $request, $method)
+    protected function methodExcludedByOptions($method, array $options)
     {
-        $options = $filter['options'];
-
-        if (! isset($options['only'])) {
-            return false;
-        }
-
-        return ! in_array($method, (array) $options['only']);
-    }
-
-    /**
-     * Determine if the filter fails the "except" constraint.
-     *
-     * @param  array  $filter
-     * @param  \Nova\Http\Request  $request
-     * @param  string  $method
-     * @return bool
-     */
-    protected function filterFailsExcept($filter, $request, $method)
-    {
-        $options = $filter['options'];
-
-        if (! isset($options['except'])) {
-            return false;
-        }
-
-        return in_array($method, (array) $options['except']);
-    }
-
-    /**
-     * Determine if the filter fails the "on" constraint.
-     *
-     * @param  array  $filter
-     * @param  \Nova\Http\Request  $request
-     * @param  string  $method
-     * @return bool
-     */
-    protected function filterFailsOn($filter, $request, $method)
-    {
-        $on = Arr::get($filter, 'options.on');
-
-        if (is_null($on)) {
-            return false;
-        } else if (is_string($on)) {
-            $on = explode('|', $on);
-        }
-
-        return ! in_array(strtolower($request->getMethod()), $on);
+        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 
     /**
@@ -260,5 +178,4 @@ class ControllerDispatcher
 
         return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
     }
-
 }
