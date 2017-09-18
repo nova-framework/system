@@ -53,7 +53,7 @@ class ControllerDispatcher
      */
     public function dispatch(Route $route, Request $request, Controller $controller, $method)
     {
-        $this->assignAfter($controller, $route, $request, $method);
+        $this->assignAfter($controller, $route, $method);
 
         //
         $response = $this->before($controller, $route, $request, $method);
@@ -113,11 +113,10 @@ class ControllerDispatcher
      *
      * @param  \Nova\Routing\Controller  $controller
      * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
      * @param  string  $method
      * @return mixed
      */
-    protected function assignAfter($controller, $route, $request, $method)
+    protected function assignAfter($controller, $route, $method)
     {
         foreach ($controller->getAfterFilters() as $filter) {
             $options = $filter['options'];
