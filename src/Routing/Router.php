@@ -608,7 +608,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function convertToControllerAction($action)
     {
-        if (is_string($action)) $action = array('uses' => $action);
+        if (is_string($action)) {
+            $action = array('uses' => $action);
+        }
 
         if (! empty($this->groupStack)) {
             $action['uses'] = $this->prependGroupUses($action['uses']);
@@ -800,7 +802,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function addGlobalFilter($filter, $callback)
     {
-        $this->events->listen('router.'.$filter, $this->parseFilter($callback));
+        $this->events->listen('router.' .$filter, $this->parseFilter($callback));
     }
 
     /**
@@ -879,7 +881,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->bind($key, function ($value) use ($className, $callback)
         {
             if (is_null($value)) {
-                return null;
+                return;
             }
 
             if ($model = with(new $className)->find($value)) {
@@ -969,7 +971,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
             return;
         }
 
-        return $this->events->until('router.'.$filter, array($request, $response));
+        return $this->events->until('router.' .$filter, array($request, $response));
     }
 
     /**
