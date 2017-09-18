@@ -117,10 +117,14 @@ class ControllerDispatcher
     protected function before($instance, $route, $request, $method)
     {
         foreach ($instance->getBeforeFilters() as $filter) {
-            if ($this->filterApplies($filter, $request, $method)) {
-                if (! is_null($response = $this->callFilter($filter, $route, $request))) {
-                    return $response;
-                }
+            if (! $this->filterApplies($filter, $request, $method)) {
+                continue;
+            }
+
+            $response = $this->callFilter($filter, $route, $request);
+
+            if (! is_null($response)) {
+                return $response;
             }
         }
     }
@@ -137,9 +141,11 @@ class ControllerDispatcher
     protected function assignAfter($instance, $route, $request, $method)
     {
         foreach ($instance->getAfterFilters() as $filter) {
-            if ($this->filterApplies($filter, $request, $method)) {
-                $route->after($this->getAssignableAfter($filter));
+            if (! $this->filterApplies($filter, $request, $method)) {
+                continue;
             }
+
+            $route->after($this->getAssignableAfter($filter));
         }
     }
 
