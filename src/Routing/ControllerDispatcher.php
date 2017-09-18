@@ -125,7 +125,9 @@ class ControllerDispatcher
                 continue;
             }
 
-            $route->after($filter['filter']);
+            $filter = $filter['filter'];
+
+            $route->after($filter);
         }
     }
 
