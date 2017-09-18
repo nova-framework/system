@@ -125,13 +125,13 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerAssetDispatcher()
     {
-        $this->app->bindShared('asset.dispatcher', function($app)
+        $this->app->bindShared('assets.dispatcher', function($app)
         {
             return new AssetDispatcher();
         });
 
         // Register the default Asset Routes to Dispatcher.
-        $dispatcher = $this->app['asset.dispatcher'];
+        $dispatcher = $this->app['assets.dispatcher'];
 
         $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
         {
