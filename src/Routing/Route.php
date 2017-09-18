@@ -281,10 +281,8 @@ class Route
 
         $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
 
-        $domain = $this->domain() ?: '';
-
         $this->compiled = with(
-            new SymfonyRoute($uri, $optionals, $this->wheres, array(), $domain)
+            new SymfonyRoute($uri, $optionals, $this->wheres, array(), $this->domain() ?: '')
 
         )->compile();
     }

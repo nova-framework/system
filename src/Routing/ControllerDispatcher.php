@@ -70,10 +70,12 @@ class ControllerDispatcher
 
         $results = array();
 
-        foreach ($controller->getMiddleware() as $name => $options) {
-            if (! static::methodExcludedByOptions($method, $options)) {
-                $results[] = $name;
+        foreach ($controller->getMiddleware() as $middleware => $options) {
+            if (static::methodExcludedByOptions($method, $options)) {
+                continue;
             }
+
+            $results[] = $middleware;
         }
 
         return $results;
@@ -91,5 +93,4 @@ class ControllerDispatcher
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
-
 }

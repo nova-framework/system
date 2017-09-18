@@ -1056,6 +1056,8 @@ class Router
     {
         $patterns = func_get_args();
 
+        $name = $this->currentRouteName();
+
         foreach ($patterns as $pattern) {
             if (Str::is($pattern, $this->currentRouteName())) {
                 return true;
@@ -1083,7 +1085,9 @@ class Router
      */
     public function currentRouteAction()
     {
-        if (! $this->current()) return;
+        if (! $this->current()) {
+            return;
+        }
 
         $action = $this->current()->getAction();
 
@@ -1100,8 +1104,10 @@ class Router
     {
         $patterns = func_get_args();
 
+        $action = $this->currentRouteAction();
+
         foreach ($patterns as $pattern) {
-            if (Str::is($pattern, $this->currentRouteAction())) {
+            if (Str::is($pattern, $action)) {
                 return true;
             }
         }
@@ -1147,7 +1153,11 @@ class Router
      */
     public function getRegistrar()
     {
-        return $this->registrar ?: $this->registrar = new ResourceRegistrar($this);
+        if (isset($this->registrar)) {
+            return $this->registrar;
+        }
+
+        return $this->registrar = new ResourceRegistrar($this);
     }
 
     /**
