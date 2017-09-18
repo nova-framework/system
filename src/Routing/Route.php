@@ -185,9 +185,8 @@ class Route
      * Run the route action and return the response.
      *
      * @param  \Nova\Http\Request  $request
-     * @return mixed
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @return mixed
      */
     protected function runController(Request $request)
     {
