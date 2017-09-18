@@ -57,7 +57,7 @@ class ControllerDispatcher
      */
     public function dispatch(Route $route, Request $request, $controller, $method)
     {
-        $instance = $this->makeController($controller);
+        $instance = $this->container->make($controller);
 
         $this->assignAfter($instance, $route, $request, $method);
 
@@ -73,17 +73,6 @@ class ControllerDispatcher
         }
 
         return $response;
-    }
-
-    /**
-     * Make a controller instance via the IoC container.
-     *
-     * @param  string  $controller
-     * @return mixed
-     */
-    protected function makeController($controller)
-    {
-        return $this->container->make($controller);
     }
 
     /**
