@@ -1045,7 +1045,9 @@ class Router
      */
     public function currentRouteName()
     {
-        return ($this->current()) ? $this->current()->getName() : null;
+        if (! is_null($route = $this->current())) {
+            return $route->getName();
+        }
     }
 
     /**
@@ -1077,7 +1079,11 @@ class Router
      */
     public function currentRouteNamed($name)
     {
-        return ($this->current()) ? $this->current()->getName() == $name : false;
+        if (! is_null($route = $this->current())) {
+            return ($route->getName() == $name);
+        }
+
+        return false;
     }
 
     /**
@@ -1087,13 +1093,11 @@ class Router
      */
     public function currentRouteAction()
     {
-        if (! $this->current()) {
-            return;
+        if (! is_null($route = $this->current())) {
+            $action = $route->getAction();
+
+            return isset($action['controller']) ? $action['controller'] : null;
         }
-
-        $action = $this->current()->getAction();
-
-        return isset($action['controller']) ? $action['controller'] : null;
     }
 
     /**
