@@ -38,7 +38,7 @@ class DispatchAssetFiles
      */
     public function handle($request, Closure $next)
     {
-        $dispatcher = $this->app['asset.dispatcher'];
+        $dispatcher = $this->app['assets.dispatcher'];
 
         return $dispatcher->dispatch($request) ?: $next($request);
     }

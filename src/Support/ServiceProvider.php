@@ -109,7 +109,7 @@ abstract class ServiceProvider
         $webroot = dirname($path) .DS .'webroot';
 
         if ($files->isDirectory($webroot)) {
-            $this->app['asset.dispatcher']->package($package, $webroot, $namespace);
+            $this->app['assets.dispatcher']->package($package, $webroot, $namespace);
         }
     }
 
