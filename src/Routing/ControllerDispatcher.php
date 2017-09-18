@@ -104,9 +104,7 @@ class ControllerDispatcher
     protected function before($instance, $route, $request, $method)
     {
         foreach ($instance->getBeforeFilters() as $filter) {
-            $options = $filter['options'];
-
-            if ($this->methodExcludedByOptions($method, $options)) {
+            if ($this->methodExcludedByFilterOptions($method, $filter)) {
                 continue;
             }
 
@@ -130,9 +128,7 @@ class ControllerDispatcher
     protected function assignAfter($instance, $route, $request, $method)
     {
         foreach ($instance->getAfterFilters() as $filter) {
-            $options = $filter['options'];
-
-            if (! $this->methodExcludedByOptions($method, $options)) {
+            if (! $this->methodExcludedByFilterOptions($method, $filter)) {
                 $filter = $filter['filter'];
 
                 $route->after($filter);
@@ -144,11 +140,13 @@ class ControllerDispatcher
      * Determine if the given options exclude a particular method.
      *
      * @param  string  $method
-     * @param  array  $options
+     * @param  array  $filter
      * @return bool
      */
-    protected function methodExcludedByOptions($method, array $options)
+    protected function methodExcludedByFilterOptions($method, array $filter)
     {
+        $options = $filter['options'];
+
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
