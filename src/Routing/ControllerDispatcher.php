@@ -78,18 +78,18 @@ class ControllerDispatcher
     /**
      * Call the given controller instance method.
      *
-     * @param  \Nova\Routing\Controller  $instance
+     * @param  \Nova\Routing\Controller  $controller
      * @param  \Nova\Routing\Route  $route
      * @param  string  $method
      * @return mixed
      */
-    protected function call($instance, $route, $method)
+    protected function call($controller, $route, $method)
     {
         $parameters = $this->resolveClassMethodDependencies(
-            $route->parametersWithoutNulls(), $instance, $method
+            $route->parametersWithoutNulls(), $controller, $method
         );
 
-        return $instance->callAction($method, $parameters);
+        return $controller->callAction($method, $parameters);
     }
 
     /**
