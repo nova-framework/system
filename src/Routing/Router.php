@@ -1052,10 +1052,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
             if ($this->filterSupportsMethod($filter, $method)) {
                 $name = $filter['name'];
 
-                //
-                $parsed = Route::parseFilters($name);
-
-                $results = array_merge($results, $parsed);
+                $results = array_merge($results, Route::parseFilters($name));
             }
         }
 
