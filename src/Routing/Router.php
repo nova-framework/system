@@ -936,7 +936,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function callRouteBefore($route, $request)
     {
         foreach ($route->beforeFilters() as $filter => $parameters) {
-            if (! is_null($response = $this->callRouteFilter($filter, $parameters, $route, $request))) {
+            $response = $this->callRouteFilter($filter, $parameters, $route, $request);
+
+            if (! is_null($response)) {
                 return $response;
             }
         }
