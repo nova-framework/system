@@ -193,13 +193,15 @@ class Route
      */
     protected function runController(Request $request)
     {
-        list($class, $method) = explode('@', $this->action['uses']);
+        list($className, $method) = explode('@', $this->action['uses']);
 
         $parameters = $this->resolveClassMethodDependencies(
-            $this->parametersWithoutNulls(), $class, $method
+            $this->parametersWithoutNulls(), $className, $method
         );
 
-        if (! method_exists($instance = $this->container->make($class), $method)) {
+        $instance = $this->container->make($className);
+
+        if (! method_exists($instance, $method)) {
             throw new NotFoundHttpException;
         }
 
@@ -224,11 +226,11 @@ class Route
      */
     protected function runWithCustomDispatcher(Request $request)
     {
-        list($class, $method) = explode('@', $this->action['uses']);
+        list($controller, $method) = explode('@', $this->action['uses']);
 
         $dispatcher = $this->container->make('framework.route.dispatcher');
 
-        return $dispatcher->dispatch($this, $request, $class, $method);
+        return $dispatcher->dispatch($this, $request, $controller, $method);
     }
 
     /**

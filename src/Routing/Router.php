@@ -17,6 +17,7 @@ use Nova\Routing\ControllerInspector;
 use Nova\Routing\RouteCollection;
 use Nova\Routing\RouteFiltererInterface;
 use Nova\Routing\Route;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -822,7 +823,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function parseFilter($callback)
     {
-        if (is_string($callback) && ! str_contains($callback, '@')) {
+        if (is_string($callback) && ! Str::contains($callback, '@')) {
             return $callback .'@filter';
         }
 
@@ -839,7 +840,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function when($pattern, $name, $methods = null)
     {
-        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
+        if (! is_null($methods)) {
+            $methods = array_map('strtoupper', (array) $methods);
+        }
 
         $this->patternFilters[$pattern][] = compact('name', 'methods');
     }
@@ -854,7 +857,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function whenRegex($pattern, $name, $methods = null)
     {
-        if (! is_null($methods)) $methods = array_map('strtoupper', (array) $methods);
+        if (! is_null($methods)) {
+            $methods = array_map('strtoupper', (array) $methods);
+        }
 
         $this->regexFilters[$pattern][] = compact('name', 'methods');
     }
@@ -863,19 +868,21 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * Register a Model binder for a wildcard.
      *
      * @param  string  $key
-     * @param  string  $class
+     * @param  string  $className
      * @param  \Closure  $callback
      * @return void
      *
      * @throws NotFoundHttpException
      */
-    public function model($key, $class, Closure $callback = null)
+    public function model($key, $className, Closure $callback = null)
     {
-        $this->bind($key, function($value) use ($class, $callback)
+        $this->bind($key, function ($value) use ($className, $callback)
         {
-            if (is_null($value)) return null;
+            if (is_null($value)) {
+                return null;
+            }
 
-            if ($model = (new $class)->find($value)) {
+            if ($model = with(new $className)->find($value)) {
                 return $model;
             }
 
@@ -913,15 +920,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function createClassBinding($binding)
     {
-        return function($value, $route) use ($binding)
+        return function ($value, $route) use ($binding)
         {
-            $segments = explode('@', $binding);
+            list ($className, $method) = array_pad(explode('@', $binding, 2), 2, 'bind');
 
-            $method = (count($segments) == 2) ? $segments[1] : 'bind';
+            $instance = $this->container->make($className);
 
-            $callable = array($this->container->make($segments[0]), $method);
-
-            return call_user_func($callable, $value, $route);
+            return call_user_func(array($instance, $method), $value, $route);
         };
     }
 
@@ -960,7 +965,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function callFilter($filter, $request, $response = null)
     {
-        if (! $this->filtering) return null;
+        if (! $this->filtering) {
+            return;
+        }
 
         return $this->events->until('router.'.$filter, array($request, $response));
     }
@@ -991,7 +998,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         foreach ($this->findPatternFilters($request) as $filter => $parameters) {
             $response = $this->callRouteFilter($filter, $parameters, $route, $request);
 
-            if (! is_null($response)) return $response;
+            if (! is_null($response)) {
+                return $response;
+            }
         }
     }
 
@@ -1008,7 +1017,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         list($path, $method) = array($request->path(), $request->getMethod());
 
         foreach ($this->patternFilters as $pattern => $filters) {
-            if (str_is($pattern, $path)) {
+            if (Str::is($pattern, $path)) {
                 $merge = $this->patternsByMethod($method, $filters);
 
                 $results = array_merge($results, $merge);
@@ -1039,7 +1048,10 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
 
         foreach ($filters as $filter) {
             if ($this->filterSupportsMethod($filter, $method)) {
-                $parsed = Route::parseFilters($filter['name']);
+                $name = $filter['name'];
+
+                //
+                $parsed = Route::parseFilters($name);
 
                 $results = array_merge($results, $parsed);
             }
@@ -1059,7 +1071,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     {
         $methods = $filter['methods'];
 
-        return (is_null($methods) || in_array($method, $methods));
+        return is_null($methods) || in_array($method, $methods);
     }
 
     /**
@@ -1074,7 +1086,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         foreach ($route->beforeFilters() as $filter => $parameters) {
             $response = $this->callRouteFilter($filter, $parameters, $route, $request);
 
-            if (! is_null($response)) return $response;
+            if (! is_null($response)) {
+                return $response;
+            }
         }
     }
 
@@ -1104,7 +1118,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function callRouteFilter($filter, $parameters, $route, $request, $response = null)
     {
-        if (! $this->filtering) return null;
+        if (! $this->filtering) {
+            return;
+        }
 
         $data = array_merge(array($route, $request, $response), $parameters);
 
@@ -1119,7 +1135,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function cleanFilterParameters(array $parameters)
     {
-        return array_filter($parameters, function($parameter)
+        return array_filter($parameters, function ($parameter)
         {
             return ! is_null($parameter) && ($parameter !== '');
         });
@@ -1267,8 +1283,12 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function is()
     {
-        foreach (func_get_args() as $pattern) {
-            if (str_is($pattern, $this->currentRouteName())) {
+        $patterns = func_get_args();
+
+        $name = $this->currentRouteName();
+
+        foreach ($patterns as $pattern) {
+            if (Str::is($pattern, $name)) {
                 return true;
             }
         }
@@ -1294,7 +1314,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function currentRouteAction()
     {
-        if (is_null($route = $this->current())) return;
+        if (is_null($route = $this->current())) {
+            return;
+        }
 
         $action = $route->getAction();
 
@@ -1309,8 +1331,12 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function uses()
     {
-        foreach (func_get_args() as $pattern) {
-            if (str_is($pattern, $this->currentRouteAction())) {
+        $patterns = func_get_args();
+
+        $action = $this->currentRouteAction();
+
+        foreach ($patterns as $pattern) {
+            if (Str::is($pattern, $action)) {
                 return true;
             }
         }
@@ -1326,7 +1352,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function currentRouteUses($action)
     {
-        return ($this->currentRouteAction() == $action);
+        return $this->currentRouteAction() == $action;
     }
 
     /**
@@ -1356,11 +1382,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function getControllerDispatcher()
     {
-        if (is_null($this->controllerDispatcher)) {
-            $this->controllerDispatcher = new ControllerDispatcher($this, $this->container);
+        if (isset($this->controllerDispatcher)) {
+            return $this->controllerDispatcher;
         }
 
-        return $this->controllerDispatcher;
+        return $this->controllerDispatcher = new ControllerDispatcher($this, $this->container);
     }
 
     /**
@@ -1381,7 +1407,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function getFileDispatcher()
     {
-        if (isset($this->fileDispatcher)) return $this->fileDispatcher;
+        if (isset($this->fileDispatcher)) {
+            return $this->fileDispatcher;
+        }
 
         return $this->fileDispatcher = $this->container->make('Nova\Routing\Assets\DispatcherInterface');
     }
@@ -1393,7 +1421,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function getInspector()
     {
-        return $this->inspector ?: $this->inspector = new ControllerInspector();
+        if (isset($this->inspector)) {
+            return $this->inspector;
+        }
+
+        return $this->inspector = new ControllerInspector();
     }
 
     /**
@@ -1403,7 +1435,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function getRegistrar()
     {
-        return $this->registrar ?: $this->registrar = new ResourceRegistrar($this);
+        if (isset($this->registrar)) {
+            return $this->registrar;
+        }
+
+        return $this->registrar = new ResourceRegistrar($this);
     }
 
     /**
