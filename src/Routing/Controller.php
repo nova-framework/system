@@ -6,7 +6,6 @@ use Nova\Routing\Route;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Closure;
 use BadMethodCallException;
 
 
@@ -123,5 +122,4 @@ abstract class Controller
     {
         throw new BadMethodCallException("Method [$method] does not exist.");
     }
-
 }
