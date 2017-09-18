@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing\Providers;
+namespace Nova\Routing;
 
 use Nova\Routing\Console\ControllerMakeCommand;
 use Nova\Routing\Generators\ControllerGenerator;
