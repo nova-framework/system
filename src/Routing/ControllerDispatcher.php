@@ -121,13 +121,11 @@ class ControllerDispatcher
         foreach ($controller->getAfterFilters() as $filter) {
             $options = $filter['options'];
 
-            if (static::methodExcludedByOptions($method, $options)) {
-                continue;
-            }
-
             $filter = $filter['filter'];
 
-            $route->after($filter);
+            if (! static::methodExcludedByOptions($method, $options)) {
+                $route->after($filter);
+            }
         }
     }
 
