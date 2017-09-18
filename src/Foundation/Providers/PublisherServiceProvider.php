@@ -68,7 +68,7 @@ class PublisherServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.asset.publish', function($app)
         {
-            return new AssetPublishCommand($app['asset.dispatcher'], $app['asset.publisher']);
+            return new AssetPublishCommand($app['assets.dispatcher'], $app['asset.publisher']);
         });
     }
 
