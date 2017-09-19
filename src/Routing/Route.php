@@ -11,10 +11,10 @@ namespace Nova\Routing;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Http\Exception\HttpResponseException;
-use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
+use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\RouteCompiler;
 use Nova\Routing\RouteDependencyResolverTrait;
 use Nova\Support\Arr;
@@ -284,10 +284,8 @@ class Route
         }
 
         return static::$validators = array(
-            new MethodValidator(),
-            new SchemeValidator(),
-            new HostValidator(),
-            new UriValidator(),
+            new UriValidator(), new MethodValidator(),
+            new SchemeValidator(), new HostValidator(),
         );
     }
 
