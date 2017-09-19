@@ -29,77 +29,77 @@ class Route
      *
      * @var string
      */
-    public $uri;
+    protected $uri;
 
     /**
      * The HTTP methods the route responds to.
      *
      * @var array
      */
-    public $methods;
+    protected $methods;
 
     /**
      * The route action array.
      *
      * @var array
      */
-    public $action;
+    protected $action;
 
     /**
      * The Controller method.
      *
      * @var mixed
      */
-    public $method;
+    protected $method;
 
     /**
      * The Controller instance.
      *
      * @var mixed
      */
-    public $controller;
+    protected $controller;
 
     /**
      * The default values for the route.
      *
      * @var array
      */
-    public $defaults = array();
+    protected $defaults = array();
 
     /**
      * The regular expression requirements.
      *
      * @var array
      */
-    public $wheres = array();
+    protected $wheres = array();
 
     /**
      * The array of matched parameters.
      *
      * @var array
      */
-    public $parameters;
+    protected $parameters;
 
     /**
      * The parameter names for the route.
      *
      * @var array|null
      */
-    public $parameterNames;
+    protected $parameterNames;
 
     /**
      * The compiled version of the route.
      *
      * @var \Symfony\Component\Routing\CompiledRoute
      */
-    public $compiled;
+    protected $compiled;
 
     /**
      * The computed gathered middleware.
      *
      * @var array|null
      */
-    public $computedMiddleware;
+    protected $computedMiddleware;
 
     /**
      * The container instance used by the route.
@@ -607,6 +607,16 @@ class Route
     }
 
     /**
+     * Get the regular expression requirements on the route.
+     *
+     * @return array
+     */
+    public function wheres()
+    {
+        return $this->wheres;
+    }
+
+    /**
      * Set a regular expression requirement on the route.
      *
      * @param  array|string  $name
@@ -632,21 +642,6 @@ class Route
     protected function parseWhere($name, $expression)
     {
         return is_array($name) ? $name : array($name => $expression);
-    }
-
-    /**
-     * Set a list of regular expression requirements on the route.
-     *
-     * @param  array  $wheres
-     * @return $this
-     */
-    protected function whereArray(array $wheres)
-    {
-        foreach ($wheres as $name => $expression) {
-            $this->where($name, $expression);
-        }
-
-        return $this;
     }
 
     /**
