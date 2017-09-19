@@ -5,6 +5,7 @@ namespace Nova\Routing;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Routing\Controller;
+use Nova\Routing\RouteFiltererInterface as RouteFilterer;
 use Nova\Routing\RouteDependencyResolverTrait;
 
 
@@ -35,7 +36,7 @@ class ControllerDispatcher
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(RouteFiltererInterface $filterer, Container $container = null)
+    public function __construct(RouteFilterer $filterer, Container $container = null)
     {
         $this->container = $container;
 
