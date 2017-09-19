@@ -233,7 +233,7 @@ class Route
     public function compileRoute()
     {
         if (! isset($this->compiled)) {
-            $this->compiled = with(new RouteCompiler($this))->compile();
+            return $this->compiled = with(new RouteCompiler($this))->compile();
         }
 
         return $this->compiled;
