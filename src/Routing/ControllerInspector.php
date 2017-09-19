@@ -2,7 +2,6 @@
 
 namespace Nova\Routing;
 
-use Nova\Helpers\Inflector;
 use Nova\Support\Str;
 
 use ReflectionClass;
@@ -110,7 +109,7 @@ class ControllerInspector
      */
     public function getVerb($name)
     {
-        return head(explode('_', Inflector::tableize($name)));
+        return head(explode('_', Str::snake($name)));
     }
 
     /**
@@ -122,7 +121,7 @@ class ControllerInspector
      */
     public function getPlainUri($name, $prefix)
     {
-        return $prefix .'/' .implode('-', array_slice(explode('_', Inflector::tableize($name)), 1));
+        return $prefix .'/' .implode('-', array_slice(explode('_', Str::snake($name)), 1));
     }
 
     /**
