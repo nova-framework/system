@@ -115,7 +115,9 @@ class UrlGenerator
      */
     public function to($path, $extra = array(), $secure = null)
     {
-        if ($this->isValidUrl($path)) return $path;
+        if ($this->isValidUrl($path)) {
+            return $path;
+        }
 
         $scheme = $this->getScheme($secure);
 
@@ -164,9 +166,9 @@ class UrlGenerator
      */
     protected function removeIndex($root)
     {
-        $i = 'index.php';
+        $index = 'index.php';
 
-        return Str::contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
+        return Str::contains($root, $index) ? str_replace('/' .$index, '', $root) : $root;
     }
 
     /**
