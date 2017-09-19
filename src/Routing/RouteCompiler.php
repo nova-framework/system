@@ -37,9 +37,7 @@ class RouteCompiler
         $route = $this->getRoute();
 
         //
-        $uri = $route->uri();
-
-        $optionals = $this->extractOptionalParameters($uri);
+        $optionals = $this->extractOptionalParameters($uri = $route->uri());
 
         $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri);
 
