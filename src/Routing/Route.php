@@ -40,56 +40,56 @@ class Route
      *
      * @var string
      */
-    public $uri;
+    protected $uri;
 
     /**
      * Supported HTTP methods.
      *
      * @var array
      */
-    public $methods = array();
+    protected $methods = array();
 
     /**
      * The route action array.
      *
      * @var array
      */
-    public $action = array();
+    protected $action = array();
 
     /**
      * The default values for the Route.
      *
      * @var array
      */
-    public $defaults = array();
+    protected $defaults = array();
 
     /**
      * The regular expression requirements.
      *
      * @var array
      */
-    public $wheres = array();
+    protected $wheres = array();
 
     /**
      * The matched Route parameters.
      *
      * @var array
      */
-    public $parameters;
+    protected $parameters;
 
     /**
      * The parameter names for the route.
      *
      * @var array|null
      */
-    public $parameterNames;
+    protected $parameterNames;
 
     /**
      * The compiled version of the Route.
      *
      * @var \Symfony\Component\Routing\CompiledRoute
      */
-    public $compiled = null;
+    protected $compiled = null;
 
     /**
      * The container instance used by the route.
@@ -103,7 +103,7 @@ class Route
      *
      * @var array
      */
-    public static $validators;
+    protected static $validators;
 
 
     /**
