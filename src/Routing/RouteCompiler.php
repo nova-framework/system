@@ -37,12 +37,14 @@ class RouteCompiler
         $route = $this->getRoute();
 
         //
-        $optionals = $this->extractOptionalParameters($route->uri());
+        $uri = $route->uri();
 
-        $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $route->uri());
+        $optionals = $this->extractOptionalParameters($uri);
+
+        $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri);
 
         return with(
-            new SymfonyRoute($uri, $optionals, $route->wheres, array(), $route->domain() ?: '')
+            new SymfonyRoute($path, $optionals, $route->wheres, array(), $route->domain() ?: '')
 
         )->compile();
     }
