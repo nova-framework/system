@@ -35,16 +35,18 @@ class ControllerInspector
         $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
-            if ($this->isRoutable($method)) {
-                $name = $method->name;
+            $name = $method->name;
 
-                $data = $this->getMethodData($method, $prefix);
+            if (! $this->isRoutable($method)) {
+                continue;
+            }
 
-                $routable[$name][] = $data;
+            $data = $this->getMethodData($method, $prefix);
 
-                if ($data['plain'] == $prefix .'/index') {
-                    $routable[$name][] = $this->getIndexData($data, $prefix);
-                }
+            $routable[$name][] = $data;
+
+            if ($data['plain'] == $prefix .'/index') {
+                $routable[$name][] = $this->getIndexData($data, $prefix);
             }
         }
 
