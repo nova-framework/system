@@ -40,7 +40,7 @@ class Route
      *
      * @var string
      */
-    public $uri = null;
+    public $uri;
 
     /**
      * Supported HTTP methods.
@@ -75,7 +75,7 @@ class Route
      *
      * @var array
      */
-    private $parameters;
+    public $parameters;
 
     /**
      * The parameter names for the route.
