@@ -48,6 +48,16 @@ class RouteCompiler
     }
 
     /**
+     * Get the inner Route instance.
+     *
+     * @return \Nova\Routing\Route
+     */
+    public function getRoute()
+    {
+        return $this->route;
+    }
+
+    /**
      * Get the optional parameters for the route.
      *
      * @param string $uri
@@ -59,15 +69,5 @@ class RouteCompiler
         preg_match_all('/\{(\w+?)\?\}/', $uri, $matches);
 
         return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
-    }
-
-    /**
-     * Get the inner Route instance.
-     *
-     * @return \Nova\Routing\Route
-     */
-    public function getRoute()
-    {
-        return $this->route;
     }
 }
