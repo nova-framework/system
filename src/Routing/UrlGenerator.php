@@ -3,6 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use InvalidArgumentException;
@@ -97,7 +98,11 @@ class UrlGenerator
      */
     public function previous()
     {
-        return $this->to($this->request->headers->get('referer'));
+        $referrer = $this->request->headers->get('referer');
+
+        $url = $referrer ? $this->to($referrer) : $this->getPreviousUrlFromSession();
+
+        return $url ?: $this->to('/');
     }
 
     /**
@@ -142,7 +147,9 @@ class UrlGenerator
      */
     public function asset($path, $secure = null)
     {
-        if ($this->isValidUrl($path)) return $path;
+        if ($this->isValidUrl($path)) {
+            return $path;
+        }
 
         $root = $this->getRootUrl($this->getScheme($secure));
 
@@ -182,7 +189,7 @@ class UrlGenerator
     protected function getScheme($secure)
     {
         if (is_null($secure)) {
-            return $this->forceSchema ?: $this->request->getScheme().'://';
+            return $this->forceSchema ?: $this->request->getScheme() .'://';
         }
 
         return $secure ? 'https://' : 'http://';
@@ -196,7 +203,7 @@ class UrlGenerator
      */
     public function forceSchema($schema)
     {
-        $this->forceSchema = $schema.'://';
+        $this->forceSchema = $schema .'://';
     }
 
     /**
@@ -239,9 +246,11 @@ class UrlGenerator
 
         $domain = $this->getRouteDomain($route, $parameters);
 
+        $root = $this->replaceRoot($route, $domain, $parameters);
+
         $uri = strtr(rawurlencode($this->trimUrl(
-            $root = $this->replaceRoot($route, $domain, $parameters),
-            $this->replaceRouteParameters($pattern, $parameters)
+            $root, $this->replaceRouteParameters($pattern, $parameters)
+
         )), $this->dontEncode) .$this->getRouteQueryString($parameters);
 
         return $absolute ? $uri : '/' .ltrim(str_replace($root, '', $uri), '/');
@@ -269,7 +278,7 @@ class UrlGenerator
      */
     protected function replaceRouteParameters($path, array &$parameters)
     {
-        if (count($parameters)) {
+        if (count($parameters) > 0) {
             $path = preg_replace_sub(
                 '/\{.*?\}/', $parameters, $this->replaceNamedParameters($path, $parameters)
             );
@@ -287,9 +296,9 @@ class UrlGenerator
      */
     protected function replaceNamedParameters($path, &$parameters)
     {
-        return preg_replace_callback('/\{(.*?)\??\}/', function($m) use (&$parameters)
+        return preg_replace_callback('/\{(.*?)\??\}/', function ($match) use (&$parameters)
         {
-            return isset($parameters[$m[1]]) ? array_pull($parameters, $m[1]) : $m[0];
+            return isset($parameters[$match[1]]) ? Arr::pull($parameters, $match[1]) : $match[0];
 
         }, $path);
     }
@@ -302,7 +311,9 @@ class UrlGenerator
      */
     protected function getRouteQueryString(array $parameters)
     {
-        if (count($parameters) == 0) return '';
+        if (count($parameters) == 0) {
+            return '';
+        }
 
         $query = http_build_query(
             $keyed = $this->getStringParameters($parameters)
@@ -323,7 +334,10 @@ class UrlGenerator
      */
     protected function getStringParameters(array $parameters)
     {
-        return array_where($parameters, function($k, $v) { return is_string($k); });
+        return Arr::where($parameters, function ($key, $value)
+        {
+            return is_string($key);
+        });
     }
 
     /**
@@ -334,7 +348,10 @@ class UrlGenerator
      */
     protected function getNumericParameters(array $parameters)
     {
-        return array_where($parameters, function($k, $v) { return is_numeric($k); });
+        return Arr::where($parameters, function ($key, $value)
+        {
+            return is_numeric($key);
+        });
     }
 
     /**
@@ -358,7 +375,9 @@ class UrlGenerator
      */
     protected function formatDomain($route, &$parameters)
     {
-        return $this->addPortToDomain($this->getDomainAndScheme($route));
+        return $this->addPortToDomain(
+            $this->getDomainAndScheme($route)
+        );
     }
 
     /**
@@ -426,7 +445,9 @@ class UrlGenerator
      */
     public function action($action, $parameters = array(), $absolute = true)
     {
-        return $this->route($action, $parameters, $absolute, $this->routes->getByAction($action));
+        return $this->route(
+            $action, $parameters, $absolute, $this->routes->getByAction($action)
+        );
     }
 
     /**
@@ -444,7 +465,7 @@ class UrlGenerator
 
         $start = Str::startsWith($root, 'http://') ? 'http://' : 'https://';
 
-        return preg_replace('~'.$start.'~', $scheme, $root, 1);
+        return preg_replace('~' .$start .'~', $scheme, $root, 1);
     }
 
     /**
@@ -466,7 +487,9 @@ class UrlGenerator
      */
     public function isValidUrl($path)
     {
-        if (Str::startsWith($path, ['#', '//', 'mailto:', 'tel:', 'http://', 'https://'])) return true;
+        if (Str::startsWith($path, array('#', '//', 'mailto:', 'tel:', 'http://', 'https://'))) {
+            return true;
+        }
 
         return filter_var($path, FILTER_VALIDATE_URL) !== false;
     }
@@ -481,7 +504,7 @@ class UrlGenerator
      */
     protected function trimUrl($root, $path, $tail = '')
     {
-        return trim($root.'/'.trim($path.'/'.$tail, '/'), '/');
+        return trim($root .'/' .trim($path .'/' .$tail, '/'), '/');
     }
 
     /**
@@ -505,4 +528,40 @@ class UrlGenerator
         $this->request = $request;
     }
 
+    /**
+     * Get the previous URL from the session if possible.
+     *
+     * @return string|null
+     */
+    protected function getPreviousUrlFromSession()
+    {
+        $session = $this->getSession();
+
+        return $session ? $session->previousUrl() : null;
+    }
+
+    /**
+     * Get the session implementation from the resolver.
+     *
+     * @return \Nova\Session\Store|null
+     */
+    protected function getSession()
+    {
+        if (isset($this->sessionResolver)) {
+            return call_user_func($this->sessionResolver);
+        }
+    }
+
+    /**
+     * Set the session resolver for the generator.
+     *
+     * @param  callable  $sessionResolver
+     * @return $this
+     */
+    public function setSessionResolver(callable $sessionResolver)
+    {
+        $this->sessionResolver = $sessionResolver;
+
+        return $this;
+    }
 }

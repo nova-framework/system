@@ -80,6 +80,8 @@ class Middleware implements HttpKernelInterface
         // so that the attributes may be persisted to some storage medium. We will also
         // add the session identifier cookie to the application response headers now.
         if ($this->sessionConfigured()) {
+            $this->storeCurrentUrl($request, $session);
+
             $this->closeSession($session);
 
             $this->addCookieToResponse($response, $session);
@@ -129,6 +131,35 @@ class Middleware implements HttpKernelInterface
         $session->save();
 
         $this->collectGarbage($session);
+    }
+
+    /**
+     * Get the session implementation from the manager.
+     *
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @return \Session\SessionInterface
+     */
+    public function getSession(Request $request)
+    {
+        $session = $this->manager->driver();
+
+        $session->setId($request->cookies->get($session->getName()));
+
+        return $session;
+    }
+
+    /**
+     * Store the current URL for the request if necessary.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Nova\Session\SessionInterface  $session
+     * @return void
+     */
+    protected function storeCurrentUrl(Request $request, $session)
+    {
+        if (($request->method() === 'GET') && $request->route() && ! $request->ajax()) {
+            $session->setPreviousUrl($request->fullUrl());
+        }
     }
 
     /**
@@ -243,20 +274,4 @@ class Middleware implements HttpKernelInterface
 
         return ! in_array($config['driver'], array(null, 'array'));
     }
-
-    /**
-     * Get the session implementation from the manager.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @return \Session\SessionInterface
-     */
-    public function getSession(Request $request)
-    {
-        $session = $this->manager->driver();
-
-        $session->setId($request->cookies->get($session->getName()));
-
-        return $session;
-    }
-
 }

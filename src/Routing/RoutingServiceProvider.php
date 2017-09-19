@@ -83,10 +83,17 @@ class RoutingServiceProvider extends ServiceProvider
             // The URL Generator needs the Route Collection that exists on the Router.
             $routes = $app['router']->getRoutes();
 
-            return new UrlGenerator($routes, $app->rebinding('request', function($app, $request)
+            $url = new UrlGenerator($routes, $app->rebinding('request', function ($app, $request)
             {
                 $app['url']->setRequest($request);
             }));
+
+            $url->setSessionResolver(function ()
+            {
+                return $this->app['session'];
+            });
+
+            return $url;
         });
     }
 
