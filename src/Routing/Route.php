@@ -651,7 +651,6 @@ class Route
      * @param  array|string  $name
      * @param  string  $expression
      * @return $this
-     * @throws \BadMethodCallException
      */
     public function where($name, $expression = null)
     {
