@@ -69,7 +69,7 @@ class RoutingServiceProvider extends ServiceProvider
             // and all the registered routes will be available to the generator.
             $routes = $app['router']->getRoutes();
 
-            $url = new UrlGenerator($routes, $app->rebinding('request', function($app, $request)
+            $url = new UrlGenerator($routes, $app->rebinding('request', function ($app, $request)
             {
                 $app['url']->setRequest($request);
             }));
@@ -125,7 +125,7 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerAssetDispatcher()
     {
-        $this->app->bindShared('assets.dispatcher', function($app)
+        $this->app->bindShared('assets.dispatcher', function ($app)
         {
             return new AssetDispatcher();
         });

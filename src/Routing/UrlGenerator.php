@@ -3,6 +3,8 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
+use Nova\Support\Arr;
+use Nova\Support\Str;
 
 use InvalidArgumentException;
 
@@ -116,13 +118,13 @@ class UrlGenerator
         // First we will check if the URL is already a valid URL. If it is we will not
         // try to generate a new one but will simply return the URL as is, which is
         // convenient since developers do not always have to check if it's valid.
-        if ($this->isValidUrl($path)) return $path;
+        if ($this->isValidUrl($path)) {
+            return $path;
+        }
 
         $scheme = $this->getScheme($secure);
 
-        $tail = implode('/', array_map(
-            'rawurlencode', (array) $extra)
-        );
+        $tail = implode('/', array_map('rawurlencode', (array) $extra));
 
         // Once we have the scheme we will compile the "tail" by collapsing the values
         // into a single string delimited by slashes. This just makes it convenient
@@ -153,14 +155,16 @@ class UrlGenerator
      */
     public function asset($path, $secure = null)
     {
-        if ($this->isValidUrl($path)) return $path;
+        if ($this->isValidUrl($path)) {
+            return $path;
+        }
 
         // Once we get the root URL, we will check to see if it contains an index.php
         // file in the paths. If it does, we will remove it since it is not needed
         // for asset paths, but only for routes to endpoints in the application.
         $root = $this->getRootUrl($this->getScheme($secure));
 
-        return $this->removeIndex($root).'/'.trim($path, '/');
+        return $this->removeIndex($root) .'/' .trim($path, '/');
     }
 
     /**
@@ -171,9 +175,9 @@ class UrlGenerator
      */
     protected function removeIndex($root)
     {
-        $i = 'index.php';
+        $index = 'index.php';
 
-        return str_contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
+        return Str::contains($root, $index) ? str_replace('/' .$index, '', $root) : $root;
     }
 
     /**
@@ -196,7 +200,7 @@ class UrlGenerator
     protected function getScheme($secure)
     {
         if (is_null($secure)) {
-            return $this->forceSchema ?: $this->request->getScheme().'://';
+            return $this->forceSchema ?: $this->request->getScheme() .'://';
         }
 
         return $secure ? 'https://' : 'http://';
@@ -210,7 +214,7 @@ class UrlGenerator
      */
     public function forceSchema($schema)
     {
-        $this->forceSchema = $schema.'://';
+        $this->forceSchema = $schema .'://';
     }
 
     /**
@@ -249,12 +253,14 @@ class UrlGenerator
     {
         $domain = $this->getRouteDomain($route, $parameters);
 
+        $root = $this->replaceRoot($route, $domain, $parameters);
+
         $uri = strtr(rawurlencode($this->trimUrl(
-            $root = $this->replaceRoot($route, $domain, $parameters),
-            $this->replaceRouteParameters($route->uri(), $parameters)
+            $root, $this->replaceRouteParameters($route->uri(), $parameters)
+
         )), $this->dontEncode) .$this->getRouteQueryString($parameters);
 
-        return $absolute ? $uri : '/'.ltrim(str_replace($root, '', $uri), '/');
+        return $absolute ? $uri : '/' .ltrim(str_replace($root, '', $uri), '/');
     }
 
     /**
@@ -279,7 +285,7 @@ class UrlGenerator
      */
     protected function replaceRouteParameters($path, array &$parameters)
     {
-        if (count($parameters)) {
+        if (count($parameters) > 0) {
             $path = preg_replace_sub(
                 '/\{.*?\}/', $parameters, $this->replaceNamedParameters($path, $parameters)
             );
@@ -297,9 +303,9 @@ class UrlGenerator
      */
     protected function replaceNamedParameters($path, &$parameters)
     {
-        return preg_replace_callback('/\{(.*?)\??\}/', function($m) use (&$parameters)
+        return preg_replace_callback('/\{(.*?)\??\}/', function ($match) use (&$parameters)
         {
-            return isset($parameters[$m[1]]) ? array_pull($parameters, $m[1]) : $m[0];
+            return isset($parameters[$match[1]]) ? Arr::pull($parameters, $match[1]) : $match[0];
 
         }, $path);
     }
@@ -315,7 +321,9 @@ class UrlGenerator
         // First we will get all of the string parameters that are remaining after we
         // have replaced the route wildcards. We'll then build a query string from
         // these string parameters then use it as a starting point for the rest.
-        if (count($parameters) == 0) return '';
+        if (count($parameters) == 0) {
+            return '';
+        }
 
         $query = http_build_query(
             $keyed = $this->getStringParameters($parameters)
@@ -325,9 +333,7 @@ class UrlGenerator
         // parameters that are in the array and add them to the query string or we
         // will make the initial query string if it wasn't started with strings.
         if (count($keyed) < count($parameters)) {
-            $query .= '&' .implode(
-                '&', $this->getNumericParameters($parameters)
-            );
+            $query .= '&' .implode('&', $this->getNumericParameters($parameters));
         }
 
         return '?' .trim($query, '&');
@@ -341,7 +347,10 @@ class UrlGenerator
      */
     protected function getStringParameters(array $parameters)
     {
-        return array_where($parameters, function($k, $v) { return is_string($k); });
+        return Arr::where($parameters, function ($key, $value)
+        {
+            return is_string($key);
+        });
     }
 
     /**
@@ -352,7 +361,10 @@ class UrlGenerator
      */
     protected function getNumericParameters(array $parameters)
     {
-        return array_where($parameters, function($k, $v) { return is_numeric($k); });
+        return Arr::where($parameters, function($key, $value)
+        {
+            return is_numeric($key);
+        });
     }
 
     /**
@@ -460,9 +472,9 @@ class UrlGenerator
             $root = $this->forcedRoot ?: $this->request->root();
         }
 
-        $start = starts_with($root, 'http://') ? 'http://' : 'https://';
+        $start = Str::startsWith($root, 'http://') ? 'http://' : 'https://';
 
-        return preg_replace('~'.$start.'~', $scheme, $root, 1);
+        return preg_replace('~' .$start .'~', $scheme, $root, 1);
     }
 
     /**
@@ -484,7 +496,9 @@ class UrlGenerator
      */
     public function isValidUrl($path)
     {
-        if (starts_with($path, ['#', '//', 'mailto:', 'tel:', 'http://', 'https://'])) return true;
+        if (Str::startsWith($path, array('#', '//', 'mailto:', 'tel:', 'http://', 'https://'))) {
+            return true;
+        }
 
         return filter_var($path, FILTER_VALIDATE_URL) !== false;
     }
@@ -499,7 +513,7 @@ class UrlGenerator
      */
     protected function trimUrl($root, $path, $tail = '')
     {
-        return trim($root.'/'.trim($path.'/'.$tail, '/'), '/');
+        return trim($root .'/' .trim($path .'/' .$tail, '/'), '/');
     }
 
     /**
@@ -542,7 +556,7 @@ class UrlGenerator
      */
     protected function getSession()
     {
-        if ($this->sessionResolver) {
+        if (isset($this->sessionResolver)) {
             return call_user_func($this->sessionResolver);
         }
     }
