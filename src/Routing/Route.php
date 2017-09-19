@@ -9,12 +9,12 @@ use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
+use Nova\Routing\RouteCompiler;
 use Nova\Routing\RouteDependencyResolverTrait;
 use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Route as SymfonyRoute;
 
 use Closure;
 use ReflectionFunction;
@@ -29,21 +29,21 @@ class Route
      *
      * @var string
      */
-    protected $uri;
+    public $uri;
 
     /**
      * The HTTP methods the route responds to.
      *
      * @var array
      */
-    protected $methods;
+    public $methods;
 
     /**
      * The route action array.
      *
      * @var array
      */
-    protected $action;
+    public $action;
 
     /**
      * The Controller method.
@@ -64,35 +64,35 @@ class Route
      *
      * @var array
      */
-    protected $defaults = array();
+    public $defaults = array();
 
     /**
      * The regular expression requirements.
      *
      * @var array
      */
-    protected $wheres = array();
+    public $wheres = array();
 
     /**
      * The array of matched parameters.
      *
      * @var array
      */
-    protected $parameters;
+    public $parameters;
 
     /**
      * The parameter names for the route.
      *
      * @var array|null
      */
-    protected $parameterNames;
+    public $parameterNames;
 
     /**
      * The compiled version of the route.
      *
      * @var \Symfony\Component\Routing\CompiledRoute
      */
-    protected $compiled;
+    public $compiled;
 
     /**
      * The computed gathered middleware.
@@ -277,26 +277,11 @@ class Route
      */
     protected function compileRoute()
     {
-        $optionals = $this->extractOptionalParameters();
+        if (! $this->compiled) {
+            return $this->compiled = with(new RouteCompiler($this))->compile();
+        }
 
-        $uri = preg_replace('/\{(\w+?)\?\}/', '{$1}', $this->uri);
-
-        $this->compiled = with(
-            new SymfonyRoute($uri, $optionals, $this->wheres, array(), $this->domain() ?: '')
-
-        )->compile();
-    }
-
-    /**
-     * Get the optional parameters for the route.
-     *
-     * @return array
-     */
-    protected function extractOptionalParameters()
-    {
-        preg_match_all('/\{(\w+?)\?\}/', $this->uri, $matches);
-
-        return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
+        return $this->compiled;
     }
 
     /**
