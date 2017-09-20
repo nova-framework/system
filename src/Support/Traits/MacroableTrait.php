@@ -2,6 +2,8 @@
 
 namespace Nova\Support\Traits;
 
+use BadMethodCallException;
+
 
 trait MacroableTrait
 {
@@ -46,12 +48,13 @@ trait MacroableTrait
      */
     public static function __callStatic($method, $parameters)
     {
-        if (static::hasMacro($method))
-        {
-            return call_user_func_array(static::$macros[$method], $parameters);
+        if (static::hasMacro($method)) {
+            $callback = static::$macros[$method];
+
+            return call_user_func_array($callback, $parameters);
         }
 
-        throw new \BadMethodCallException("Method {$method} does not exist.");
+        throw new BadMethodCallException("Method {$method} does not exist.");
     }
 
     /**
