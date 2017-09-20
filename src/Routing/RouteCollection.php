@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Http\Request;
 use Nova\Http\Response;
+use Nova\Support\Arr;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -89,7 +90,9 @@ class RouteCollection implements Countable, IteratorAggregate
         $action = $route->getAction();
 
         if (isset($action['as'])) {
-            $this->nameList[$action['as']] = $route;
+            $name = $action['as'];
+
+            $this->nameList[$name] = $route;
         }
 
         // When the route is routing to a controller we will also store the action that
@@ -110,7 +113,9 @@ class RouteCollection implements Countable, IteratorAggregate
     protected function addToActionList($action, $route)
     {
         if (! isset($this->actionList[$action['controller']])) {
-            $this->actionList[$action['controller']] = $route;
+            $controller = $action['controller'];
+
+            $this->actionList[$controller] = $route;
         }
     }
 
@@ -182,28 +187,16 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function getOtherMethodsRoute($request, array $others)
     {
-        if ($request->method() == 'OPTIONS') {
-            return (new Route('OPTIONS', $request->path(), function() use ($others)
-            {
-                return new Response('', 200, array('Allow' => implode(',', $others)));
-
-            }))->bind($request);
+        if ($request->method() !== 'OPTIONS') {
+            throw new MethodNotAllowedHttpException($others);
         }
 
-        $this->methodNotAllowed($others);
-    }
+        $route = new Route('OPTIONS', $request->path(), function () use ($others)
+        {
+            return new Response('', 200, array('Allow' => implode(',', $others)));
+        });
 
-    /**
-     * Throw a method not allowed HTTP exception.
-     *
-     * @param  array  $others
-     * @return void
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
-     */
-    protected function methodNotAllowed(array $others)
-    {
-        throw new MethodNotAllowedHttpException($others);
+        return $route->bind($request);
     }
 
     /**
@@ -216,7 +209,7 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function check(array $routes, $request, $includingMethod = true)
     {
-        return array_first($routes, function($key, $value) use ($request, $includingMethod)
+        return Arr::first($routes, function($key, $value) use ($request, $includingMethod)
         {
             return $value->matches($request, $includingMethod);
         });
@@ -230,9 +223,11 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function get($method = null)
     {
-        if (is_null($method)) return $this->getRoutes();
+        if (is_null($method)) {
+            return $this->getRoutes();
+        }
 
-        return array_get($this->routes, $method, array());
+        return Arr::get($this->routes, $method, array());
     }
 
     /**
@@ -254,7 +249,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function getByName($name)
     {
-        return isset($this->nameList[$name]) ? $this->nameList[$name] : null;
+        if (isset($this->nameList[$name])) {
+            return $this->nameList[$name];
+        }
     }
 
     /**
@@ -265,7 +262,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function getByAction($action)
     {
-        return isset($this->actionList[$action]) ? $this->actionList[$action] : null;
+        if (isset($this->actionList[$action])) {
+            return $this->actionList[$action];
+        }
     }
 
     /**
