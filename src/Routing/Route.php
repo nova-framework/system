@@ -596,9 +596,13 @@ class Route
      */
     protected function matchToKeys(array $matches)
     {
-        if (count($this->parameterNames()) == 0) return array();
+        $parameterNames = $this->parameterNames();
 
-        $parameters = array_intersect_key($matches, array_flip($this->parameterNames()));
+        if (count($parameterNames) == 0) {
+            return array();
+        }
+
+        $parameters = array_intersect_key($matches, array_flip($parameterNames));
 
         return array_filter($parameters, function ($value)
         {
@@ -759,7 +763,9 @@ class Route
      */
     public function domain()
     {
-        return isset($this->action['domain']) ? $this->action['domain'] : null;
+        if (isset($this->action['domain'])) {
+            return $this->action['domain'];
+        }
     }
 
     /**
@@ -798,7 +804,9 @@ class Route
      */
     public function getPrefix()
     {
-        return isset($this->action['prefix']) ? $this->action['prefix'] : null;
+        if (isset($this->action['prefix'])) {
+            return $this->action['prefix'];
+        }
     }
 
     /**
@@ -808,7 +816,9 @@ class Route
      */
     public function getName()
     {
-        return isset($this->action['as']) ? $this->action['as'] : null;
+        if (isset($this->action['as'])) {
+            return $this->action['as'];
+        }
     }
 
     /**

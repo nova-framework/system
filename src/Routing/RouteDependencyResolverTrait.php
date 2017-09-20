@@ -12,19 +12,6 @@ use ReflectionFunctionAbstract;
 
 trait RouteDependencyResolverTrait
 {
-    /**
-     * Call a class method with the resolved dependencies.
-     *
-     * @param  object  $instance
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function callWithDependencies($instance, $method)
-    {
-        return call_user_func_array(
-            array($instance, $method), $this->resolveClassMethodDependencies(array(), $instance, $method)
-        );
-    }
 
     /**
      * Resolve the object method's type-hinted dependencies.
@@ -81,10 +68,7 @@ trait RouteDependencyResolverTrait
     {
         $class = $parameter->getClass();
 
-        // If the parameter has a type-hinted class, we will check to see if it is already in
-        // the list of parameters. If it is we will just skip it as it is probably a model
-        // binding and we do not want to mess with those; otherwise, we resolve it here.
-        if ($class && ! $this->alreadyInParameters($class->name, $parameters)) {
+        if (! is_null($class) && ! $this->alreadyInParameters($class->name, $parameters)) {
             return $this->container->make($class->name);
         }
     }

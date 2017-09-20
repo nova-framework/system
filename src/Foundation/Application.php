@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.78.6';
+    const VERSION = '3.78.7';
 
     /**
      * Indicates if the application has "booted".
@@ -1104,7 +1104,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
             'redirect'       => 'Nova\Routing\Redirector',
             'request'        => 'Nova\Http\Request',
-            'router'         => 'Nova\Routing\Router',
+            'router'         => array('Nova\Routing\Router', 'Nova\Routing\RouteFiltererInterface'),
             'session'        => 'Nova\Session\SessionManager',
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
@@ -1113,8 +1113,10 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'view'           => 'Nova\View\Factory',
         );
 
-        foreach ($aliases as $key => $alias) {
-            $this->alias($key, $alias);
+        foreach ($aliases as $key => $value) {
+            foreach ((array) $value as $alias) {
+                $this->alias($key, $alias);
+            }
         }
     }
 

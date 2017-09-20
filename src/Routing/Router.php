@@ -101,7 +101,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      *
      * @var array $groupStack
      */
-    private $groupStack = array();
+    protected $groupStack = array();
 
     /**
      * An array of HTTP request Methods.
