@@ -72,11 +72,10 @@ class ResourceRegistrar
     {
         list($name, $prefix) = $this->getResourcePrefix($name);
 
-        $callback = function ($me) use ($name, $controller, $options) {
-            $me->resource($name, $controller, $options);
-        };
-
-        return $this->router->group(compact('prefix'), $callback);
+        return $this->router->group(compact('prefix'), function ($router) use ($name, $controller, $options)
+        {
+            $router->resource($name, $controller, $options);
+        });
     }
 
     /**
@@ -105,7 +104,7 @@ class ResourceRegistrar
     {
         if (isset($options['only'])) {
             return array_intersect($defaults, (array) $options['only']);
-        } elseif (isset($options['except'])) {
+        } else if (isset($options['except'])) {
             return array_diff($defaults, (array) $options['except']);
         }
 
@@ -141,7 +140,7 @@ class ResourceRegistrar
     {
         return implode('/', array_map(function ($segment)
         {
-            return $segment .'/{'.$this->getResourceWildcard($segment) .'}';
+            return $segment .'/{' .$this->getResourceWildcard($segment) .'}';
 
         }, $segments));
     }
@@ -176,7 +175,7 @@ class ResourceRegistrar
             return $options['names'][$method];
         }
 
-        $prefix = isset($options['as']) ? $options['as'].'.' : '';
+        $prefix = isset($options['as']) ? $options['as'] .'.' : '';
 
         if (! $this->router->hasGroupStack()) {
             return $prefix .$resource .'.' .$method;
@@ -280,7 +279,7 @@ class ResourceRegistrar
      */
     protected function addResourceShow($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.$base.'}';
+        $uri = $this->getResourceUri($name) .'/{' .$base .'}';
 
         $action = $this->getResourceAction($name, $controller, 'show', $options);
 
@@ -298,7 +297,7 @@ class ResourceRegistrar
      */
     protected function addResourceEdit($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.$base.'}/edit';
+        $uri = $this->getResourceUri($name) .'/{' .$base .'}/edit';
 
         $action = $this->getResourceAction($name, $controller, 'edit', $options);
 
@@ -332,7 +331,7 @@ class ResourceRegistrar
      */
     protected function addPutResourceUpdate($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.$base.'}';
+        $uri = $this->getResourceUri($name) .'/{' .$base .'}';
 
         $action = $this->getResourceAction($name, $controller, 'update', $options);
 
@@ -349,7 +348,7 @@ class ResourceRegistrar
      */
     protected function addPatchResourceUpdate($name, $base, $controller)
     {
-        $uri = $this->getResourceUri($name).'/{'.$base.'}';
+        $uri = $this->getResourceUri($name) .'/{' .$base .'}';
 
         $this->router->patch($uri, $controller .'@update');
     }
@@ -365,7 +364,7 @@ class ResourceRegistrar
      */
     protected function addResourceDestroy($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.$base.'}';
+        $uri = $this->getResourceUri($name) .'/{' .$base .'}';
 
         $action = $this->getResourceAction($name, $controller, 'destroy', $options);
 
