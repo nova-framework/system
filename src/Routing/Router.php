@@ -17,6 +17,7 @@ use Nova\Routing\ControllerInspector;
 use Nova\Routing\RouteCollection;
 use Nova\Routing\RouteFiltererInterface;
 use Nova\Routing\Route;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -67,13 +68,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @var \Http\Request
      */
     protected $currentRequest;
-
-    /**
-     * The controller dispatcher instance.
-     *
-     * @var \Nova\Routing\ControllerDispatcher
-     */
-    protected $controllerDispatcher;
 
     /**
      * The asset file dispatcher instance.
@@ -312,7 +306,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $action = array('uses' => $controller .'@' .$method);
 
         //
-        $action['as'] = array_get($names, $method);
+        $action['as'] = Arr::get($names, $method);
 
         $this->{$route['verb']}($route['uri'], $action);
     }
@@ -433,12 +427,12 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected static function formatUsesPrefix($new, $old)
     {
         if (isset($new['namespace']) && isset($old['namespace'])) {
-            return trim(array_get($old, 'namespace'), '\\') .'\\' .trim($new['namespace'], '\\');
+            return trim(Arr::get($old, 'namespace'), '\\') .'\\' .trim($new['namespace'], '\\');
         } else if (isset($new['namespace'])) {
             return trim($new['namespace'], '\\');
         }
 
-        return array_get($old, 'namespace');
+        return Arr::get($old, 'namespace');
     }
 
     /**
@@ -451,10 +445,10 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected static function formatGroupPrefix($new, $old)
     {
         if (isset($new['prefix'])) {
-            return trim(array_get($old, 'prefix'), '/') .'/' .trim($new['prefix'], '/');
+            return trim(Arr::get($old, 'prefix'), '/') .'/' .trim($new['prefix'], '/');
         }
 
-        return array_get($old, 'prefix');
+        return Arr::get($old, 'prefix');
     }
 
     /**
@@ -551,7 +545,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function addWhereClausesToRoute($route)
     {
-        $wheres = array_get($route->getAction(), 'where', array());
+        $wheres = Arr::get($route->getAction(), 'where', array());
 
         $route->where(array_merge($this->patterns, $wheres));
 
@@ -743,7 +737,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected function performBinding($key, $value, $route)
     {
-        return call_user_func($this->binders[$key], $value, $route);
+        $callback = $this->binders[$key];
+
+        return call_user_func($callback, $value, $route);
     }
 
     /**
@@ -844,7 +840,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
                 return call_user_func($callback);
             }
 
-            throw new NotFoundHttpException;
+            throw new NotFoundHttpException();
         });
     }
 
@@ -1229,31 +1225,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function getRoutes()
     {
         return $this->routes;
-    }
-
-    /**
-     * Get the controller dispatcher instance.
-     *
-     * @return \Nova\Routing\ControllerDispatcher
-     */
-    public function getControllerDispatcher()
-    {
-        if (isset($this->controllerDispatcher)) {
-            return $this->controllerDispatcher;
-        }
-
-        return $this->controllerDispatcher = new ControllerDispatcher($this, $this->container);
-    }
-
-    /**
-     * Set the controller dispatcher instance.
-     *
-     * @param  \Nova\Routing\ControllerDispatcher  $dispatcher
-     * @return void
-     */
-    public function setControllerDispatcher(ControllerDispatcher $dispatcher)
-    {
-        $this->controllerDispatcher = $dispatcher;
     }
 
     /**

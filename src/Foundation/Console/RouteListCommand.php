@@ -148,31 +148,7 @@ class RouteListCommand extends Command
     {
         $before = array_keys($route->beforeFilters());
 
-        $before = array_unique(array_merge($before, $this->getPatternFilters($route)));
-
-        return implode(', ', $before);
-    }
-
-    /**
-    * Get all of the pattern filters matching the route.
-    *
-    * @param  \Nova\Routing\Route  $route
-    * @return array
-    */
-    protected function getPatternFilters($route)
-    {
-        $patterns = array();
-
-        foreach ($route->methods() as $method) {
-            // For each method supported by the route we will need to gather up the patterned
-            // filters for that method. We will then merge these in with the other filters
-            // we have already gathered up then return them back out to these consumers.
-            $inner = $this->getMethodPatterns($route->uri(), $method);
-
-            $patterns = array_merge($patterns, array_keys($inner));
-        }
-
-        return $patterns;
+        return implode(', ', array_unique($before));
     }
 
     /**

@@ -351,7 +351,7 @@ class ResourceRegistrar
     {
         $uri = $this->getResourceUri($name).'/{'.$base.'}';
 
-        $this->router->patch($uri, $controller.'@update');
+        $this->router->patch($uri, $controller .'@update');
     }
 
     /**

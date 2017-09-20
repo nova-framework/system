@@ -36,10 +36,13 @@ class ControllerInspector
         foreach ($methods as $method) {
             $name = $method->name;
 
-            if (! $this->isRoutable($method)) {
+            if (! $this->isRoutable($method, $controller)) {
                 continue;
             }
 
+            $routable[$name] = array();
+
+            //
             $data = $this->getMethodData($method, $prefix);
 
             $routable[$name][] = $data;
@@ -56,17 +59,12 @@ class ControllerInspector
      * Determine if the given controller method is routable.
      *
      * @param  \ReflectionMethod  $method
+     * @param  string  $controller
      * @return bool
      */
-    public function isRoutable(ReflectionMethod $method)
+    public function isRoutable(ReflectionMethod $method, $controller)
     {
-        if ($method->class == 'Nova\Routing\Controller') {
-            return false;
-        }
-
-        $path = str_replace('\\', '/', $method->class);
-
-        if (preg_match('#^.+/Controllers/BaseController$#', $path) === 1) {
+        if ($method->class != $controller) {
             return false;
         }
 
@@ -82,9 +80,9 @@ class ControllerInspector
      */
     public function getMethodData(ReflectionMethod $method, $prefix)
     {
-        $verb = $this->getVerb($name = $method->name);
+        list ($verb, $plain) = $this->getMethodInfo($name, $prefix);
 
-        $uri = $this->addUriWildcards($plain = $this->getPlainUri($name, $prefix));
+        $uri = $this->addUriWildcards($plain);
 
         return compact('verb', 'plain', 'uri');
     }
@@ -102,26 +100,19 @@ class ControllerInspector
     }
 
     /**
-     * Extract the verb from a controller action.
-     *
-     * @param  string  $name
-     * @return string
-     */
-    public function getVerb($name)
-    {
-        return head(explode('_', Str::snake($name)));
-    }
-
-    /**
-     * Determine the URI from the given method name.
+     * Determine the verb and URI from the given method name.
      *
      * @param  string  $name
      * @param  string  $prefix
      * @return string
      */
-    public function getPlainUri($name, $prefix)
+    public function getMethodInfo($name, $prefix)
     {
-        return $prefix .'/' .implode('-', array_slice(explode('_', Str::snake($name)), 1));
+        $parts = explode('_', Str::snake($name));
+
+        return array(
+            head($parts), $prefix .'/' .implode('-', array_slice($parts, 1))
+        );
     }
 
     /**
@@ -132,7 +123,7 @@ class ControllerInspector
      */
     public function addUriWildcards($uri)
     {
-        return $uri .'/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}';
+        return $uri .'/{one?}/{two?}/{three?}/{four?}/{five?}';
     }
 
 }
