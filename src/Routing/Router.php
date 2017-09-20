@@ -13,7 +13,6 @@ use Nova\Events\Dispatcher;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Routing\ControllerDispatcher;
-use Nova\Routing\ControllerInspector;
 use Nova\Routing\RouteCollection;
 use Nova\Routing\RouteFiltererInterface;
 use Nova\Routing\Route;
@@ -75,13 +74,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @var \Nova\Routing\AssetFileDispatcher
      */
     protected $fileDispatcher;
-
-    /**
-     * The controller inspector instance.
-     *
-     * @var \Nova\Routing\ControllerInspector
-     */
-    protected $inspector;
 
     /**
      * Indicates if the router is running filters.
@@ -245,85 +237,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $methods = array_map('strtoupper', (array) $methods);
 
         return $this->addRoute($methods, $route, $action);
-    }
-
-    /**
-     * Register an array of controllers with wildcard routing.
-     *
-     * @param  array  $controllers
-     * @return void
-     */
-    public function controllers(array $controllers)
-    {
-        foreach ($controllers as $uri => $name) {
-            $this->controller($uri, $name);
-        }
-    }
-
-    /**
-     * Route a Controller to a URI with wildcard routing.
-     *
-     * @param  string  $uri
-     * @param  string  $controller
-     * @param  array   $names
-     * @return void
-     * @throws  \BadMethodCallException
-     */
-    public function controller($uri, $controller, $names = array())
-    {
-        $inspector = $this->getInspector();
-
-        //
-        $prepended = $controller;
-
-        if (! empty($this->groupStack)) {
-            $prepended = $this->prependGroupUses($controller);
-        }
-
-        // Retrieve the Controller routable methods and associated information.
-        $routable = $inspector->getRoutable($prepended, $uri);
-
-        foreach ($routable as $method => $routes) {
-            foreach ($routes as $route) {
-                $this->registerInspected($route, $controller, $method, $names);
-            }
-        }
-
-        $this->addFallthroughRoute($controller, $uri);
-    }
-
-    /**
-     * Register an inspected controller route.
-     *
-     * @param  array   $route
-     * @param  string  $controller
-     * @param  string  $method
-     * @param  array   $names
-     * @return void
-     */
-    protected function registerInspected($route, $controller, $method, &$names)
-    {
-        $action = array('uses' => $controller .'@' .$method);
-
-        //
-        $action['as'] = Arr::get($names, $method);
-
-        $this->{$route['verb']}($route['uri'], $action);
-    }
-
-    /**
-     * Add a fallthrough route for a controller.
-     *
-     * @param  string  $controller
-     * @param  string  $uri
-     * @return void
-     * @throws  \BadMethodCallException
-     */
-    protected function addFallthroughRoute($controller, $uri)
-    {
-        $route = $this->any($uri .'/{_missing}', $controller .'@missingMethod');
-
-        $route->where('_missing', '(.*)');
     }
 
     /**
@@ -1025,16 +938,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
-     * Return the available Filters.
-     *
-     * @return array
-     */
-    public function getFilters()
-    {
-        return $this->filters;
-    }
-
-    /**
      * Create a response instance from the given value.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
@@ -1239,20 +1142,6 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         }
 
         return $this->fileDispatcher = $this->container->make('Nova\Routing\Assets\DispatcherInterface');
-    }
-
-    /**
-     * Get a Controller Inspector instance.
-     *
-     * @return \Nova\Routing\ControllerInspector
-     */
-    public function getInspector()
-    {
-        if (isset($this->inspector)) {
-            return $this->inspector;
-        }
-
-        return $this->inspector = new ControllerInspector();
     }
 
     /**

@@ -2,10 +2,11 @@
 
 namespace Nova\Foundation\Console;
 
+use Nova\Console\Command;
 use Nova\Http\Request;
 use Nova\Routing\Route;
 use Nova\Routing\Router;
-use Nova\Console\Command;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,6 +43,13 @@ class RouteListCommand extends Command
     protected $routes;
 
     /**
+    * An array of all the know controller instances.
+    *
+    * @var \Nova\Routing\Controller
+    */
+    protected $controllers;
+
+    /**
     * The table helper set.
     *
     * @var \Symfony\Component\Console\Helper\TableHelper
@@ -54,7 +62,7 @@ class RouteListCommand extends Command
     * @var array
     */
     protected $headers = array(
-        'Domain', 'URI', 'Name', 'Action', 'Before Filters', 'After Filters'
+        'Domain', 'Method', 'URI', 'Name', 'Action', 'Before Filters', 'After Filters'
     );
 
     /**
@@ -117,7 +125,8 @@ class RouteListCommand extends Command
 
         return $this->filterRoute(array(
             'host'   => $route->domain(),
-            'uri'    => $uri,
+            'method' => implode('|', $route->methods()),
+            'uri'    => $route->uri(),
             'name'   => $route->getName(),
             'action' => $route->getActionName(),
             'before' => $this->getBeforeFilters($route),
@@ -146,21 +155,19 @@ class RouteListCommand extends Command
     */
     protected function getBeforeFilters($route)
     {
-        $before = array_keys($route->beforeFilters());
+        $filters = array_keys($route->beforeFilters());
 
-        return implode(', ', array_unique($before));
-    }
+        $action = $route->getActionName();
 
-    /**
-    * Get the pattern filters for a given URI and method.
-    *
-    * @param  string  $uri
-    * @param  string  $method
-    * @return array
-    */
-    protected function getMethodPatterns($uri, $method)
-    {
-        return $this->router->findPatternFilters(Request::create($uri, $method));
+        if ($action !== 'Closure') {
+            list($controller, $method) = explode('@', $action);
+
+            $filters = array_merge($filters, $this->parseControllerFilters(
+                $instance = $this->getController($controller), $method, $instance->getBeforeFilters()
+            ));
+        }
+
+        return implode(', ', array_unique($filters));
     }
 
     /**
@@ -171,7 +178,78 @@ class RouteListCommand extends Command
     */
     protected function getAfterFilters($route)
     {
-        return implode(', ', array_keys($route->afterFilters()));
+        $filters = array_keys($route->afterFilters());
+
+        $action = $route->getActionName();
+
+        if ($action !== 'Closure') {
+            list($controller, $method) = explode('@', $action);
+
+            $filters = array_merge($filters, $this->parseControllerFilters(
+                $instance = $this->getController($controller), $method, $instance->getAfterFilters()
+            ));
+        }
+
+        return implode(', ', array_unique($filters));
+    }
+
+    /**
+    * Get controller instance
+    *
+    * @param  string  $controller
+    * @return \Nova\Routing\Controller
+    */
+    protected function getController($controller)
+    {
+        if (isset($this->controllers[$controller])) {
+            return $this->controllers[$controller];
+        }
+
+        return $this->controllers[$controller] = $this->container->make($controller);
+    }
+
+    /**
+     * Get the route filters for the given controller instance and method.
+     *
+     * @param  \Nova\Routing\Controller  $controller
+     * @param  string  $method
+     * @param  array  $filters
+     * @return array
+     */
+    protected function parseControllerFilters($controller, $method, array $filters)
+    {
+        $results = array();
+
+        foreach ($filters as $filter) {
+            if (static::methodExcludedByFilter($method, $filter)) {
+                continue;
+            }
+
+            $result = $filter['filter'];
+
+            if (! empty($filter['parameters'])) {
+                $result .= ':' .implode(',', $filter['parameters']);
+            }
+
+            $results[] = $result;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $filter
+     * @return bool
+     */
+    protected static function methodExcludedByFilter($method, array $filter)
+    {
+        $options = $filter['options'];
+
+        return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except'])));
     }
 
     /**
@@ -183,8 +261,7 @@ class RouteListCommand extends Command
     protected function filterRoute(array $route)
     {
         if (($this->option('name') && ! str_contains($route['name'], $this->option('name'))) ||
-            $this->option('path') && ! str_contains($route['uri'], $this->option('path')))
-        {
+            $this->option('path') && ! str_contains($route['uri'], $this->option('path'))) {
             return null;
         } else {
             return $route;
