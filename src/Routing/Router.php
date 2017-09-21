@@ -103,6 +103,13 @@ class Router
      */
     protected $registrar;
 
+    /**
+     * The registered string macros.
+     *
+     * @var array
+     */
+    protected $macros = array();
+
 
     /**
      * Create a new Router instance.
@@ -1174,5 +1181,40 @@ class Router
     public function getPatterns()
     {
         return $this->patterns;
+    }
+
+    /**
+     * Register a custom macro.
+     *
+     * @param  string    $name
+     * @param  callable  $callback
+     * @return void
+     */
+    public function extend($name, callable $callback)
+    {
+        $this->macros[$name] = $callback;
+    }
+
+    /**
+     * Dynamically handle calls to the class.
+     *
+     * @param  string  $method
+     * @param  array   $parameters
+     * @return mixed
+     *
+     * @throws \BadMethodCallException
+     */
+    public static function __call($method, $parameters)
+    {
+        if (isset($this->macros[$name])) {
+            $callback = $this->macros[$method];
+
+            //
+            $parameters = array_merge(array($this), $parameters);
+
+            return call_user_func_array($callback, $parameters);
+        }
+
+        throw new BadMethodCallException("Method {$method} does not exist.");
     }
 }
