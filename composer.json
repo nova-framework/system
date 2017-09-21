@@ -27,6 +27,7 @@
         "paragonie/random_compat": "~1.4|~2.0",
         "doctrine/inflector": "1.1.*",
         "nesbot/carbon": "^1.21",
+        "mtdowling/cron-expression": "~1.0",
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
         "predis/predis": "0.8.*",

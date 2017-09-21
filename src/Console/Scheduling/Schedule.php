@@ -33,7 +33,7 @@ class Schedule
     }
 
     /**
-     * Add a new Artisan command event to the schedule.
+     * Add a new Forge command event to the schedule.
      *
      * @param  string  $command
      * @param  array  $parameters
