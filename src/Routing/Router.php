@@ -527,7 +527,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      * @param  string  $uses
      * @return string
      */
-    protected function prependGroupUses($uses)
+    public function prependGroupUses($uses)
     {
         $group = last($this->groupStack);
 
@@ -1205,7 +1205,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
             $callback = $this->extensions[$method];
 
             //
-            $parameters = array_merge(array($this), $parameters);
+            $parameters = array_merge(array($this->container), $parameters);
 
             return call_user_func_array($callback, $parameters);
         }
