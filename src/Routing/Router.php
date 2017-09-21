@@ -1215,7 +1215,7 @@ class Router
      *
      * @throws \BadMethodCallException
      */
-    public static function __call($method, $parameters)
+    public function __call($method, $parameters)
     {
         if (isset($this->macros[$name])) {
             $callback = $this->macros[$method];
