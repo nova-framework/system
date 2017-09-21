@@ -104,11 +104,11 @@ class Router
     protected $registrar;
 
     /**
-     * The registered string macros.
+     * The registered string extensions.
      *
      * @var array
      */
-    protected $macros = array();
+    protected $extensions = array();
 
 
     /**
@@ -1184,7 +1184,7 @@ class Router
     }
 
     /**
-     * Register a custom macro.
+     * Register a custom extension.
      *
      * @param  string    $name
      * @param  callable  $callback
@@ -1192,7 +1192,7 @@ class Router
      */
     public function extend($name, callable $callback)
     {
-        $this->macros[$name] = $callback;
+        $this->extensions[$name] = $callback;
     }
 
     /**
@@ -1206,8 +1206,8 @@ class Router
      */
     public static function __call($method, $parameters)
     {
-        if (isset($this->macros[$name])) {
-            $callback = $this->macros[$method];
+        if (isset($this->extensions[$name])) {
+            $callback = $this->extensions[$method];
 
             //
             $parameters = array_merge(array($this), $parameters);
