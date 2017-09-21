@@ -1209,9 +1209,6 @@ class Router
         if (isset($this->extensions[$name])) {
             $callback = $this->extensions[$method];
 
-            //
-            $parameters = array_merge(array($this->container), $parameters);
-
             return call_user_func_array($callback, $parameters);
         }
 
