@@ -555,7 +555,7 @@ class Router
      * @param  string  $uses
      * @return string
      */
-    public function prependGroupUses($uses)
+    protected function prependGroupUses($uses)
     {
         $group = last($this->groupStack);
 
