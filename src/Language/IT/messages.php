@@ -28,6 +28,8 @@ return array (
   'POST Variables' => 'Variabili POST',
   'Possible keys: <b>{0}</b>' => 'Possibili chiavi: <b>{0}</b>',
   'Rows: <b>{0}</b>' => 'Righe: <b>{0}</b>',
+  'Scheduled Job Output' => '',
+  'Scheduled Job Output ({0})' => '',
   'Server Headers' => 'Server Headers',
   'Speed' => 'Velocita\'',
   'Speed: <b>{0}</b>' => 'Velocita\': <b>{0}</b>',

@@ -28,6 +28,8 @@ return array (
   'POST Variables' => 'POST Variabler',
   'Possible keys: <b>{0}</b>' => 'Mulige nøgler: <b>{0}</b>',
   'Rows: <b>{0}</b>' => 'Rækker <b>{0}</b>',
+  'Scheduled Job Output' => '',
+  'Scheduled Job Output ({0})' => '',
   'Server Headers' => 'Server sidehoved',
   'Speed' => 'Hastighed',
   'Speed: <b>{0}</b>' => 'Hastighed: <b>{0}</b>',
