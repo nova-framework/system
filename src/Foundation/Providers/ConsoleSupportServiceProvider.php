@@ -32,6 +32,9 @@ class ConsoleSupportServiceProvider extends ServiceProvider
         {
            return new Forge($app);
         });
+
+        // Register the additional service providers.
+        $this->app->register('Nova\Console\ScheduleServiceProvider');
     }
 
     /**

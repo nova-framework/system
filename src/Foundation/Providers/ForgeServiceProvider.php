@@ -81,7 +81,7 @@ class ForgeServiceProvider extends ServiceProvider
             return new ClearCompiledCommand;
         });
     }
-    
+
     /**
      * Register the command.
      *
