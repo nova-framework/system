@@ -117,6 +117,13 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     protected $registrar;
 
+    /**
+     * The registered string macros.
+     *
+     * @var array
+     */
+    protected $macros = array();
+
 
     /**
      * Router constructor.
@@ -1171,4 +1178,38 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         return $this->dispatch(Request::createFromBase($request));
     }
 
+    /**
+     * Register a custom macro.
+     *
+     * @param  string    $name
+     * @param  callable  $callback
+     * @return void
+     */
+    public function extend($name, callable $callback)
+    {
+        $this->macros[$name] = $callback;
+    }
+
+    /**
+     * Dynamically handle calls to the class.
+     *
+     * @param  string  $method
+     * @param  array   $parameters
+     * @return mixed
+     *
+     * @throws \BadMethodCallException
+     */
+    public function __call($method, $parameters)
+    {
+        if (isset($this->macros[$name])) {
+            $callback = $this->macros[$method];
+
+            //
+            $parameters = array_merge(array($this), $parameters);
+
+            return call_user_func_array($callback, $parameters);
+        }
+
+        throw new BadMethodCallException("Method {$method} does not exist.");
+    }
 }
