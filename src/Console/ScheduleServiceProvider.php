@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Console\Scheduling;
+namespace Nova\Console;
 
 use Nova\Support\ServiceProvider;
 
