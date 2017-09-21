@@ -118,11 +118,11 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     protected $registrar;
 
     /**
-     * The registered string extensions.
+     * The registered string macros.
      *
      * @var array
      */
-    protected $extensions = array();
+    protected $macros = array();
 
 
     /**
@@ -1179,15 +1179,26 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     }
 
     /**
-     * Register a custom extension.
+     * Register a custom macro.
      *
      * @param  string    $name
      * @param  callable  $callback
      * @return void
      */
-    public function extend($name, callable $callback)
+    public function macro($name, callable $callback)
     {
-        $this->extensions[$name] = $callback;
+        $this->macros[$name] = $callback;
+    }
+
+    /**
+     * Checks if macro is registered
+     *
+     * @param  string    $name
+     * @return boolean
+     */
+    public function hasMacro($name)
+    {
+        return isset($this->macros[$name]);
     }
 
     /**
@@ -1201,8 +1212,8 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
      */
     public function __call($method, $parameters)
     {
-        if (isset($this->extensions[$name])) {
-            $callback = $this->extensions[$method];
+        if (isset($this->macros[$name])) {
+            $callback = $this->macros[$method];
 
             return call_user_func_array($callback, $parameters);
         }
