@@ -30,6 +30,7 @@ return array (
   'Rows: <b>{0}</b>' => 'Lignes: <b>{0}</b>',
   'Scheduled Job Output' => '',
   'Scheduled Job Output ({0})' => '',
+  'Sent {0} email(s) ...' => '',
   'Server Headers' => 'En-têtes du serveur',
   'Speed' => 'Vitesse',
   'Speed: <b>{0}</b>' => 'Vitesse: <b>{0}</b>',

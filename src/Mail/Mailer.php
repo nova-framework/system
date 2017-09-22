@@ -2,10 +2,11 @@
 
 namespace Nova\Mail;
 
-use Nova\Log\Writer;
-use Nova\View\Factory;
-use Nova\Events\Dispatcher;
 use Nova\Container\Container;
+use Nova\Events\Dispatcher;
+use Nova\Log\Writer;
+use Nova\Support\Arr;
+use Nova\View\Factory;
 
 use Swift_Mailer;
 use Swift_Message;
@@ -28,6 +29,13 @@ class Mailer
      * @var \Swift_Mailer
      */
     protected $swift;
+
+    /**
+     * The Swift Spool Mailer instance.
+     *
+     * @var \Swift_Mailer
+     */
+    protected $swiftSpool;
 
     /**
      * The event dispatcher instance.
@@ -83,13 +91,17 @@ class Mailer
      *
      * @param  \Nova\View\Factory  $views
      * @param  \Swift_Mailer  $swift
+     * @param  \Swift_Mailer  $swiftSpool
      * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
-    public function __construct(Factory $views, Swift_Mailer $swift, Dispatcher $events = null)
+    public function __construct(Factory $views, Swift_Mailer $swift, Swift_Mailer $swiftSpool, Dispatcher $events = null)
     {
         $this->views = $views;
         $this->swift = $swift;
+
+        $this->swiftSpool = $swiftSpool;
+
         $this->events = $events;
     }
 
@@ -103,6 +115,18 @@ class Mailer
     public function alwaysFrom($address, $name = null)
     {
         $this->from = compact('address', 'name');
+    }
+
+    /**
+     * Send a new message when only a raw text part.
+     *
+     * @param  string  $text
+     * @param  mixed  $callback
+     * @return int
+     */
+    public function raw($text, $callback)
+    {
+        return $this->send(array('raw' => $text), array(), $callback);
     }
 
     /**
@@ -128,10 +152,37 @@ class Mailer
      */
     public function send($view, array $data, $callback)
     {
+        $this->sendMessage($view, $data, $callback, $this->swift);
+    }
+
+    /**
+     * Queue a new e-mail message for sending.
+     *
+     * @param  string|array  $view
+     * @param  array   $data
+     * @param  \Closure|string  $callback
+     * @return void
+     */
+    public function queue($view, array $data, $callback)
+    {
+        $this->sendMessage($view, $data, $callback, $this->swiftSpool);
+    }
+
+    /**
+     * Create and send a new message using a view.
+     *
+     * @param  string|array  $view
+     * @param  array  $data
+     * @param  \Closure|string  $callback
+     * @param  \Swift_Mailer  $mailer
+     * @return void
+     */
+    protected function sendMessage($view, array $data, $callback, $mailer)
+    {
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
-        list($view, $plain) = $this->parseView($view);
+        list($view, $plain, $raw) = $this->parseView($view);
 
         $data['message'] = $message = $this->createMessage();
 
@@ -140,11 +191,11 @@ class Mailer
         // Once we have retrieved the view content for the e-mail we will set the body
         // of this message using the HTML type, which will provide a simple wrapper
         // to creating view based emails that are able to receive arrays of data.
-        $this->addContent($message, $view, $plain, $data);
+        $this->addContent($message, $view, $plain, $raw, $data);
 
         $message = $message->getSwiftMessage();
 
-        $this->sendSwiftMessage($message);
+        $this->sendSwiftMessage($message, $mailer);
     }
 
     /**
@@ -153,10 +204,11 @@ class Mailer
      * @param  \Nova\Mail\Message  $message
      * @param  string  $view
      * @param  string  $plain
+     * @param  string  $raw
      * @param  array   $data
      * @return void
      */
-    protected function addContent($message, $view, $plain, $data)
+    protected function addContent($message, $view, $plain, $raw, $data)
     {
         if (isset($view)) {
             $message->setBody($this->getView($view, $data), 'text/html');
@@ -164,6 +216,12 @@ class Mailer
 
         if (isset($plain)) {
             $message->addPart($this->getView($plain, $data), 'text/plain');
+        }
+
+        if (isset($raw)) {
+            $method = (isset($view) || isset($plain)) ? 'addPart' : 'setBody';
+
+            call_user_func(array($message, $method), $raw, 'text/plain');
         }
     }
 
@@ -177,13 +235,15 @@ class Mailer
      */
     protected function parseView($view)
     {
-        if (is_string($view)) return array($view, null);
+        if (is_string($view)) {
+            return array($view, null, null);
+        }
 
         // If the given view is an array with numeric keys, we will just assume that
         // both a "pretty" and "plain" view were provided, so we will return this
         // array as is, since must should contain both views with numeric keys.
-        if (is_array($view) && isset($view[0])) {
-            return $view;
+        else if (is_array($view) && isset($view[0])) {
+            return array($view[0], $view[1], null);
         }
 
         // If the view is an array, but doesn't contain numeric keys, we will assume
@@ -191,7 +251,9 @@ class Mailer
         // named keys instead, allowing the developers to use one or the other.
         else if (is_array($view)) {
             return array(
-                array_get($view, 'html'), array_get($view, 'text')
+                Arr::get($view, 'html'),
+                Arr::get($view, 'text'),
+                Arr::get($view, 'raw'),
             );
         }
 
@@ -202,16 +264,21 @@ class Mailer
      * Send a Swift Message instance.
      *
      * @param  \Swift_Message  $message
+     * @param  \Swift_Mailer  $mailer
      * @return void
      */
-    protected function sendSwiftMessage($message)
+    protected function sendSwiftMessage($message, $mailer)
     {
         if ($this->events) {
             $this->events->fire('mailer.sending', array($message));
         }
 
         if (! $this->pretending) {
-            $this->swift->send($message, $this->failedRecipients);
+            try {
+                return $mailer->send($message, $this->failedRecipients);
+            } finally {
+                $mailer->getTransport()->stop();
+            }
         } else if (isset($this->logger)) {
             $this->logMessage($message);
         }
