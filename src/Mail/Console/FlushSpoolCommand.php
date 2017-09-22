@@ -23,7 +23,7 @@ class FlushSpoolCommand extends Command
      *
      * @var string
      */
-    protected $description = "Flush the Mailer's Spool queue";
+    protected $description = "Send the emails queued on Mailer Spool";
 
     /**
      * The event dispatcher instance.
