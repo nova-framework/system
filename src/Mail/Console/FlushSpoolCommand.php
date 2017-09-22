@@ -16,7 +16,7 @@ class FlushSpoolCommand extends Command
      *
      * @var string
      */
-    protected $name = 'mailer:spool:flush';
+    protected $name = 'mailer:spool:send';
 
     /**
      * The console command description.
