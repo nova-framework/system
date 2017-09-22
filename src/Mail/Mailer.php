@@ -269,7 +269,7 @@ class Mailer
      */
     protected function sendSwiftMessage($message, $mailer)
     {
-        if ($this->events) {
+        if (isset($this->events)) {
             $this->events->fire('mailer.sending', array($message));
         }
 

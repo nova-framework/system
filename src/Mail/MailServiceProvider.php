@@ -74,7 +74,7 @@ class MailServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('command.mailer.spool.flush', function ($app)
         {
-            return new Console\FlushSpoolCommand($app['swift.transport'], $app['swift.transport.spool']);
+            return new Console\FlushSpoolCommand($app['swift.transport'], $app['swift.transport.spool'], $app['events']);
         });
 
         $this->commands('command.mailer.spool.flush');

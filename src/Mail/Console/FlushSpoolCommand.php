@@ -3,7 +3,7 @@
 namespace Nova\Mail\Console;
 
 use Nova\Console\Command;
-use Nova\Filesystem\Filesystem;
+use Nova\Events\Dispatcher;
 
 use Swift_Transport;
 use Swift_SpoolTransport;
@@ -26,6 +26,13 @@ class FlushSpoolCommand extends Command
     protected $description = "Flush the Mailer's Spool queue";
 
     /**
+     * The event dispatcher instance.
+     *
+     * @var \Nova\Events\Dispatcher
+     */
+    protected $events;
+
+    /**
      * The Swift Transport instance.
      *
      * @var \Swift_Transport
@@ -45,11 +52,13 @@ class FlushSpoolCommand extends Command
      *
      * @return void
      */
-    public function __construct(Swift_Transport $transport, Swift_SpoolTransport $spoolTransport)
+    public function __construct(Swift_Transport $transport, Swift_SpoolTransport $spoolTransport, Dispatcher $events = null)
     {
         parent::__construct();
 
         //
+        $this->events = $events;
+
         $this->transport = $transport;
 
         $this->spoolTransport = $spoolTransport;
@@ -75,7 +84,13 @@ class FlushSpoolCommand extends Command
         }
 
         // Sends messages using the given transport instance.
-        $result = $spool->flushQueue($this->transport);
+        $failedRecipients = array();
+
+        $result = $spool->flushQueue($this->transport, $failedRecipients);
+
+        if (isset($this->events)) {
+            $this->events->fire('mailer.spool.flushing', array($result, $failedRecipients));
+        }
 
         $this->info(__d('nova', 'Sent {0} email(s) ...', $result));
     }
