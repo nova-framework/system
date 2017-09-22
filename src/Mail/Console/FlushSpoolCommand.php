@@ -89,7 +89,7 @@ class FlushSpoolCommand extends Command
         $result = $spool->flushQueue($this->transport, $failedRecipients);
 
         if (isset($this->events)) {
-            $this->events->fire('mailer.spool.sending', array($result, $failedRecipients));
+            $this->events->fire('mailer.spool.sent', array($result, $failedRecipients));
         }
 
         $this->info(__d('nova', 'Sent {0} email(s) ...', $result));
