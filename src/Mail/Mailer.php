@@ -277,6 +277,10 @@ class Mailer
             try {
                 return $mailer->send($message, $this->failedRecipients);
             } finally {
+                if (isset($this->events)) {
+                    $this->events->fire('mailer.sent', array($message));
+                }
+
                 $mailer->getTransport()->stop();
             }
         } else if (isset($this->logger)) {
