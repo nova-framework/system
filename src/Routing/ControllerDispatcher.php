@@ -13,7 +13,6 @@ class ControllerDispatcher
 {
     use RouteDependencyResolverTrait;
 
-
     /**
      * The IoC container instance.
      *
