@@ -3,8 +3,8 @@
 namespace Nova\Database\Console\Seeds;
 
 use Nova\Console\GeneratorCommand;
-use Nova\Foundation\Composer;
 use Nova\Filesystem\Filesystem;
+use Nova\Support\Composer;
 
 
 class SeederMakeCommand extends GeneratorCommand

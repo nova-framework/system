@@ -1,9 +1,11 @@
 <?php
 
-namespace Nova\Foundation;
+namespace Nova\Support;
 
 use Nova\Filesystem\Filesystem;
+
 use Symfony\Component\Process\Process;
+
 
 class Composer
 {
@@ -44,9 +46,12 @@ class Composer
      */
     public function dumpAutoloads($extra = '')
     {
+        $command = trim($this->findComposer() .' dump-autoload ' .$extra);
+
+        //
         $process = $this->getProcess();
 
-        $process->setCommandLine(trim($this->findComposer() .' dump-autoload ' .$extra));
+        $process->setCommandLine($command);
 
         $process->run();
     }

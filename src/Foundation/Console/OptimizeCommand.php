@@ -3,7 +3,7 @@
 namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
-use Nova\Foundation\Composer;
+use Nova\Support\Composer;
 
 use Symfony\Component\Console\Input\InputOption;
 

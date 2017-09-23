@@ -2,8 +2,8 @@
 
 namespace Nova\Foundation\Providers;
 
-use Nova\Foundation\Composer;
 use Nova\Foundation\Forge;
+use Nova\Support\Composer;
 use Nova\Support\ServiceProvider;
 
 
