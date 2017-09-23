@@ -67,6 +67,27 @@ class ControllerDispatcher
     }
 
     /**
+     * Apply the applicable after filters to the route.
+     *
+     * @param  \Nova\Routing\Controller  $controller
+     * @param  \Nova\Routing\Route  $route
+     * @param  string  $method
+     * @return mixed
+     */
+    protected function assignAfter($controller, $route, $method)
+    {
+        foreach ($controller->getAfterFilters() as $filter) {
+            if (static::methodExcludedByFilter($method, $filter)) {
+                continue;
+            }
+
+            $filter = $filter['filter'];
+
+            $route->after($filter);
+        }
+    }
+
+    /**
      * Call the "before" filters for the controller.
      *
      * @param  \Nova\Routing\Controller  $controller
@@ -87,27 +108,6 @@ class ControllerDispatcher
             if (! is_null($response)) {
                 return $response;
             }
-        }
-    }
-
-    /**
-     * Apply the applicable after filters to the route.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function assignAfter($controller, $route, $method)
-    {
-        foreach ($controller->getAfterFilters() as $filter) {
-            if (static::methodExcludedByFilter($method, $filter)) {
-                continue;
-            }
-
-            $filter = $filter['filter'];
-
-            $route->after($filter);
         }
     }
 
