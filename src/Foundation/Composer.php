@@ -21,6 +21,7 @@ class Composer
      */
     protected $workingPath;
 
+
     /**
      * Create a new Composer manager instance.
      *
@@ -31,6 +32,7 @@ class Composer
     public function __construct(Filesystem $files, $workingPath = null)
     {
         $this->files = $files;
+
         $this->workingPath = $workingPath;
     }
 
@@ -44,7 +46,7 @@ class Composer
     {
         $process = $this->getProcess();
 
-        $process->setCommandLine(trim($this->findComposer().' dump-autoload '.$extra));
+        $process->setCommandLine(trim($this->findComposer() .' dump-autoload ' .$extra));
 
         $process->run();
     }
@@ -66,9 +68,8 @@ class Composer
      */
     protected function findComposer()
     {
-        if ($this->files->exists($this->workingPath.'/composer.phar'))
-        {
-            return '"'.PHP_BINARY.'" composer.phar';
+        if ($this->files->exists($this->workingPath .'/composer.phar')) {
+            return '"' .PHP_BINARY .'" composer.phar';
         }
 
         return 'composer';
@@ -81,7 +82,7 @@ class Composer
      */
     protected function getProcess()
     {
-        return (new Process('', $this->workingPath))->setTimeout(null);
+        return with(new Process('', $this->workingPath))->setTimeout(null);
     }
 
     /**
