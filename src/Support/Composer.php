@@ -48,12 +48,15 @@ class Composer
      */
     public function dumpAutoloads($extra = '')
     {
-        $command = $this->findComposer() .' dump-autoload ' .$extra;
+        $command = $this->findComposer() .' dump-autoload';
 
-        //
+        if (! empty($extra)) {
+            $command = trim($command .' ' .$extra);
+        }
+
         $process = $this->getProcess();
 
-        $process->setCommandLine(trim($command));
+        $process->setCommandLine($command);
 
         $process->run();
     }
