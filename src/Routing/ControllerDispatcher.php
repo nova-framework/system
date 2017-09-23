@@ -55,26 +55,10 @@ class ControllerDispatcher
     {
         $this->assignAfter($controller, $route, $method);
 
-        //
-        $response = $this->before($controller, $route, $request, $method);
-
-        if (is_null($response)) {
-            $response = $this->call($controller, $route, $method);
+        if (! is_null($response = $this->before($controller, $route, $request, $method))) {
+            return $response;
         }
 
-        return $response;
-    }
-
-    /**
-     * Call the given controller instance method.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function call($controller, $route, $method)
-    {
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method
         );
