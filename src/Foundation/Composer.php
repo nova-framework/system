@@ -68,7 +68,7 @@ class Composer
      */
     protected function findComposer()
     {
-        if ($this->files->exists($this->workingPath .'/composer.phar')) {
+        if ($this->files->exists($this->workingPath .DS .'composer.phar')) {
             return '"' .PHP_BINARY .'" composer.phar';
         }
 
