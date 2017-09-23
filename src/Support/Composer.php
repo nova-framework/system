@@ -5,6 +5,8 @@ namespace Nova\Support;
 use Nova\Filesystem\Filesystem;
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessUtils;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 
 class Composer
@@ -74,7 +76,9 @@ class Composer
     protected function findComposer()
     {
         if ($this->files->exists($this->workingPath .DS .'composer.phar')) {
-            return '"' .PHP_BINARY .'" composer.phar';
+            $executable = with(new PhpExecutableFinder)->find(false);
+
+            return ProcessUtils::escapeArgument($executable) .' composer.phar';
         }
 
         return 'composer';
@@ -87,7 +91,9 @@ class Composer
      */
     protected function getProcess()
     {
-        return with(new Process('', $this->workingPath))->setTimeout(null);
+        $process = new Process('', $this->workingPath);
+
+        return $process->setTimeout(null);
     }
 
     /**
