@@ -22,6 +22,7 @@ class Forge
      */
     protected $forge;
 
+
     /**
      * Create a new forge command runner instance.
      *
@@ -40,7 +41,9 @@ class Forge
      */
     protected function getForge()
     {
-        if (! is_null($this->forge)) return $this->forge;
+        if (isset($this->forge)) {
+            return $this->forge;
+        }
 
         $this->app->loadDeferredProviders();
 
@@ -58,7 +61,9 @@ class Forge
      */
     public function __call($method, $parameters)
     {
-        return call_user_func_array(array($this->getForge(), $method), $parameters);
+        $instance = $this->getForge();
+
+        return call_user_func_array(array($instance, $method), $parameters);
     }
 
 }
