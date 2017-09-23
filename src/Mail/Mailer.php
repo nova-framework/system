@@ -88,6 +88,7 @@ class Mailer
      */
     protected $parsedViews = array();
 
+
     /**
      * Create a new Mailer instance.
      *
@@ -116,6 +117,18 @@ class Mailer
     }
 
     /**
+     * Send a new message when only a raw text part.
+     *
+     * @param  string  $text
+     * @param  mixed  $callback
+     * @return int
+     */
+    public function raw($text, $callback)
+    {
+        return $this->send(array('raw' => $text), array(), $callback);
+    }
+
+    /**
      * Send a new message when only a plain part.
      *
      * @param  string  $view
@@ -141,7 +154,7 @@ class Mailer
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
-        list($view, $plain) = $this->parseView($view);
+        list($view, $plain, $raw) = $this->parseView($view);
 
         $data['message'] = $message = $this->createMessage();
 
@@ -150,7 +163,7 @@ class Mailer
         // Once we have retrieved the view content for the e-mail we will set the body
         // of this message using the HTML type, which will provide a simple wrapper
         // to creating view based emails that are able to receive arrays of data.
-        $this->addContent($message, $view, $plain, $data);
+        $this->addContent($message, $view, $plain, $raw, $data);
 
         $message = $message->getSwiftMessage();
 
@@ -267,10 +280,11 @@ class Mailer
      * @param  \Nova\Mail\Message  $message
      * @param  string  $view
      * @param  string  $plain
+     * @param  string  $raw
      * @param  array   $data
      * @return void
      */
-    protected function addContent($message, $view, $plain, $data)
+    protected function addContent($message, $view, $plain, $raw, $data)
     {
         if (isset($view)) {
             $message->setBody($this->getView($view, $data), 'text/html');
@@ -278,6 +292,12 @@ class Mailer
 
         if (isset($plain)) {
             $message->addPart($this->getView($plain, $data), 'text/plain');
+        }
+
+        if (isset($raw)) {
+            $method = (isset($view) || isset($plain)) ? 'addPart' : 'setBody';
+
+            call_user_func(array($message, $method), $raw, 'text/plain');
         }
     }
 
@@ -291,13 +311,15 @@ class Mailer
      */
     protected function parseView($view)
     {
-        if (is_string($view)) return array($view, null);
+        if (is_string($view)) {
+            return array($view, null, null);
+        }
 
         // If the given view is an array with numeric keys, we will just assume that
         // both a "pretty" and "plain" view were provided, so we will return this
         // array as is, since must should contain both views with numeric keys.
         if (is_array($view) && isset($view[0])) {
-            return $view;
+            return array($view[0], $view[1], null);
         }
 
         // If the view is an array, but doesn't contain numeric keys, we will assume
@@ -305,7 +327,9 @@ class Mailer
         // named keys instead, allowing the developers to use one or the other.
         else if (is_array($view)) {
             return array(
-                array_get($view, 'html'), array_get($view, 'text')
+                Arr::get($view, 'html'),
+                Arr::get($view, 'text'),
+                Arr::get($view, 'raw'),
             );
         }
 
