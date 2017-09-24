@@ -6,6 +6,7 @@ use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Routing\Controller;
 use Nova\Routing\RouteFiltererInterface as RouteFilterer;
+use Nova\Routing\Route;
 use Nova\Routing\RouteDependencyResolverTrait;
 
 
@@ -67,27 +68,6 @@ class ControllerDispatcher
     }
 
     /**
-     * Apply the applicable after filters to the route.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function assignAfter($controller, $route, $method)
-    {
-        foreach ($controller->getAfterFilters() as $filter) {
-            if (static::methodExcludedByFilter($method, $filter)) {
-                continue;
-            }
-
-            $filter = $filter['filter'];
-
-            $route->after($filter);
-        }
-    }
-
-    /**
      * Call the "before" filters for the controller.
      *
      * @param  \Nova\Routing\Controller  $controller
@@ -98,8 +78,8 @@ class ControllerDispatcher
      */
     protected function before($controller, $route, $request, $method)
     {
-        foreach ($controller->getBeforeFilters() as $filter) {
-            if (static::methodExcludedByFilter($method, $filter)) {
+        foreach ($controller->getBeforeFilters() as $filter => $options) {
+            if (static::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -112,6 +92,36 @@ class ControllerDispatcher
     }
 
     /**
+     * Apply the applicable after filters to the route.
+     *
+     * @param  \Nova\Routing\Controller  $controller
+     * @param  \Nova\Routing\Route  $route
+     * @param  string  $method
+     * @return mixed
+     */
+    protected function assignAfter($controller, $route, $method)
+    {
+        foreach ($controller->getAfterFilters() as $filter => $options) {
+            if (! static::methodExcludedByOptions($method, $options)) {
+                $route->after($filter);
+            }
+        }
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $options
+     * @return bool
+     */
+    protected static function methodExcludedByOptions($method, array $options)
+    {
+        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except']));
+    }
+
+    /**
      * Call the given controller filter method.
      *
      * @param  array  $filter
@@ -121,23 +131,8 @@ class ControllerDispatcher
      */
     protected function callFilter($filter, $route, $request)
     {
-        extract($filter);
+        list($filter, $parameters) = Route::parseFilter($filter);
 
         return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
-    }
-
-    /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $filter
-     * @return bool
-     */
-    protected static function methodExcludedByFilter($method, array $filter)
-    {
-        $options = $filter['options'];
-
-        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 }

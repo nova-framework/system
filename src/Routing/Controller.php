@@ -2,8 +2,6 @@
 
 namespace Nova\Routing;
 
-use Nova\Routing\Route;
-
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use BadMethodCallException;
@@ -47,7 +45,7 @@ abstract class Controller
      */
     public function beforeFilter($filter, array $options = array())
     {
-        $this->beforeFilters[] = $this->parseFilter($filter, $options);
+        $this->beforeFilters[$filter] = $options;
     }
 
     /**
@@ -59,21 +57,7 @@ abstract class Controller
      */
     public function afterFilter($filter, array $options = array())
     {
-        $this->afterFilters[] = $this->parseFilter($filter, $options);
-    }
-
-    /**
-     * Parse the given filter and options.
-     *
-     * @param  string  $filter
-     * @param  array  $options
-     * @return array
-     */
-    protected function parseFilter($filter, array $options)
-    {
-        list($filter, $parameters) = Route::parseFilter($filter);
-
-        return compact('filter', 'parameters', 'options');
+        $this->afterFilters[$filter] = $options;
     }
 
     /**
