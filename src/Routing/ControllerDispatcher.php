@@ -88,7 +88,7 @@ class ControllerDispatcher
      * @param  array  $options
      * @return bool
      */
-    protected static function methodExcludedByOptions($method, array $options)
+    public static function methodExcludedByOptions($method, array $options)
     {
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));

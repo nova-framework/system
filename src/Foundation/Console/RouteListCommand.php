@@ -3,6 +3,7 @@
 namespace Nova\Foundation\Console;
 
 use Nova\Http\Request;
+use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\Route;
 use Nova\Routing\Router;
 use Nova\Console\Command;
@@ -188,7 +189,7 @@ class RouteListCommand extends Command
         $results = array();
 
         foreach ($controller->getMiddleware() as $middleware => $options) {
-            if ($this->methodExcludedByOptions($method, $options)) {
+            if (ControllerDispatcher::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -200,19 +201,6 @@ class RouteListCommand extends Command
         }
 
         return $results;
-    }
-
-    /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $options
-     * @return bool
-     */
-    protected function methodExcludedByOptions($method, array $options)
-    {
-        return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except'])));
     }
 
     /**
