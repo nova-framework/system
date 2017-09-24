@@ -225,7 +225,7 @@ class RouteListCommand extends Command
         $results = array();
 
         foreach ($filters as $filter => $options) {
-            if (static::methodExcludedByOptions($method, $options)) {
+            if ($this->methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -244,7 +244,7 @@ class RouteListCommand extends Command
      * @param  array  $options
      * @return bool
      */
-    protected static function methodExcludedByOptions($method, array $options)
+    protected function methodExcludedByOptions($method, array $options)
     {
         return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except'])));
