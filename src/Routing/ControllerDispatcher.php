@@ -74,7 +74,7 @@ class ControllerDispatcher
                 continue;
             }
 
-            list($filter, $parameters) = Route::parseFilter($filter);
+            list ($filter, $parameters) = Route::parseFilter($filter);
 
             if (! is_null($response = $router->callRouteFilter($filter, $parameters, $route, $request))) {
                 return $response;
