@@ -80,7 +80,7 @@ trait RouteDependencyResolverTrait
      * @param  array  $parameters
      * @return bool
      */
-    protected function alreadyInParameters($className, array $parameters)
+    protected function alreadyInParameters($class, array $parameters)
     {
         $result = Arr::first($parameters, function ($key, $value) use ($class)
         {
