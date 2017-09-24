@@ -159,13 +159,15 @@ class RouteListCommand extends Command
 
         $action = $route->getActionName();
 
-        if ($action !== 'Closure') {
-            list($controller, $method) = explode('@', $action);
-
-            $filters = array_merge($filters, $this->parseControllerFilters(
-                $instance = $this->getController($controller), $method, $instance->getBeforeFilters()
-            ));
+        if ($action == 'Closure') {
+            return implode(', ', $filters);
         }
+
+        list($controller, $method) = explode('@', $action);
+
+        $filters = array_merge($filters, $this->parseControllerFilters(
+            $instance = $this->getController($controller), $method, $instance->getBeforeFilters()
+        ));
 
         return implode(', ', array_unique($filters));
     }
@@ -182,13 +184,15 @@ class RouteListCommand extends Command
 
         $action = $route->getActionName();
 
-        if ($action !== 'Closure') {
-            list($controller, $method) = explode('@', $action);
-
-            $filters = array_merge($filters, $this->parseControllerFilters(
-                $instance = $this->getController($controller), $method, $instance->getAfterFilters()
-            ));
+        if ($action == 'Closure') {
+            return implode(', ', $filters);
         }
+
+        list($controller, $method) = explode('@', $action);
+
+        $filters = array_merge($filters, $this->parseControllerFilters(
+            $instance = $this->getController($controller), $method, $instance->getAfterFilters()
+        ));
 
         return implode(', ', array_unique($filters));
     }
@@ -220,18 +224,14 @@ class RouteListCommand extends Command
     {
         $results = array();
 
-        foreach ($filters as $filter) {
-            if (static::methodExcludedByFilter($method, $filter)) {
+        foreach ($filters as $filter => $options) {
+            if (static::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
-            $result = $filter['filter'];
+            list($filter, $parameters) = Route::parseFilter($filter);
 
-            if (! empty($filter['parameters'])) {
-                $result .= ':' .implode(',', $filter['parameters']);
-            }
-
-            $results[] = $result;
+            $results[] = $filter;
         }
 
         return $results;
@@ -241,13 +241,11 @@ class RouteListCommand extends Command
      * Determine if the given options exclude a particular method.
      *
      * @param  string  $method
-     * @param  array  $filter
+     * @param  array  $options
      * @return bool
      */
-    protected static function methodExcludedByFilter($method, array $filter)
+    protected static function methodExcludedByOptions($method, array $options)
     {
-        $options = $filter['options'];
-
         return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except'])));
     }
