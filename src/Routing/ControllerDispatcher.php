@@ -92,7 +92,7 @@ class ControllerDispatcher
     }
 
     /**
-     * Apply the applicable after filters to the route.
+     * Apply the applicable "after" filters to the route.
      *
      * @param  \Nova\Routing\Controller  $controller
      * @param  \Nova\Routing\Route  $route
