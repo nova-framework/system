@@ -29,7 +29,7 @@ class ControllerDispatcher
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(Container $container = null)
+    public function __construct(Container $container)
     {
         $this->container = $container;
     }
