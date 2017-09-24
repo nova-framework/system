@@ -113,7 +113,7 @@ class ControllerDispatcher
     /**
      * Call the given controller filter method.
      *
-     * @param  array  $filter
+     * @param  string  $filter
      * @param  \Nova\Routing\Route  $route
      * @param  \Nova\Http\Request  $request
      * @return mixed
