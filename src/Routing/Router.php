@@ -14,7 +14,6 @@ use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\RouteCollection;
-use Nova\Routing\RouteFiltererInterface;
 use Nova\Routing\Route;
 use Nova\Support\Arr;
 use Nova\Support\Str;
@@ -31,7 +30,7 @@ use Closure;
 /**
  * Router class will load requested Controller / Closure based on URL.
  */
-class Router implements HttpKernelInterface, RouteFiltererInterface
+class Router implements HttpKernelInterface
 {
     /**
      * The event dispatcher instance.

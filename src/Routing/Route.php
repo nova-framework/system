@@ -15,6 +15,7 @@ use Nova\Routing\Matching\HostValidator;
 use Nova\Routing\Matching\MethodValidator;
 use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\Matching\UriValidator;
+use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\RouteCompiler;
 use Nova\Routing\RouteDependencyResolverTrait;
 use Nova\Support\Arr;
@@ -193,7 +194,7 @@ class Route
         list($controller, $method) = explode('@', $this->action['uses']);
 
         //
-        $dispatcher = $this->container->make('routing.controller.dispatcher');
+        $dispatcher = new ControllerDispatcher($this->container);
 
         return $dispatcher->dispatch(
             $this, $request, $this->container->make($controller), $method

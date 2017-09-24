@@ -5,7 +5,6 @@ namespace Nova\Routing;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Routing\Controller;
-use Nova\Routing\RouteFiltererInterface as RouteFilterer;
 use Nova\Routing\Route;
 use Nova\Routing\RouteDependencyResolverTrait;
 
@@ -21,26 +20,16 @@ class ControllerDispatcher
      */
     protected $container;
 
-    /**
-     * The routing filterer implementation.
-     *
-     * @var \Nova\Routing\RouteFiltererInterface  $filterer
-     */
-    protected $filterer;
-
 
     /**
      * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\RouteFiltererInterface  $filterer
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(RouteFilterer $filterer, Container $container = null)
+    public function __construct(Container $container)
     {
         $this->container = $container;
-
-        $this->filterer = $filterer;
     }
 
     /**
@@ -133,6 +122,9 @@ class ControllerDispatcher
     {
         list($filter, $parameters) = Route::parseFilter($filter);
 
-        return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
+        //
+        $router = $this->container['router'];
+
+        return $router->callRouteFilter($filter, $parameters, $route, $request);
     }
 }

@@ -36,8 +36,6 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->registerRouter();
 
-        $this->registerControllerDispatcher();
-
         $this->registerUrlGenerator();
 
         $this->registerRedirector();
@@ -55,19 +53,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app['router'] = $this->app->share(function ($app)
         {
             return new Router($app['events'], $app);
-        });
-    }
-
-    /**
-     * Register the URL generator service.
-     *
-     * @return void
-     */
-    protected function registerControllerDispatcher()
-    {
-        $this->app->singleton('routing.controller.dispatcher', function ($app)
-        {
-            return new ControllerDispatcher($app['router'], $app);
         });
     }
 
