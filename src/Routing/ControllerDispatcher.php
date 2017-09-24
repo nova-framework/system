@@ -112,21 +112,6 @@ class ControllerDispatcher
     }
 
     /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $filter
-     * @return bool
-     */
-    protected static function methodExcludedByFilter($method, array $filter)
-    {
-        $options = $filter['options'];
-
-        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except']));
-    }
-
-    /**
      * Call the given controller filter method.
      *
      * @param  array  $filter
@@ -139,5 +124,20 @@ class ControllerDispatcher
         extract($filter);
 
         return $this->filterer->callRouteFilter($filter, $parameters, $route, $request);
+    }
+
+    /**
+     * Determine if the given options exclude a particular method.
+     *
+     * @param  string  $method
+     * @param  array  $filter
+     * @return bool
+     */
+    protected static function methodExcludedByFilter($method, array $filter)
+    {
+        $options = $filter['options'];
+
+        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 }
