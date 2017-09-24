@@ -139,7 +139,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->container = $container ?: new Container();
 
         //
-        $this->bind('_missing', function($value)
+        $this->bind('_missing', function ($value)
         {
             return explode('/', $value);
         });
@@ -543,9 +543,9 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         $this->currentRequest = $request;
 
         // Asset Files Dispatching.
-        $response = $this->dispatchToFile($request);
-
-        if (! is_null($response)) return $response;
+        if (! is_null($response = $this->dispatchToFile($request))) {
+            return $response;
+        }
 
         // If no response was returned from the before filter, we will call the proper
         // route instance to get the response. If no route is found a response will
@@ -577,7 +577,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
         // Execute the Routes matching.
         $route = $this->findRoute($request);
 
-        $request->setRouteResolver(function() use ($route)
+        $request->setRouteResolver(function () use ($route)
         {
             return $route;
         });
@@ -1065,7 +1065,7 @@ class Router implements HttpKernelInterface, RouteFiltererInterface
     public function currentRouteNamed($name)
     {
         if (! is_null($route = $this->current())) {
-            return ($route->getName() == $name);
+            return $route->getName() == $name;
         }
 
         return false;
