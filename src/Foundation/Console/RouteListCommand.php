@@ -4,6 +4,7 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Http\Request;
+use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\Route;
 use Nova\Routing\Router;
 use Nova\Support\Str;
@@ -225,7 +226,7 @@ class RouteListCommand extends Command
         $results = array();
 
         foreach ($filters as $filter => $options) {
-            if ($this->methodExcludedByOptions($method, $options)) {
+            if (ControllerDispatcher::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
@@ -238,19 +239,6 @@ class RouteListCommand extends Command
     }
 
     /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $options
-     * @return bool
-     */
-    protected function methodExcludedByOptions($method, array $options)
-    {
-        return ((! empty($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except'])));
-    }
-
-    /**
     * Filter the route by URI and / or name.
     *
     * @param  array  $route
@@ -258,8 +246,8 @@ class RouteListCommand extends Command
     */
     protected function filterRoute(array $route)
     {
-        if (($this->option('name') && ! str_contains($route['name'], $this->option('name'))) ||
-            $this->option('path') && ! str_contains($route['uri'], $this->option('path'))) {
+        if (($this->option('name') && ! Str::contains($route['name'], $this->option('name'))) ||
+            $this->option('path') && ! Str::contains($route['uri'], $this->option('path'))) {
             return null;
         } else {
             return $route;
