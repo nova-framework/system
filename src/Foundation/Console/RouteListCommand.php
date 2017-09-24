@@ -184,6 +184,7 @@ class RouteListCommand extends Command
     {
         $middlewares = $this->router->getMiddleware();
 
+        //
         $results = array();
 
         foreach ($controller->getMiddleware() as $middleware => $options) {
