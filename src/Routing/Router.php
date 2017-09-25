@@ -345,13 +345,13 @@ class Router implements HttpKernelInterface
      */
     protected static function formatUsesPrefix($new, $old)
     {
-        if (isset($new['namespace']) && isset($old['namespace'])) {
-            return trim(Arr::get($old, 'namespace'), '\\') .'\\' .trim($new['namespace'], '\\');
-        } else if (isset($new['namespace'])) {
-            return trim($new['namespace'], '\\');
+        if (! isset($new['namespace'])) {
+            return isset($old['namespace']) ? $old['namespace'] : null;
         }
 
-        return Arr::get($old, 'namespace');
+        return isset($old['namespace'])
+            ? trim($old['namespace'], '\\') .'\\' .trim($new['namespace'], '\\')
+            : trim($new['namespace'], '\\');
     }
 
     /**
@@ -363,11 +363,13 @@ class Router implements HttpKernelInterface
      */
     protected static function formatGroupPrefix($new, $old)
     {
+        $prefix = isset($old['prefix']) ? $old['prefix'] : null;
+
         if (isset($new['prefix'])) {
-            return trim(Arr::get($old, 'prefix'), '/') .'/' .trim($new['prefix'], '/');
+            return trim($prefix, '/') .'/' .trim($new['prefix'], '/');
         }
 
-        return Arr::get($old, 'prefix');
+        return $prefix;
     }
 
     /**
@@ -466,9 +468,9 @@ class Router implements HttpKernelInterface
      */
     protected function addWhereClausesToRoute($route)
     {
-        $wheres = Arr::get($route->getAction(), 'where', array());
-
-        $route->where(array_merge($this->patterns, $wheres));
+        $route->where(
+            array_merge($this->patterns, Arr::get($route->getAction(), 'where', array()))
+        );
 
         return $route;
     }
