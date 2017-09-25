@@ -145,6 +145,21 @@ class Router implements HttpKernelInterface
     }
 
     /**
+     * Get the response for a given request.
+     *
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  int   $type
+     * @param  bool  $catch
+     * @return \Nova\Http\Response
+     */
+    public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    {
+        return $this->dispatch(
+            Request::createFromBase($request)
+        );
+    }
+
+    /**
      * Register a new GET route with the router.
      *
      * @param  string  $uri
@@ -1166,19 +1181,6 @@ class Router implements HttpKernelInterface
         }
 
         return $this->registrar = new ResourceRegistrar($this);
-    }
-
-    /**
-     * Get the response for a given request.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Nova\Http\Response
-     */
-    public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        return $this->dispatch(Request::createFromBase($request));
     }
 
     /**
