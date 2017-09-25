@@ -34,6 +34,13 @@ class Router
     protected $container;
 
     /**
+     * The Router instance used by the route.
+     *
+     * @var \Nova\Routing\Router  $router
+     */
+    protected $router;
+
+    /**
      * The route collection instance.
      *
      * @var \Nova\Routing\RouteCollection
@@ -465,7 +472,9 @@ class Router
      */
     protected function newRoute($methods, $uri, $action)
     {
-        return with(new Route($methods, $uri, $action))->setContainer($this->container);
+        return with(new Route($methods, $uri, $action))
+            ->setRouter($this)
+            ->setContainer($this->container);
     }
 
     /**

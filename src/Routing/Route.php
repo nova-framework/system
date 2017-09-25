@@ -843,6 +843,19 @@ class Route
     }
 
     /**
+     * Set the router instance on the route.
+     *
+     * @param  \Nova\Routing\Router  $router
+     * @return $this
+     */
+    public function setRouter(Router $router)
+    {
+        $this->router = $router;
+
+        return $this;
+    }
+
+    /**
      * Dynamically access route parameters.
      *
      * @param  string  $key
