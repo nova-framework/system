@@ -348,9 +348,12 @@ class Router
             return isset($old['namespace']) ? $old['namespace'] : null;
         }
 
-        return isset($old['namespace'])
-            ? trim($old['namespace'], '\\') .'\\' .trim($new['namespace'], '\\')
-            : trim($new['namespace'], '\\');
+        // A new namespace is set.
+        else if (! isset($old['namespace'])) {
+            return trim($new['namespace'], '\\');
+        }
+
+        return trim($old['namespace'], '\\') .'\\' .trim($new['namespace'], '\\');
     }
 
     /**
