@@ -33,7 +33,7 @@ class Validator implements MessageProviderInterface
     /**
      * The Presence Verifier implementation.
      *
-     * @var \Nova\Validation\Contracts\PresenceVerifierInterface
+     * @var \Nova\Validation\PresenceVerifierInterface
      */
     protected $presenceVerifier;
 
