@@ -34,7 +34,10 @@ class ValidationServiceProvider extends ServiceProvider
 
         $this->app->bindShared('validator', function($app)
         {
-            $validator = new Factory($app['config']);
+            $config = $app['config'];
+
+            // Get a Validation Factory instance.
+            $validator = new Factory($config);
 
             if (isset($app['validation.presence'])) {
                 $presenceVerifier = $app['validation.presence'];
