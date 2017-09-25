@@ -10,6 +10,8 @@ use Nova\Routing\RouteDependencyResolverTrait;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use LogicException;
+
 
 class ControllerDispatcher
 {
@@ -164,13 +166,17 @@ class ControllerDispatcher
      * Returns the current Router instance.
      *
      * @return \Nova\Routing\Router
+     *
+     * @throws \LogicException
      */
     protected function getRouter()
     {
         if (isset($this->router)) {
             return $this->router;
+        } else if ($this->container->bound('router')) {
+            return $this->router = $this->container['router'];
         }
 
-        return $this->router = $this->container['router'];
+        throw new LogicException('Router not bound in the Container instance.');
     }
 }
