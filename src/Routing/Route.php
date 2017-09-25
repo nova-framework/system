@@ -100,6 +100,13 @@ class Route
     protected $container;
 
     /**
+     * The Router instance used by the route.
+     *
+     * @var \Nova\Routing\Router  $router
+     */
+    protected $router;
+
+    /**
      * The validators used by the routes.
      *
      * @var array
@@ -194,7 +201,7 @@ class Route
         list($controller, $method) = explode('@', $this->action['uses']);
 
         //
-        $dispatcher = new ControllerDispatcher($this->container);
+        $dispatcher = new ControllerDispatcher($this->container, $this->router);
 
         return $dispatcher->dispatch(
             $this, $request, $this->container->make($controller), $method
@@ -874,6 +881,19 @@ class Route
     public function setContainer(Container $container)
     {
         $this->container = $container;
+
+        return $this;
+    }
+
+    /**
+     * Set the router instance on the route.
+     *
+     * @param  \Nova\Routing\Router  $router
+     * @return $this
+     */
+    public function setRouter(Router $router)
+    {
+        $this->router = $router;
 
         return $this;
     }

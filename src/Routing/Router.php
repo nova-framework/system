@@ -440,7 +440,9 @@ class Router implements HttpKernelInterface
      */
     protected function newRoute($methods, $uri, $action)
     {
-        return (new Route($methods, $uri, $action))->setContainer($this->container);
+        return with(new Route($methods, $uri, $action))
+            ->setRouter($this)
+            ->setContainer($this->container);
     }
 
     /**
