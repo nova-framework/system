@@ -8,7 +8,7 @@
  * @version 3.0
  */
 
-namespace Nova\Validation;
+namespace Nova\Validation\Language;
 
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -27,7 +27,7 @@ class Translator implements TranslatorInterface
      */
     public function __construct()
     {
-        $lines = require realpath(__DIR__) .DS .'Language' .DS .'messages.php';
+        $lines = require realpath(__DIR__) .DS .'messages.php';
 
         $this->messages = array('validation' => $lines);
     }

@@ -9,7 +9,7 @@
 namespace Nova\Validation;
 
 use Nova\Helpers\Inflector;
-use Nova\Validation\Translator;
+use Nova\Validation\Language\Translator;
 
 use Closure;
 

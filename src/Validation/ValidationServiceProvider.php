@@ -10,7 +10,7 @@ namespace Nova\Validation;
 
 use Nova\Validation\DatabasePresenceVerifier;
 use Nova\Validation\Factory;
-use Nova\Validation\Translator;
+use Nova\Validation\Language\Translator;
 use Nova\Support\ServiceProvider;
 
 
