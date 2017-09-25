@@ -8,8 +8,6 @@ use Nova\Routing\Controller;
 use Nova\Routing\Route;
 use Nova\Routing\RouteDependencyResolverTrait;
 
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
 
 class ControllerDispatcher
 {
@@ -73,15 +71,9 @@ class ControllerDispatcher
      * @param  \Nova\Routing\Route  $route
      * @param  string  $method
      * @return mixed
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     protected function call($controller, $route, $method)
     {
-        if (! method_exists($controller, $method)) {
-            throw new NotFoundHttpException();
-        }
-
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method
         );
