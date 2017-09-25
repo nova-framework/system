@@ -663,7 +663,7 @@ class Route
      *
      * @return array
      */
-    public function wheres()
+    public function patterns()
     {
         return $this->wheres;
     }
