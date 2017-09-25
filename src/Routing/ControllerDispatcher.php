@@ -16,7 +16,7 @@ class ControllerDispatcher
     use RouteDependencyResolverTrait;
 
     /**
-     * The IoC container instance.
+     * The Container instance.
      *
      * @var \Nova\Container\Container
      */
