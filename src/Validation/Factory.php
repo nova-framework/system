@@ -201,7 +201,7 @@ class Factory
      *
      * @return \Validation\Translator
      */
-    public function getTranslator()
+    public function getConfig()
     {
         return $this->config;
     }
