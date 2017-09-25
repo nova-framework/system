@@ -31,11 +31,11 @@ class ControllerDispatcher
     /**
      * Create a new Controller Dispatcher instance.
      *
-     * @param  \Nova\Container\Container  $container
      * @param  \Nova\Routing\Router  $router
+     * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(Container $container, Router $router)
+    public function __construct(Router $router, Container $container)
     {
         $this->container = $container;
 

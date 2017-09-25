@@ -200,12 +200,23 @@ class Route
     {
         list($controller, $method) = explode('@', $this->action['uses']);
 
-        //
-        $dispatcher = new ControllerDispatcher($this->container, $this->router);
-
-        return $dispatcher->dispatch(
+        return $this->controllerDispatcher()->dispatch(
             $this, $request, $this->container->make($controller), $method
         );
+    }
+
+    /**
+     * Get the dispatcher for the route's controller.
+     *
+     * @return \Nova\Routing\ControllerDispatcher
+     */
+    public function controllerDispatcher()
+    {
+        if ($this->container->bound('routing.controller.dispatcher')) {
+            return $this->container['routing.controller.dispatcher'];
+        }
+
+        return new ControllerDispatcher($this->router, $this->container);
     }
 
     /**

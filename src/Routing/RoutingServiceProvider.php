@@ -41,6 +41,8 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerRedirector();
 
         $this->registerResponseFactory();
+
+        $this->registerControllerDispatcher();
     }
 
     /**
@@ -111,6 +113,19 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app->singleton('response.factory', function ($app)
         {
             return new ResponseFactory();
+        });
+    }
+
+    /**
+     * Register the URL generator service.
+     *
+     * @return void
+     */
+    protected function registerControllerDispatcher()
+    {
+        $this->app->singleton('routing.controller.dispatcher', function ($app)
+        {
+            return new ControllerDispatcher($app['router'], $app);
         });
     }
 
