@@ -78,7 +78,7 @@ class ControllerDispatcher
     protected function call($controller, $route, $method)
     {
         if (! method_exists($controller, $method)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException('Method not found.');
         }
 
         $parameters = $this->resolveClassMethodDependencies(
