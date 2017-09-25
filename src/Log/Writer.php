@@ -42,13 +42,13 @@ class Writer implements PsrLoggerInterface
      * @var array
      */
     protected $levels = array(
-        'debug'         => MonologLogger::DEBUG,
-        'info'          => MonologLogger::INFO,
+        'debug'     => MonologLogger::DEBUG,
+        'info'      => MonologLogger::INFO,
         'notice'    => MonologLogger::NOTICE,
         'warning'   => MonologLogger::WARNING,
-        'error'         => MonologLogger::ERROR,
+        'error'     => MonologLogger::ERROR,
         'critical'  => MonologLogger::CRITICAL,
-        'alert'         => MonologLogger::ALERT,
+        'alert'     => MonologLogger::ALERT,
         'emergency' => MonologLogger::EMERGENCY,
     );
 
