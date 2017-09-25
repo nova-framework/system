@@ -337,13 +337,13 @@ class Router
      */
     protected static function formatUsesPrefix($new, $old)
     {
-        if (isset($new['namespace'])) {
-            return isset($old['namespace'])
-                ? trim($old['namespace'], '\\') .'\\' .trim($new['namespace'], '\\')
-                : trim($new['namespace'], '\\');
+        if (! isset($new['namespace'])) {
+            return isset($old['namespace']) ? $old['namespace'] : null;
         }
 
-        return isset($old['namespace']) ? $old['namespace'] : null;
+        return isset($old['namespace'])
+            ? trim($old['namespace'], '\\') .'\\' .trim($new['namespace'], '\\')
+            : trim($new['namespace'], '\\');
     }
 
     /**
@@ -355,13 +355,13 @@ class Router
      */
     protected static function formatGroupPrefix($new, $old)
     {
-        $oldPrefix = isset($old['prefix']) ? $old['prefix'] : null;
+        $prefix = isset($old['prefix']) ? $old['prefix'] : null;
 
         if (isset($new['prefix'])) {
-            return trim($oldPrefix, '/') .'/' .trim($new['prefix'], '/');
+            return trim($prefix, '/') .'/' .trim($new['prefix'], '/');
         }
 
-        return $oldPrefix;
+        return $prefix;
     }
 
     /**
