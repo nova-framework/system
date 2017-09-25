@@ -8,10 +8,9 @@
 
 namespace Nova\Validation;
 
+use Nova\Support\ServiceProvider;
 use Nova\Validation\DatabasePresenceVerifier;
 use Nova\Validation\Factory;
-use Nova\Validation\Language\Translator;
-use Nova\Support\ServiceProvider;
 
 
 class ValidationServiceProvider extends ServiceProvider
@@ -31,16 +30,14 @@ class ValidationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerTranslator();
-
         $this->registerPresenceVerifier();
 
         $this->app->bindShared('validator', function($app)
         {
-            $translator = $app['validation.translator'];
+            $config = $app['config'];
 
             // Get a Validation Factory instance.
-            $validator = new Factory($translator);
+            $validator = new Factory($config);
 
             if (isset($app['validation.presence'])) {
                 $presenceVerifier = $app['validation.presence'];
@@ -62,19 +59,6 @@ class ValidationServiceProvider extends ServiceProvider
         $this->app->bindShared('validation.presence', function($app)
         {
             return new DatabasePresenceVerifier($app['db']);
-        });
-    }
-
-    /**
-     * Register the Database Presence Verifier.
-     *
-     * @return void
-     */
-    protected function registerTranslator()
-    {
-        $this->app->bindShared('validation.translator', function($app)
-        {
-            return new Translator();
         });
     }
 

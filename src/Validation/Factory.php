@@ -8,8 +8,9 @@
 
 namespace Nova\Validation;
 
-use Nova\Helpers\Inflector;
-use Nova\Validation\Language\Translator;
+use Nova\Config\Repository as Config;
+use Nova\Support\Str;
+use Nova\Validation\DatabasePresenceVerifier;
 
 use Closure;
 
@@ -17,16 +18,16 @@ use Closure;
 class Factory
 {
     /**
-     * The Translator implementation.
+     * The Config instance.
      *
-     * @var \Validation\Translator
+     * @var \Nova\Config\Repository
      */
-    protected $translator;
+    protected $config;
 
     /**
-     * The Database Presence Verifier implementation.
+     * The Database Presence Verifier instance.
      *
-     * @var \Validation\DatabasePresenceVerifier
+     * @var \Nova\Validation\DatabasePresenceVerifier
      */
     protected $verifier;
 
@@ -65,15 +66,16 @@ class Factory
      */
     protected $resolver;
 
+
     /**
      * Create a new Validator Factory instance.
      *
-     * @param  \Validation\Translator  $translator
+     * @param  \Nova\Validation\Translator  $translator
      * @return void
      */
-    public function __construct(Translator $translator)
+    public function __construct(Config $config)
     {
-        $this->translator = $translator;
+        $this->config = $config;
     }
 
     /**
@@ -82,7 +84,7 @@ class Factory
      * @param  array  $data
      * @param  array  $rules
      * @param  array  $messages
-     * @return \Validation\Validator
+     * @return \Nova\Validation\Validator
      */
     public function make(array $data, array $rules, array $messages = array(), array $customAttributes = array())
     {
@@ -100,7 +102,7 @@ class Factory
     /**
      * Add the extensions to a validator instance.
      *
-     * @param  \Validation\Validator  $validator
+     * @param  \Nova\Validation\Validator  $validator
      * @return void
      */
     protected function addExtensions($validator)
@@ -122,14 +124,14 @@ class Factory
      * @param  array  $data
      * @param  array  $rules
      * @param  array  $messages
-     * @return \Validation\Validator
+     * @return \Nova\Validation\Validator
      */
     protected function resolve($data, $rules, $messages, $customAttributes)
     {
         if (is_null($this->resolver)) {
-            return new Validator($this->translator, $data, $rules, $messages, $customAttributes);
+            return new Validator($this->config, $data, $rules, $messages, $customAttributes);
         } else {
-            return call_user_func($this->resolver, $this->translator, $data, $rules, $messages, $customAttributes);
+            return call_user_func($this->resolver, $this->config, $data, $rules, $messages, $customAttributes);
         }
     }
 
@@ -146,7 +148,7 @@ class Factory
         $this->extensions[$rule] = $extension;
 
         if ($message !== null) {
-            $rule = Inflector::tableize($rule);
+            $rule = Str::snake($rule);
 
             $this->fallbackMessages[$rule] = $message;
         }
@@ -165,7 +167,7 @@ class Factory
         $this->implicitExtensions[$rule] = $extension;
 
         if ($message !== null) {
-            $rule = Inflector::tableize($rule);
+            $rule = Str::snake($rule);
 
             $this->fallbackMessages[$rule] = $message;
         }
@@ -195,19 +197,19 @@ class Factory
     }
 
     /**
-     * Get the Translator implementation.
+     * Get the Config instance.
      *
-     * @return \Validation\Translator
+     * @return \Nova\Config\Repository
      */
-    public function getTranslator()
+    public function getConfig()
     {
-        return $this->translator;
+        return $this->config;
     }
 
     /**
-     * Get the database presence verifier implementation.
+     * Get the database presence verifier instance.
      *
-     * @return \Validation\DatabasePresenceVerifier
+     * @return \Nova\Validation\DatabasePresenceVerifier
      */
     public function getPresenceVerifier()
     {
@@ -217,7 +219,7 @@ class Factory
     /**
      * Set the database presence verifier implementation.
      *
-     * @param  \Validation\DatabasePresenceVerifier  $presenceVerifier
+     * @param  \Nova\Validation\DatabasePresenceVerifier  $presenceVerifier
      * @return void
      */
     public function setPresenceVerifier(DatabasePresenceVerifier $presenceVerifier)
