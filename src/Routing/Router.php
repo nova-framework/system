@@ -348,7 +348,9 @@ class Router implements HttpKernelInterface
             $new['as'] = $old['as'] .(isset($new['as']) ? $new['as'] : '');
         }
 
-        return array_merge_recursive(array_except($old, array('namespace', 'prefix', 'where', 'as')), $new);
+        return array_merge_recursive(
+            Arr::except($old, array('namespace', 'prefix', 'where', 'as')), $new
+        );
     }
 
     /**
