@@ -20,9 +20,16 @@ class ControllerDispatcher
      */
     protected $container;
 
+    /**
+     * The Router instance.
+     *
+     * @var \Nova\Routing\Router  $router
+     */
+    protected $router;
+
 
     /**
-     * Create a new controller dispatcher instance.
+     * Create a new Controller Dispatcher instance.
      *
      * @param  \Nova\Container\Container  $container
      * @return void
@@ -45,10 +52,25 @@ class ControllerDispatcher
     {
         $this->assignAfter($controller, $route, $method);
 
-        if (! is_null($response = $this->before($controller, $route, $request, $method))) {
-            return $response;
+        $response = $this->before($controller, $route, $request, $method);
+
+        if (is_null($response)) {
+            return $this->call($controller, $route, $method);
         }
 
+        return $response;
+    }
+
+    /**
+     * Call the given controller instance method.
+     *
+     * @param  \Nova\Routing\Controller  $controller
+     * @param  \Nova\Routing\Route  $route
+     * @param  string  $method
+     * @return mixed
+     */
+    protected function call($controller, $route, $method)
+    {
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method
         );
@@ -67,16 +89,14 @@ class ControllerDispatcher
      */
     protected function before($controller, $route, $request, $method)
     {
-        $router = $this->container['router'];
-
         foreach ($controller->getBeforeFilters() as $filter => $options) {
             if (static::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
-            list ($filter, $parameters) = Route::parseFilter($filter);
+            $response = $this->callFilter($filter, $route, $request);
 
-            if (! is_null($response = $router->callRouteFilter($filter, $parameters, $route, $request))) {
+            if (! is_null($response)) {
                 return $response;
             }
         }
@@ -93,9 +113,11 @@ class ControllerDispatcher
     protected function assignAfter($controller, $route, $method)
     {
         foreach ($controller->getAfterFilters() as $filter => $options) {
-            if (! static::methodExcludedByOptions($method, $options)) {
-                $route->after($filter);
+            if (static::methodExcludedByOptions($method, $options)) {
+                continue;
             }
+
+            $route->after($filter);
         }
     }
 
@@ -110,5 +132,37 @@ class ControllerDispatcher
     {
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));
+    }
+
+    /**
+     * Call the given controller filter method.
+     *
+     * @param  array  $filter
+     * @param  \Nova\Routing\Route  $route
+     * @param  \Nova\Http\Request  $request
+     * @return mixed
+     */
+    protected function callFilter($filter, $route, $request)
+    {
+        list ($filter, $parameters) = Route::parseFilter($filter);
+
+        //
+        $router = $this->getRouter();
+
+        return $router->callRouteFilter($filter, $parameters, $route, $request);
+    }
+
+    /**
+     * Returns the current Router instance.
+     *
+     * @return \Nova\Routing\Router
+     */
+    protected function getRouter()
+    {
+        if (isset($this->router)) {
+            return $this->router;
+        }
+
+        return $this->router = $this->container['router'];
     }
 }
