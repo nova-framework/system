@@ -213,7 +213,7 @@ class Route
             return $this->container['routing.controller.dispatcher'];
         }
 
-        return new ControllerDispatcher($this->router, $this->container);
+        return new ControllerDispatcher($this->container);
     }
 
     /**
