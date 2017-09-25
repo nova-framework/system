@@ -197,11 +197,23 @@ class Route
      */
     protected function runController()
     {
-        $dispatcher = new ControllerDispatcher($this->container);
-
-        return $dispatcher->dispatch(
+        return $this->controllerDispatcher()->dispatch(
             $this, $this->getController(), $this->getControllerMethod()
         );
+    }
+
+    /**
+     * Get the dispatcher for the route's controller.
+     *
+     * @return \Nova\Routing\ControllerDispatcher
+     */
+    public function controllerDispatcher()
+    {
+        if ($this->container->bound('routing.controller.dispatcher')) {
+            return $this->container['routing.controller.dispatcher'];
+        }
+
+        return new ControllerDispatcher($this->router, $this->container);
     }
 
     /**

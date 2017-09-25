@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Http\Request;
 use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
+use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
@@ -30,6 +31,8 @@ class RoutingServiceProvider extends ServiceProvider
 
         $this->registerResponseFactory();
 
+        $this->registerControllerDispatcher();
+
         $this->registerAssetDispatcher();
     }
 
@@ -40,18 +43,9 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerRouter()
     {
-        $this->app['router'] = $this->app->share(function($app)
+        $this->app->singleton('router', function ($app)
         {
-            $router = new Router($app['events'], $app);
-
-            // If the current application environment is "testing", we will disable the
-            // routing filters, since they can be tested independently of the routes
-            // and just get in the way of our typical controller testing concerns.
-            if ($app['env'] == 'testing') {
-                //$router->disableFilters();
-            }
-
-            return $router;
+            return new Router($app['events'], $app);
         });
     }
 
@@ -62,7 +56,7 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerUrlGenerator()
     {
-        $this->app['url'] = $this->app->share(function($app)
+        $this->app->singleton('url', function ($app)
         {
             // The URL generator needs the route collection that exists on the router.
             // Keep in mind this is an object, so we're passing by references here
@@ -90,7 +84,7 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerRedirector()
     {
-        $this->app['redirect'] = $this->app->share(function($app)
+        $this->app->singleton('redirect', function ($app)
         {
             $redirector = new Redirector($app['url']);
 
@@ -115,6 +109,19 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app->singleton('response.factory', function ($app)
         {
             return new ResponseFactory();
+        });
+    }
+
+    /**
+     * Register the URL generator service.
+     *
+     * @return void
+     */
+    protected function registerControllerDispatcher()
+    {
+        $this->app->singleton('routing.controller.dispatcher', function ($app)
+        {
+            return new ControllerDispatcher($app);
         });
     }
 
