@@ -63,7 +63,7 @@ class Request extends SymfonyRequest implements ArrayAccess
 
         return static::createFromBase($request);
     }
-    
+
     /**
      * Return the Request instance.
      *
@@ -187,6 +187,16 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function ajax()
     {
         return $this->isXmlHttpRequest();
+    }
+
+    /**
+     * Determine if the request is the result of an PJAX call.
+     *
+     * @return bool
+     */
+    public function pjax()
+    {
+        return $this->headers->get('X-PJAX') == true;
     }
 
     /**
