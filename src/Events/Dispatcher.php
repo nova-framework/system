@@ -335,7 +335,7 @@ class Dispatcher
         // If the listener has an @ sign, we will assume it is being used to delimit
         // the class name from the handle method name. This allows for handlers
         // to run multiple handler methods in a single class for convenience.
-        list ($class, $method) = array_pad(explode('@', $listener, 2), 2, 'handle');
+        list ($className, $method) = array_pad(explode('@', $listener, 2), 2, 'handle');
 
         $instance = $this->container->make($className);
 
