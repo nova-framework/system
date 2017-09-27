@@ -14,7 +14,7 @@ class CookieSessionHandler implements \SessionHandlerInterface
      *
      * @var \Nova\Cookie\CookieJar
      */
-    protected $cookie;
+    protected $cookies;
 
     /**
      * The request instance.
@@ -30,9 +30,10 @@ class CookieSessionHandler implements \SessionHandlerInterface
      * @param  int  $minutes
      * @return void
      */
-    public function __construct(CookieJar $cookie, $minutes)
+    public function __construct(CookieJar $cookies, $minutes)
     {
-        $this->cookie = $cookie;
+        $this->cookies = $cookies;
+
         $this->minutes = $minutes;
     }
 
@@ -57,7 +58,9 @@ class CookieSessionHandler implements \SessionHandlerInterface
      */
     public function read($sessionId)
     {
-        return $this->request->cookies->get($sessionId) ?: '';
+        $cookie = $this->getSessionCookie($sessionId);
+
+        return $this->request->cookies->get($cookie) ?: '';
     }
 
     /**
@@ -65,7 +68,9 @@ class CookieSessionHandler implements \SessionHandlerInterface
      */
     public function write($sessionId, $data)
     {
-        $this->cookie->queue($sessionId, $data, $this->minutes);
+        $cookie = $this->getSessionCookie($sessionId);
+
+        $this->cookies->queue($cookie, $data, $this->minutes);
     }
 
     /**
@@ -73,7 +78,9 @@ class CookieSessionHandler implements \SessionHandlerInterface
      */
     public function destroy($sessionId)
     {
-        $this->cookie->queue($this->cookie->forget($sessionId));
+        $cookie = $this->getSessionCookie($sessionId);
+
+        $this->cookies->queue($this->cookies->forget($cookie));
     }
 
     /**
@@ -82,6 +89,17 @@ class CookieSessionHandler implements \SessionHandlerInterface
     public function gc($lifetime)
     {
         return true;
+    }
+
+    /**
+     * Set the request instance.
+     *
+     * @param  string  $sessionId
+     * @return string
+     */
+    protected function getSessionCookie($sessionId)
+    {
+        return PREFIX .'session_' .$sessionId;
     }
 
     /**

@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+use Closure;
 use Exception;
 
 
@@ -155,6 +156,20 @@ class Application extends \Symfony\Component\Console\Application
         foreach ($commands as $command)  {
             $this->resolve($command);
         }
+    }
+
+    /**
+     * Register a Closure based command with the application.
+     *
+     * @param  string  $signature
+     * @param  Closure  $callback
+     * @return \Nova\Console\ClosureCommand
+     */
+    public function command($signature, Closure $callback)
+    {
+        $command = new ClosureCommand($signature, $callback);
+
+        return $this->add($command);
     }
 
     /**

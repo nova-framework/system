@@ -734,7 +734,7 @@ class SessionGuard implements GuardInterface
      */
     public function getRecallerName()
     {
-        return 'remember_' .$this->name .'_' .md5(get_class($this));
+        return PREFIX .'remember_' .$this->name .'_' .md5(get_class($this));
     }
 
     /**
