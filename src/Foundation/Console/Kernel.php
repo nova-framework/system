@@ -6,10 +6,12 @@ use Nova\Console\Contracts\KernelInterface;
 use Nova\Console\Scheduling\Schedule;
 use Nova\Console\Application as Forge;
 use Nova\Events\Dispatcher;
+use Nova\Foundation\Console\ClosureCommand;
 use Nova\Foundation\Application;
 
 use Symfony\Component\Debug\Exception\FatalErrorException;
 
+use Closure;
 use Exception;
 use Throwable;
 
@@ -45,6 +47,13 @@ class Kernel implements KernelInterface
     protected $commands = array();
 
     /**
+     * Indicates if the Closure commands have been loaded.
+     *
+     * @var bool
+     */
+    protected $commandsLoaded = false;
+
+    /**
      * The bootstrap classes for the application.
      *
      * @var array
@@ -58,6 +67,7 @@ class Kernel implements KernelInterface
         'Nova\Foundation\Bootstrap\SetRequestForConsole',
         'Nova\Foundation\Bootstrap\BootProviders',
     );
+
 
     /**
      * Create a new forge command runner instance.
@@ -75,7 +85,11 @@ class Kernel implements KernelInterface
 
         $this->events = $events;
 
-        $this->defineConsoleSchedule();
+        //
+        $this->app->booted(function ()
+        {
+            $this->defineConsoleSchedule();
+        });
     }
 
     /**
@@ -103,6 +117,12 @@ class Kernel implements KernelInterface
     {
         try {
             $this->bootstrap();
+
+            if (! $this->commandsLoaded) {
+                $this->commands();
+
+                $this->commandsLoaded = true;
+            }
 
             return $this->getForge()->run($input, $output);
         } catch (Exception $e) {
@@ -143,6 +163,46 @@ class Kernel implements KernelInterface
     protected function schedule(Schedule $schedule)
     {
         //
+    }
+
+    /**
+     * Register the Closure based commands for the application.
+     *
+     * @return void
+     */
+    protected function commands()
+    {
+        //
+    }
+
+    /**
+     * Register a Closure based command with the application.
+     *
+     * @param  string  $signature
+     * @param  Closure  $callback
+     * @return \Nova\Foundation\Console\ClosureCommand
+     */
+    public function command($signature, Closure $callback)
+    {
+        $command = new ClosureCommand($signature, $callback);
+
+        Forge::starting(function ($forge) use ($command)
+        {
+            $forge->add($command);
+        });
+
+        return $command;
+    }
+
+    /**
+     * Register the given command with the console application.
+     *
+     * @param  \Symfony\Component\Console\Command\Command  $command
+     * @return void
+     */
+    public function registerCommand($command)
+    {
+        $this->getForge()->add($command);
     }
 
     /**

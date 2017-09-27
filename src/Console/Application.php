@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+use Closure;
 use Exception;
 
 
@@ -31,6 +32,13 @@ class Application extends SymfonyApplication
      * @var \Symfony\Component\Console\Output\BufferedOutput
      */
     protected $lastOutput;
+
+    /**
+     * The console application bootstrappers.
+     *
+     * @var array
+     */
+    protected static $bootstrappers = array();
 
 
     /**
@@ -51,6 +59,41 @@ class Application extends SymfonyApplication
         $this->setCatchExceptions(false);
 
         $events->fire('forge.start', array($this));
+
+        $this->bootstrap();
+    }
+
+    /**
+     * Register a console "starting" bootstrapper.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public static function starting(Closure $callback)
+    {
+        static::$bootstrappers[] = $callback;
+    }
+
+    /**
+     * Bootstrap the console application.
+     *
+     * @return void
+     */
+    protected function bootstrap()
+    {
+        foreach (static::$bootstrappers as $bootstrapper) {
+            call_user_func($bootstrapper, $this);
+        }
+    }
+
+    /*
+     * Clear the console application bootstrappers.
+     *
+     * @return void
+     */
+    public static function forgetBootstrappers()
+    {
+        static::$bootstrappers = array();
     }
 
     /**

@@ -87,5 +87,5 @@ interface DispatcherInterface
      *
      * @return void
      */
-    public function forgetQueued();
+    public function forgetPushed();
 }

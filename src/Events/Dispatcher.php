@@ -109,7 +109,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function hasListeners($eventName)
     {
-        return isset($this->listeners[$eventName]);
+        return isset($this->listeners[$eventName]) || isset($this->wildcards[$eventName]);
     }
 
     /**
@@ -121,7 +121,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function push($event, $payload = array())
     {
-        $this->listen($event.'_pushed', function() use ($event, $payload)
+        $this->listen($event .'_pushed', function() use ($event, $payload)
         {
             $this->fire($event, $payload);
         });
@@ -296,7 +296,9 @@ class Dispatcher implements DispatcherInterface
         $wildcards = array();
 
         foreach ($this->wildcards as $key => $listeners) {
-            if (str_is($key, $eventName)) $wildcards = array_merge($wildcards, $listeners);
+            if (Str::is($key, $eventName)) {
+                $wildcards = array_merge($wildcards, $listeners);
+            }
         }
 
         return $wildcards;
@@ -318,7 +320,9 @@ class Dispatcher implements DispatcherInterface
         if (isset($this->listeners[$eventName])) {
             krsort($this->listeners[$eventName]);
 
-            $this->sorted[$eventName] = call_user_func_array('array_merge', $this->listeners[$eventName]);
+            $this->sorted[$eventName] = call_user_func_array(
+                'array_merge', $this->listeners[$eventName]
+            );
         }
     }
 
@@ -331,7 +335,7 @@ class Dispatcher implements DispatcherInterface
     public function makeListener($listener)
     {
         if (is_string($listener)) {
-            $listener = $this->createClassListener($listener);
+            return $this->createClassListener($listener);
         }
 
         return $listener;
@@ -345,11 +349,9 @@ class Dispatcher implements DispatcherInterface
      */
     public function createClassListener($listener)
     {
-        $container = $this->container;
-
-        return function() use ($listener, $container)
+        return function() use ($listener)
         {
-            $callable = $this->createClassCallable($listener, $container);
+            $callable = $this->createClassCallable($listener);
 
             // We will make a callable of the listener instance and a method that should
             // be called on that instance, then we will pass in the arguments that we
@@ -364,10 +366,9 @@ class Dispatcher implements DispatcherInterface
      * Create the class based event callable.
      *
      * @param  string  $listener
-     * @param  \Nova\Container\Container  $container
      * @return callable
      */
-    protected function createClassCallable($listener, $container)
+    protected function createClassCallable($listener)
     {
         list($className, $method) = $this->parseClassCallable($listener);
 
@@ -375,7 +376,7 @@ class Dispatcher implements DispatcherInterface
             return $this->createQueuedHandlerCallable($className, $method);
         }
 
-        $instance = $container->make($className);
+        $instance = $this->container->make($className);
 
         return array($instance, $method);
     }
@@ -391,7 +392,6 @@ class Dispatcher implements DispatcherInterface
         // If the listener has an @ sign, we will assume it is being used to delimit
         // the class name from the handle method name. This allows for handlers
         // to run multiple handler methods in a single class for convenience.
-
         return array_pad(explode('@', $listener, 2), 2, 'handle');
     }
 
@@ -404,9 +404,7 @@ class Dispatcher implements DispatcherInterface
     protected function handlerShouldBeQueued($className)
     {
         try {
-            return with(new ReflectionClass($className))->implementsInterface(
-                'Nova\Queue\Contracts\ShouldQueueInterface'
-            );
+            return with(new ReflectionClass($className))->implementsInterface('Nova\Queue\Contracts\ShouldQueueInterface');
         }
         catch (Exception $e) {
             return false;
@@ -464,7 +462,9 @@ class Dispatcher implements DispatcherInterface
         $handler = with(new ReflectionClass($class))->newInstanceWithoutConstructor();
 
         $handler->queue($this->resolveQueue(), 'Nova\Events\CallQueuedHandler@call', array(
-            'class' => $className, 'method' => $method, 'data' => serialize($arguments),
+            'class'  => $className,
+            'method' => $method,
+            'data'   => serialize($arguments),
         ));
     }
 
@@ -480,11 +480,11 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Forget all of the queued listeners.
+     * Forget all of the pushed listeners.
      *
      * @return void
      */
-    public function forgetQueued()
+    public function forgetPushed()
     {
         foreach ($this->listeners as $key => $value) {
             if (Str::endsWith($key, '_pushed')) {
