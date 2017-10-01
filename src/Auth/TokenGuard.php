@@ -3,8 +3,8 @@
 namespace Nova\Auth;
 
 use Nova\Auth\GuardHelpersTrait;
-use Nova\Auth\GuardInterface;
-use Nova\Auth\UserProviderInterface;
+use Nova\Auth\Contracts\GuardInterface;
+use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Http\Request;
 
 
@@ -41,7 +41,7 @@ class TokenGuard implements GuardInterface
      * @param  \Nova\Http\Request  $request
      * @return void
      */
-    public function __construct(UserProvider $provider, Request $request)
+    public function __construct(UserProviderInterface $provider, Request $request)
     {
         $this->request  = $request;
         $this->provider = $provider;

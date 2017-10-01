@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use ArrayAccess;
 use Closure;
 use SplFileInfo;
+use RuntimeException;
 
 
 class Request extends SymfonyRequest implements ArrayAccess
@@ -737,6 +738,24 @@ class Request extends SymfonyRequest implements ArrayAccess
         } else {
             return $route->parameter($param);
         }
+    }
+
+    /**
+     * Get a unique fingerprint for the request / route / IP address.
+     *
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
+    public function fingerprint()
+    {
+        if (is_null($route = $this->route())) {
+            throw new RuntimeException('Unable to generate fingerprint. Route unavailable.');
+        }
+
+        return sha1(implode('|', array_merge(
+            $route->methods(), array($route->domain(), $route->uri(), $this->ip())
+        )));
     }
 
     /**

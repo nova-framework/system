@@ -5,7 +5,7 @@ namespace Nova\Routing\Middleware;
 use Nova\Cache\RateLimiter;
 use Nova\Http\Response;
 
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 use Closure;
 
@@ -97,7 +97,7 @@ class ThrottleRequests
      * @param  int|null  $retryAfter
      * @return \Nova\Http\Response
      */
-    protected function addHeaders(Response $response, $maxAttempts, $remainingAttempts, $retryAfter = null)
+    protected function addHeaders(SymfonyResponse $response, $maxAttempts, $remainingAttempts, $retryAfter = null)
     {
         $headers = array(
             'X-RateLimit-Limit' => $maxAttempts,
