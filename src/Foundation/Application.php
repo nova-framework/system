@@ -37,7 +37,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @var string
      */
-    const VERSION = '3.78.11';
+    const VERSION = '3.78.12';
 
     /**
      * Indicates if the application has "booted".
@@ -1104,12 +1104,11 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
             'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
             'redirect'       => 'Nova\Routing\Redirector',
             'request'        => 'Nova\Http\Request',
-            'router'         => array('Nova\Routing\Router', 'Nova\Routing\RouteFiltererInterface'),
+            'router'         => 'Nova\Routing\Router',
             'session'        => 'Nova\Session\SessionManager',
             'session.store'  => 'Nova\Session\Store',
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
-            'layout'         => 'Nova\Layout\Factory',
             'view'           => 'Nova\View\Factory',
         );
 
