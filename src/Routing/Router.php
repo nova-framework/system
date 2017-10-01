@@ -626,19 +626,19 @@ class Router
      */
     protected function runRouteWithinStack(Route $route, Request $request)
     {
-        $shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
-                                ($this->container->make('middleware.disable') === true);
-
-        $middleware = $shouldSkipMiddleware ? array() : $this->gatherRouteMiddleware($route);
+        $skipMiddleware = $this->container->bound('middleware.disable') &&
+                          ($this->container->make('middleware.disable') === true);
 
         // Create a Pipeline instance.
-        $pipeline = new Pipeline($this->container);
+        $pipeline = new Pipeline(
+            $this->container, $skipMiddleware ? array() : $this->gatherRouteMiddleware($route)
+        );
 
-        return $pipeline->send($request)->through($middleware)->then(function ($request) use ($route)
+        return $pipeline->handle($request, function ($request) use ($route)
         {
-            return $this->prepareResponse(
-                $request, $route->run($request)
-            );
+            $response = $route->run($request);
+
+            return $this->prepareResponse($request, $response);
         });
     }
 
@@ -691,19 +691,19 @@ class Router
             return $callable;
         }
 
-        // When the callable is a string, we add the parameters string and return it.
+        // When the callable is a string, we will add back the parameters before returning.
         else if (is_string($callable)) {
             return $callable .':' .$parameters;
         }
 
-        // A callback with parameters; we create a proper middleware closure for it.
+        // A callback with parameters; we should create a proper middleware closure for it.
+        $parameters = explode(',', $parameters);
+
         return function ($passable, $stack) use ($callable, $parameters)
         {
-            $parameters = array_merge(
-                array($passable, $stack), explode(',', $parameters)
+            return call_user_func_array(
+                $callable, array_merge(array($passable, $stack), $parameters)
             );
-
-            return call_user_func_array($callable, $parameters);
         };
     }
 
@@ -718,15 +718,16 @@ class Router
         $results = array();
 
         foreach ($this->middlewareGroups[$name] as $middleware) {
-            if (isset($this->middlewareGroups[$middleware])) {
-                $results = array_merge(
-                    $results, $this->parseMiddlewareGroup($middleware)
-                );
+            if (! isset($this->middlewareGroups[$middleware])) {
+                $results[] = $this->parseMiddleware($middleware);
 
                 continue;
             }
 
-            $results[] = $this->parseMiddleware($middleware);
+            // The middleware refer a middleware group.
+            $results = array_merge(
+                $results, $this->parseMiddlewareGroup($middleware)
+            );
         }
 
         return $results;

@@ -23,13 +23,6 @@ class Dispatcher implements QueueingDispatcher
     protected $container;
 
     /**
-     * The pipeline instance for the bus.
-     *
-     * @var \Nova\Pipeline\Pipeline
-     */
-    protected $pipeline;
-
-    /**
      * The pipes to send commands through before dispatching.
      *
      * @var array
@@ -63,8 +56,6 @@ class Dispatcher implements QueueingDispatcher
         $this->container = $container;
 
         $this->queueResolver = $queueResolver;
-
-        $this->pipeline = new Pipeline($container);
     }
 
     /**
@@ -92,16 +83,20 @@ class Dispatcher implements QueueingDispatcher
     public function dispatchNow($command, $handler = null)
     {
         if (! is_null($handler) || ($handler = $this->getCommandHandler($command))) {
-            $callback = function ($command) use ($handler) {
+            $callback = function ($command) use ($handler)
+            {
                 return $handler->handle($command);
             };
         } else {
-            $callback = function ($command) {
-                return $this->container->call([$command, 'handle']);
+            $callback = function ($command)
+            {
+                return $this->container->call(array($command, 'handle'));
             };
         }
 
-        return $this->pipeline->send($command)->through($this->pipes)->then($callback);
+        $pipeline = new Pipeline($this->container, $this->pipes);
+
+        return $pipeline->handle($command, $callback);
     }
 
     /**

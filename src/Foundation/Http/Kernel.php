@@ -8,7 +8,7 @@ use Nova\Pipeline\Pipeline;
 use Nova\Routing\Router;
 use Nova\Support\Facades\Facade;
 
-use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
 use Exception;
@@ -127,12 +127,12 @@ class Kernel implements KernelInterface
 
         $this->bootstrap();
 
-        //
-        $shouldSkipMiddleware = $this->app->shouldSkipMiddleware();
+        // Create a Pipeline instance.
+        $pipeline = new Pipeline(
+            $this->app, $this->shouldSkipMiddleware() ? array() : $this->middleware
+        );
 
-        $pipeline = new Pipeline($this->app);
-
-        return $pipeline->send($request)->through($shouldSkipMiddleware ? array() : $this->middleware)->then(function ($request)
+        return $pipeline->handle($request, function ($request)
         {
             $this->app->instance('request', $request);
 
@@ -149,9 +149,7 @@ class Kernel implements KernelInterface
      */
     public function terminate($request, $response)
     {
-        $shouldSkipMiddleware = $this->app->shouldSkipMiddleware();
-
-        $middlewares = $shouldSkipMiddleware ? array() : array_merge(
+        $middlewares = $this->shouldSkipMiddleware() ? array() : array_merge(
             $this->gatherRouteMiddleware($request),
             $this->middleware
         );

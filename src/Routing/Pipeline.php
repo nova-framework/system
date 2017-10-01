@@ -18,15 +18,15 @@ class Pipeline extends BasePipeline
     /**
      * Get the final piece of the Closure onion.
      *
-     * @param  \Closure  $destination
+     * @param  \Closure  $callback
      * @return \Closure
      */
-    protected function getInitialSlice(Closure $destination)
+    protected function prepareDestination(Closure $callback)
     {
-        return function ($passable) use ($destination)
+        return function ($passable) use ($callback)
         {
             try {
-                return call_user_func($destination, $passable);
+                return call_user_func($callback, $passable);
             }
             catch (Exception $e) {
                 return $this->handleException($passable, $e);
@@ -44,12 +44,12 @@ class Pipeline extends BasePipeline
      * @param  mixed  $pipe
      * @return \Closure
      */
-    protected function getSlice($stack, $pipe)
+    protected function createSlice($stack, $pipe)
     {
         return function ($passable) use ($stack, $pipe)
         {
             try {
-                return $this->callPipe($pipe, $passable, $stack);
+                return $this->call($pipe, $passable, $stack);
             }
             catch (Exception $e) {
                 return $this->handleException($passable, $e);
