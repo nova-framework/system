@@ -2,6 +2,9 @@
 
 namespace {{namespace}};
 
+use {{fullUserModel}};
+use {{fullModel}};
+
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 
 
@@ -11,11 +14,58 @@ class {{className}}
 
 
     /**
-     * Create a new policy instance.
+     * Create a new {{className}} instance.
      *
      * @return void
      */
     public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can view the {{camelModel}}.
+     *
+     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullModel}}  ${{camelModel}}
+     * @return mixed
+     */
+    public function view({{userModel}} $user, {{model}} ${{camelModel}})
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can create {{pluralModel}}.
+     *
+     * @param  \{{fullUserModel}}  $user
+     * @return mixed
+     */
+    public function create({{userModel}} $user)
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can update the {{camelModel}}.
+     *
+     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullModel}}  ${{camelModel}}
+     * @return mixed
+     */
+    public function update({{userModel}} $user, {{model}} ${{camelModel}})
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can delete the {{camelModel}}.
+     *
+     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullModel}}  ${{camelModel}}
+     * @return mixed
+     */
+    public function delete({{userModel}} $user, {{model}} ${{camelModel}})
     {
         //
     }
