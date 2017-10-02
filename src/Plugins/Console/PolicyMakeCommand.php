@@ -126,9 +126,9 @@ class PolicyMakeCommand extends MakeCommand
         //
         $config = $this->container['config'];
 
-        $this->data['fullUserModel'] = $namespaceModel = $config->get('auth.providers.users.model', 'App\Models\User');
+        $this->data['fullUserModel'] = $model = $config->get('auth.providers.users.model', 'App\Models\User');
 
-        $this->data['userModel'] = class_basename(trim($namespaceModel, '\\'));
+        $this->data['userModel'] = class_basename(trim($model, '\\'));
     }
 
     /**
