@@ -250,7 +250,7 @@ class Gate implements GateInterface
             return false;
         }
 
-        $arguments = is_array($arguments) ? $arguments : [$arguments];
+        $arguments = is_array($arguments) ? $arguments : array($arguments);
 
         if (is_null($result = $this->callBeforeCallbacks($user, $ability, $arguments))) {
             $result = $this->callAuthCallback($user, $ability, $arguments);
