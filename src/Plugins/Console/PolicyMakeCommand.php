@@ -163,7 +163,14 @@ class PolicyMakeCommand extends MakeCommand
             $this->data['fullUserModel'],
         );
 
-        return str_replace($searches, $replaces, $content);
+        $content = str_replace($searches, $replaces, $content);
+
+        //
+        $namespaceModel = $this->data['fullModel'];
+
+        return str_replace(
+            "use {$namespaceModel};\nuse {$namespaceModel};", "use {$namespaceModel};", $content
+        );
     }
 
 
