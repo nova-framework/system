@@ -14,16 +14,6 @@ class {{className}}
 
 
     /**
-     * Create a new {{className}} instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Determine whether the user can view the {{camelModel}}.
      *
      * @param  \{{fullUserModel}}  $user
