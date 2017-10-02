@@ -3,8 +3,10 @@
 namespace Nova\Module\Console;
 
 use Nova\Module\Console\MakeCommand;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
 class MakePolicyCommand extends MakeCommand
@@ -49,15 +51,28 @@ class MakePolicyCommand extends MakeCommand
     );
 
     /**
-     * Module stubs used to populate defined files.
+     * Plugin signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'model',
+    );
+
+    /**
+     * Plugin stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
+            'policy.plain.stub',
+        ),
+        'model' => array(
             'policy.stub',
         ),
     );
+
 
     /**
      * Resolve Container after getting file path.
@@ -70,8 +85,53 @@ class MakePolicyCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-        $this->data['path']      = $this->getBaseNamespace();
+
+        $this->data['path'] = $this->getBaseNamespace();
+
         $this->data['className'] = basename($filePath);
+
+        //
+        $this->data['model'] = 'dummy';
+
+        $this->data['fullModel']   = 'dummy';
+        $this->data['camelModel']  = 'dummy';
+        $this->data['pluralModel'] = 'dummy';
+
+        $this->data['userModel']     = 'dummy';
+        $this->data['fullUserModel'] = 'dummy';
+    }
+
+    /**
+     * Resolve Container after getting input option.
+     *
+     * @param string $option
+     *
+     * @return array
+     */
+    protected function resolveByOption($option)
+    {
+        $model = str_replace('/', '\\', $option);
+
+        $namespaceModel = $this->container->getNamespace() .'Models\\' .$model;
+
+        if (Str::startsWith($model, '\\')) {
+            $this->data['fullModel'] = trim($model, '\\');
+        } else {
+            $this->data['fullModel'] = $namespaceModel;
+        }
+
+        $this->data['model'] = $model = class_basename(trim($model, '\\'));
+
+        $this->data['camelModel'] = Str::camel($model);
+
+        $this->data['pluralModel'] = Str::plural(Str::camel($model));
+
+        //
+        $config = $this->container['config'];
+
+        $this->data['fullUserModel'] = $model = $config->get('auth.providers.users.model', 'App\Models\User');
+
+        $this->data['userModel'] = class_basename(trim($model, '\\'));
     }
 
     /**
@@ -83,21 +143,36 @@ class MakePolicyCommand extends MakeCommand
     {
         $searches = array(
             '{{filename}}',
-            '{{path}}',
             '{{namespace}}',
             '{{className}}',
+            '{{model}}',
+            '{{fullModel}}',
+            '{{camelModel}}',
+            '{{pluralModel}}',
+            '{{userModel}}',
+            '{{fullUserModel}}',
+
         );
 
         $replaces = array(
             $this->data['filename'],
-            $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
+            $this->data['model'],
+            $this->data['fullModel'],
+            $this->data['camelModel'],
+            $this->data['pluralModel'],
+            $this->data['userModel'],
+            $this->data['fullUserModel'],
         );
 
-        return str_replace($searches, $replaces, $content);
-    }
+        $content = str_replace($searches, $replaces, $content);
 
+        //
+        $class = $this->data['fullModel'];
+
+        return str_replace("use {$class};\nuse {$class};", "use {$class};", $content);
+    }
 
     /**
      * Get the console command arguments.
@@ -109,6 +184,18 @@ class MakePolicyCommand extends MakeCommand
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
             array('name', InputArgument::REQUIRED, 'The name of the Policy class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--model', null, InputOption::VALUE_OPTIONAL, 'The model that the policy applies to.'),
         );
     }
 }
