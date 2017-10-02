@@ -81,10 +81,12 @@ class ControllerMakeCommand extends MakeCommand
      */
     protected function resolveByPath($filePath)
     {
-        $this->data['filename']            = $this->makeFileName($filePath);
-        $this->data['namespace']        = $this->getNamespace($filePath);
-        $this->data['rootNamespace']    = $this->container->getNamespace();
-        $this->data['className']        = basename($filePath);
+        $this->data['filename']  = $this->makeFileName($filePath);
+        $this->data['namespace'] = $this->getNamespace($filePath);
+
+        $this->data['rootNamespace'] = $this->container->getNamespace();
+
+        $this->data['className'] = basename($filePath);
     }
 
     /**
