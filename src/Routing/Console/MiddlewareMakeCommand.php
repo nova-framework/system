@@ -61,6 +61,6 @@ class MiddlewareMakeCommand extends Command
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace .'\Foundation\Http\Middleware';
+        return $rootNamespace .'\Foundation\Middleware';
     }
 }
