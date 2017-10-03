@@ -161,11 +161,11 @@ class MakeModuleCommand extends Command
     {
         $name = $this->ask('Please enter the name of the module:', $this->data['name']);
 
-        $this->data['slug'] = $this->ask('Please enter the slug for the module:', $this->data['slug']);
-
-        //
         $this->data['name']      = $name;
         $this->data['namespace'] = $name;
+
+        //
+        $this->data['slug'] = $this->ask('Please enter the slug for the module:', $this->data['slug']);
 
         //
         $this->comment('You have provided the following manifest information:');
