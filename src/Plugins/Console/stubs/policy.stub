@@ -14,17 +14,6 @@ class {{className}}
 
 
     /**
-     * Determine whether the user can view the {{pluralModels}}.
-     *
-     * @param  \{{fullUserModel}}  $authUser
-     * @return mixed
-     */
-    public function index({{userModel}} $authUser)
-    {
-        //
-    }
-
-    /**
      * Determine whether the user can view the {{camelModel}}.
      *
      * @param  \{{fullUserModel}}  $authUser
