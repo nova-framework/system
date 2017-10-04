@@ -16,9 +16,9 @@ trait AuthorizableTrait
      */
     public function can($ability, $arguments = array())
     {
-        $gate = App::make('Nova\Auth\Access\GateInterface');
+        $gate = App::make('Nova\Auth\Access\GateInterface')->forUser($this);
 
-        return $gate->forUser($this)->check($ability, $arguments);
+        return $gate->check($ability, $arguments);
     }
 
     /**

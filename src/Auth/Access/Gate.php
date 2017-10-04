@@ -126,7 +126,7 @@ class Gate implements GateInterface
      */
     protected function buildAbilityCallback($callback)
     {
-        return function() use ($callback)
+        return function () use ($callback)
         {
             list($class, $method) = explode('@', $callback);
 
