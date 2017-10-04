@@ -17,9 +17,9 @@ trait AuthorizableTrait
      */
     public function can($ability, $arguments = array())
     {
-        $gate = App::make(Gate::class);
+        $gate = App::make(Gate::class)->forUser($this);
 
-        return $gate->forUser($this)->check($ability, $arguments);
+        return $gate->check($ability, $arguments);
     }
 
     /**
