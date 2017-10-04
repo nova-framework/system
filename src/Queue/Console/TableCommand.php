@@ -52,7 +52,7 @@ class TableCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $table = $this->container['config']['queue.connections.database.table'];
 

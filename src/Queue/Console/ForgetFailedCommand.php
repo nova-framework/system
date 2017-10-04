@@ -29,7 +29,7 @@ class ForgetFailedCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         if ($this->container['queue.failer']->forget($this->argument('id')))
         {

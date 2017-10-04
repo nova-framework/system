@@ -208,7 +208,7 @@ class Worker
             // be auto-deleted after processing and if so we will go ahead and run
             // the delete method on the job. Otherwise we will just keep moving.
 
-            $job->fire();
+            $job->handle();
 
             if ($job->autoDelete()) {
                 $job->delete();

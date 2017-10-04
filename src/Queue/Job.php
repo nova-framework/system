@@ -41,7 +41,7 @@ abstract class Job
      *
      * @return void
      */
-    abstract public function fire();
+    abstract public function handle();
 
     /**
      * Delete the job from the queue.
@@ -91,7 +91,7 @@ abstract class Job
      * @param  array  $payload
      * @return void
      */
-    protected function resolveAndFire(array $payload)
+    protected function resolveAndHandle(array $payload)
     {
         list($class, $method) = $this->parseJob($payload['job']);
 

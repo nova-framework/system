@@ -54,7 +54,7 @@ class VendorPublishCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $group = $this->input->getArgument('group');
 

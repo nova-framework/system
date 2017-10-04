@@ -45,14 +45,14 @@ class SyncJob extends Job
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $data = json_decode($this->data, true);
 
         if ($this->job instanceof Closure) {
             call_user_func($this->job, $this, $data);
         } else {
-            $this->resolveAndFire(array('job' => $this->job, 'data' => $data));
+            $this->resolveAndHandle(array('job' => $this->job, 'data' => $data));
         }
     }
 

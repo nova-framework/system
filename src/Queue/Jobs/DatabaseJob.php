@@ -48,9 +48,9 @@ class DatabaseJob extends Job
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
-        $this->resolveAndFire(json_decode($this->job->payload, true));
+        $this->resolveAndHandle(json_decode($this->job->payload, true));
     }
 
     /**

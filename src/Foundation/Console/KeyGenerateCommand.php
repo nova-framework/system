@@ -41,7 +41,7 @@ class KeyGenerateCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         list($path, $contents) = $this->getKeyFile();
 

@@ -61,7 +61,7 @@ class PluginMigrateRollbackCommand extends Command
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         if (! $this->confirmToProceed()) {
             return;

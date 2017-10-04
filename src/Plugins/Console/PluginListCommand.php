@@ -51,7 +51,7 @@ class PluginListCommand extends Command
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $plugins = $this->plugins->all();
 

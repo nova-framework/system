@@ -61,7 +61,7 @@ class ViewPublishCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $package = $this->input->getArgument('package');
 

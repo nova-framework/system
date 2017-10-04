@@ -163,7 +163,7 @@ class IronQueue extends Queue implements QueueInterface
      */
     public function marshal()
     {
-        $this->createPushedIronJob($this->marshalPushedJob())->fire();
+        $this->createPushedIronJob($this->marshalPushedJob())->handle();
 
         return new Response('OK');
     }

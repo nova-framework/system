@@ -26,7 +26,7 @@ class ClearCompiledCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         if (file_exists($path = $this->container['config']['app.manifest'] .DS .'services.php')) {
             @unlink($path);

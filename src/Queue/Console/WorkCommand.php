@@ -52,7 +52,7 @@ class WorkCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         if ($this->downForMaintenance() && ! $this->option('daemon')) {
             return;

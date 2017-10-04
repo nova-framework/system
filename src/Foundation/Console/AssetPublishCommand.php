@@ -63,7 +63,7 @@ class AssetPublishCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         foreach ($this->getPackages() as $package) {
             $this->publishAssets($package);

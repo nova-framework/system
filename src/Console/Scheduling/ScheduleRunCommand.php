@@ -47,7 +47,7 @@ class ScheduleRunCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $events = $this->schedule->dueEvents($this->container);
 

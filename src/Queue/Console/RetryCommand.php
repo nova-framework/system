@@ -29,7 +29,7 @@ class RetryCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $failed = $this->container['queue.failer']->find($this->argument('id'));
 
