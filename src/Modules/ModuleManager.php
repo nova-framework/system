@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Module;
+namespace Nova\Modules;
 
 use Nova\Config\Repository as Config;
 use Nova\Foundation\Application;
-use Nova\Module\Repository;
+use Nova\Modules\Repository;
 use Nova\Support\Collection;
 use Nova\Support\Str;
 
@@ -17,7 +17,7 @@ class ModuleManager
     protected $app;
 
     /**
-     * @var Nova\Module\Repository
+     * @var Nova\Modules\Repository
      */
     protected $repository;
 
@@ -66,7 +66,7 @@ class ModuleManager
      *
      * @return void
      *
-     * @throws \Nova\Module\FileMissingException
+     * @throws \Nova\Modules\FileMissingException
      */
     protected function registerServiceProvider($properties)
     {

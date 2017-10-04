@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 use Nova\Console\Command;
 
 
@@ -23,7 +23,7 @@ class ModuleListCommand extends Command
     protected $description = 'List all Application Modules';
 
     /**
-     * @var \Nova\Module\ModuleManager
+     * @var \Nova\Modules\ModuleManager
      */
     protected $module;
 
@@ -37,7 +37,7 @@ class ModuleListCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @param \Nova\Module\ModuleManager $module
+     * @param \Nova\Modules\ModuleManager $module
      */
     public function __construct(ModuleManager $module)
     {

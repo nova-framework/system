@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Module;
+namespace Nova\Modules;
 
-use Nova\Module\ModuleManager;
-use Nova\Module\Repository;
+use Nova\Modules\ModuleManager;
+use Nova\Modules\Repository;
 
 use Nova\Support\ServiceProvider;
 

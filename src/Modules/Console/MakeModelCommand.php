@@ -1,35 +1,34 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
-use Nova\Module\Console\MakeCommand;
+use Nova\Modules\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeControllerCommand extends MakeCommand
+class MakeModelCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:controller';
+    protected $name = 'make:module:model';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Controller class';
+    protected $description = 'Create a new Module Model class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'Model';
 
     /**
      * Module folders to be created.
@@ -37,7 +36,7 @@ class MakeControllerCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Controllers/',
+        'Models/',
     );
 
     /**
@@ -50,32 +49,20 @@ class MakeControllerCommand extends MakeCommand
     );
 
     /**
-     * Module signature option.
-     *
-     * @var array
-     */
-    protected $signOption = array(
-        'resource',
-    );
-
-    /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
-            'controller.stub',
-        ),
-        'resource' => array(
-            'controller_resource.stub',
+            'model.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $FilePath
+     * @param string $filePath
      *
      * @return array
      */
@@ -83,9 +70,7 @@ class MakeControllerCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-
-        $this->data['path'] = $this->getBaseNamespace();
-
+        $this->data['path']      = $this->getBaseNamespace();
         $this->data['className'] = basename($filePath);
     }
 
@@ -113,6 +98,7 @@ class MakeControllerCommand extends MakeCommand
         return str_replace($searches, $replaces, $content);
     }
 
+
     /**
      * Get the console command arguments.
      *
@@ -122,19 +108,7 @@ class MakeControllerCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Controller class.'),
-        );
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('--resource', null, InputOption::VALUE_NONE, 'Generate a module resource controller class'),
+            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
         );
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -89,7 +89,7 @@ class MakeModuleCommand extends Command
     /**
      * The modules instance.
      *
-     * @var \Nova\Module\ModuleManager
+     * @var \Nova\Modules\ModuleManager
      */
     protected $modules;
 
@@ -111,7 +111,7 @@ class MakeModuleCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \>Nova\Module\ModuleManager    $module
+     * @param \Nova\Modules\ModuleManager    $module
      */
     public function __construct(Filesystem $files, ModuleManager $modules)
     {

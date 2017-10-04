@@ -1,34 +1,35 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
-use Nova\Module\Console\MakeCommand;
+use Nova\Modules\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeSeederCommand extends MakeCommand
+class MakeControllerCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:seeder';
+    protected $name = 'make:module:controller';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Seeder class';
+    protected $description = 'Create a new Module Controller class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Seeder';
+    protected $type = 'Controller';
 
     /**
      * Module folders to be created.
@@ -36,7 +37,7 @@ class MakeSeederCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Database/Seeds/',
+        'Controllers/',
     );
 
     /**
@@ -49,13 +50,25 @@ class MakeSeederCommand extends MakeCommand
     );
 
     /**
+     * Module signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'resource',
+    );
+
+    /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
-            'seeder_plus.stub',
+            'controller.stub',
+        ),
+        'resource' => array(
+            'controller_resource.stub',
         ),
     );
 
@@ -109,8 +122,19 @@ class MakeSeederCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Seeder class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Controller class.'),
         );
     }
 
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--resource', null, InputOption::VALUE_NONE, 'Generate a module resource controller class'),
+        );
+    }
 }

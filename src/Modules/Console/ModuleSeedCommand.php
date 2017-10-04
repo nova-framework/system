@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,7 +29,7 @@ class ModuleSeedCommand extends Command
     protected $description = 'Seed the database with records for a specific or all modules';
 
     /**
-     * @var \Nova\Modules\ModuleManager
+     * @var \Nova\Moduless\ModuleManager
      */
     protected $modules;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;

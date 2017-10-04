@@ -1,11 +1,11 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 use Nova\Support\Arr;
 
 use Symfony\Component\Console\Input\InputOption;

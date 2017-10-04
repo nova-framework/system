@@ -1,34 +1,34 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
-use Nova\Module\Console\MakeCommand;
+use Nova\Modules\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeModelCommand extends MakeCommand
+class MakeSeederCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:model';
+    protected $name = 'make:module:seeder';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Model class';
+    protected $description = 'Create a new Module Seeder class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Model';
+    protected $type = 'Seeder';
 
     /**
      * Module folders to be created.
@@ -36,7 +36,7 @@ class MakeModelCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Models/',
+        'Database/Seeds/',
     );
 
     /**
@@ -55,14 +55,14 @@ class MakeModelCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'model.stub',
+            'seeder_plus.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $filePath
+     * @param string $FilePath
      *
      * @return array
      */
@@ -70,7 +70,9 @@ class MakeModelCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-        $this->data['path']      = $this->getBaseNamespace();
+
+        $this->data['path'] = $this->getBaseNamespace();
+
         $this->data['className'] = basename($filePath);
     }
 
@@ -98,7 +100,6 @@ class MakeModelCommand extends MakeCommand
         return str_replace($searches, $replaces, $content);
     }
 
-
     /**
      * Get the console command arguments.
      *
@@ -108,7 +109,8 @@ class MakeModelCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Seeder class.'),
         );
     }
+
 }

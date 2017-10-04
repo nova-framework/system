@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\Module\ModuleManager
+ * @see \Nova\Modules\ModuleManager
  */
 class Module extends Facade
 {

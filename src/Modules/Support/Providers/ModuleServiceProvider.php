@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module\Support\Providers;
+namespace Nova\Modules\Support\Providers;
 
 use Nova\Support\ServiceProvider;
 

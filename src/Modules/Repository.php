@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Module;
+namespace Nova\Modules;
 
 use Nova\Config\Repository as Config;
 use Nova\Filesystem\Filesystem;

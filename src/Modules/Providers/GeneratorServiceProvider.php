@@ -1,15 +1,15 @@
 <?php
 
-namespace Nova\Module\Providers;
+namespace Nova\Modules\Providers;
 
-use Nova\Module\Console\MakeModuleCommand;
-use Nova\Module\Console\MakeConsoleCommand;
-use Nova\Module\Console\MakeControllerCommand;
-use Nova\Module\Console\MakeMigrationCommand;
-use Nova\Module\Console\MakeModelCommand;
-use Nova\Module\Console\MakePolicyCommand;
-use Nova\Module\Console\MakeProviderCommand;
-use Nova\Module\Console\MakeSeederCommand;
+use Nova\Modules\Console\MakeModuleCommand;
+use Nova\Modules\Console\MakeConsoleCommand;
+use Nova\Modules\Console\MakeControllerCommand;
+use Nova\Modules\Console\MakeMigrationCommand;
+use Nova\Modules\Console\MakeModelCommand;
+use Nova\Modules\Console\MakePolicyCommand;
+use Nova\Modules\Console\MakeProviderCommand;
+use Nova\Modules\Console\MakeSeederCommand;
 use Nova\Support\ServiceProvider;
 
 

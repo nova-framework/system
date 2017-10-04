@@ -1,13 +1,13 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Nova\Filesystem\Filesystem;
 use Nova\Database\Migrations\Migrator;
-use Nova\Module\Console\MigrationTrait;
-use Nova\Module\ModuleManager;
+use Nova\Modules\Console\MigrationTrait;
+use Nova\Modules\ModuleManager;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;

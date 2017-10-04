@@ -1,10 +1,10 @@
 <?php
 
-namespace Nova\Module\Console;
+namespace Nova\Modules\Console;
 
 use Nova\Console\Command as CommandGenerator;
 use Nova\Filesystem\Filesystem;
-use Nova\Module\ModuleManager;
+use Nova\Modules\ModuleManager;
 use Nova\Support\Str;
 
 
@@ -41,7 +41,7 @@ class MakeCommand extends CommandGenerator
     /**
      * The modules instance.
      *
-     * @var \Nova\Module\ModuleManager
+     * @var \Nova\Modules\ModuleManager
      */
     protected $modules;
 
@@ -84,7 +84,7 @@ class MakeCommand extends CommandGenerator
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \Nova\Module\ModuleManager    $modules
+     * @param \Nova\Modules\ModuleManager    $modules
      */
     public function __construct(Filesystem $files, ModuleManager $modules)
     {
