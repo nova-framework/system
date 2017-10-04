@@ -53,11 +53,7 @@ class ForgetCommand extends Command
      */
     public function fire()
     {
-        $key = $this->argument('key');
-
-        $store = $this->option('store') ? $this->option('store') : null;
-
-        $this->cache->store($store)->forget($key);
+        $this->cache->driver($this->option('store'))->forget($key = $this->argument('key'));
 
         $this->info('The [' .$key .'] key has been removed from the cache.');
     }
@@ -82,7 +78,7 @@ class ForgetCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('store', 's', InputOption::VALUE_NONE, 'The store to remove the key from.'),
+            array('store', null, InputOption::VALUE_OPTIONAL, 'The store to remove the key from.'),
         );
     }
 }
