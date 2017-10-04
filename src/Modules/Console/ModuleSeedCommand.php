@@ -29,7 +29,7 @@ class ModuleSeedCommand extends Command
     protected $description = 'Seed the database with records for a specific or all modules';
 
     /**
-     * @var \Nova\Moduless\ModuleManager
+     * @var \Nova\Modules\ModuleManager
      */
     protected $modules;
 
