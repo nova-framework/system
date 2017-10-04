@@ -14,12 +14,12 @@ class {{className}}
 
 
     /**
-     * Determine whether the user can view the {{pluralModels}}.
+     * Determine whether the user can view the {{pluralModel}}.
      *
-     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullUserModel}}  $authUser
      * @return mixed
      */
-    public function index({{userModel}} $user)
+    public function index({{userModel}} $authUser)
     {
         //
     }
@@ -27,11 +27,11 @@ class {{className}}
     /**
      * Determine whether the user can view the {{camelModel}}.
      *
-     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullUserModel}}  $authUser
      * @param  \{{fullModel}}  ${{camelModel}}
      * @return mixed
      */
-    public function view({{userModel}} $user, {{model}} ${{camelModel}})
+    public function view({{userModel}} $authUser, {{model}} ${{camelModel}})
     {
         //
     }
@@ -39,10 +39,10 @@ class {{className}}
     /**
      * Determine whether the user can create {{pluralModel}}.
      *
-     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullUserModel}}  $authUser
      * @return mixed
      */
-    public function create({{userModel}} $user)
+    public function create({{userModel}} $authUser)
     {
         //
     }
@@ -50,11 +50,11 @@ class {{className}}
     /**
      * Determine whether the user can update the {{camelModel}}.
      *
-     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullUserModel}}  $authUser
      * @param  \{{fullModel}}  ${{camelModel}}
      * @return mixed
      */
-    public function update({{userModel}} $user, {{model}} ${{camelModel}})
+    public function update({{userModel}} $authUser, {{model}} ${{camelModel}})
     {
         //
     }
@@ -62,11 +62,11 @@ class {{className}}
     /**
      * Determine whether the user can delete the {{camelModel}}.
      *
-     * @param  \{{fullUserModel}}  $user
+     * @param  \{{fullUserModel}}  $authUser
      * @param  \{{fullModel}}  ${{camelModel}}
      * @return mixed
      */
-    public function delete({{userModel}} $user, {{model}} ${{camelModel}})
+    public function delete({{userModel}} $authUser, {{model}} ${{camelModel}})
     {
         //
     }
