@@ -21,7 +21,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerUserResolver();
 
         $this->registerAccessGate();
-        
+
         $this->registerRequestRebindHandler();
     }
 
