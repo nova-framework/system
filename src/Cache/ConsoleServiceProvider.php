@@ -29,7 +29,7 @@ class ConsoleServiceProvider extends ServiceProvider
 
         $this->app->bindShared('command.cache.forget', function($app)
         {
-            return new Console\ForgetCommand($app['cache'], $app['files']);
+            return new Console\ForgetCommand($app['cache']);
         });
 
         $this->app->bindShared('command.cache.table', function($app)
