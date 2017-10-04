@@ -82,7 +82,7 @@ class ForgetCommand extends Command
     protected function getOptions()
     {
         return array(
-            array('store', null, InputOption::VALUE_NONE, 'The store to remove the key from.'),
+            array('store', 's', InputOption::VALUE_NONE, 'The store to remove the key from.'),
         );
     }
 }
