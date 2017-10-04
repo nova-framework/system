@@ -36,7 +36,7 @@ class MiddlewareMakeCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = [
-        'Http/Middleware/',
+        'Middleware/',
     ];
 
     /**

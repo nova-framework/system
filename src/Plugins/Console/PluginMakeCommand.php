@@ -203,9 +203,9 @@ class PluginMakeCommand extends Command
         //
         $config = $this->container['config'];
 
-        $this->data['author']    = $config->get('plugins.author.name');
+        $this->data['author']   = $config->get('plugins.author.name');
         $this->data['email']    = $config->get('plugins.author.email');
-        $this->data['homepage']    = $config->get('plugins.author.homepage');
+        $this->data['homepage'] = $config->get('plugins.author.homepage');
 
         $this->data['license'] = 'MIT';
 
@@ -227,7 +227,7 @@ class PluginMakeCommand extends Command
         $this->data['slug'] = $this->ask('Please enter the slug of the plugin:', $this->data['slug']);
 
         if (strpos($this->data['package'], '/') > 0) {
-            list($vendor) = explode('/', $this->data['package']);
+            list ($vendor) = explode('/', $this->data['package']);
         } else {
             $vendor = null;
         }
@@ -248,16 +248,17 @@ class PluginMakeCommand extends Command
         }
 
         //
-        $this->data['namespace']    = $this->ask('Please enter the namespace of the plugin:', $this->data['namespace']);
-        $this->data['license']        = $this->ask('Please enter the license of the plugin:', $this->data['license']);
+        $this->data['namespace'] = $this->ask('Please enter the namespace of the plugin:', $this->data['namespace']);
+
+        $this->data['license'] = $this->ask('Please enter the license of the plugin:', $this->data['license']);
 
         $this->comment('You have provided the following information:');
 
-        $this->comment('Name:        '.$this->data['name']);
-        $this->comment('Slug:        '.$this->data['slug']);
-        $this->comment('Package:    '.$this->data['package']);
-        $this->comment('Namespace:    '.$this->data['namespace']);
-        $this->comment('License:    '.$this->data['license']);
+        $this->comment('Name:       ' .$this->data['name']);
+        $this->comment('Slug:       ' .$this->data['slug']);
+        $this->comment('Package:    ' .$this->data['package']);
+        $this->comment('Namespace:  ' .$this->data['namespace']);
+        $this->comment('License:    ' .$this->data['license']);
 
         if ($this->confirm('Do you wish to continue?')) {
             $this->generate();
