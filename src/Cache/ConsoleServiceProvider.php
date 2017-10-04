@@ -14,6 +14,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
+
     /**
      * Register the service provider.
      *
@@ -26,12 +27,17 @@ class ConsoleServiceProvider extends ServiceProvider
             return new Console\ClearCommand($app['cache'], $app['files']);
         });
 
+        $this->app->bindShared('command.cache.forget', function($app)
+        {
+            return new Console\ForgetCommand($app['cache'], $app['files']);
+        });
+
         $this->app->bindShared('command.cache.table', function($app)
         {
             return new Console\CacheTableCommand($app['files']);
         });
 
-        $this->commands('command.cache.clear', 'command.cache.table');
+        $this->commands('command.cache.clear', 'command.cache.forget', 'command.cache.table');
     }
 
     /**
@@ -41,7 +47,7 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('command.cache.clear', 'command.cache.table');
+        return array('command.cache.clear', 'command.cache.forget', 'command.cache.table');
     }
 
 }
