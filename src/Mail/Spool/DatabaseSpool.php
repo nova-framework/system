@@ -136,7 +136,7 @@ class DatabaseSpool extends BaseSpool
         $count = 0;
 
         // Start the transport only if there are queued messages to send.
-        if (! $transport->isStarted() && $this->hasQueuedJobs()) {
+        if (! $transport->isStarted() && $this->hasQueuedMessages()) {
             $transport->start();
         }
 
@@ -232,7 +232,7 @@ class DatabaseSpool extends BaseSpool
      *
      * @return void
      */
-    protected function hasQueuedJobs()
+    protected function hasQueuedMessages()
     {
         return $this->getQuery()
             ->where('reserved', 0)
