@@ -390,11 +390,7 @@ class Gate implements GateInterface
                 }
             }
 
-            if (strpos($ability, '-') !== false) {
-                $ability = Str::camel($ability);
-            }
-
-            $callable = array($instance, $ability);
+            $callable = array($instance, Str::camel($ability));
 
             if (! is_callable($callable)) {
                 return false;
