@@ -2,6 +2,7 @@
 
 namespace Nova\Mail;
 
+use Nova\Mail\Spool\DatabaseSpool;
 use Nova\Mail\Transport\LogTransport;
 use Nova\Mail\Transport\MailgunTransport;
 use Nova\Mail\Transport\MandrillTransport;
@@ -77,7 +78,12 @@ class MailServiceProvider extends ServiceProvider
             return new Console\FlushSpoolCommand($app['swift.transport'], $app['swift.transport.spool'], $app['events']);
         });
 
-        $this->commands('command.mailer.spool.flush');
+        $this->app->bindShared('command.mailer.spool.table', function ($app)
+        {
+            return new Console\SpoolTableCommand($app['files']);
+        });
+
+        $this->commands('command.mailer.spool.flush', 'command.mailer.spool.table');
     }
 
     /**
@@ -280,8 +286,15 @@ class MailServiceProvider extends ServiceProvider
         {
             extract($config);
 
-            // Create a new File Spool instance.
-            $spool = new FileSpool($files);
+            // If is used the File Spool.
+            if ($driver == 'file') {
+                $spool = new FileSpool($files);
+            }
+
+            // If is used the Database Spool.
+            else if ($driver == 'database') {
+                $spool = new DatabaseSpool($app['db']->connection($connection), $table);
+            }
 
             $spool->setMessageLimit($messageLimit);
             $spool->setTimeLimit($timeLimit);
