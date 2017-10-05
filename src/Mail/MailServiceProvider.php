@@ -3,6 +3,7 @@
 namespace Nova\Mail;
 
 use Nova\Mail\Spool\DatabaseSpool;
+use Nova\Mail\Spool\FileSpool;
 use Nova\Mail\Transport\LogTransport;
 use Nova\Mail\Transport\MailgunTransport;
 use Nova\Mail\Transport\MandrillTransport;
@@ -14,8 +15,6 @@ use Swift_Mailer;
 use Swift_SmtpTransport as SmtpTransport;
 use Swift_MailTransport as MailTransport;
 use Swift_SendmailTransport as SendmailTransport;
-
-use Swift_FileSpool as FileSpool;
 use Swift_SpoolTransport as SpoolTransport;
 
 
@@ -78,12 +77,17 @@ class MailServiceProvider extends ServiceProvider
             return new Console\FlushSpoolCommand($app['swift.transport'], $app['swift.transport.spool'], $app['events']);
         });
 
+        $this->app->bindShared('command.mailer.spool.clear', function ($app)
+        {
+            return new Console\ClearSpoolCommand($app['swift.transport.spool']);
+        });
+
         $this->app->bindShared('command.mailer.spool.table', function ($app)
         {
             return new Console\SpoolTableCommand($app['files']);
         });
 
-        $this->commands('command.mailer.spool.flush', 'command.mailer.spool.table');
+        $this->commands('command.mailer.spool.flush', 'command.mailer.spool.clear', 'command.mailer.spool.table');
     }
 
     /**
@@ -286,12 +290,12 @@ class MailServiceProvider extends ServiceProvider
         {
             extract($config);
 
-            // If is used the File Spool.
+            // If it is used the File Spool.
             if ($driver == 'file') {
                 $spool = new FileSpool($files);
             }
 
-            // If is used the Database Spool.
+            // If it is used the Database Spool.
             else if ($driver == 'database') {
                 $spool = new DatabaseSpool($app['db']->connection($connection), $table);
             }

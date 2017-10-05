@@ -124,6 +124,17 @@ class DatabaseSpool extends BaseSpool
     }
 
     /**
+     * Remove from the Queue the messages failed to be sent.
+     */
+    public function clearFailedMessages()
+    {
+        $this->getQuery()
+            ->where('reserved', 0)
+            ->where('attempts', '>', $this->retryLimit)
+            ->delete();
+    }
+
+    /**
      * Sends messages using the given transport instance.
      *
      * @param \Swift_Transport $transport         A transport instance
@@ -136,7 +147,7 @@ class DatabaseSpool extends BaseSpool
         $count = 0;
 
         // Start the transport only if there are queued messages to send.
-        if (! $transport->isStarted() && $this->hasQueuedMessages()) {
+        if (! $transport->isStarted() && $this->hasQueuedJobs()) {
             $transport->start();
         }
 
@@ -228,11 +239,11 @@ class DatabaseSpool extends BaseSpool
     }
 
     /**
-     * Determine if are queued messages to send.
+     * Determine if there are queued messages to send.
      *
      * @return void
      */
-    protected function hasQueuedMessages()
+    protected function hasQueuedJobs()
     {
         return $this->getQuery()
             ->where('reserved', 0)
