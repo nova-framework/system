@@ -14,7 +14,7 @@ class {{className}}
 
 
     /**
-     * Determine whether the user can the view {{pluralModel}} list.
+     * Determine whether the user can view the {{pluralModel}} list.
      *
      * @param  \{{fullUserModel}}  $authUser
      * @return mixed
