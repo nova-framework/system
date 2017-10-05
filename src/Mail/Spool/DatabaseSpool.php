@@ -234,7 +234,10 @@ class DatabaseSpool extends BaseSpool
      */
     protected function hasQueuedJobs()
     {
-        return $this->getQuery()->where('reserved', 0)->exists();
+        return $this->getQuery()
+            ->where('reserved', 0)
+            ->where('attempts', '<=', $this->retryLimit)
+            ->exists();
     }
 
     /**
