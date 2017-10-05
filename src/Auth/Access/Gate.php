@@ -77,10 +77,12 @@ class Gate implements GateInterface
                                 array $beforeCallbacks = array(),
                                 array $afterCallbacks = array())
     {
-        $this->policies        = $policies;
-        $this->container       = $container;
-        $this->abilities       = $abilities;
-        $this->userResolver    = $userResolver;
+        $this->policies  = $policies;
+        $this->container = $container;
+        $this->abilities = $abilities;
+
+        $this->userResolver = $userResolver;
+
         $this->afterCallbacks  = $afterCallbacks;
         $this->beforeCallbacks = $beforeCallbacks;
     }
@@ -109,7 +111,7 @@ class Gate implements GateInterface
     {
         if (is_callable($callback)) {
             $this->abilities[$ability] = $callback;
-        } elseif (is_string($callback) && str_contains($callback, '@')) {
+        } elseif (is_string($callback) && Str::contains($callback, '@')) {
             $this->abilities[$ability] = $this->buildAbilityCallback($callback);
         } else {
             throw new InvalidArgumentException("Callback must be a callable or a 'Class@method' string.");
@@ -126,7 +128,7 @@ class Gate implements GateInterface
      */
     protected function buildAbilityCallback($callback)
     {
-        return function() use ($callback)
+        return function () use ($callback)
         {
             list($class, $method) = explode('@', $callback);
 
@@ -327,12 +329,12 @@ class Gate implements GateInterface
             return $this->resolvePolicyCallback($user, $ability, $arguments);
         } else if (isset($this->abilities[$ability])) {
             return $this->abilities[$ability];
-        } else {
-            return function()
-            {
-                return false;
-            };
         }
+
+        return function ()
+        {
+            return false;
+        };
     }
 
     /**
@@ -355,7 +357,7 @@ class Gate implements GateInterface
             return isset($this->policies[$class]);
         }
 
-        return (is_string($argument) && isset($this->policies[$argument]));
+        return is_string($argument) && isset($this->policies[$argument]);
     }
 
     /**
@@ -368,7 +370,7 @@ class Gate implements GateInterface
      */
     protected function resolvePolicyCallback($user, $ability, array $arguments)
     {
-        return function() use ($user, $ability, $arguments)
+        return function () use ($user, $ability, $arguments)
         {
             $instance = $this->getPolicyFor(head($arguments));
 
@@ -442,7 +444,7 @@ class Gate implements GateInterface
      */
     public function forUser($user)
     {
-        $callback = function() use ($user)
+        $callback = function () use ($user)
         {
             return $user;
         };
