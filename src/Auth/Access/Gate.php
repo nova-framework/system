@@ -5,7 +5,7 @@ namespace Nova\Auth\Access;
 use Nova\Auth\Access\GateInterface;
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 use Nova\Auth\Access\Response;
-use Nova\Auth\Access\UnauthorizedException;
+use Nova\Auth\Access\AuthorizationException;
 use Nova\Container\Container;
 use Nova\Support\Str;
 
@@ -212,7 +212,7 @@ class Gate implements GateInterface
         try {
             $result = $this->raw($ability, $arguments);
         }
-        catch (UnauthorizedException $e) {
+        catch (AuthorizationException $e) {
             return false;
         }
 
@@ -226,7 +226,7 @@ class Gate implements GateInterface
      * @param  array|mixed  $arguments
      * @return \Nova\Auth\Access\Response
      *
-     * @throws \Nova\Auth\Access\UnauthorizedException
+     * @throws \Nova\Auth\Access\AuthorizationException
      */
     public function authorize($ability, $arguments = array())
     {
