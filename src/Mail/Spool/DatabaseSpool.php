@@ -37,6 +37,9 @@ class DatabaseSpool extends BaseSpool
     protected $retryLimit = 10;
 
 
+    /**
+     * Create a new Database Spool instance.
+     */
     public function __construct(Connection $connection, $table)
     {
         $this->connection = $connection;
