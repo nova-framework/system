@@ -77,10 +77,12 @@ class Gate implements GateInterface
                                 array $beforeCallbacks = array(),
                                 array $afterCallbacks = array())
     {
-        $this->policies        = $policies;
-        $this->container       = $container;
-        $this->abilities       = $abilities;
-        $this->userResolver    = $userResolver;
+        $this->policies  = $policies;
+        $this->container = $container;
+        $this->abilities = $abilities;
+
+        $this->userResolver = $userResolver;
+
         $this->afterCallbacks  = $afterCallbacks;
         $this->beforeCallbacks = $beforeCallbacks;
     }
