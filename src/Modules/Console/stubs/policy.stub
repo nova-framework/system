@@ -19,7 +19,7 @@ class {{className}}
      * @param  \{{fullUserModel}}  $authUser
      * @return mixed
      */
-    public function list({{userModel}} $authUser)
+    public function lists({{userModel}} $authUser)
     {
         //
     }
