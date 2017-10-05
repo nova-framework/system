@@ -327,12 +327,12 @@ class Gate implements GateInterface
             return $this->resolvePolicyCallback($user, $ability, $arguments);
         } else if (isset($this->abilities[$ability])) {
             return $this->abilities[$ability];
-        } else {
-            return function()
-            {
-                return false;
-            };
         }
+
+        return function ()
+        {
+            return false;
+        };
     }
 
     /**
@@ -355,7 +355,7 @@ class Gate implements GateInterface
             return isset($this->policies[$class]);
         }
 
-        return (is_string($argument) && isset($this->policies[$argument]));
+        return is_string($argument) && isset($this->policies[$argument]);
     }
 
     /**
@@ -368,7 +368,7 @@ class Gate implements GateInterface
      */
     protected function resolvePolicyCallback($user, $ability, array $arguments)
     {
-        return function() use ($user, $ability, $arguments)
+        return function () use ($user, $ability, $arguments)
         {
             $instance = $this->getPolicyFor(head($arguments));
 
@@ -442,7 +442,7 @@ class Gate implements GateInterface
      */
     public function forUser($user)
     {
-        $callback = function() use ($user)
+        $callback = function () use ($user)
         {
             return $user;
         };
