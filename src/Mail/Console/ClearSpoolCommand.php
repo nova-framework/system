@@ -53,7 +53,7 @@ class ClearSpoolCommand extends Command
     {
         $spool = $this->transport->getSpool();
 
-        $spool->clearFailedMessages();
+        $spool->clear();
 
         $this->info('Mailer Spool queue cleared!');
     }

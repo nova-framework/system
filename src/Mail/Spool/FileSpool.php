@@ -11,7 +11,7 @@ class DatabaseSpool extends BaseSpool
     /**
      * Remove from the Queue the messages failed to be sent.
      */
-    public function clearFailedMessages()
+    public function clear()
     {
         //
     }
