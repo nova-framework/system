@@ -68,6 +68,8 @@ class SpoolTableCommand extends Command
         $this->files->put($fullPath, $stub);
 
         $this->info('Migration created successfully!');
+
+        $this->call('optimize');
     }
 
     /**
