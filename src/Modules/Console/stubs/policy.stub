@@ -14,6 +14,17 @@ class {{className}}
 
 
     /**
+     * Determine whether the user can view the {{pluralModel}} list.
+     *
+     * @param  \{{fullUserModel}}  $authUser
+     * @return mixed
+     */
+    public function list({{userModel}} $authUser)
+    {
+        //
+    }
+
+    /**
      * Determine whether the user can view the {{camelModel}}.
      *
      * @param  \{{fullUserModel}}  $authUser
