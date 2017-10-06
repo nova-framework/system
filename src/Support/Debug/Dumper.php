@@ -2,10 +2,9 @@
 
 namespace Nova\Support\Debug;
 
-use Nova\Support\Debug\HtmlDumper;
-
-use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Dumper\HtmlDumper;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
 
 
 class Dumper
