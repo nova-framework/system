@@ -1,5 +1,6 @@
 <?php
 
+use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
@@ -684,7 +685,13 @@ if (! function_exists('dd'))
      */
     function dd()
     {
-        array_map(function($x) { var_dump($x); }, func_get_args()); die;
+        array_map(function ($value)
+        {
+            with(new Dumper)->dump($value);
+
+        }, func_get_args());
+
+        die (1);
     }
 }
 
