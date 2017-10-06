@@ -3,8 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Container\Container;
-use Nova\Http\Request;
-use Nova\Routing\Router;
 use Nova\Routing\RouteDependencyResolverTrait;
 
 use Closure;
