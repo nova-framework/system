@@ -4,7 +4,6 @@ namespace Nova\Routing;
 
 use Nova\Container\Container;
 use Nova\Http\Request;
-use Nova\Pipeline\Pipeline;
 use Nova\Routing\Router;
 use Nova\Routing\RouteDependencyResolverTrait;
 
