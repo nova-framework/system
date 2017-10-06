@@ -183,10 +183,11 @@ class Factory
      *
      * @param string $view
      * @param string $theme
+     * @param mixed $data
      *
      * @return \Nova\View\Layout
      */
-    public function createLayout($view, $theme)
+    public function createLayout($view, $theme, $data = array())
     {
         if (isset($this->aliases[$view])) {
             $view = $this->aliases[$view];
@@ -198,7 +199,10 @@ class Factory
         // Normalize the Layout name.
         $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
 
-        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path));
+        // Get the parsed View data.
+        $data = $this->parseData($data);
+
+        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path, $data));
 
         return $layout;
     }
@@ -210,9 +214,20 @@ class Factory
      */
     public function fetch($view, $data = array(), $module = null, Closure $callback = null)
     {
-        $instance = $this->make($view, $data, $module);
+        return $this->make($view, $data, $module)->render($callback);
+    }
 
-        return $instance->render($callback);
+    /**
+     * Create a Layout instance and return its rendered content.
+     *
+     * @param string $view
+     * @param string $theme
+     * @param mixed $data
+     * @return string
+     */
+    public function partial($view, $theme, $data = array(), Closure $callback = null)
+    {
+        return $this->createLayout($view, $theme, $data)->render($callback);
     }
 
     /**
