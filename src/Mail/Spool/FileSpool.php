@@ -5,7 +5,7 @@ namespace Nova\Mail\Spool;
 use Swift_FileSpool as BaseSpool;
 
 
-class DatabaseSpool extends BaseSpool
+class FileSpool extends BaseSpool
 {
 
     /**
