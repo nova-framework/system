@@ -18,14 +18,14 @@ class Dumper
      */
     public function dump($value)
     {
-        if (class_exists(CliDumper::class)) {
-            $dumper = in_array(PHP_SAPI, array('cli', 'phpdbg')) ? new CliDumper : new HtmlDumper;
+        $cloner = new VarCloner();
 
-            $value = with(new VarCloner())->cloneVar($value);
-
-            $dumper->dump($value);
+        if (in_array(PHP_SAPI, array('cli', 'phpdbg'))) {
+            $dumper = new CliDumper();
         } else {
-            var_dump($value);
+            $dumper = new HtmlDumper();
         }
+
+        $dumper->dump($cloner->cloneVar($value));
     }
 }
