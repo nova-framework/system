@@ -238,7 +238,13 @@ class Factory
      */
     protected function parseData($data)
     {
-        return ($data instanceof Arrayable) ? $data->toArray() : $data;
+        if ($data instanceof Arrayable) {
+            $data = $data->toArray();
+        }
+
+        unset($data['__path'], $data['__path']);
+
+        return $data;
     }
 
     /**
