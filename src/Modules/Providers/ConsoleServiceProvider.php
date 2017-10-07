@@ -7,6 +7,7 @@ use Nova\Modules\Console\ModuleMigrateCommand;
 use Nova\Modules\Console\ModuleMigrateRefreshCommand;
 use Nova\Modules\Console\ModuleMigrateResetCommand;
 use Nova\Modules\Console\ModuleMigrateRollbackCommand;
+use Nova\Modules\Console\ModuleMigrateStatusCommand;
 use Nova\Modules\Console\ModuleSeedCommand;
 use Nova\Modules\Console\ModuleOptimizeCommand;
 
@@ -42,6 +43,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'ModuleMigrateRefresh',
             'ModuleMigrateReset',
             'ModuleMigrateRollback',
+            'ModuleMigrateStatus',
             'ModuleOptimize',
             'ModuleSeed',
         );
@@ -109,6 +111,21 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.module.migrate.rollback');
+    }
+
+    /**
+     * Register the "status" migration command.
+     *
+     * @return void
+     */
+    protected function registerModuleMigrateStatusCommand()
+    {
+        $this->app->bindShared('command.module.migrate.status', function ($app)
+        {
+            return new ModuleMigrateStatusCommand($app['migrator'], $app['modules']);
+        });
+
+        $this->commands('command.module.migrate.status');
     }
 
     /**

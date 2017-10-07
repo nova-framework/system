@@ -8,6 +8,7 @@ use Nova\Database\Console\Migrations\InstallCommand;
 use Nova\Database\Console\Migrations\MigrateCommand;
 use Nova\Database\Console\Migrations\RollbackCommand;
 use Nova\Database\Console\Migrations\MakeMigrationCommand;
+use Nova\Database\Console\Migrations\StatusCommand;
 use Nova\Database\Migrations\DatabaseMigrationRepository;
 use Nova\Database\Migrations\Migrator;
 use Nova\Database\Migrations\MigrationCreator;
@@ -74,7 +75,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerCommands()
     {
-        $commands = array('Migrate', 'Rollback', 'Reset', 'Refresh', 'Install', 'Make');
+        $commands = array('Migrate', 'Rollback', 'Reset', 'Refresh', 'Install', 'Make', 'Status');
 
         foreach ($commands as $command) {
             $this->{'register' .$command .'Command'}();
@@ -83,7 +84,8 @@ class MigrationServiceProvider extends ServiceProvider
         $this->commands(
             'command.migrate', 'command.migrate.make',
             'command.migrate.install', 'command.migrate.rollback',
-            'command.migrate.reset', 'command.migrate.refresh'
+            'command.migrate.reset', 'command.migrate.refresh',
+            'command.migrate.status'
         );
     }
 
@@ -142,6 +144,19 @@ class MigrationServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the "status" migration command.
+     *
+     * @return void
+     */
+    protected function registerStatusCommand()
+    {
+        $this->app->bindShared('command.migrate.status', function ($app)
+        {
+            return new StatusCommand($app['migrator']);
+        });
+    }
+
+    /**
      * Register the "install" migration command.
      *
      * @return void
@@ -188,6 +203,7 @@ class MigrationServiceProvider extends ServiceProvider
             'command.migrate.rollback', 'command.migrate.reset',
             'command.migrate.refresh', 'command.migrate.install',
             'migration.creator', 'command.migrate.make',
+            'command.migrate.status',
         );
     }
 

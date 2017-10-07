@@ -3,19 +3,16 @@
 namespace Nova\Modules\Console;
 
 use Nova\Console\Command;
-use Nova\Console\ConfirmableTrait;
 use Nova\Database\Migrations\Migrator;
 use Nova\Modules\Console\MigrationTrait;
 use Nova\Modules\ModuleManager;
-use Nova\Support\Arr;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class ModuleMigrateRollbackCommand extends Command
+class ModuleMigrateStatusCommand extends Command
 {
-    use ConfirmableTrait;
     use MigrationTrait;
 
     /**
@@ -23,14 +20,14 @@ class ModuleMigrateRollbackCommand extends Command
      *
      * @var string
      */
-    protected $name = 'module:migrate:rollback';
+    protected $name = 'module:migrate:status';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Rollback the last database migrations for a specific or all modules';
+    protected $description = 'Show the status of each migration';
 
     /**
      * @var \Nova\Modules\ModuleManager
@@ -38,16 +35,18 @@ class ModuleMigrateRollbackCommand extends Command
     protected $modules;
 
     /**
-     * @var Migrator
+     * The migrator instance.
+     *
+     * @var \Nova\Database\Migrations\Migrator
      */
     protected $migrator;
 
 
     /**
-     * Create a new command instance.
+     * Create a new migration rollback command instance.
      *
      * @param  \Nova\Database\Migrations\Migrator $migrator
-     * @param \Nova\Modules\ModuleManager $modules
+     * @return \Nova\Database\Console\Migrations\StatusCommand
      */
     public function __construct(Migrator $migrator, ModuleManager $modules)
     {
@@ -60,12 +59,12 @@ class ModuleMigrateRollbackCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      */
     public function fire()
     {
-        if (! $this->confirmToProceed()) {
-            return;
+        if (! $this->migrator->repositoryExists()) {
+            return $this->error('No migrations found.');
         }
 
         $slug = $this->argument('slug');
@@ -75,24 +74,17 @@ class ModuleMigrateRollbackCommand extends Command
                 return $this->error('Module does not exist.');
             }
 
-            return $this->rollback($slug);
+            return $this->status($slug);
         }
 
         foreach ($this->modules->all() as $module) {
-            $this->comment('Rollback the last migration from Module: ' .$module['name']);
+            $this->comment('Migrations Status for Module: ' .$module['name']);
 
-            $this->rollback($module['slug']);
+            $this->status($module['slug']);
         }
     }
 
-    /**
-     * Run the migration rollback for the specified module.
-     *
-     * @param string $slug
-     *
-     * @return mixed
-     */
-    protected function rollback($slug)
+    protected function status($slug)
     {
         if (! $this->modules->exists($slug)) {
             return $this->error('Module does not exist.');
@@ -101,18 +93,35 @@ class ModuleMigrateRollbackCommand extends Command
         $this->requireMigrations($slug);
 
         //
-        $this->migrator->setConnection($this->input->getOption('database'));
-
-        $pretend = $this->input->getOption('pretend');
-
-        $this->migrator->rollback($pretend, $slug);
+        $ran = $this->migrator->getRepository()->getRan();
 
         //
-        foreach ($this->migrator->getNotes() as $note) {
-            if (! $this->option('quiet')) {
-                $this->line($note);
-            }
+        $migrations = array();
+
+        foreach ($this->getAllMigrationFiles($slug) as $migration) {
+            $migrations[] = in_array($migration, $ran) ? array('<info>Y</info>', $migration) : array('<fg=red>N</fg=red>', $migration);
         }
+
+        if (count($migrations) > 0) {
+            $this->table(array('Ran?', 'Migration'), $migrations);
+        } else {
+            $this->error('No migrations found');
+
+            $this->output->writeln('');
+        }
+    }
+
+    /**
+     * Get all of the migration files.
+     *
+     * @param  string  $path
+     * @return array
+     */
+    protected function getAllMigrationFiles($slug)
+    {
+        $path = $this->getMigrationPath($slug);
+
+        return $this->migrator->getMigrationFiles($path);
     }
 
     /**
@@ -136,8 +145,6 @@ class ModuleMigrateRollbackCommand extends Command
     {
         return array(
             array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
-            array('force', null, InputOption::VALUE_NONE, 'Force the operation to run while in production.'),
-            array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
         );
     }
 }
