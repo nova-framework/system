@@ -93,6 +93,8 @@ class ModuleMigrateStatusCommand extends Command
         $this->requireMigrations($slug);
 
         //
+        $this->migrator->setConnection($this->input->getOption('database'));
+
         $ran = $this->migrator->getRepository()->getRan();
 
         //
