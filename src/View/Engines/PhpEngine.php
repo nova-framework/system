@@ -38,7 +38,7 @@ class PhpEngine implements EngineInterface
 
         // Extract the rendering variables.
         foreach ($__data as $__variable => $__value) {
-            if (in_array($__variable, array('__path', '__data', '__env'))) {
+            if (in_array($__variable, array('__path', '__data'))) {
                 continue;
             }
 
