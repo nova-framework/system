@@ -186,6 +186,8 @@ class Factory
      */
     public function fetch($view, $data = array(), Closure $callback = null)
     {
+        unset($data['__path'], $data['__path']);
+
         return $this->make($view, $data)->render($callback);
     }
 

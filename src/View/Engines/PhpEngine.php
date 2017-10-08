@@ -38,11 +38,15 @@ class PhpEngine implements EngineInterface
 
         // Extract the rendering variables.
         foreach ($__data as $__variable => $__value) {
+            if (in_array($__variable, array('__path', '__data'))) {
+                continue;
+            }
+
             ${$__variable} = $__value;
         }
 
         // Housekeeping...
-        unset($__variable, $__value);
+        unset($__data, $__variable, $__value);
 
         // We'll evaluate the contents of the view inside a try/catch block so we can
         // flush out any stray output that might get out before an error occurs or
