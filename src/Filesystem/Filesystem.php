@@ -4,7 +4,7 @@ namespace Nova\Filesystem;
 
 use Symfony\Component\Finder\Finder;
 
-use Nova\FilesystemIterator;
+use \FilesystemIterator;
 
 
 class Filesystem
