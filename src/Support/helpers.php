@@ -4,6 +4,7 @@ use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
+use Nova\View\Expression;
 
 
 if (! function_exists('site_url'))
@@ -618,6 +619,66 @@ if (! function_exists('class_uses_recursive'))
     }
 }
 
+if (! function_exists('config')) {
+    /**
+     * Get / set the specified configuration value.
+     *
+     * If an array is passed as the key, we will assume you want to set an array of values.
+     *
+     * @param  array|string  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    function config($key = null, $default = null)
+    {
+        if (is_null($key)) {
+            return app('config');
+        } else if (is_array($key)) {
+            return app('config')->set($key);
+        }
+
+        return app('config')->get($key, $default);
+    }
+}
+
+if (! function_exists('cookie')) {
+    /**
+     * Create a new cookie instance.
+     *
+     * @param  string  $name
+     * @param  string  $value
+     * @param  int     $minutes
+     * @param  string  $path
+     * @param  string  $domain
+     * @param  bool    $secure
+     * @param  bool    $httpOnly
+     *
+     * @return \Symfony\Component\HttpFoundation\Cookie
+     */
+    function cookie($name = null, $value = null, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true)
+    {
+        $cookie = app('cookie');
+
+        if (is_null($name)) {
+            return $cookie;
+        }
+
+        return $cookie->make($name, $value, $minutes, $path, $domain, $secure, $httpOnly);
+    }
+}
+
+if (! function_exists('csrf_field')) {
+    /**
+     * Generate a CSRF token form field.
+     *
+     * @return string
+     */
+    function csrf_field()
+    {
+        return new Expression('<input type="hidden" name="csrfToken" value="' .csrf_token() .'">');
+    }
+}
+
 if (! function_exists('csrf_token'))
 {
     /**
@@ -817,6 +878,19 @@ if (! function_exists('link_to_action'))
     function link_to_action($action, $title = null, $parameters = array(), $attributes = array())
     {
         return app('html')->linkAction($action, $title, $parameters, $attributes);
+    }
+}
+
+if (! function_exists('method_field')) {
+    /**
+     * Generate a form field to spoof the HTTP verb used by forms.
+     *
+     * @param  string  $method
+     * @return \Nova\View\Expression
+     */
+    function method_field($method)
+    {
+        return new Expression('<input type="hidden" name="_method" value="' .$method .'">');
     }
 }
 
