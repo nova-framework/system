@@ -69,7 +69,7 @@ class FileStore implements StoreInterface
 
         try
         {
-            $expire = substr($contents = $this->files->get($path), 0, 10);
+            $expire = substr($contents = $this->files->get($path, true), 0, 10);
         } catch (\Exception $e) {
             return array('data' => null, 'time' => null);
         }

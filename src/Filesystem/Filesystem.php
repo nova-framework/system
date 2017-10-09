@@ -24,15 +24,47 @@ class Filesystem
      * Get the contents of a file.
      *
      * @param  string  $path
+     * @param  bool  $lock
      * @return string
      *
      * @throws FileNotFoundException
      */
-    public function get($path)
+    public function get($path, $lock = false)
     {
-        if ($this->isFile($path)) return file_get_contents($path);
+        if ($this->isFile($path)) {
+            return return $lock ? $this->sharedGet($path) : file_get_contents($path);
+        }
 
         throw new FileNotFoundException("File does not exist at path {$path}");
+    }
+
+    /**
+     * Get contents of a file with shared access.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function sharedGet($path)
+    {
+        $contents = '';
+
+        $handle = fopen($path, 'rb');
+
+        if (! is_null($handle)) {
+            try {
+                if (flock($handle, LOCK_SH)) {
+                    clearstatcache(true, $path);
+
+                    $contents = fread($handle, $this->size($path) ?: 1);
+
+                    flock($handle, LOCK_UN);
+                }
+            } finally {
+                fclose($handle);
+            }
+        }
+
+        return $contents;
     }
 
     /**
