@@ -59,7 +59,7 @@ class FileSessionHandler implements \SessionHandlerInterface
     public function read($sessionId)
     {
         if ($this->files->exists($path = $this->path .DS .$sessionId)) {
-            return $this->files->get($path);
+            return $this->files->get($path, true);
         }
 
         return '';
