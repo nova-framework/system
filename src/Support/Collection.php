@@ -565,6 +565,18 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     }
 
     /**
+     * Get the values of a given key.
+     *
+     * @param  string|array  $value
+     * @param  string|null  $key
+     * @return static
+     */
+    public function pluck($value, $key = null)
+    {
+        return with(new static(Arr::pluck($this->items, $value, $key)))->first();
+    }
+
+    /**
      * Return only unique items from the collection array.
      *
      * @return \Nova\Support\Collection
