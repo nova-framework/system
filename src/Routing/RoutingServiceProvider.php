@@ -215,9 +215,9 @@ class RoutingServiceProvider extends ServiceProvider
      *
      * @return bool
      */
-    public function isAssetsCacheExpired(Filesystem $files, $cachePath)
+    public function isAssetsCacheExpired(Filesystem $files, $cache)
     {
-        if (! $files->exists($cachePath)) {
+        if (! $files->exists($cache)) {
             return true;
         }
 
@@ -226,7 +226,7 @@ class RoutingServiceProvider extends ServiceProvider
 
         $lastModified = $files->lastModified($path);
 
-        if ($lastModified >= $files->lastModified($cachePath)) {
+        if ($lastModified >= $files->lastModified($cache)) {
             return true;
         }
 
