@@ -579,16 +579,14 @@ class Application extends Container implements ResponsePreparerInterface
     {
         $request = $request ?: $this['request'];
 
-        $config = $this['config'];
-
         // Setup the Router middlewares.
-        $middlewareGroups = $config->get('app.middlewareGroups');
+        $middlewareGroups = $this['config']->get('app.middlewareGroups');
 
         foreach ($middlewareGroups as $key => $middleware) {
             $this['router']->middlewareGroup($key, $middleware);
         }
 
-        $routeMiddleware = $config->get('app.routeMiddleware');
+        $routeMiddleware = $this['config']->get('app.routeMiddleware');
 
         foreach($routeMiddleware as $name => $middleware) {
             $this['router']->middleware($name, $middleware);
