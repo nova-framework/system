@@ -63,6 +63,7 @@ class Handler
      */
     protected $handled = array();
 
+
     /**
      * Create a new error handler instance.
      *
@@ -158,9 +159,7 @@ class Handler
      */
     public function handleException($exception)
     {
-        $response = $this->callCustomHandlers($exception);
-
-        if (! is_null($response)) {
+        if (! is_null($response = $this->callCustomHandlers($exception))) {
             return $this->prepareResponse($response);
         }
 
@@ -175,7 +174,9 @@ class Handler
      */
     public function handleUncaughtException($exception)
     {
-        $this->handleException($exception)->send();
+        $response = $this->handleException($exception);
+
+        $response->send();
     }
 
     /**
@@ -185,14 +186,10 @@ class Handler
      */
     public function handleShutdown()
     {
-        $error = error_get_last();
+        if (! is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
+            $response = $this->handleException($this->fatalExceptionFromError($error, 0));
 
-        if (! is_null($error)) {
-            extract($error);
-
-            if (! $this->isFatal($type)) return;
-
-            $this->handleException(new FatalError($message, $type, 0, $file, $line))->send();
+            $response->send();
         }
     }
 
@@ -205,6 +202,20 @@ class Handler
     protected function isFatal($type)
     {
         return in_array($type, array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE));
+    }
+
+    /**
+     * Create a new fatal exception instance from an error array.
+     *
+     * @param  array  $error
+     * @param  int|null  $traceOffset
+     * @return \Symfony\Component\Debug\Exception\FatalErrorException
+     */
+    protected function fatalExceptionFromError(array $error, $traceOffset = null)
+    {
+        return new FatalError(
+            $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
+        );
     }
 
     /**
@@ -240,7 +251,7 @@ class Handler
             // if any exceptions are thrown from a handler itself. This way we will get
             // at least some errors, and avoid errors with no data or not log writes.
             try {
-                $response = $handler($exception, $code, $fromConsole);
+                $response = call_user_func($handler, $exception, $code, $fromConsole);
             }
             catch (\Exception $e) {
                 $response = $this->formatException($e);
@@ -359,7 +370,7 @@ class Handler
      */
     public function runningInConsole()
     {
-        return (php_sapi_name() == 'cli');
+        return php_sapi_name() == 'cli';
     }
 
     /**

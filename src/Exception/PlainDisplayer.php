@@ -42,5 +42,5 @@ class PlainDisplayer implements ExceptionDisplayerInterface
 
         // Create a Response and return it.
         return new Response($message, $status, $headers);
-     }
+    }
 }

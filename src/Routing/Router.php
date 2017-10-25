@@ -6,7 +6,7 @@ use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
-use Nova\Pipeline\Pipeline;
+use Nova\Routing\Pipeline;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
