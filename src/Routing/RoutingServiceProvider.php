@@ -145,7 +145,7 @@ class RoutingServiceProvider extends ServiceProvider
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
-                $paths = $dispatcher->getValidVendorPaths();
+                $paths = $dispatcher->getPaths();
 
                 if (! Str::startsWith($path, $paths)) {
                     return new Response('File Not Found', 404);

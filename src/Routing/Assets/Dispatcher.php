@@ -23,6 +23,11 @@ use LogicException;
 
 class Dispatcher
 {
+    /**
+     * The Application instance.
+     *
+     * @var \Nova\Foundation\Application
+     */
     protected $app;
 
     /**
@@ -33,10 +38,10 @@ class Dispatcher
     protected $routes = array();
 
     /**
-     * The cache control options.
-     * @var int
+     * The valid Vendor paths.
+     * @var array
      */
-    protected $cacheControl = array();
+    protected $paths;
 
 
     /**
@@ -176,8 +181,12 @@ class Dispatcher
         return $guesser->guess($path);
     }
 
-    public function getValidVendorPaths()
+    public function getPaths()
     {
+        if (isset($this->paths)) {
+            return $this->paths;
+        }
+
         $files = $this->app['files'];
 
         // The cache file path.
@@ -189,7 +198,7 @@ class Dispatcher
         $lastModified = $files->lastModified($configPath);
 
         if ($files->exists($path) && ! ($lastModified < $files->lastModified($path))) {
-            return $files->getRequire($path);
+            return $this->paths = $files->getRequire($path);
         }
 
         $config = $this->app['config'];
@@ -218,6 +227,6 @@ class Dispatcher
 
         $files->put($path, $content);
 
-        return $paths;
+        return $this->paths = $paths;
     }
 }
