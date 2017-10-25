@@ -29,13 +29,6 @@ class Dispatcher
      */
     protected $routes = array();
 
-    /**
-     * All of the named path hints.
-     *
-     * @var array
-     */
-    protected $hints = array();
-
 
     /**
      * Register a new Asset Route with the manager.
@@ -148,97 +141,5 @@ class Dispatcher
         $guesser = MimeTypeGuesser::getInstance();
 
         return $guesser->guess($path);
-    }
-
-    /**
-     * Get the path for a registered namespace.
-     *
-     * @param  string  $namespace
-     * @return string|null
-     */
-    public function findNamedPath($namespace)
-    {
-        return Arr::get($this->hints, $namespace);
-    }
-
-    /**
-     * Register a Package for cascading configuration.
-     *
-     * @param  string  $package
-     * @param  string  $hint
-     * @param  string  $namespace
-     * @return void
-     */
-    public function package($package, $hint, $namespace = null)
-    {
-        $namespace = $this->getPackageNamespace($package, $namespace);
-
-        $this->addNamespace(str_replace('_', '-', $namespace), $hint);
-    }
-
-    /**
-     * Get the configuration namespace for a Package.
-     *
-     * @param  string  $package
-     * @param  string  $namespace
-     * @return string
-     */
-    protected function getPackageNamespace($package, $namespace)
-    {
-        if (is_null($namespace)) {
-            list($vendor, $namespace) = explode('/', $package);
-
-            return Str::snake($namespace);
-        }
-
-        return $namespace;
-    }
-
-    /**
-     * Add a new namespace to the loader.
-     *
-     * @param  string  $namespace
-     * @param  string  $hint
-     * @return void
-     */
-    public function addNamespace($namespace, $hint)
-    {
-        $namespace = str_replace('_', '-', $namespace);
-
-        $this->hints[$namespace] = rtrim($hint, DS) .DS;
-    }
-
-    /**
-     * Return true if has the specified namespace hint on the router.
-     *
-     * @param  string  $namespace
-     * @return void
-     */
-    public function hasNamespace($namespace)
-    {
-        $namespace = str_replace('_', '-', $namespace);
-
-        return isset($this->hints[$namespace]);
-    }
-
-    /**
-     * Get a namespace hint from the router.
-     *
-     * @param  string  $namespace
-     * @return void
-     */
-    public function getNamespace($namespace)
-    {
-        return $this->findNamedPath($namespace);
-    }
-
-    /**
-     * Returns all registered namespaces with the router.
-     *
-     * @return array
-     */
-    public function getNamespaces()
-    {
-        return $this->hints;
     }
 }
