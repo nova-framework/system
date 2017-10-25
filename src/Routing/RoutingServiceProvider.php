@@ -160,13 +160,13 @@ class RoutingServiceProvider extends ServiceProvider
         // For assets from Modules and Themes.
         $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $folder, $path) use ($dispatcher)
         {
+            $type = (strtolower($type) == 'modules') ? 'Modules' : 'Themes';
+
             if (strlen($folder) > 3) {
                 $folder = Str::studly($folder);
             } else {
                 $folder = Str::upper($folder);
             }
-
-            $type = (strtolower($type) == 'modules') ? 'Modules' : 'Themes';
 
             $path = APPDIR .$type .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
 
