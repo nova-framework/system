@@ -176,7 +176,7 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $files = $this->app['files'];
 
-        // The cache path.
+        // The cache file path.
         $path = STORAGE_PATH .'assets.php';
 
         // The config path for checking againts the cache file.
