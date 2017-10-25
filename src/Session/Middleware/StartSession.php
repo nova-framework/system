@@ -55,9 +55,6 @@ class StartSession
     {
         $this->sessionHandled = true;
 
-        // If a session driver has been configured, we will need to start the session here
-        // so that the data is ready for an application. Note that the Nova sessions
-        // do not make use of PHP "native" sessions in any way since they are crappy.
         if ($this->sessionConfigured()) {
             $session = $this->startSession($request);
 
@@ -66,9 +63,6 @@ class StartSession
 
         $response = $next($request);
 
-        // Again, if the session has been configured we will need to close out the session
-        // so that the attributes may be persisted to some storage medium. We will also
-        // add the session identifier cookie to the application response headers now.
         if ($this->sessionConfigured()) {
             $this->storeCurrentUrl($request, $session);
 
@@ -148,9 +142,6 @@ class StartSession
     {
         $config = $this->manager->getSessionConfig();
 
-        // Here we will see if this request hits the garbage collection lottery by hitting
-        // the odds needed to perform garbage collection on any given request. If we do
-        // hit it, we'll call this handler to let it delete all the expired sessions.
         if ($this->configHitsLottery($config)) {
             $session->getHandler()->gc($this->getSessionLifetimeInSeconds());
         }

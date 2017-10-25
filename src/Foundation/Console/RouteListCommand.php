@@ -2,15 +2,17 @@
 
 namespace Nova\Foundation\Console;
 
-use Nova\Console\Command;
 use Nova\Http\Request;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\Route;
 use Nova\Routing\Router;
-use Nova\Support\Str;
+use Nova\Console\Command;
+use Nova\Support\Arr;
 
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
+
+use Closure;
 
 
 class RouteListCommand extends Command
@@ -44,13 +46,6 @@ class RouteListCommand extends Command
     protected $routes;
 
     /**
-    * An array of all the know controller instances.
-    *
-    * @var \Nova\Routing\Controller
-    */
-    protected $controllers;
-
-    /**
     * The table helper set.
     *
     * @var \Symfony\Component\Console\Helper\TableHelper
@@ -63,7 +58,7 @@ class RouteListCommand extends Command
     * @var array
     */
     protected $headers = array(
-        'Domain', 'Method', 'URI', 'Name', 'Action', 'Before Filters', 'After Filters'
+        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware'
     );
 
     /**
@@ -122,16 +117,13 @@ class RouteListCommand extends Command
     */
     protected function getRouteInformation(Route $route)
     {
-        $uri = implode('|', $route->methods()).' '.$route->uri();
-
         return $this->filterRoute(array(
             'host'   => $route->domain(),
             'method' => implode('|', $route->methods()),
             'uri'    => $route->uri(),
             'name'   => $route->getName(),
             'action' => $route->getActionName(),
-            'before' => $this->getBeforeFilters($route),
-            'after'  => $this->getAfterFilters($route)
+            'middleware' => $this->getMiddleware($route),
         ));
     }
 
@@ -149,90 +141,63 @@ class RouteListCommand extends Command
     }
 
     /**
-    * Get before filters
-    *
-    * @param  \Nova\Routing\Route  $route
-    * @return string
-    */
-    protected function getBeforeFilters($route)
+     * Get before filters.
+     *
+     * @param  \Nova\Routing\Route  $route
+     * @return string
+     */
+    protected function getMiddleware($route)
     {
-        $filters = array_keys($route->beforeFilters());
+        $middlewares = array_values($route->middleware());
 
-        $action = $route->getActionName();
+        $actionName = $route->getActionName();
 
-        if ($action == 'Closure') {
-            return implode(', ', $filters);
+        if (! empty($actionName) && ($actionName !== 'Closure')) {
+            $middlewares = array_merge($middlewares, $this->getControllerMiddleware($actionName));
         }
 
-        list($controller, $method) = explode('@', $action);
-
-        $filters = array_merge($filters, $this->parseControllerFilters(
-            $instance = $this->getController($controller), $method, $instance->getBeforeFilters()
-        ));
-
-        return implode(', ', array_unique($filters));
+        return implode(', ', $middlewares);
     }
 
     /**
-    * Get after filters
-    *
-    * @param  Route  $route
-    * @return string
-    */
-    protected function getAfterFilters($route)
+     * Get the middleware for the given Controller@action name.
+     *
+     * @param  string  $actionName
+     * @return array
+     */
+    protected function getControllerMiddleware($actionName)
     {
-        $filters = array_keys($route->afterFilters());
+        list($controller, $method) = explode('@', $actionName);
 
-        $action = $route->getActionName();
-
-        if ($action == 'Closure') {
-            return implode(', ', $filters);
-        }
-
-        list($controller, $method) = explode('@', $action);
-
-        $filters = array_merge($filters, $this->parseControllerFilters(
-            $instance = $this->getController($controller), $method, $instance->getAfterFilters()
-        ));
-
-        return implode(', ', array_unique($filters));
+        return $this->getControllerMiddlewareFromInstance(
+            $this->container->make($controller), $method
+        );
     }
 
     /**
-    * Get controller instance
-    *
-    * @param  string  $controller
-    * @return \Nova\Routing\Controller
-    */
-    protected function getController($controller)
-    {
-        if (isset($this->controllers[$controller])) {
-            return $this->controllers[$controller];
-        }
-
-        return $this->controllers[$controller] = $this->container->make($controller);
-    }
-
-    /**
-     * Get the route filters for the given controller instance and method.
+     * Get the middlewares for the given controller instance and method.
      *
      * @param  \Nova\Routing\Controller  $controller
      * @param  string  $method
-     * @param  array  $filters
      * @return array
      */
-    protected function parseControllerFilters($controller, $method, array $filters)
+    protected function getControllerMiddlewareFromInstance($controller, $method)
     {
+        $middlewares = $this->router->getMiddleware();
+
+        //
         $results = array();
 
-        foreach ($filters as $filter => $options) {
+        foreach ($controller->getMiddleware() as $middleware => $options) {
             if (ControllerDispatcher::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
-            list($filter, $parameters) = Route::parseFilter($filter);
+            list($name, $parameters) = array_pad(explode(':', $middleware, 2), 2, null);
 
-            $results[] = $filter;
+            $middleware = Arr::get($middlewares, $name, $name);
+
+            $results[] = (! $middleware instanceof Closure) ? $middleware : $name;
         }
 
         return $results;
@@ -246,12 +211,12 @@ class RouteListCommand extends Command
     */
     protected function filterRoute(array $route)
     {
-        if (($this->option('name') && ! Str::contains($route['name'], $this->option('name'))) ||
-            $this->option('path') && ! Str::contains($route['uri'], $this->option('path'))) {
+        if (($this->option('name') && ! str_contains($route['name'], $this->option('name'))) ||
+            $this->option('path') && ! str_contains($route['uri'], $this->option('path'))) {
             return null;
-        } else {
-            return $route;
         }
+
+        return $route;
     }
 
     /**
