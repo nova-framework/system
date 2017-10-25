@@ -3,6 +3,7 @@
 namespace Nova\Auth;
 
 use Nova\Hashing\HasherInterface;
+use Nova\Support\Str;
 
 
 class ExtendedUserProvider implements UserProviderInterface
@@ -90,7 +91,9 @@ class ExtendedUserProvider implements UserProviderInterface
         $query = $this->createModel()->newQuery();
 
         foreach ($credentials as $key => $value) {
-            if (! str_contains($key, 'password')) $query->where($key, $value);
+            if (! Str::contains($key, 'password')) {
+                $query->where($key, $value);
+            }
         }
 
         return $query->first();

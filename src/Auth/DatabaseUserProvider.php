@@ -4,6 +4,7 @@ namespace Nova\Auth;
 
 use Nova\Database\Connection;
 use Nova\Hashing\HasherInterface;
+use Nova\Support\Str;
 
 
 class DatabaseUserProvider implements UserProviderInterface
@@ -106,7 +107,7 @@ class DatabaseUserProvider implements UserProviderInterface
         $query = $this->conn->table($this->table);
 
         foreach ($credentials as $key => $value) {
-            if (! str_contains($key, 'password')) {
+            if (! Str::contains($key, 'password')) {
                 $query->where($key, $value);
             }
         }
