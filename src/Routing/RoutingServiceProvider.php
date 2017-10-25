@@ -166,7 +166,9 @@ class RoutingServiceProvider extends ServiceProvider
                 $folder = Str::upper($folder);
             }
 
-            $path = APPDIR .ucfirst($type) .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
+            $type = (strtolower($type) == 'modules') ? 'Modules' : 'Themes';
+
+            $path = APPDIR .$type .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
 
             return $dispatcher->serve($path, $request);
         });
