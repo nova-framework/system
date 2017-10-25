@@ -3,13 +3,13 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
+use Nova\Filesystem\Filesystem;
 use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
-use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
 use Nova\Support\Str;
 
@@ -145,24 +145,7 @@ class RoutingServiceProvider extends ServiceProvider
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
-                $options = Config::get('routing.assets.paths', array());
-
-                //
-                $paths = array();
-
-                foreach ($options as $vendor => $value) {
-                    $values = is_array($value) ? $value : array($value);
-
-                    $values = array_map(function($value) use ($vendor)
-                    {
-                        return $vendor .'/' .$value .'/';
-
-                    }, $values);
-
-                    $paths = array_merge($paths, $values);
-                }
-
-                $paths = array_unique($paths);
+                $paths = $this->getVendorPaths();
 
                 if (! Str::startsWith($path, $paths)) {
                     return new Response('File Not Found', 404);
@@ -187,5 +170,66 @@ class RoutingServiceProvider extends ServiceProvider
 
             return $dispatcher->serve($path, $request);
         });
+    }
+
+    protected function getVendorPaths()
+    {
+        $files = $this->app['files'];
+
+        // The cache path.
+        $cachePath = STORAGE_PATH .'assets.php';
+
+        if (! $this->isAssetsCacheExpired($files, $cachePath)) {
+            $files->getRequire($cachePath);
+        }
+
+        $options = $this->app['config']->get('routing.assets.paths', array());
+
+        //
+        $paths = array();
+
+        foreach ($options as $vendor => $value) {
+            $values = is_array($value) ? $value : array($value);
+
+            $values = array_map(function($value) use ($vendor)
+            {
+                return $vendor .'/' .$value .'/';
+
+            }, $values);
+
+            $paths = array_merge($paths, $values);
+        }
+
+        $paths = array_unique($paths);
+
+        // Save to the cache.
+        $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
+
+        $files->put($cachePath, $content);
+
+        return $paths;
+    }
+
+    /*
+     * Determine if the cahe is expired.
+     *
+     * @return bool
+     */
+    public function isAssetsCacheExpired(Filesystem $files, $cachePath)
+    {
+        if (! $files->exists($cachePath)) {
+            return true;
+        }
+
+        // Determine the path to the associated configuration file.
+        $path = APPDIR .'Config' .DS .'Routing.php';
+
+        $lastModified = $files->lastModified($path);
+
+        if ($lastModified >= $files->lastModified($cachePath)) {
+            return true;
+        }
+
+        return false;
     }
 }
