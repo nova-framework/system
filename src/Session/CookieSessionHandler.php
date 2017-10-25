@@ -26,14 +26,13 @@ class CookieSessionHandler implements \SessionHandlerInterface
     /**
      * Create a new cookie driven handler instance.
      *
-     * @param  \Cookie\CookieJar  $cookie
+     * @param  \Nova\Cookie\CookieJar  $cookie
      * @param  int  $minutes
      * @return void
      */
     public function __construct(CookieJar $cookies, $minutes)
     {
         $this->cookies = $cookies;
-
         $this->minutes = $minutes;
     }
 

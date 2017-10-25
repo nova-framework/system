@@ -2,6 +2,9 @@
 
 namespace Nova\Session;
 
+use Nova\Session\ExistenceAwareInterface;
+use Nova\Session\SessionInterface;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionBagInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
@@ -603,7 +606,7 @@ class Store implements SessionInterface
     {
         return $this->put('_previous.url', $url);
     }
-
+    
     /**
      * Set the existence of the session on the handler if applicable.
      *

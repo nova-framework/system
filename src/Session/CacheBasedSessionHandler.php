@@ -2,7 +2,7 @@
 
 namespace Nova\Session;
 
-use Cache\Repository;
+use Nova\Cache\Repository;
 
 
 class CacheBasedSessionHandler implements \SessionHandlerInterface
