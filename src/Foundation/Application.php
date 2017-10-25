@@ -614,7 +614,7 @@ class Application extends Container implements ResponsePreparerInterface
 
         $response->send();
 
-        $this->finish($request, $response);
+        $this->shutdown($request, $response);
     }
 
     /**
@@ -649,7 +649,7 @@ class Application extends Container implements ResponsePreparerInterface
      * @param  \Nova\Http\Response  $response
      * @return void
      */
-    public function finish($request, $response)
+    public function shutdown($request, $response)
     {
         $middlewares = $this->shouldSkipMiddleware() ? array() : array_merge(
             $this->gatherRouteMiddleware($request),
@@ -818,21 +818,6 @@ class Application extends Container implements ResponsePreparerInterface
         foreach ($callbacks as $callback) {
             call_user_func($callback, $this);
         }
-    }
-
-    /**
-     * Prepare the request by injecting any services.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return \Nova\Http\Request
-     */
-    public function prepareRequest(Request $request)
-    {
-        if (! is_null($this['config']['session.driver']) && ! $request->hasSession()) {
-            $request->setSession($this['session']->driver());
-        }
-
-        return $request;
     }
 
     /**
