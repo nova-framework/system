@@ -7,7 +7,7 @@ use Nova\Modules\Console\MakeCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MiddlewareMakeCommand extends MakeCommand
+class MakeMiddlewareCommand extends MakeCommand
 {
     /**
      * The name of the console command.

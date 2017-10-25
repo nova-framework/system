@@ -5,6 +5,7 @@ namespace Nova\Modules\Providers;
 use Nova\Modules\Console\MakeModuleCommand;
 use Nova\Modules\Console\MakeConsoleCommand;
 use Nova\Modules\Console\MakeControllerCommand;
+use Nova\Modules\Console\MakeMiddlewareCommand;
 use Nova\Modules\Console\MakeMigrationCommand;
 use Nova\Modules\Console\MakeModelCommand;
 use Nova\Modules\Console\MakePolicyCommand;
@@ -40,6 +41,7 @@ class GeneratorServiceProvider extends ServiceProvider
             'MakeModule',
             'MakeConsole',
             'MakeController',
+            'MakeMiddleware',
             'MakeModel',
             'MakePolicy',
             'MakeProvider',
@@ -91,6 +93,19 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module.controller');
+    }
+
+    /**
+     * Register the make:module:controller command.
+     */
+    private function registerMakeMiddlewareCommand()
+    {
+        $this->app->bindShared('command.make.module.middleware', function ($app)
+        {
+            return new MakeMiddlewareCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.middleware');
     }
 
     /**
