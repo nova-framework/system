@@ -141,20 +141,12 @@ class RoutingServiceProvider extends ServiceProvider
         // Register the default Asset Routes to Dispatcher.
         $dispatcher = $this->app['assets.dispatcher'];
 
-        $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
-        {
-            $path = base_path('assets') .DS .str_replace('/', DS, $path);
-
-            return $dispatcher->serve($path, $request);
-        });
-
+        // For Modules and Themes.
         $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $folder, $path) use ($dispatcher)
         {
             if (strlen($folder) > 3) {
-                // A standard Theme or Module name.
                 $folder = Str::studly($folder);
             } else {
-                // A short Theme or Module name.
                 $folder = Str::upper($folder);
             }
 
@@ -163,6 +155,7 @@ class RoutingServiceProvider extends ServiceProvider
             return $dispatcher->serve($path, $request);
         });
 
+        // For assets.
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
