@@ -61,7 +61,7 @@ class HandleProfiling
         $debug = $config->get('app.debug', false);
 
         if ($debug && $this->canPatchContent($response)) {
-            $withDatabase = $config->get('forensics::config.withDatabase', false);
+            $withDatabase = $config->get('profiler.withDatabase', false);
 
             $content = str_replace(
                 array(
