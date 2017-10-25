@@ -201,12 +201,9 @@ class Dispatcher
             return $this->paths = $files->getRequire($path);
         }
 
-        $config = $this->app['config'];
-
-        // Parse the configuration.
         $paths = array();
 
-        $options = $config->get('routing.assets.paths', array());
+        $options = $this->app['config']->get('routing.assets.paths', array());
 
         foreach ($options as $vendor => $value) {
             $values = is_array($value) ? $value : array($value);
