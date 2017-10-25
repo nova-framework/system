@@ -141,21 +141,7 @@ class RoutingServiceProvider extends ServiceProvider
         // Register the default Asset Routes to Dispatcher.
         $dispatcher = $this->app['assets.dispatcher'];
 
-        // For Modules and Themes.
-        $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $folder, $path) use ($dispatcher)
-        {
-            if (strlen($folder) > 3) {
-                $folder = Str::studly($folder);
-            } else {
-                $folder = Str::upper($folder);
-            }
-
-            $path = APPDIR .ucfirst($type) .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
-
-            return $dispatcher->serve($path, $request);
-        });
-
-        // For assets.
+        // For the assets from Vendor or main assets folder.
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
@@ -184,6 +170,20 @@ class RoutingServiceProvider extends ServiceProvider
             }
 
             $path = ROOTDIR .$type .DS .str_replace('/', DS, $path);
+
+            return $dispatcher->serve($path, $request);
+        });
+
+        // For assets from Modules and Themes.
+        $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $folder, $path) use ($dispatcher)
+        {
+            if (strlen($folder) > 3) {
+                $folder = Str::studly($folder);
+            } else {
+                $folder = Str::upper($folder);
+            }
+
+            $path = APPDIR .ucfirst($type) .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
 
             return $dispatcher->serve($path, $request);
         });
