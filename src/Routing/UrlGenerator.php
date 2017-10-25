@@ -21,7 +21,7 @@ class UrlGenerator
     /**
      * The request instance.
      *
-     * @var \Http\Request
+     * @var \Nova\Http\Request
      */
     protected $request;
 
@@ -115,6 +115,9 @@ class UrlGenerator
      */
     public function to($path, $extra = array(), $secure = null)
     {
+        // First we will check if the URL is already a valid URL. If it is we will not
+        // try to generate a new one but will simply return the URL as is, which is
+        // convenient since developers do not always have to check if it's valid.
         if ($this->isValidUrl($path)) {
             return $path;
         }
@@ -123,6 +126,9 @@ class UrlGenerator
 
         $tail = implode('/', array_map('rawurlencode', (array) $extra));
 
+        // Once we have the scheme we will compile the "tail" by collapsing the values
+        // into a single string delimited by slashes. This just makes it convenient
+        // for passing the array of parameters to this URL as a list of segments.
         $root = $this->getRootUrl($scheme);
 
         return $this->trimUrl($root, $path, $tail);
@@ -153,9 +159,12 @@ class UrlGenerator
             return $path;
         }
 
+        // Once we get the root URL, we will check to see if it contains an index.php
+        // file in the paths. If it does, we will remove it since it is not needed
+        // for asset paths, but only for routes to endpoints in the application.
         $root = $this->getRootUrl($this->getScheme($secure));
 
-        return $this->removeIndex($root).'/'.trim($path, '/');
+        return $this->removeIndex($root) .'/' .trim($path, '/');
     }
 
     /**
@@ -239,19 +248,15 @@ class UrlGenerator
      * @param  array  $parameters
      * @param  bool  $absolute
      * @return string
-     *
-     * @throws \BadMethodCallException
      */
     protected function toRoute($route, array $parameters, $absolute)
     {
-        $pattern = $route->uri();
-
         $domain = $this->getRouteDomain($route, $parameters);
 
         $root = $this->replaceRoot($route, $domain, $parameters);
 
         $uri = strtr(rawurlencode($this->trimUrl(
-            $root, $this->replaceRouteParameters($pattern, $parameters)
+            $root, $this->replaceRouteParameters($route->uri(), $parameters)
 
         )), $this->dontEncode) .$this->getRouteQueryString($parameters);
 
@@ -313,6 +318,9 @@ class UrlGenerator
      */
     protected function getRouteQueryString(array $parameters)
     {
+        // First we will get all of the string parameters that are remaining after we
+        // have replaced the route wildcards. We'll then build a query string from
+        // these string parameters then use it as a starting point for the rest.
         if (count($parameters) == 0) {
             return '';
         }
@@ -321,6 +329,9 @@ class UrlGenerator
             $keyed = $this->getStringParameters($parameters)
         );
 
+        // Lastly, if there are still parameters remaining, we will fetch the numeric
+        // parameters that are in the array and add them to the query string or we
+        // will make the initial query string if it wasn't started with strings.
         if (count($keyed) < count($parameters)) {
             $query .= '&' .implode('&', $this->getNumericParameters($parameters));
         }
@@ -350,7 +361,7 @@ class UrlGenerator
      */
     protected function getNumericParameters(array $parameters)
     {
-        return Arr::where($parameters, function ($key, $value)
+        return Arr::where($parameters, function($key, $value)
         {
             return is_numeric($key);
         });
@@ -377,9 +388,7 @@ class UrlGenerator
      */
     protected function formatDomain($route, &$parameters)
     {
-        return $this->addPortToDomain(
-            $this->getDomainAndScheme($route)
-        );
+        return $this->addPortToDomain($this->getDomainAndScheme($route));
     }
 
     /**
@@ -390,7 +399,7 @@ class UrlGenerator
      */
     protected function getDomainAndScheme($route)
     {
-        return $this->getRouteScheme($route) .$route->domain();
+        return $this->getRouteScheme($route).$route->domain();
     }
 
     /**
@@ -447,9 +456,7 @@ class UrlGenerator
      */
     public function action($action, $parameters = array(), $absolute = true)
     {
-        return $this->route(
-            $action, $parameters, $absolute, $this->routes->getByAction($action)
-        );
+        return $this->route($action, $parameters, $absolute, $this->routes->getByAction($action));
     }
 
     /**

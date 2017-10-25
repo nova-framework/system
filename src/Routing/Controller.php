@@ -10,18 +10,11 @@ use BadMethodCallException;
 abstract class Controller
 {
     /**
-     * The "before" filters registered on the controller.
+     * The middleware registered on the controller.
      *
      * @var array
      */
-    protected $beforeFilters = array();
-
-    /**
-     * The "after" filters registered on the controller.
-     *
-     * @var array
-     */
-    protected $afterFilters = array();
+    protected $middleware = array();
 
 
     /**
@@ -31,57 +24,35 @@ abstract class Controller
      * @param array   $params
      * @return mixed
      */
-    public function callAction($method, $parameters)
+    public function callAction($method, array $parameters)
     {
         return call_user_func_array(array($this, $method), $parameters);
     }
 
     /**
-     * Register a "before" filter on the controller.
+     * Register middleware on the controller.
      *
-     * @param  string  $filter
-     * @param  array  $options
+     * @param  string  $middleware
+     * @param  array   $options
      * @return void
      */
-    public function beforeFilter($filter, array $options = array())
+    public function middleware($middleware, array $options = array())
     {
-        $this->beforeFilters[$filter] = $options;
+        $this->middleware[$middleware] = $options;
     }
 
     /**
-     * Register an "after" filter on the controller.
-     *
-     * @param  string  $filter
-     * @param  array  $options
-     * @return void
-     */
-    public function afterFilter($filter, array $options = array())
-    {
-        $this->afterFilters[$filter] = $options;
-    }
-
-    /**
-     * Get the registered "before" filters.
+     * Get the middleware assigned to the controller.
      *
      * @return array
      */
-    public function getBeforeFilters()
+    public function getMiddleware()
     {
-        return $this->beforeFilters;
+        return $this->middleware;
     }
 
     /**
-     * Get the registered "after" filters.
-     *
-     * @return array
-     */
-    public function getAfterFilters()
-    {
-        return $this->afterFilters;
-    }
-
-    /**
-     * Handle calls to missing methods on the Controller.
+     * Handle calls to missing methods on the controller.
      *
      * @param  array   $parameters
      * @return mixed
@@ -90,7 +61,7 @@ abstract class Controller
      */
     public function missingMethod($parameters = array())
     {
-        throw new NotFoundHttpException("Controller method not found.");
+        throw new NotFoundHttpException('Controller method not found.');
     }
 
     /**

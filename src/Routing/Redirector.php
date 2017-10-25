@@ -186,7 +186,8 @@ class Redirector
     {
         $redirect = new RedirectResponse($path, $status, $headers);
 
-        if (isset($this->session)) {
+        if (isset($this->session))
+        {
             $redirect->setSession($this->session);
         }
 
@@ -198,7 +199,7 @@ class Redirector
     /**
      * Get the URL generator instance.
      *
-     * @return \Nova\Routing\UrlGenerator
+     * @return  \Nova\Routing\UrlGenerator
      */
     public function getUrlGenerator()
     {
@@ -208,7 +209,7 @@ class Redirector
     /**
      * Set the active session store.
      *
-     * @param  \Session\Store  $session
+     * @param  \Nova\Session\Store  $session
      * @return void
      */
     public function setSession(SessionStore $session)

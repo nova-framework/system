@@ -3,6 +3,8 @@
 namespace Nova\Routing;
 
 use Nova\Routing\Console\ControllerMakeCommand;
+use Nova\Routing\Console\MiddlewareMakeCommand;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -23,12 +25,17 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('command.controller.make', function ($app)
+        $this->app->bindShared('command.controller.make', function($app)
         {
             return new ControllerMakeCommand($app['files']);
         });
 
-        $this->commands('command.controller.make');
+        $this->app->bindShared('command.middleware.make', function($app)
+        {
+            return new MiddlewareMakeCommand($app['files']);
+        });
+
+        $this->commands('command.controller.make', 'command.middleware.make');
     }
 
     /**
@@ -39,7 +46,7 @@ class ConsoleServiceProvider extends ServiceProvider
     public function provides()
     {
         return array(
-            'command.controller.make'
+            'command.controller.make', 'command.middleware.make'
         );
     }
 

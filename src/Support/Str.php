@@ -195,7 +195,7 @@ class Str
      * @param  string  $default
      * @return array
      */
-    public static function parseCallback($callback, $default)
+    public static function parseCallback($callback, $default = null)
     {
         return static::contains($callback, '@') ? explode('@', $callback, 2) : array($callback, $default);
     }

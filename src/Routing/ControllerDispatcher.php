@@ -3,10 +3,9 @@
 namespace Nova\Routing;
 
 use Nova\Container\Container;
-use Nova\Http\Request;
-use Nova\Routing\Controller;
-use Nova\Routing\Route;
 use Nova\Routing\RouteDependencyResolverTrait;
+
+use Closure;
 
 
 class ControllerDispatcher
@@ -14,114 +13,69 @@ class ControllerDispatcher
     use RouteDependencyResolverTrait;
 
     /**
-     * The Container instance.
+     * The IoC container instance.
      *
      * @var \Nova\Container\Container
      */
     protected $container;
 
-    /**
-     * The Router instance.
-     *
-     * @var \Nova\Routing\Router  $router
-     */
-    protected $router;
-
 
     /**
-     * Create a new Controller Dispatcher instance.
+     * Create a new controller dispatcher instance.
      *
-     * @param  \Nova\Routing\Router  $router
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    public function __construct(Router $router, Container $container)
+    public function __construct(Container $container)
     {
         $this->container = $container;
-
-        $this->router = $router;
     }
 
     /**
      * Dispatch a request to a given controller and method.
      *
      * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @param  \Nova\Routing\Controller  $controller
+     * @param  mixed  $controller
      * @param  string  $method
      * @return mixed
      */
-    public function dispatch(Route $route, Request $request, Controller $controller, $method)
-    {
-        $this->assignAfter($controller, $route, $method);
-
-        $response = $this->before($controller, $route, $request, $method);
-
-        if (is_null($response)) {
-            return $this->call($controller, $route, $method);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Call the given controller instance method.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function call($controller, $route, $method)
+    public function dispatch(Route $route, $controller, $method)
     {
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method
         );
 
-        return $controller->callAction($method, $parameters);
+        if (method_exists($controller, 'callAction')) {
+            return $controller->callAction($method, $parameters);
+        }
+
+        return call_user_func_array(array($controller, $method), $parameters);
     }
 
     /**
-     * Call the "before" filters for the controller.
+     * Get the middleware for the controller instance.
      *
      * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
      * @param  string  $method
-     * @return mixed
+     * @return array
      */
-    protected function before($controller, $route, $request, $method)
+    public static function getMiddleware($controller, $method)
     {
-        foreach ($controller->getBeforeFilters() as $filter => $options) {
+        if (! method_exists($controller, 'getMiddleware')) {
+            return array();
+        }
+
+        $results = array();
+
+        foreach ($controller->getMiddleware() as $middleware => $options) {
             if (static::methodExcludedByOptions($method, $options)) {
                 continue;
             }
 
-            $response = $this->callFilter($filter, $route, $request);
-
-            if (! is_null($response)) {
-                return $response;
-            }
+            $results[] = $middleware;
         }
-    }
 
-    /**
-     * Apply the applicable "after" filters to the route.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  \Nova\Routing\Route  $route
-     * @param  string  $method
-     * @return mixed
-     */
-    protected function assignAfter($controller, $route, $method)
-    {
-        foreach ($controller->getAfterFilters() as $filter => $options) {
-            if (static::methodExcludedByOptions($method, $options)) {
-                continue;
-            }
-
-            $route->after($filter);
-        }
+        return $results;
     }
 
     /**
@@ -135,20 +89,5 @@ class ControllerDispatcher
     {
         return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
             (! empty($options['except']) && in_array($method, (array) $options['except']));
-    }
-
-    /**
-     * Call the given controller filter method.
-     *
-     * @param  array  $filter
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    protected function callFilter($filter, $route, $request)
-    {
-        list ($filter, $parameters) = Route::parseFilter($filter);
-
-        return $this->router->callRouteFilter($filter, $parameters, $route, $request);
     }
 }

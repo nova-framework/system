@@ -1,24 +1,19 @@
 <?php
 
-namespace Nova\Cookie;
+namespace Nova\Cookie\Middleware;
 
-use Nova\Encryption\Encrypter;
 use Nova\Encryption\DecryptException;
+use Nova\Encryption\Encrypter;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 
-class Guard implements HttpKernelInterface
+use Closure;
+
+
+class EncryptCookies
 {
-    /**
-     * The wrapped kernel implementation.
-     *
-     * @var \Symfony\Component\HttpKernel\HttpKernelInterface
-     */
-    protected $app;
-
     /**
      * The encrypter instance.
      *
@@ -27,33 +22,45 @@ class Guard implements HttpKernelInterface
     protected $encrypter;
 
     /**
+     * The names of the cookies that should not be encrypted.
+     *
+     * @var array
+     */
+    protected $except = array();
+
+
+    /**
      * Create a new CookieGuard instance.
      *
-     * @param  \Symfony\Component\HttpKernel\HttpKernelInterface  $app
-     * @param  \Encryption\Encrypter  $encrypter
+     * @param  \Nova\Encryption\Encrypter  $encrypter
      * @return void
      */
-    public function __construct(HttpKernelInterface $app, Encrypter $encrypter)
+    public function __construct(Encrypter $encrypter)
     {
-        $this->app = $app;
         $this->encrypter = $encrypter;
     }
 
     /**
-     * Handle the given request and get the response.
+     * Disable encryption for the given cookie name(s).
      *
-     * @implements HttpKernelInterface::handle
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param string|array $cookieName
+     * @return void
      */
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    public function disableFor($cookieName)
     {
-        $response = $this->app->handle($this->decrypt($request), $type, $catch);
+        $this->except = array_merge($this->except, (array) $cookieName);
+    }
 
-        return $this->encrypt($response);
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        return $this->encrypt($next($this->decrypt($request)));
     }
 
     /**
@@ -64,18 +71,14 @@ class Guard implements HttpKernelInterface
      */
     protected function decrypt(Request $request)
     {
-        foreach ($request->cookies as $key => $cookie) {
-            if($key == 'PHPSESSID') {
-                // Leave alone the PHPSESSID.
+        foreach ($request->cookies as $key => $c) {
+            if ($this->isDisabled($key)) {
                 continue;
             }
 
-            try
-            {
-                $request->cookies->set($key, $this->decryptCookie($cookie));
-            }
-            catch (DecryptException $e)
-            {
+            try {
+                $request->cookies->set($key, $this->decryptCookie($c));
+            } catch (DecryptException $e) {
                 $request->cookies->set($key, null);
             }
         }
@@ -91,11 +94,9 @@ class Guard implements HttpKernelInterface
      */
     protected function decryptCookie($cookie)
     {
-        if (is_array($cookie)) {
-            return $this->decryptArray($cookie);
-        }
-
-        return $this->encrypter->decrypt($cookie);
+        return is_array($cookie)
+            ? $this->decryptArray($cookie)
+            : $this->encrypter->decrypt($cookie);
     }
 
     /**
@@ -109,7 +110,9 @@ class Guard implements HttpKernelInterface
         $decrypted = array();
 
         foreach ($cookie as $key => $value) {
-            $decrypted[$key] = $this->encrypter->decrypt($value);
+            if (is_string($value)) {
+                $decrypted[$key] = $this->encrypter->decrypt($value);
+            }
         }
 
         return $decrypted;
@@ -123,16 +126,14 @@ class Guard implements HttpKernelInterface
      */
     protected function encrypt(Response $response)
     {
-        foreach ($response->headers->getCookies() as $key => $cookie)
-        {
-            if($cookie->getName() == 'PHPSESSID') {
-                // Leave alone the PHPSESSID.
+        foreach ($response->headers->getCookies() as $cookie) {
+            if ($this->isDisabled($cookie->getName())) {
                 continue;
             }
 
-            $encrypted = $this->encrypter->encrypt($cookie->getValue());
-
-            $response->headers->setCookie($this->duplicate($cookie, $encrypted));
+            $response->headers->setCookie($this->duplicate(
+                $cookie, $this->encrypter->encrypt($cookie->getValue())
+            ));
         }
 
         return $response;
@@ -141,7 +142,7 @@ class Guard implements HttpKernelInterface
     /**
      * Duplicate a cookie with a new value.
      *
-     * @param  \Symfony\Component\HttpFoundation\Cookie  $cookie
+     * @param  \Symfony\Component\HttpFoundation\Cookie  $c
      * @param  mixed  $value
      * @return \Symfony\Component\HttpFoundation\Cookie
      */
@@ -158,4 +159,14 @@ class Guard implements HttpKernelInterface
         );
     }
 
+    /**
+     * Determine whether encryption has been disabled for the given cookie.
+     *
+     * @param  string $name
+     * @return bool
+     */
+    public function isDisabled($name)
+    {
+        return in_array($name, $this->except);
+    }
 }

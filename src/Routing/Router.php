@@ -1,36 +1,24 @@
 <?php
-/**
- * Router - routing urls to closures and controllers.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Routing;
 
-use Nova\Container\Container;
-use Nova\Events\Dispatcher;
 use Nova\Http\Request;
 use Nova\Http\Response;
-use Nova\Routing\ControllerDispatcher;
-use Nova\Routing\RouteCollection;
-use Nova\Routing\Route;
+use Nova\Events\Dispatcher;
+use Nova\Container\Container;
+use Nova\Pipeline\Pipeline;
 use Nova\Support\Arr;
+use Nova\Support\Collection;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 
-use BadMethodCallException;
 use Closure;
 
 
-/**
- * Router class will load requested Controller / Closure based on URL.
- */
-class Router implements HttpKernelInterface
+class Router
 {
     /**
      * The event dispatcher instance.
@@ -47,6 +35,13 @@ class Router implements HttpKernelInterface
     protected $container;
 
     /**
+     * The Router instance used by the route.
+     *
+     * @var \Nova\Routing\Router  $router
+     */
+    protected $router;
+
+    /**
      * The route collection instance.
      *
      * @var \Nova\Routing\RouteCollection
@@ -54,32 +49,32 @@ class Router implements HttpKernelInterface
     protected $routes;
 
     /**
-     * Matched Route, the current found Route, if any.
+     * The currently dispatched route instance.
      *
-     * @var Route|null $current
+     * @var \Nova\Routing\Route
      */
-    protected $current = null;
+    protected $current;
 
     /**
      * The request currently being dispatched.
      *
-     * @var \Http\Request
+     * @var \Nova\Http\Request
      */
     protected $currentRequest;
 
     /**
-     * The asset file dispatcher instance.
+     * All of the short-hand keys for middlewares.
      *
-     * @var \Nova\Routing\AssetFileDispatcher
+     * @var array
      */
-    protected $fileDispatcher;
+    protected $middleware = array();
 
     /**
-     * Indicates if the router is running filters.
+     * All of the middleware groups.
      *
-     * @var bool
+     * @var array
      */
-    protected $filtering = true;
+    protected $middlewareGroups = array();
 
     /**
      * The registered route value binders.
@@ -96,18 +91,18 @@ class Router implements HttpKernelInterface
     protected $patterns = array();
 
     /**
-     * Array of Route Groups
+     * The route group attribute stack.
      *
-     * @var array $groupStack
+     * @var array
      */
     protected $groupStack = array();
 
     /**
-     * An array of HTTP request Methods.
+     * All of the verbs supported by the router.
      *
-     * @var array $methods
+     * @var array
      */
-    public static $methods = array('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS');
+    public static $verbs = array('GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS');
 
     /**
      * The resource registrar instance.
@@ -125,38 +120,24 @@ class Router implements HttpKernelInterface
 
 
     /**
-     * Router constructor.
+     * Create a new Router instance.
      *
-     * @codeCoverageIgnore
+     * @param  \Nova\Events\Dispatcher  $events
+     * @param  \Nova\Container\Container  $container
+     * @return void
      */
-    public function __construct(Dispatcher $events = null, Container $container = null)
+    public function __construct(Dispatcher $events, Container $container = null)
     {
         $this->events = $events;
 
-        $this->routes = new RouteCollection();
+        $this->routes = new RouteCollection;
 
-        $this->container = $container ?: new Container();
+        $this->container = $container ?: new Container;
 
-        //
-        $this->bind('_missing', function ($value)
+        $this->bind('_missing', function($value)
         {
             return explode('/', $value);
         });
-    }
-
-    /**
-     * Get the response for a given request.
-     *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  int   $type
-     * @param  bool  $catch
-     * @return \Nova\Http\Response
-     */
-    public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        return $this->dispatch(
-            Request::createFromBase($request)
-        );
     }
 
     /**
@@ -166,9 +147,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function get($route, $action)
+    public function get($uri, $action)
     {
-        return $this->addRoute(array('GET', 'HEAD'), $route, $action);
+        return $this->addRoute(['GET', 'HEAD'], $uri, $action);
     }
 
     /**
@@ -178,9 +159,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function post($route, $action)
+    public function post($uri, $action)
     {
-        return $this->addRoute('POST', $route, $action);
+        return $this->addRoute('POST', $uri, $action);
     }
 
     /**
@@ -190,9 +171,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function put($route, $action)
+    public function put($uri, $action)
     {
-        return $this->addRoute('PUT', $route, $action);
+        return $this->addRoute('PUT', $uri, $action);
     }
 
     /**
@@ -202,9 +183,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function patch($route, $action)
+    public function patch($uri, $action)
     {
-        return $this->addRoute('PATCH', $route, $action);
+        return $this->addRoute('PATCH', $uri, $action);
     }
 
     /**
@@ -214,9 +195,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function delete($route, $action)
+    public function delete($uri, $action)
     {
-        return $this->addRoute('DELETE', $route, $action);
+        return $this->addRoute('DELETE', $uri, $action);
     }
 
     /**
@@ -226,9 +207,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function options($route, $action)
+    public function options($uri, $action)
     {
-        return $this->addRoute('OPTIONS', $route, $action);
+        return $this->addRoute('OPTIONS', $uri, $action);
     }
 
     /**
@@ -238,11 +219,11 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function any($route, $action)
+    public function any($uri, $action)
     {
-        $methods = array('GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE');
+        $verbs = array('GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE');
 
-        return $this->addRoute($methods, $route, $action);
+        return $this->addRoute($verbs, $uri, $action);
     }
 
     /**
@@ -253,11 +234,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    public function match($methods, $route, $action)
+    public function match($methods, $uri, $action)
     {
-        $methods = array_map('strtoupper', (array) $methods);
-
-        return $this->addRoute($methods, $route, $action);
+        return $this->addRoute(array_map('strtoupper', (array) $methods), $uri, $action);
     }
 
     /**
@@ -284,9 +263,15 @@ class Router implements HttpKernelInterface
      */
     public function group(array $attributes, Closure $callback)
     {
+        if (isset($attributes['middleware']) && is_string($attributes['middleware'])) {
+            $attributes['middleware'] = explode('|', $attributes['middleware']);
+        }
+
         $this->updateGroupStack($attributes);
 
-        // Execute the group callback.
+        // Once we have updated the group stack, we will execute the user Closure and
+        // merge in the groups attributes when the route is created. After we have
+        // run the callback, we will pop the attributes off of this group stack.
         call_user_func($callback, $this);
 
         array_pop($this->groupStack);
@@ -417,12 +402,9 @@ class Router implements HttpKernelInterface
      * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
-    protected function addRoute($methods, $route, $action = null)
+    protected function addRoute($methods, $uri, $action)
     {
-        $route = $this->createRoute($methods, $route, $action);
-
-        // Add the current Route instance to the known Routes list.
-        return $this->routes->add($route);
+        return $this->routes->add($this->createRoute($methods, $uri, $action));
     }
 
     /**
@@ -435,22 +417,56 @@ class Router implements HttpKernelInterface
      */
     protected function createRoute($methods, $uri, $action)
     {
-        if ($this->actionReferencesController($action)) {
+        if (is_callable($action)) {
+            $action = array('uses' => $action);
+        }
+
+        // If the route is routing to a controller we will parse the route action into
+        // an acceptable array format before registering it and creating this route
+        // instance itself. We need to build the Closure that will call this out.
+        else if ($this->actionReferencesController($action)) {
             $action = $this->convertToControllerAction($action);
         }
 
-        // Prefix the current route pattern.
-        $uri = $this->prefix($uri);
+        // If no "uses" property has been set, we will dig through the array to find a
+        // Closure instance within this list. We will set the first Closure we come
+        // across into the "uses" property that will get fired off by this route.
+        else if (! isset($action['uses'])) {
+            $action['uses'] = $this->findActionClosure($action);
+        }
 
-        $route = $this->newRoute($methods, $uri, $action);
+        if (isset($action['middleware']) && is_string($action['middleware'])) {
+            $action['middleware'] = explode('|', $action['middleware']);
+        }
 
-        if ($this->hasGroupStack()) {
+        $route = $this->newRoute(
+            $methods, $uri = $this->prefix($uri), $action
+        );
+
+        // If we have groups that need to be merged, we will merge them now after this
+        // route has already been created and is ready to go. After we're done with
+        // the merge we will be ready to return the route back out to the caller.
+        if (! empty($this->groupStack)) {
             $this->mergeGroupAttributesIntoRoute($route);
         }
 
         $this->addWhereClausesToRoute($route);
 
         return $route;
+    }
+
+    /**
+     * Find the Closure in an action array.
+     *
+     * @param  array  $action
+     * @return \Closure
+     */
+    protected function findActionClosure(array $action)
+    {
+        return Arr::first($action, function ($key, $value)
+        {
+            return is_callable($value) && is_numeric($key);
+        });
     }
 
     /**
@@ -476,9 +492,7 @@ class Router implements HttpKernelInterface
      */
     protected function prefix($uri)
     {
-        $prefix = $this->getLastGroupPrefix();
-
-        return trim(trim($prefix, '/') .'/' .trim($uri, '/'), '/') ?: '/';
+        return trim(trim($this->getLastGroupPrefix(), '/') .'/' .trim($uri, '/'), '/') ?: '/';
     }
 
     /**
@@ -536,10 +550,16 @@ class Router implements HttpKernelInterface
             $action = array('uses' => $action);
         }
 
+        // Here we'll get an instance of this controller dispatcher and hand it off to
+        // the Closure so it will be used to resolve the class instances out of our
+        // IoC container instance and call the appropriate methods on the class.
         if (! empty($this->groupStack)) {
             $action['uses'] = $this->prependGroupUses($action['uses']);
         }
 
+        // Here we'll get an instance of this controller dispatcher and hand it off to
+        // the Closure so it will be used to resolve the class instances out of our
+        // IoC container instance and call the appropriate methods on the class.
         $action['controller'] = $action['uses'];
 
         return $action;
@@ -559,35 +579,18 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Dispatch route
-     * @return bool
+     * Dispatch the request to the application.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return \Nova\Http\Response
      */
     public function dispatch(Request $request)
     {
         $this->currentRequest = $request;
 
-        // Asset Files Dispatching.
-        if (! is_null($response = $this->dispatchToFile($request))) {
-            return $response;
-        }
+        $response = $this->dispatchToRoute($request);
 
-        // If no response was returned from the before filter, we will call the proper
-        // route instance to get the response. If no route is found a response will
-        // still get returned based on why no routes were found for this request.
-        $response = $this->callFilter('before', $request);
-
-        if (is_null($response)) {
-            $response = $this->dispatchToRoute($request);
-        }
-
-        $response = $this->prepareResponse($request, $response);
-
-        // Once this route has run and the response has been prepared, we will run the
-        // after filter to do any last work on the response or for this application
-        // before we will return the response back to the consuming code for use.
-        $this->callFilter('after', $request, $response);
-
-        return $response;
+        return $this->prepareResponse($request, $response);
     }
 
     /**
@@ -598,7 +601,9 @@ class Router implements HttpKernelInterface
      */
     public function dispatchToRoute(Request $request)
     {
-        // Execute the Routes matching.
+        // First we will find a route that matches this request. We will also set the
+        // route resolver on the request so middlewares assigned to the route will
+        // receive access to this route instance for checking of the parameters.
         $route = $this->findRoute($request);
 
         $request->setRouteResolver(function () use ($route)
@@ -608,37 +613,125 @@ class Router implements HttpKernelInterface
 
         $this->events->fire('router.matched', array($route, $request));
 
-        // Once we have successfully matched the incoming request to a given route we
-        // can call the before filters on that route. This works similar to global
-        // filters in that if a response is returned we will not call the route.
-        $response = $this->callRouteBefore($route, $request);
+        $response = $this->runRouteWithinStack($route, $request);
 
-        if (is_null($response)) {
-            $response = $route->run($request);
-        }
-
-        // Prepare the Reesponse.
-        $response = $this->prepareResponse($request, $response);
-
-        // After we have a prepared response from the route or filter we will call to
-        // the "after" filters to do any last minute processing on this request or
-        // response object before the response is returned back to the consumer.
-        $this->callRouteAfter($route, $request, $response);
-
-        return $response;
+        return $this->prepareResponse($request, $response);
     }
 
     /**
-     * Dispatch the request to a asset file and return the response.
+     * Run the given route within a Stack "onion" instance.
      *
+     * @param  \Nova\Routing\Route  $route
      * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    public function dispatchToFile(Request $request)
+    protected function runRouteWithinStack(Route $route, Request $request)
     {
-        $fileDispatcher = $this->getFileDispatcher();
+        $skipMiddleware = $this->container->bound('middleware.disable') &&
+                          ($this->container->make('middleware.disable') === true);
 
-        return $fileDispatcher->dispatch($request);
+        // Create a Pipeline instance.
+        $pipeline = new Pipeline(
+            $this->container, $skipMiddleware ? array() : $this->gatherRouteMiddleware($route)
+        );
+
+        return $pipeline->handle($request, function ($request) use ($route)
+        {
+            $response = $route->run($request);
+
+            return $this->prepareResponse($request, $response);
+        });
+    }
+
+    /**
+     * Gather the middleware for the given route.
+     *
+     * @param  \Mini\Routing\Route  $route
+     * @return array
+     */
+    public function gatherRouteMiddleware(Route $route)
+    {
+        $middleware = array_map(function ($name)
+        {
+            return $this->resolveMiddleware($name);
+
+        }, $route->gatherMiddleware());
+
+        return Arr::flatten($middleware);
+    }
+
+    /**
+     * Resolve the middleware name to class name preserving passed parameters.
+     *
+     * @param  string $name
+     * @return array
+     */
+    public function resolveMiddleware($name)
+    {
+        if (isset($this->middlewareGroups[$name])) {
+            return $this->parseMiddlewareGroup($name);
+        }
+
+        return $this->parseMiddleware($name);
+    }
+
+    /**
+     * Parse the middleware and format it for usage.
+     *
+     * @param  string  $name
+     * @return array
+     */
+    protected function parseMiddleware($name)
+    {
+        list($name, $parameters) = array_pad(explode(':', $name, 2), 2, null);
+
+        //
+        $callable = isset($this->middleware[$name]) ? $this->middleware[$name] : $name;
+
+        if (is_null($parameters)) {
+            return $callable;
+        }
+
+        // When the callable is a string, we will add back the parameters before returning.
+        else if (is_string($callable)) {
+            return $callable .':' .$parameters;
+        }
+
+        // A callback with parameters; we should create a proper middleware closure for it.
+        $parameters = explode(',', $parameters);
+
+        return function ($passable, $stack) use ($callable, $parameters)
+        {
+            return call_user_func_array(
+                $callable, array_merge(array($passable, $stack), $parameters)
+            );
+        };
+    }
+
+    /**
+     * Parse the middleware group and format it for usage.
+     *
+     * @param  string  $name
+     * @return array
+     */
+    protected function parseMiddlewareGroup($name)
+    {
+        $results = array();
+
+        foreach ($this->middlewareGroups[$name] as $middleware) {
+            if (! isset($this->middlewareGroups[$middleware])) {
+                $results[] = $this->parseMiddleware($middleware);
+
+                continue;
+            }
+
+            // The middleware refer a middleware group.
+            $results = array_merge(
+                $results, $this->parseMiddlewareGroup($middleware)
+            );
+        }
+
+        return $results;
     }
 
     /**
@@ -647,7 +740,7 @@ class Router implements HttpKernelInterface
      * @param  \Nova\Http\Request  $request
      * @return \Nova\Routing\Route
      */
-    protected function findRoute(Request $request)
+    protected function findRoute($request)
     {
         $this->current = $route = $this->routes->match($request);
 
@@ -698,94 +791,81 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Register a new "before" filter with the router.
+     * Get all of the defined middleware short-hand names.
      *
-     * @param  string|callable  $callback
-     * @return void
+     * @return array
      */
-    public function before($callback)
+    public function getMiddleware()
     {
-        $this->addGlobalFilter('before', $callback);
+        return $this->middleware;
     }
 
     /**
-     * Register a new "after" filter with the router.
-     *
-     * @param  string|callable  $callback
-     * @return void
-     */
-    public function after($callback)
-    {
-        $this->addGlobalFilter('after', $callback);
-    }
-
-    /**
-     * Register a new global filter with the router.
-     *
-     * @param  string  $filter
-     * @param  string|callable   $callback
-     * @return void
-     */
-    protected function addGlobalFilter($filter, $callback)
-    {
-        $this->events->listen('router.' .$filter, $this->parseFilter($callback));
-    }
-
-    /**
-     * Register a new Filter with the Router.
+     * Register a short-hand name for a middleware.
      *
      * @param  string  $name
-     * @param  string|callable  $callback
-     * @return void
+     * @param  string|\Closure  $middleware
+     * @return $this
      */
-    public function filter($name, $callback)
+    public function middleware($name, $middleware)
     {
-        $this->events->listen('router.filter: '.$name, $this->parseFilter($callback));
+        $this->middleware[$name] = $middleware;
+
+        return $this;
     }
 
     /**
-     * Parse the registered Filter.
+     * Register a group of middleware.
      *
-     * @param  callable|string  $callback
-     * @return mixed
+     * @param  string  $name
+     * @param  array  $middleware
+     * @return $this
      */
-    protected function parseFilter($callback)
+    public function middlewareGroup($name, array $middleware)
     {
-        if (is_string($callback) && ! Str::contains($callback, '@')) {
-            return $callback .'@filter';
+        $this->middlewareGroups[$name] = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * Add a middleware to the beginning of a middleware group.
+     *
+     * If the middleware is already in the group, it will not be added again.
+     *
+     * @param  string  $group
+     * @param  string  $middleware
+     * @return $this
+     */
+    public function prependMiddlewareToGroup($group, $middleware)
+    {
+        if (isset($this->middlewareGroups[$group]) && ! in_array($middleware, $this->middlewareGroups[$group])) {
+            array_unshift($this->middlewareGroups[$group], $middleware);
         }
 
-        return $callback;
+        return $this;
     }
 
     /**
-     * Register a Model binder for a wildcard.
+     * Add a middleware to the end of a middleware group.
      *
-     * @param  string  $key
-     * @param  string  $className
-     * @param  \Closure  $callback
-     * @return void
+     * If the middleware is already in the group, it will not be added again.
      *
-     * @throws NotFoundHttpException
+     * @param  string  $group
+     * @param  string  $middleware
+     * @return $this
      */
-    public function model($key, $className, Closure $callback = null)
+    public function pushMiddlewareToGroup($group, $middleware)
     {
-        $this->bind($key, function ($value) use ($className, $callback)
-        {
-            if (is_null($value)) {
-                return;
-            }
+        if (! array_key_exists($group, $this->middlewareGroups)) {
+            $this->middlewareGroups[$group] = array();
+        }
 
-            if (! is_null($model = with(new $className)->find($value))) {
-                return $model;
-            }
+        if (! in_array($middleware, $this->middlewareGroups[$group])) {
+            $this->middlewareGroups[$group][] = $middleware;
+        }
 
-            if ($callback instanceof Closure) {
-                return call_user_func($callback, $value);
-            }
-
-            throw new NotFoundHttpException();
-        });
+        return $this;
     }
 
     /**
@@ -807,6 +887,57 @@ class Router implements HttpKernelInterface
     }
 
     /**
+     * Register a model binder for a wildcard.
+     *
+     * @param  string  $key
+     * @param  string  $className
+     * @param  \Closure  $callback
+     * @return void
+     *
+     * @throws NotFoundHttpException
+     */
+    public function model($key, $className, Closure $callback = null)
+    {
+        $this->bind($key, function ($value) use ($className, $callback)
+        {
+            if (is_null($value)) {
+                return;
+            }
+
+            // For model binders, we will attempt to retrieve the models using the find
+            // method on the model instance. If we cannot retrieve the models we'll
+            // throw a not found exception otherwise we will return the instance.
+            if (! is_null($model = with(new $className)->find($value))) {
+                return $model;
+            }
+
+            // If a callback was supplied to the method we will call that to determine
+            // what we should do when the model is not found. This just gives these
+            // developer a little greater flexibility to decide what will happen.
+            if ($callback instanceof Closure) {
+                return call_user_func($callback, $value);
+            }
+
+            throw new NotFoundHttpException;
+        });
+    }
+
+    /**
+     * Get the binding callback for a given binding.
+     *
+     * @param  string  $key
+     * @return \Closure|null
+     */
+    public function getBindingCallback($key)
+    {
+        $key = str_replace('-', '_', $key);
+
+        if (isset($this->binders[$key])) {
+            return $this->binders[$key];
+        }
+    }
+
+    /**
      * Create a class based binding using the IoC container.
      *
      * @param  string    $binding
@@ -816,7 +947,10 @@ class Router implements HttpKernelInterface
     {
         return function ($value, $route) use ($binding)
         {
-            list ($className, $method) = array_pad(explode('@', $binding, 2), 2, 'bind');
+            // If the binding has an @ sign, we will assume it's being used to delimit
+            // the class name from the bind method name. This allows for bindings
+            // to run multiple bind methods in a single class for convenience.
+            list($className, $method) = array_pad(explode('@', $binding, 2), 2, 'bind');
 
             $instance = $this->container->make($className);
 
@@ -850,132 +984,13 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Call the given filter with the request and response.
-     *
-     * @param  string  $filter
-     * @param  \Nova\Http\Request   $request
-     * @param  \Nova\Http\Response  $response
-     * @return mixed
-     */
-    protected function callFilter($filter, $request, $response = null)
-    {
-        if (! $this->filtering) {
-            return;
-        }
-
-        return $this->events->until('router.' .$filter, array($request, $response));
-    }
-
-    /**
-     * Call the given route's before filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function callRouteBefore($route, $request)
-    {
-        foreach ($route->beforeFilters() as $filter => $parameters) {
-            $response = $this->callRouteFilter($filter, $parameters, $route, $request);
-
-            if (! is_null($response)) {
-                return $response;
-            }
-        }
-    }
-
-    /**
-     * Call the given route's before filters.
-     *
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @param  \Nova\Http\Response  $response
-     * @return mixed
-     */
-    public function callRouteAfter($route, $request, $response)
-    {
-        foreach ($route->afterFilters() as $filter => $parameters) {
-            $this->callRouteFilter($filter, $parameters, $route, $request, $response);
-        }
-    }
-
-    /**
-     * Call the given Route Filter.
-     *
-     * @param  string  $filter
-     * @param  array  $parameters
-     * @param  \Nova\Routing\Route  $route
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function callRouteFilter($filter, $parameters, $route, $request, $response = null)
-    {
-        if (! $this->filtering) {
-            return;
-        }
-
-        $data = array_merge(array($route, $request, $response), $parameters);
-
-        return $this->events->until('router.filter: '.$filter, $this->cleanFilterParameters($data));
-    }
-
-    /**
-     * Clean the parameters being passed to a filter callback.
-     *
-     * @param  array  $parameters
-     * @return array
-     */
-    protected function cleanFilterParameters(array $parameters)
-    {
-        return array_filter($parameters, function ($parameter)
-        {
-            return ! is_null($parameter) && ($parameter !== '');
-        });
-    }
-
-    /**
-     * Run a callback with filters disable on the router.
-     *
-     * @param  callable  $callback
-     * @return void
-     */
-    public function withoutFilters(callable $callback)
-    {
-        $this->disableFilters();
-
-        call_user_func($callback);
-
-        $this->enableFilters();
-    }
-
-    /**
-     * Enable route filtering on the router.
-     *
-     * @return void
-     */
-    public function enableFilters()
-    {
-        $this->filtering = true;
-    }
-
-    /**
-     * Disable route filtering on the router.
-     *
-     * @return void
-     */
-    public function disableFilters()
-    {
-        $this->filtering = false;
-    }
-
-    /**
      * Create a response instance from the given value.
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
      * @param  mixed  $response
      * @return \Nova\Http\Response
      */
-    protected function prepareResponse($request, $response)
+    public function prepareResponse($request, $response)
     {
         if (! $response instanceof SymfonyResponse) {
             $response = new Response($response);
@@ -1017,9 +1032,9 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Return the current Matched Route, if there are any.
+     * Get the currently dispatched route instance.
      *
-     * @return null|Route
+     * @return \Nova\Routing\Route
      */
     public function getCurrentRoute()
     {
@@ -1037,7 +1052,7 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Check if a Route with the given name exists.
+     * Check if a route with the given name exists.
      *
      * @param  string  $name
      * @return bool
@@ -1072,7 +1087,7 @@ class Router implements HttpKernelInterface
         $name = $this->currentRouteName();
 
         foreach ($patterns as $pattern) {
-            if (Str::is($pattern, $name)) {
+            if (Str::is($pattern, $this->currentRouteName())) {
                 return true;
             }
         }
@@ -1089,7 +1104,7 @@ class Router implements HttpKernelInterface
     public function currentRouteNamed($name)
     {
         if (! is_null($route = $this->current())) {
-            return $route->getName() == $name;
+            return ($route->getName() == $name);
         }
 
         return false;
@@ -1152,27 +1167,13 @@ class Router implements HttpKernelInterface
     }
 
     /**
-     * Return the available Routes.
+     * Get the underlying route collection.
      *
      * @return \Nova\Routing\RouteCollection
      */
     public function getRoutes()
     {
         return $this->routes;
-    }
-
-    /**
-     * Get the controller dispatcher instance.
-     *
-     * @return \Nova\Routing\ControllerDispatcher
-     */
-    public function getFileDispatcher()
-    {
-        if (isset($this->fileDispatcher)) {
-            return $this->fileDispatcher;
-        }
-
-        return $this->fileDispatcher = $this->container->make('Nova\Routing\Assets\DispatcherInterface');
     }
 
     /**
@@ -1187,6 +1188,16 @@ class Router implements HttpKernelInterface
         }
 
         return $this->registrar = new ResourceRegistrar($this);
+    }
+
+    /**
+     * Get the global "where" patterns.
+     *
+     * @return array
+     */
+    public function getPatterns()
+    {
+        return $this->patterns;
     }
 
     /**

@@ -1,31 +1,21 @@
 <?php
-/**
- * RoutingServiceProvider - Implements a Service Provider for Routing.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Routing;
 
+use Nova\Http\Request;
+use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
+use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
+use Nova\Support\Str;
 
 
 class RoutingServiceProvider extends ServiceProvider
 {
-
-    /**
-     * Boot the Service Provider.
-     */
-    public function boot()
-    {
-        $this->registerAssetDispatcher();
-    }
 
     /**
      * Register the Service Provider.
@@ -43,10 +33,12 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerResponseFactory();
 
         $this->registerControllerDispatcher();
+
+        $this->registerAssetDispatcher();
     }
 
     /**
-     * Register the Router instance.
+     * Register the router instance.
      *
      * @return void
      */
@@ -67,7 +59,9 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->singleton('url', function ($app)
         {
-            // The URL Generator needs the Route Collection that exists on the Router.
+            // The URL generator needs the route collection that exists on the router.
+            // Keep in mind this is an object, so we're passing by references here
+            // and all the registered routes will be available to the generator.
             $routes = $app['router']->getRoutes();
 
             $url = new UrlGenerator($routes, $app->rebinding('request', function ($app, $request)
@@ -95,6 +89,9 @@ class RoutingServiceProvider extends ServiceProvider
         {
             $redirector = new Redirector($app['url']);
 
+            // If the session is set on the application instance, we'll inject it into
+            // the redirector instance. This allows the redirect responses to allow
+            // for the quite convenient "with" methods that flash to the session.
             if (isset($app['session.store'])) {
                 $redirector->setSession($app['session.store']);
             }
@@ -125,28 +122,77 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->singleton('routing.controller.dispatcher', function ($app)
         {
-            return new ControllerDispatcher($app['router'], $app);
+            return new ControllerDispatcher($app);
         });
     }
 
     /**
      * Register the Assets Dispatcher.
+     *
+     * @return void
      */
-    public function registerAssetDispatcher()
+    protected function registerAssetDispatcher()
     {
-        $config = $this->app['config'];
+        $this->app->bindShared('assets.dispatcher', function ($app)
+        {
+            return new AssetDispatcher();
+        });
 
-        //
-        $driver = $config->get('routing.assets.driver', 'default');
+        // Register the default Asset Routes to Dispatcher.
+        $dispatcher = $this->app['assets.dispatcher'];
 
-        if ($driver == 'custom') {
-            $className = $config->get('routing.assets.dispatcher');
-        } else {
-            $className = 'Nova\Routing\Assets\\' .ucfirst($driver) .'Dispatcher';
-        }
+        $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
+        {
+            $path = base_path('assets') .DS .str_replace('/', DS, $path);
 
-        // Bind the calculated class name to the Assets Dispatcher Interface.
-        $this->app->bind('Nova\Routing\Assets\DispatcherInterface', $className);
+            return $dispatcher->serve($path, $request);
+        });
+
+        $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $folder, $path) use ($dispatcher)
+        {
+            if (strlen($folder) > 3) {
+                // A standard Theme or Module name.
+                $folder = Str::studly($folder);
+            } else {
+                // A short Theme or Module name.
+                $folder = Str::upper($folder);
+            }
+
+            $path = APPDIR .ucfirst($type) .DS .$folder .DS .'Assets' .DS .str_replace('/', DS, $path);
+
+            return $dispatcher->serve($path, $request);
+        });
+
+        $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
+        {
+            if ($type == 'vendor') {
+                $options = Config::get('routing.assets.paths', array());
+
+                //
+                $paths = array();
+
+                foreach ($options as $vendor => $value) {
+                    $values = is_array($value) ? $value : array($value);
+
+                    $values = array_map(function($value) use ($vendor)
+                    {
+                        return $vendor .'/' .$value .'/';
+
+                    }, $values);
+
+                    $paths = array_merge($paths, $values);
+                }
+
+                $paths = array_unique($paths);
+
+                if (! Str::startsWith($path, $paths)) {
+                    return new Response('File Not Found', 404);
+                }
+            }
+
+            $path = ROOTDIR .$type .DS .str_replace('/', DS, $path);
+
+            return $dispatcher->serve($path, $request);
+        });
     }
-
 }
