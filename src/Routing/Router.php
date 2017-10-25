@@ -1234,7 +1234,7 @@ class Router
      */
     public function __call($method, $parameters)
     {
-        if (isset($this->macros[$name])) {
+        if (isset($this->macros[$method])) {
             $callback = $this->macros[$method];
 
             return call_user_func_array($callback, $parameters);
