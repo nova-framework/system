@@ -145,7 +145,7 @@ class RoutingServiceProvider extends ServiceProvider
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
-                $paths = $this->getVendorPaths();
+                $paths = $this->getValidVendorPaths();
 
                 if (! Str::startsWith($path, $paths)) {
                     return new Response('File Not Found', 404);
@@ -172,21 +172,26 @@ class RoutingServiceProvider extends ServiceProvider
         });
     }
 
-    protected function getVendorPaths()
+    protected function getValidVendorPaths()
     {
         $files = $this->app['files'];
 
         // The cache path.
-        $cachePath = STORAGE_PATH .'assets.php';
+        $path = STORAGE_PATH .'assets.php';
 
-        if (! $this->isAssetsCacheExpired($files, $cachePath)) {
-            $files->getRequire($cachePath);
+        // The config path for checking againts the cache file.
+        $configPath = APPDIR .'Config' .DS .'Routing.php';
+
+        if ($files->exists($path) && ! ($files->lastModified($configPath) < $files->lastModified($path))) {
+            return $files->getRequire($path);
         }
 
-        $options = $this->app['config']->get('routing.assets.paths', array());
+        $config = $this->app['config'];
 
-        //
+        // Parse the configuration.
         $paths = array();
+
+        $options = $config->get('routing.assets.paths', array());
 
         foreach ($options as $vendor => $value) {
             $values = is_array($value) ? $value : array($value);
@@ -205,31 +210,8 @@ class RoutingServiceProvider extends ServiceProvider
         // Save to the cache.
         $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
 
-        $files->put($cachePath, $content);
+        $files->put($path, $content);
 
         return $paths;
-    }
-
-    /*
-     * Determine if the cahe is expired.
-     *
-     * @return bool
-     */
-    public function isAssetsCacheExpired(Filesystem $files, $cache)
-    {
-        if (! $files->exists($cache)) {
-            return true;
-        }
-
-        // Determine the path to the associated configuration file.
-        $path = APPDIR .'Config' .DS .'Routing.php';
-
-        $lastModified = $files->lastModified($path);
-
-        if ($lastModified >= $files->lastModified($cache)) {
-            return true;
-        }
-
-        return false;
     }
 }
