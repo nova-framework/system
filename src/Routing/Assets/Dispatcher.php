@@ -4,6 +4,7 @@ namespace Nova\Routing\Assets;
 
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
+use Nova\Foundation\Application;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Support\Arr;
@@ -22,6 +23,8 @@ use LogicException;
 
 class Dispatcher
 {
+    protected $app;
+
     /**
      * All of the registered Asset Routes.
      *
@@ -29,6 +32,22 @@ class Dispatcher
      */
     protected $routes = array();
 
+    /**
+     * The cache control options.
+     * @var int
+     */
+    protected $cacheControl = array();
+
+
+    /**
+     * Create a new Default Dispatcher instance.
+     *
+     * @return void
+     */
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+    }
 
     /**
      * Register a new Asset Route with the manager.
@@ -107,14 +126,28 @@ class Dispatcher
         );
 
         // Setup the (browser) Cache Control.
-        $response->setTtl(600);
-        $response->setMaxAge(10800);
-        $response->setSharedMaxAge(600);
+        $this->setupCacheControl($response);
 
         // Prepare the Response against the Request instance.
         $response->isNotModified($request);
 
         return $response->prepare($request);
+    }
+
+    protected function setupCacheControl(SymfonyResponse $response)
+    {
+        $options = $this->app['config']->get('routing.assets.cache', array());
+
+        //
+        $ttl    = array_get($options, 'ttl', 600);
+        $maxAge = array_get($options, 'maxAge', 10800);
+
+        $sharedMaxAge = array_get($options, 'sharedMaxAge', 600);
+
+        //
+        $response->setTtl($ttl);
+        $response->setMaxAge($maxAge);
+        $response->setSharedMaxAge($sharedMaxAge);
     }
 
     protected function getMimeType($path)
@@ -141,5 +174,50 @@ class Dispatcher
         $guesser = MimeTypeGuesser::getInstance();
 
         return $guesser->guess($path);
+    }
+
+    public function getValidVendorPaths()
+    {
+        $files = $this->app['files'];
+
+        // The cache file path.
+        $path = STORAGE_PATH .'assets.php';
+
+        // The config path for checking againts the cache file.
+        $configPath = APPDIR .'Config' .DS .'Routing.php';
+
+        $lastModified = $files->lastModified($configPath);
+
+        if ($files->exists($path) && ! ($lastModified < $files->lastModified($path))) {
+            return $files->getRequire($path);
+        }
+
+        $config = $this->app['config'];
+
+        // Parse the configuration.
+        $paths = array();
+
+        $options = $config->get('routing.assets.paths', array());
+
+        foreach ($options as $vendor => $value) {
+            $values = is_array($value) ? $value : array($value);
+
+            $values = array_map(function($value) use ($vendor)
+            {
+                return $vendor .'/' .$value .'/';
+
+            }, $values);
+
+            $paths = array_merge($paths, $values);
+        }
+
+        $paths = array_unique($paths);
+
+        // Save to the cache.
+        $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
+
+        $files->put($path, $content);
+
+        return $paths;
     }
 }

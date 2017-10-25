@@ -135,7 +135,7 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('assets.dispatcher', function ($app)
         {
-            return new AssetDispatcher();
+            return new AssetDispatcher($app);
         });
 
         // Register the default Asset Routes to Dispatcher.
@@ -145,7 +145,7 @@ class RoutingServiceProvider extends ServiceProvider
         $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
         {
             if ($type == 'vendor') {
-                $paths = $this->getValidVendorPaths();
+                $paths = $dispatcher->getValidVendorPaths();
 
                 if (! Str::startsWith($path, $paths)) {
                     return new Response('File Not Found', 404);
@@ -170,48 +170,5 @@ class RoutingServiceProvider extends ServiceProvider
 
             return $dispatcher->serve($path, $request);
         });
-    }
-
-    protected function getValidVendorPaths()
-    {
-        $files = $this->app['files'];
-
-        // The cache file path.
-        $path = STORAGE_PATH .'assets.php';
-
-        // The config path for checking againts the cache file.
-        $configPath = APPDIR .'Config' .DS .'Routing.php';
-
-        if ($files->exists($path) && ! ($files->lastModified($configPath) < $files->lastModified($path))) {
-            return $files->getRequire($path);
-        }
-
-        $config = $this->app['config'];
-
-        // Parse the configuration.
-        $paths = array();
-
-        $options = $config->get('routing.assets.paths', array());
-
-        foreach ($options as $vendor => $value) {
-            $values = is_array($value) ? $value : array($value);
-
-            $values = array_map(function($value) use ($vendor)
-            {
-                return $vendor .'/' .$value .'/';
-
-            }, $values);
-
-            $paths = array_merge($paths, $values);
-        }
-
-        $paths = array_unique($paths);
-
-        // Save to the cache.
-        $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
-
-        $files->put($path, $content);
-
-        return $paths;
     }
 }
