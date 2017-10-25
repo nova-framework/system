@@ -74,9 +74,7 @@ class Pipeline extends BasePipeline
             throw $e;
         }
 
-        $handler = $this->container['exception'];
-
-        $response = $handler->handleException($e);
+        $response = $this->container['exception']->handleException($e);
 
         if (method_exists($response, 'withException')) {
             $response->withException($e);
