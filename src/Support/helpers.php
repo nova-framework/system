@@ -675,7 +675,7 @@ if (! function_exists('csrf_field')) {
      */
     function csrf_field()
     {
-        return new Expression('<input type="hidden" name="_token" value="' .csrf_token() .'">');
+        return new Expression('<input type="hidden" name="_token" value="' .csrf_token() .'" />');
     }
 }
 
