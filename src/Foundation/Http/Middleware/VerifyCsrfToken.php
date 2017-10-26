@@ -100,7 +100,7 @@ class VerifyCsrfToken
     {
         $sessionToken = $request->session()->token();
 
-        $token = $request->input('csrfToken') ?: $request->header('X-CSRF-TOKEN');
+        $token = $request->input('_token') ?: $request->header('X-CSRF-TOKEN');
 
         if (is_null($token) && ! is_null($header = $request->header('X-XSRF-TOKEN'))) {
             $token = $this->encrypter->decrypt($header);
