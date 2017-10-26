@@ -1088,7 +1088,6 @@ class Application extends Container implements ResponsePreparerInterface
             'log'            => 'Nova\Log\Writer',
             'mailer'         => 'Nova\Mail\Mailer',
             'paginator'      => 'Nova\Pagination\Environment',
-            'auth.reminder'  => 'Nova\Auth\Reminders\PasswordBroker',
             'redirect'       => 'Nova\Routing\Redirector',
             'request'        => 'Nova\Http\Request',
             'router'         => 'Nova\Routing\Router',
