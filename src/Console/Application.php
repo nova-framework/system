@@ -206,7 +206,7 @@ class Application extends \Symfony\Component\Console\Application
     public function renderException(Exception $e, OutputInterface $output)
     {
         if (isset($this->exceptionHandler)) {
-            return $this->exceptionHandler->renderForConsole($e, $output);
+            $this->exceptionHandler->renderForConsole($e, $output);
         }
 
         parent::renderException($e, $output);
