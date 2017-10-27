@@ -245,7 +245,10 @@ class Handler
         foreach ($this->handlers as $handler) {
             if (! $this->handlesException($handler, $exception)) {
                 continue;
-            } else if ($exception instanceof HttpExceptionInterface) {
+            }
+
+            // The handler handles this exception.
+            else if ($exception instanceof HttpExceptionInterface) {
                 $code = $exception->getStatusCode();
             } else {
                 $code = 500;
