@@ -7,9 +7,11 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
 use Exception;
+use Throwable;
 
 
 class Application extends \Symfony\Component\Console\Application
@@ -80,6 +82,45 @@ class Application extends \Symfony\Component\Console\Application
         }
 
         return $this;
+    }
+
+    /**
+     * Run the console application.
+     *
+     * @param  \Symfony\Component\Console\Input\InputInterface  $input
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @return int
+     */
+    public function handle($input, $output = null)
+    {
+        try {
+            return $this->run($input, $output);
+        }
+
+        // Catch the Exceptions.
+        catch (Exception $e) {
+            $handler = $this->getExceptionHandler();
+
+            $handler->report($e);
+
+            $handler->renderForConsole($output, $e);
+
+            return 1;
+        }
+
+        // Catch the Throwables.
+        catch (Throwable $e) {
+            $e = new FatalThrowableError($e);
+
+            //
+            $handler = $this->getExceptionHandler();
+
+            $handler->report($e);
+
+            $handler->renderForConsole($output, $e);
+
+            return 1;
+        }
     }
 
     /**
@@ -197,22 +238,6 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
-     * Render the given exception.
-     *
-     * @param  \Exception  $e
-     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
-     * @return void
-     */
-    public function renderException(Exception $e, OutputInterface $output)
-    {
-        if (isset($this->exceptionHandler)) {
-            $this->exceptionHandler->renderForConsole($e, $output);
-        }
-
-        parent::renderException($e, $output);
-    }
-
-    /**
      * Set the exception handler instance.
      *
      * @param  \Nova\Exception\Handler  $handler
@@ -228,12 +253,12 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Set the Nova application instance.
      *
-     * @param  \Nova\Foundation\Application  $nova
+     * @param  \Nova\Foundation\Application  $container
      * @return $this
      */
-    public function setContainer($nova)
+    public function setContainer($container)
     {
-        $this->container = $nova;
+        $this->container = $container;
 
         return $this;
     }
@@ -251,4 +276,13 @@ class Application extends \Symfony\Component\Console\Application
         return $this;
     }
 
+    /**
+     * Get the Nova application instance.
+     *
+     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     */
+    public function getExceptionHandler()
+    {
+        return $this->container->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+    }
 }
