@@ -15,6 +15,7 @@ use Nova\Pipeline\Pipeline;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;
+use Nova\Log\LogServiceProvider;
 use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
 use Nova\Config\FileEnvironmentVariablesLoader;
@@ -156,9 +157,29 @@ class Application extends Container implements ResponsePreparerInterface
      */
     protected function registerBaseServiceProviders()
     {
-        foreach (array('Event', 'Exception', 'Routing') as $name) {
+        foreach (array('Event', 'Log', 'Exception', 'Routing') as $name) {
             $this->{"register{$name}Provider"}();
         }
+    }
+
+    /**
+     * Register the event service provider.
+     *
+     * @return void
+     */
+    protected function registerEventProvider()
+    {
+        $this->register(new EventServiceProvider($this));
+    }
+
+    /**
+     * Register the log service provider.
+     *
+     * @return void
+     */
+    protected function registerLogProvider()
+    {
+        $this->register(new LogServiceProvider($this));
     }
 
     /**
@@ -179,16 +200,6 @@ class Application extends Container implements ResponsePreparerInterface
     protected function registerRoutingProvider()
     {
         $this->register(new RoutingServiceProvider($this));
-    }
-
-    /**
-     * Register the event service provider.
-     *
-     * @return void
-     */
-    protected function registerEventProvider()
-    {
-        $this->register(new EventServiceProvider($this));
     }
 
     /**

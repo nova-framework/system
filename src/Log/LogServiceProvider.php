@@ -1,17 +1,15 @@
-<?php namespace Nova\Log;
+<?php
 
-use Monolog\Logger;
+namespace Nova\Log;
+
+use Nova\Log\Writer;
 use Nova\Support\ServiceProvider;
 
-class LogServiceProvider extends ServiceProvider {
+use Monolog\Logger as Monolog;
 
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
 
+class LogServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *
@@ -19,38 +17,89 @@ class LogServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $logger = new Writer(
-            new Logger($this->app['env']), $this->app['events']
-        );
-
-        // Once we have an instance of the logger we'll bind it as an instance into
-        // the container so that it is available for resolution. We'll also bind
-        // the PSR Logger interface to resolve to this Monolog implementation.
-        $this->app->instance('log', $logger);
-
-        $this->app->bind('Psr\Log\LoggerInterface', function($app)
+        $this->app->singleton('log', function ()
         {
-            return $app['log']->getMonolog();
+            return $this->createLogger();
         });
-
-        // If the setup Closure has been bound in the container, we will resolve it
-        // and pass in the logger instance. This allows this to defer all of the
-        // logger class setup until the last possible second, improving speed.
-        if (isset($this->app['log.setup']))
-        {
-            call_user_func($this->app['log.setup'], $logger);
-        }
     }
-
 
     /**
-     * Get the services provided by the provider.
+     * Create the logger.
      *
-     * @return array
+     * @return \Nova\Log\Writer
      */
-    public function provides()
+    protected function createLogger()
     {
-        return array('log', 'Psr\Log\LoggerInterface');
+        $log = new Writer(
+            new Monolog('nova'), $this->app['events']
+        );
+
+        $this->configureHandler($log);
+
+        return $log;
     }
 
+    /**
+     * Configure the Monolog handlers for the application.
+     *
+     * @param  \Nova\Foundation\Application  $app
+     * @param  \Nova\Log\Writer  $log
+     * @return void
+     */
+    protected function configureHandler(Writer $log)
+    {
+        $driver = $this->app['config']['app.log'];
+
+        $method = 'configure' .ucfirst($driver) .'Handler';
+
+        call_user_func(array($this, $method), $log);
+    }
+
+    /**
+     * Configure the Monolog handlers for the application.
+     *
+     * @param  \Nova\Foundation\Application  $app
+     * @param  \Nova\Log\Writer  $log
+     * @return void
+     */
+    protected function configureSingleHandler(Writer $log)
+    {
+        $log->useFiles($this->app['path.storage'] .DS .'logs' .DS .'framework.log');
+    }
+
+    /**
+     * Configure the Monolog handlers for the application.
+     *
+     * @param  \Nova\Log\Writer  $log
+     * @return void
+     */
+    protected function configureDailyHandler(Writer $log)
+    {
+        $log->useDailyFiles(
+            $this->app['path.storage'] .DS .'logs' .DS .'framework.log',
+            $this->app['config']->get('app.log_max_files', 5)
+        );
+    }
+
+    /**
+     * Configure the Monolog handlers for the application.
+     *
+     * @param  \Nova\Log\Writer  $log
+     * @return void
+     */
+    protected function configureSyslogHandler(Writer $log)
+    {
+        $log->useSyslog('nova');
+    }
+
+    /**
+     * Configure the Monolog handlers for the application.
+     *
+     * @param  \Nova\Log\Writer  $log
+     * @return void
+     */
+    protected function configureErrorlogHandler(Writer $log)
+    {
+        $log->useErrorLog();
+    }
 }
