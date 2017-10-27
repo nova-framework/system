@@ -64,9 +64,7 @@ class Handler
 
         $this->registerExceptionHandler();
 
-        if ($environment != 'testing') {
-            $this->registerShutdownHandler();
-        }
+        $this->registerShutdownHandler();
     }
 
     /**
@@ -86,7 +84,7 @@ class Handler
      */
     protected function registerExceptionHandler()
     {
-        set_exception_handler(array($this, 'handleUncaughtException'));
+        set_exception_handler(array($this, 'handleException'));
     }
 
     /**
@@ -136,17 +134,6 @@ class Handler
         } else {
             $this->renderHttpResponse($exception);
         }
-    }
-
-    /**
-     * Handle an uncaught exception.
-     *
-     * @param  \Exception  $exception
-     * @return void
-     */
-    public function handleUncaughtException($exception)
-    {
-        $this->handleException($exception);
     }
 
     /**
