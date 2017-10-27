@@ -17,18 +17,12 @@ use Throwable;
 class Application extends \Symfony\Component\Console\Application
 {
     /**
-     * The exception handler instance.
-     *
-     * @var \Nova\Exception\Handler
-     */
-    protected $exceptionHandler;
-
-    /**
      * The Nova application instance.
      *
      * @var \Nova\Foundation\Application
      */
     protected $container;
+
 
     /**
      * Create and boot a new Console application.
@@ -53,7 +47,6 @@ class Application extends \Symfony\Component\Console\Application
 
         $console = with($console = new static('Nova Framework', $app::VERSION))
             ->setContainer($app)
-            ->setExceptionHandler($app['exception'])
             ->setAutoExit(false);
 
         $app->instance('forge', $console);
@@ -235,19 +228,6 @@ class Application extends \Symfony\Component\Console\Application
         $message = 'The environment the command should run under.';
 
         return new InputOption('--env', null, InputOption::VALUE_OPTIONAL, $message);
-    }
-
-    /**
-     * Set the exception handler instance.
-     *
-     * @param  \Nova\Exception\Handler  $handler
-     * @return $this
-     */
-    public function setExceptionHandler($handler)
-    {
-        $this->exceptionHandler = $handler;
-
-        return $this;
     }
 
     /**
