@@ -7,6 +7,7 @@ use Nova\Auth\AuthenticationException;
 use Nova\Container\Container;
 use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Http\Exception\HttpResponseException;
+use Nova\Http\Request;
 use Nova\Http\Response as HttpResponse;
 use Nova\Foundation\Contracts\ExceptionHandlerInterface;
 use Nova\Support\Facades\Config;
@@ -137,7 +138,7 @@ class Handler implements ExceptionHandlerInterface
      * @param  \Exception  $e
      * @return \Nova\Http\Response
      */
-    public function render($request, Exception $e)
+    public function render(Request $request, Exception $e)
     {
         $e = $this->prepareException($e);
 
@@ -159,12 +160,12 @@ class Handler implements ExceptionHandlerInterface
      * @param  \Exception $e
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function prepareResponse($request, Exception $e)
+    protected function prepareResponse(Request $request, Exception $e)
     {
         if ($this->isHttpException($e)) {
-            return $this->createResponse($this->renderHttpException($e), $e);
+            return $this->createResponse($this->renderHttpException($e, $request), $e);
         } else {
-            return $this->createResponse($this->convertExceptionToResponse($e), $e);
+            return $this->createResponse($this->convertExceptionToResponse($e, $request), $e);
         }
     }
 
@@ -188,9 +189,9 @@ class Handler implements ExceptionHandlerInterface
      * @param  \Symfony\Component\HttpKernel\Exception\HttpException  $e
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function renderHttpException(HttpException $e)
+    protected function renderHttpException(HttpException $e, Request $request)
     {
-        return $this->convertExceptionToResponse($e);
+        return $this->convertExceptionToResponse($e, $request);
     }
 
     /**
@@ -200,7 +201,7 @@ class Handler implements ExceptionHandlerInterface
      * @param  \Nova\Http\Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function convertValidationExceptionToResponse(ValidationException $e, $request)
+    protected function convertValidationExceptionToResponse(ValidationException $e, Request $request)
     {
         if ($e->response) {
             return $e->response;
@@ -221,7 +222,7 @@ class Handler implements ExceptionHandlerInterface
      * @param  \Exception  $e
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function convertExceptionToResponse(Exception $e)
+    protected function convertExceptionToResponse(Exception $e, Request $request)
     {
         $debug = Config::get('app.debug');
 
