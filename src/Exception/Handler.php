@@ -47,9 +47,9 @@ class Handler
      */
     public function __construct(Application $app,  $debug = true)
     {
-        $this->debug = $debug;
-
         $this->app = $app;
+
+        $this->debug = $debug;
     }
 
     /**
@@ -60,40 +60,10 @@ class Handler
      */
     public function register($environment)
     {
-        $this->registerErrorHandler();
-
-        $this->registerExceptionHandler();
-
-        $this->registerShutdownHandler();
-    }
-
-    /**
-     * Register the PHP error handler.
-     *
-     * @return void
-     */
-    protected function registerErrorHandler()
-    {
         set_error_handler(array($this, 'handleError'));
-    }
 
-    /**
-     * Register the PHP exception handler.
-     *
-     * @return void
-     */
-    protected function registerExceptionHandler()
-    {
         set_exception_handler(array($this, 'handleException'));
-    }
 
-    /**
-     * Register the PHP shutdown handler.
-     *
-     * @return void
-     */
-    protected function registerShutdownHandler()
-    {
         register_shutdown_function(array($this, 'handleShutdown'));
     }
 
@@ -181,7 +151,11 @@ class Handler
      */
     protected function renderForConsole($e, ConsoleOutput $output = null)
     {
-        $this->getExceptionHandler()->renderForConsole($output ?: new ConsoleOutput(), $e);
+        if (is_null($output)) {
+            $output = new ConsoleOutput();
+        }
+
+        $this->getExceptionHandler()->renderForConsole($output, $e);
     }
 
     /**
