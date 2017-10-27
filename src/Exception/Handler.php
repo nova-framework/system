@@ -10,7 +10,7 @@ use Nova\Support\Contracts\ResponsePreparerInterface;
 use Nova\Support\Facades\Redirect;
 
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Symfony\Component\Debug\Exception\FatalErrorException as FatalError;
+use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
@@ -159,6 +159,10 @@ class Handler
      */
     public function handleException($exception)
     {
+        if (! $exception instanceof Exception) {
+            $exception = new FatalThrowableError($exception);
+        }
+
         if (! is_null($response = $this->callCustomHandlers($exception))) {
             return $this->prepareResponse($response);
         }
@@ -213,7 +217,7 @@ class Handler
      */
     protected function fatalExceptionFromError(array $error, $traceOffset = null)
     {
-        return new FatalError(
+        return new FatalErrorException(
             $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
         );
     }
@@ -276,10 +280,6 @@ class Handler
     {
         $displayer = $this->debug ? $this->debugDisplayer : $this->plainDisplayer;
 
-        if (! $exception instanceof \Exception) {
-            $exception = new FatalThrowableError($exception);
-        }
-
         return $displayer->display($exception);
     }
 
@@ -308,7 +308,7 @@ class Handler
     {
         $parameters = $reflection->getParameters();
 
-        $expected = $parameters[0];
+        $expected = array_shift($parameters);
 
         return ! $expected->getClass() || $expected->getClass()->isInstance($exception);
     }
