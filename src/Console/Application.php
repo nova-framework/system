@@ -66,7 +66,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function boot()
     {
-        $path = $this->container['path'] .DS .'Console' .DS .'Forge.php';
+        $path = $this->container['path'] .DS .'Console.php';
 
         if (file_exists($path)) {
             require $path;
