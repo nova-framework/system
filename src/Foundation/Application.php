@@ -609,18 +609,10 @@ class Application extends Container implements ResponsePreparerInterface
             $response = $this->sendRequestThroughRouter($request);
         }
         catch (Exception $e) {
-            if ($this->runningUnitTests()) {
-                throw $e;
-            }
-
-            $response = $this['exception']->handleException($e);
+            $response = $this->handleException($request, $e);
         }
         catch (Throwable $e) {
-            if ($this->runningUnitTests()) {
-                throw $e;
-            }
-
-            $response = $this['exception']->handleException(new FatalThrowableError($e));
+            $response = $this->handleException($request, new FatalThrowableError($e));
         }
 
         $response->send();
@@ -707,6 +699,53 @@ class Application extends Container implements ResponsePreparerInterface
         foreach ($this->terminatingCallbacks as $callback) {
             call_user_func($callback);
         }
+    }
+
+    /**
+     * Handle the given exception.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Exception  $e
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function handleException($request, Exception $e)
+    {
+        $this->reportException($e);
+
+        return $this->renderException($request, $e);
+    }
+
+    /**
+     * Report the exception to the exception handler.
+     *
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function reportException(Exception $e)
+    {
+        $this->getExceptionHandler()->report($e);
+    }
+
+    /**
+     * Render the exception to a response.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Exception  $e
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function renderException($request, Exception $e)
+    {
+        return $this->getExceptionHandler()->render($request, $e);
+    }
+
+    /**
+     * Get the Nova application instance.
+     *
+     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     */
+    public function getExceptionHandler()
+    {
+        return $this->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
     }
 
     /**
@@ -867,17 +906,6 @@ class Application extends Container implements ResponsePreparerInterface
     }
 
     /**
-     * Register a maintenance mode event listener.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function down(Closure $callback)
-    {
-        $this['events']->listen('nova.app.down', $callback);
-    }
-
-    /**
      * Throw an HttpException with the given data.
      *
      * @param  int     $code
@@ -895,56 +923,6 @@ class Application extends Container implements ResponsePreparerInterface
         }
 
         throw new HttpException($code, $message, null, $headers);
-    }
-
-    /**
-     * Register a 404 error handler.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function missing(Closure $callback)
-    {
-        $this->error(function(NotFoundHttpException $e) use ($callback)
-        {
-            return call_user_func($callback, $e);
-        });
-    }
-
-    /**
-     * Register an application error handler.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function error(Closure $callback)
-    {
-        $this['exception']->error($callback);
-    }
-
-    /**
-     * Register an error handler at the bottom of the stack.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function pushError(Closure $callback)
-    {
-        $this['exception']->pushError($callback);
-    }
-
-    /**
-     * Register an error handler for fatal errors.
-     *
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function fatal(Closure $callback)
-    {
-        $this->error(function(FatalErrorException $e) use ($callback)
-        {
-            return call_user_func($callback, $e);
-        });
     }
 
     /**
@@ -1096,7 +1074,7 @@ class Application extends Container implements ResponsePreparerInterface
             'files'          => 'Nova\Filesystem\Filesystem',
             'hash'           => 'Nova\Hashing\HasherInterface',
             'language'       => 'Nova\Language\LanguageManager',
-            'log'            => 'Nova\Log\Writer',
+            'log'            => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
             'mailer'         => 'Nova\Mail\Mailer',
             'paginator'      => 'Nova\Pagination\Environment',
             'redirect'       => 'Nova\Routing\Redirector',

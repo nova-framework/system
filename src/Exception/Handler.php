@@ -5,10 +5,12 @@ namespace Nova\Exception;
 use Nova\Exception\PlainDisplayer;
 use Nova\Exception\WhoopsDisplayer;
 use Nova\Exception\ExceptionDisplayerInterface;
+use Nova\Foundation\Application;
 
 use Nova\Support\Contracts\ResponsePreparerInterface;
 use Nova\Support\Facades\Redirect;
 
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
@@ -24,23 +26,9 @@ class Handler
     /**
      * The response preparer implementation.
      *
-     * @var \Nova\Support\Contracts\ResponsePreparerInterface
+     * @var \Nova\Foundation\Application
      */
-    protected $responsePreparer;
-
-    /**
-     * The plain exception displayer.
-     *
-     * @var \Nova\Exception\ExceptionDisplayerInterface
-     */
-    protected $plainDisplayer;
-
-    /**
-     * The debug exception displayer.
-     *
-     * @var \Nova\Exception\ExceptionDisplayerInterface
-     */
-    protected $debugDisplayer;
+    protected $app;
 
     /**
      * Indicates if the application is in debug mode.
@@ -49,41 +37,19 @@ class Handler
      */
     protected $debug;
 
-    /**
-     * All of the register exception handlers.
-     *
-     * @var array
-     */
-    protected $handlers = array();
-
-    /**
-     * All of the handled error messages.
-     *
-     * @var array
-     */
-    protected $handled = array();
-
 
     /**
      * Create a new error handler instance.
      *
-     * @param  \Nova\Support\Contracts\ResponsePreparerInterface  $responsePreparer
-     * @param  \Exception\ExceptionDisplayerInterface  $plainDisplayer
-     * @param  \Exception\ExceptionDisplayerInterface  $debugDisplayer
+     * @param  \Nova\Foundation\Application  $app
      * @param  bool  $debug
      * @return void
      */
-    public function __construct(ResponsePreparerInterface $responsePreparer,
-                                ExceptionDisplayerInterface $plainDisplayer,
-                                ExceptionDisplayerInterface $debugDisplayer,
-                                $debug = true)
+    public function __construct(Application $app,  $debug = true)
     {
         $this->debug = $debug;
 
-        $this->plainDisplayer = $plainDisplayer;
-        $this->debugDisplayer = $debugDisplayer;
-
-        $this->responsePreparer = $responsePreparer;
+        $this->app = $app;
     }
 
     /**
@@ -163,11 +129,13 @@ class Handler
             $exception = new FatalThrowableError($exception);
         }
 
-        if (! is_null($response = $this->callCustomHandlers($exception))) {
-            return $this->prepareResponse($response);
-        }
+        $this->getExceptionHandler()->report($exception);
 
-        return $this->displayException($exception);
+        if ($this->app->runningInConsole()) {
+            $this->renderForConsole($exception);
+        } else {
+            $this->renderHttpResponse($exception);
+        }
     }
 
     /**
@@ -178,9 +146,7 @@ class Handler
      */
     public function handleUncaughtException($exception)
     {
-        $response = $this->handleException($exception);
-
-        $response->send();
+        $this->handleException($exception);
     }
 
     /**
@@ -191,9 +157,7 @@ class Handler
     public function handleShutdown()
     {
         if (! is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
-            $response = $this->handleException($this->fatalExceptionFromError($error, 0));
-
-            $response->send();
+            $this->handleException($this->fatalExceptionFromError($error, 0));
         }
     }
 
@@ -223,157 +187,25 @@ class Handler
     }
 
     /**
-     * Handle a console exception.
-     *
-     * @param  \Exception  $exception
-     * @return void
-     */
-    public function handleConsole($exception)
-    {
-        return $this->callCustomHandlers($exception, true);
-    }
-
-    /**
-     * Handle the given exception.
-     *
-     * @param  \Exception  $exception
-     * @param  bool  $fromConsole
-     * @return void
-     */
-    protected function callCustomHandlers($exception, $fromConsole = false)
-    {
-        foreach ($this->handlers as $handler) {
-            if (! $this->handlesException($handler, $exception)) {
-                continue;
-            }
-
-            // The handler handles this exception.
-            else if ($exception instanceof HttpExceptionInterface) {
-                $code = $exception->getStatusCode();
-            } else {
-                $code = 500;
-            }
-
-            // We will wrap this handler in a try / catch and avoid white screens of death
-            // if any exceptions are thrown from a handler itself. This way we will get
-            // at least some errors, and avoid errors with no data or not log writes.
-            try {
-                $response = call_user_func($handler, $exception, $code, $fromConsole);
-            }
-            catch (\Exception $e) {
-                $response = $this->formatException($e);
-            }
-            catch (\Throwable $e) {
-                $response = $this->formatException($e);
-            }
-
-            if (isset($response) && ! is_null($response)) {
-                return $response;
-            }
-        }
-    }
-
-    /**
-     * Display the given exception to the user.
-     *
-     * @param  \Exception  $exception
-     * @return void
-     */
-    protected function displayException($exception)
-    {
-        $displayer = $this->debug ? $this->debugDisplayer : $this->plainDisplayer;
-
-        return $displayer->display($exception);
-    }
-
-    /**
-     * Determine if the given handler handles this exception.
-     *
-     * @param  \Closure    $handler
-     * @param  \Exception  $exception
-     * @return bool
-     */
-    protected function handlesException(Closure $handler, $exception)
-    {
-        $reflection = new ReflectionFunction($handler);
-
-        return ($reflection->getNumberOfParameters() == 0) || $this->hints($reflection, $exception);
-    }
-
-    /**
-     * Determine if the given handler type hints the exception.
-     *
-     * @param  \ReflectionFunction  $reflection
-     * @param  \Exception  $exception
-     * @return bool
-     */
-    protected function hints(ReflectionFunction $reflection, $exception)
-    {
-        $parameters = $reflection->getParameters();
-
-        $expected = array_shift($parameters);
-
-        return ! $expected->getClass() || $expected->getClass()->isInstance($exception);
-    }
-
-    /**
-     * Format an exception thrown by a handler.
+     * Render an exception to the console.
      *
      * @param  \Exception  $e
-     * @return string
-     */
-    protected function formatException(\Exception $e)
-    {
-        if ($this->debug) {
-            $location = $e->getMessage() .' in '.$e->getFile() .':' .$e->getLine();
-
-            return 'Error in exception handler: '.$location;
-        }
-
-        return 'Error in exception handler.';
-    }
-
-    /**
-     * Register an application error handler.
-     *
-     * @param  \Closure  $callback
      * @return void
      */
-    public function error(Closure $callback)
+    protected function renderForConsole($e, ConsoleOutput $output = null)
     {
-        array_unshift($this->handlers, $callback);
+        $this->getExceptionHandler()->renderForConsole($output ?: new ConsoleOutput(), $e);
     }
 
     /**
-     * Register an application error handler at the bottom of the stack.
+     * Render an exception as an HTTP response and send it.
      *
-     * @param  \Closure  $callback
+     * @param  \Exception  $e
      * @return void
      */
-    public function pushError(Closure $callback)
+    protected function renderHttpResponse($e)
     {
-        $this->handlers[] = $callback;
-    }
-
-    /**
-     * Prepare the given response.
-     *
-     * @param  mixed  $response
-     * @return \Nova\Http\Response
-     */
-    protected function prepareResponse($response)
-    {
-        return $this->responsePreparer->prepareResponse($response);
-    }
-
-    /**
-     * Determine if we are running in the console.
-     *
-     * @return bool
-     */
-    public function runningInConsole()
-    {
-        return php_sapi_name() == 'cli';
+        $this->getExceptionHandler()->render($this->app['request'], $e)->send();
     }
 
     /**
@@ -387,4 +219,13 @@ class Handler
         $this->debug = $debug;
     }
 
+    /**
+     * Get an instance of the exception handler.
+     *
+     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     */
+    protected function getExceptionHandler()
+    {
+        return $this->app->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+    }
 }

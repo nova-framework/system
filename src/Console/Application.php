@@ -207,11 +207,8 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function renderException(Exception $e, OutputInterface $output)
     {
-        // If we have an exception handler instance, we will call that first in case
-        // it has some handlers that need to be run first. We will pass "true" as
-        // the second parameter to indicate that it's handling a console error.
         if (isset($this->exceptionHandler)) {
-            $this->exceptionHandler->handleConsole($e);
+            return $this->exceptionHandler->renderForConsole($e, $output);
         }
 
         parent::renderException($e, $output);

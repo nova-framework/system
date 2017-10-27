@@ -7,15 +7,6 @@ use Nova\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the Application
-     */
-    protected function bootstrapFrom($path)
-    {
-        $app = $this->app;
-
-        return require $path;
-    }
 
     /**
      * {@inheritdoc}

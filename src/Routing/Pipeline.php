@@ -70,16 +70,30 @@ class Pipeline extends BasePipeline
      */
     protected function handleException($passable, Exception $e)
     {
-        if (! $passable instanceof Request) {
+        if ($this->shouldThrowExceptions() || (! $passable instanceof Request)) {
             throw $e;
         }
 
-        $response = $this->container['exception']->handleException($e);
+        $handler = $this->container->make(ExceptionHandler::class);
+
+        $handler->report($e);
+
+        $response = $handler->render($passable, $e);
 
         if (method_exists($response, 'withException')) {
             $response->withException($e);
         }
 
         return $response;
+    }
+
+    /**
+     * Determines whether exceptions should be throw during execution.
+     *
+     * @return bool
+     */
+    protected function shouldThrowExceptions()
+    {
+        return ! $this->container->bound(ExceptionHandler::class);
     }
 }
