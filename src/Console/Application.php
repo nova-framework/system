@@ -68,9 +68,7 @@ class Application extends \Symfony\Component\Console\Application
     {
         $path = $this->container['path'] .DS .'Console.php';
 
-        if (file_exists($path)) {
-            require $path;
-        }
+        if (is_readable($path)) require $path;
 
         // If the event dispatcher is set on the application, we will fire an event
         // with the Nova instance to provide each listener the opportunity to
