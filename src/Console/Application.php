@@ -89,31 +89,32 @@ class Application extends \Symfony\Component\Console\Application
         try {
             return $this->run($input, $output);
         }
-
-        // Catch the Exceptions.
         catch (Exception $e) {
-            $handler = $this->getExceptionHandler();
-
-            $handler->report($e);
-
-            $handler->renderForConsole($output, $e);
+            $this->manageException($output, $e);
 
             return 1;
         }
-
-        // Catch the Throwables.
         catch (Throwable $e) {
-            $e = new FatalThrowableError($e);
-
-            //
-            $handler = $this->getExceptionHandler();
-
-            $handler->report($e);
-
-            $handler->renderForConsole($output, $e);
+            $this->manageException($output, new FatalThrowableError($e));
 
             return 1;
         }
+    }
+
+    /**
+     * Report and render the given exception.
+     *
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function manageException(OutputInterface $output, Exception $e)
+    {
+        $handler = $this->getExceptionHandler();
+
+        $handler->report($e);
+
+        $handler->renderForConsole($output, $e);
     }
 
     /**
@@ -257,7 +258,7 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
-     * Get the Nova application instance.
+     * Get the Exception Handler instance.
      *
      * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
      */
