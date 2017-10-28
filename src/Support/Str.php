@@ -2,9 +2,8 @@
 
 namespace Nova\Support;
 
-use Nova\Helpers\Inflector;
-
 use Nova\Support\Traits\MacroableTrait;
+use Nova\Support\Pluralizer;
 
 use Stringy\StaticStringy;
 
@@ -209,7 +208,7 @@ class Str
      */
     public static function plural($value, $count = 2)
     {
-        return Inflector::pluralize($value, $count);
+        return Pluralizer::plural($value, $count);
     }
 
     /**
@@ -341,7 +340,7 @@ class Str
      */
     public static function singular($value)
     {
-        return Inflector::singularize($value);
+        return Plurarizer::singular($value);
     }
 
     /**
