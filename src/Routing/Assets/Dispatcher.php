@@ -111,14 +111,20 @@ class Dispatcher
     /**
      * Serve a File.
      *
-     * @param string $path
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  string  $path
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  string  $disposition
+     * @param  string|null  $fileName
+     * @param  bool  $prepared
+     *
+     * @return  \Symfony\Component\HttpFoundation\Response
      */
-    public function serve($path, SymfonyRequest $request)
+    public function serve($path, SymfonyRequest $request, $disposition = 'inline', $fileName = null, $prepared = true)
     {
-        if (! is_file($path) || ! is_readable($path)) {
+        if (! file_exists($path)) {
             return new Response('File Not Found', 404);
+        } else if (! is_readable($path)) {
+            return new Response('Unauthorized Access', 403);
         }
 
         // Create a Binary File Response instance.
@@ -126,17 +132,23 @@ class Dispatcher
             'Content-Type' => $this->getMimeType($path)
         );
 
-        $response = new BinaryFileResponse(
-            $path, 200, $headers, true, 'inline', true, false
-        );
+        $response = new BinaryFileResponse($path, 200, $headers, true, $disposition, true, false);
+
+        // Set the Content Disposition.
+        $response->setContentDisposition($disposition, $fileName ?: basename($path));
 
         // Setup the (browser) Cache Control.
         $this->setupCacheControl($response);
 
-        // Prepare the Response against the Request instance.
+        // Setup the Not Modified since...
         $response->isNotModified($request);
 
-        return $response->prepare($request);
+        // Prepare the Response against the Request instance, if is requested.
+        if ($prepared) {
+            return $response->prepare($request);
+        }
+
+        return $response;
     }
 
     protected function setupCacheControl(SymfonyResponse $response)
