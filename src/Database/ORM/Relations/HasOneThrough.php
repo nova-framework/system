@@ -126,7 +126,7 @@ class HasOneThrough extends Relation
     {
         $table = $this->parent->getTable();
 
-        $this->query->whereIn($table .'.' .$this->firstKey, $this->getKeys($models, $this->localKey));
+        $this->query->whereIn($table .'.' .$this->firstKey, $this->getKeys($models));
     }
 
     /**
@@ -139,7 +139,7 @@ class HasOneThrough extends Relation
     public function initRelation(array $models, $relation)
     {
         foreach ($models as $model) {
-            $model->setRelation($relation, $this->related->newCollection());
+            $model->setRelation($relation, null);
         }
 
         return $models;
