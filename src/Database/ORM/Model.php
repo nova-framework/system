@@ -13,6 +13,7 @@ use Nova\Database\ORM\Relations\MorphMany;
 use Nova\Database\ORM\Relations\BelongsTo;
 use Nova\Database\ORM\Relations\MorphToMany;
 use Nova\Database\ORM\Relations\BelongsToMany;
+use Nova\Database\ORM\Relations\HasOneThrough;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\ConnectionResolverInterface as Resolver;
@@ -723,6 +724,29 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         $localKey = $localKey ?: $this->getKeyName();
 
         return new HasOne($instance->newQuery(), $this, $instance->getTable().'.'.$foreignKey, $localKey);
+    }
+
+    /**
+     * Define a has-one-through relationship.
+     *
+     * @param  string  $related
+     * @param  string  $through
+     * @param  string|null  $firstKey
+     * @param  string|null  $secondKey
+     * @param  string|null  $localKey
+     * @return \Nova\Database\ORM\Relations\HasOneThrough
+     */
+    public function hasOneThrough($related, $through, $firstKey = null, $secondKey = null, $localKey = null)
+    {
+        $through = new $through;
+
+        $firstKey = $firstKey ?: $this->getForeignKey();
+
+        $secondKey = $secondKey ?: $through->getForeignKey();
+
+        $localKey = $localKey ?: $this->getKeyName();
+
+        return new HasOneThrough((new $related)->newQuery(), $this, $through, $firstKey, $secondKey, $localKey);
     }
 
     /**

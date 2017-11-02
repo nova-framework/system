@@ -2,14 +2,15 @@
 
 namespace Nova\Database\ORM\Relations;
 
-use Nova\Database\ORM\Model;
+use Nova\Database\ORM\Relations\Relation;
 use Nova\Database\ORM\Builder;
 use Nova\Database\ORM\Collection;
+use Nova\Database\ORM\Model;
 use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Database\Query\Expression;
 
 
-class HasManyThrough extends Relation
+class HasOneThrough extends Relation
 {
     /**
      * The distance parent model instance.
@@ -33,17 +34,26 @@ class HasManyThrough extends Relation
     protected $secondKey;
 
     /**
-     * Create a new has many relationship instance.
+     * The local key on the relationship.
+     *
+     * @var string
+     */
+    protected $localKey;
+
+    /**
+     * Create a new has many through relationship instance.
      *
      * @param  \Nova\Database\ORM\Builder  $query
      * @param  \Nova\Database\ORM\Model  $farParent
      * @param  \Nova\Database\ORM\Model  $parent
      * @param  string  $firstKey
      * @param  string  $secondKey
+     * @param  string  $localKey
      * @return void
      */
-    public function __construct(Builder $query, Model $farParent, Model $parent, $firstKey, $secondKey)
+    public function __construct(Builder $query, Model $farParent, Model $parent, $firstKey, $secondKey, $localKey)
     {
+        $this->localKey  = $localKey;
         $this->firstKey  = $firstKey;
         $this->secondKey = $secondKey;
         $this->farParent = $farParent;
@@ -58,12 +68,16 @@ class HasManyThrough extends Relation
      */
     public function addConstraints()
     {
-        $parentTable = $this->parent->getTable();
-
         $this->setJoin();
 
         if (static::$constraints) {
-            $this->query->where($parentTable.'.'.$this->firstKey, '=', $this->farParent->getKey());
+            $parentTable = $this->parent->getTable();
+
+            $localKey = $this->localKey;
+
+            $localValue = $this->farParent->{$this->localKey};
+
+            $this->query->where($parentTable .'.' .$this->firstKey, '=', $localValue);
         }
     }
 
@@ -82,7 +96,7 @@ class HasManyThrough extends Relation
 
         $query->select(new Expression('count(*)'));
 
-        $key = $this->wrap($parentTable.'.'.$this->firstKey);
+        $key = $this->wrap($parentTable .'.' .$this->firstKey);
 
         return $query->where($this->getHasCompareKey(), '=', new Expression($key));
     }
@@ -97,9 +111,11 @@ class HasManyThrough extends Relation
     {
         $query = $query ?: $this->query;
 
-        $foreignKey = $this->related->getTable().'.'.$this->secondKey;
+        $foreignKey = $this->related->getTable().'.'.$this->related->getKeyName();
 
-        $query->join($this->parent->getTable(), $this->getQualifiedParentKeyName(), '=', $foreignKey);
+        $localKey = $this->parent->getTable().'.'.$this->secondKey;
+
+        $query->join($this->parent->getTable(), $localKey, '=', $foreignKey);
     }
 
     /**
@@ -112,7 +128,7 @@ class HasManyThrough extends Relation
     {
         $table = $this->parent->getTable();
 
-        $this->query->whereIn($table.'.'.$this->firstKey, $this->getKeys($models));
+        $this->query->whereIn($table .'.' .$this->firstKey, $this->getKeys($models, $this->localKey));
     }
 
     /**
@@ -144,10 +160,11 @@ class HasManyThrough extends Relation
         $dictionary = $this->buildDictionary($results);
 
         foreach ($models as $model) {
-            $key = $model->getKey();
+            //$key = $model->getKey();
+            $key = $model->{$this->localKey};
 
             if (isset($dictionary[$key])) {
-                $value = $this->related->newCollection($dictionary[$key]);
+                $value = reset($dictionary[$key]);
 
                 $model->setRelation($relation, $value);
             }
@@ -166,7 +183,8 @@ class HasManyThrough extends Relation
     {
         $dictionary = array();
 
-        $foreign = $this->firstKey;
+        //$foreign = $this->firstKey;
+        $foreign = 'related_' .$this->localKey;
 
         foreach ($results as $result) {
             $dictionary[$result->{$foreign}][] = $result;
@@ -182,14 +200,14 @@ class HasManyThrough extends Relation
      */
     public function getResults()
     {
-        return $this->get();
+        return $this->first();
     }
 
     /**
-     * Execute the query and get the first result.
+     * Execute the query and get the first related model.
      *
-     * @param  array  $columns
-     * @return \Nova\Database\ORM\Model|static|null
+     * @param  array   $columns
+     * @return mixed
      */
     public function first($columns = array('*'))
     {
@@ -204,11 +222,13 @@ class HasManyThrough extends Relation
      * @param  array  $columns
      * @return \Nova\Database\ORM\Model|static
      *
-     * @throws \Database\ORM\ModelNotFoundException
+     * @throws \Nova\Database\ORM\ModelNotFoundException
      */
     public function firstOrFail($columns = array('*'))
     {
-        if (! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) {
+            return $model;
+        }
 
         throw new ModelNotFoundException;
     }
@@ -221,6 +241,8 @@ class HasManyThrough extends Relation
      */
     public function get($columns = array('*'))
     {
+        $columns = $this->query->getQuery()->columns ? array() : $columns;
+
         $select = $this->getSelectColumns($columns);
 
         $models = $this->query->addSelect($select)->getModels();
@@ -236,7 +258,7 @@ class HasManyThrough extends Relation
      * Set the select clause for the relation query.
      *
      * @param  array  $columns
-     * @return \Nova\Database\ORM\Relations\BelongsToMany
+     * @return array
      */
     protected function getSelectColumns(array $columns = array('*'))
     {
@@ -244,23 +266,8 @@ class HasManyThrough extends Relation
             $columns = array($this->related->getTable().'.*');
         }
 
-        return array_merge($columns, array($this->parent->getTable().'.'.$this->firstKey));
-    }
-
-    /**
-     * Get a paginator for the "select" statement.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    public function paginate($perPage = null, $columns = array('*'))
-    {
-        $this->query->addSelect($this->getSelectColumns($columns));
-
-        $pager = $this->query->paginate($perPage, $columns);
-
-        return $pager;
+        //return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey));
+        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->localKey));
     }
 
     /**
@@ -273,4 +280,23 @@ class HasManyThrough extends Relation
         return $this->farParent->getQualifiedKeyName();
     }
 
+    /**
+     * Get the qualified foreign key on the related model.
+     *
+     * @return string
+     */
+    public function getForeignKey()
+    {
+        return $this->related->getTable().'.'.$this->secondKey;
+    }
+
+    /**
+     * Get the qualified foreign key on the "through" model.
+     *
+     * @return string
+     */
+    public function getThroughKey()
+    {
+        return $this->parent->getTable().'.'.$this->firstKey;
+    }
 }
