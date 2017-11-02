@@ -14,6 +14,7 @@ use Nova\Database\ORM\Relations\BelongsTo;
 use Nova\Database\ORM\Relations\MorphToMany;
 use Nova\Database\ORM\Relations\BelongsToMany;
 use Nova\Database\ORM\Relations\HasOneThrough;
+use Nova\Database\ORM\Relations\BelongsToThrough;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\ConnectionResolverInterface as Resolver;
@@ -803,6 +804,29 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
+     * Define a has-one-through relationship.
+     *
+     * @param  string  $related
+     * @param  string  $through
+     * @param  string|null  $firstKey
+     * @param  string|null  $secondKey
+     * @param  string|null  $localKey
+     * @return \Nova\Database\ORM\Relations\BelongsToThrough
+     */
+    public function belongsToThrough($related, $through, $firstKey = null, $secondKey = null, $localKey = null)
+    {
+        $through = new $through;
+
+        $firstKey = $firstKey ?: $this->getForeignKey();
+
+        $secondKey = $secondKey ?: $through->getForeignKey();
+
+        $localKey = $localKey ?: $this->getKeyName();
+
+        return new BelongsToThrough((new $related)->newQuery(), $this, $through, $firstKey, $secondKey, $localKey);
+    }
+
+    /**
      * Define a polymorphic, inverse one-to-one or many relationship.
      *
      * @param  string  $name
@@ -1320,7 +1344,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function incrementOrDecrementAttributeValue($column, $amount, $method)
     {
-        $this->{$column} = $this->{$column} + ($method == 'increment' ? $amount : $amount * -1);
+        $this->{$column} = $this->{$column} + (($method == 'increment') ? $amount : $amount * -1);
 
         $this->syncOriginalAttribute($column);
     }
@@ -1378,7 +1402,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
             $saved = $this->performInsert($query, $options);
         }
 
-        if ($saved) $this->finishSave($options);
+        if ($saved) {
+            $this->finishSave($options);
+        }
 
         return $saved;
     }
@@ -1395,7 +1421,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 
         $this->syncOriginal();
 
-        if (array_get($options, 'touch', true)) $this->touchOwners();
+        if (array_get($options, 'touch', true)) {
+            $this->touchOwners();
+        }
     }
 
     /**
@@ -1439,7 +1467,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function performInsert(Builder $query, array $options = [])
     {
-        if ($this->fireModelEvent('creating') === false) return false;
+        if ($this->fireModelEvent('creating') === false) {
+            return false;
+        }
 
         if ($this->timestamps && array_get($options, 'timestamps', true)) {
             $this->updateTimestamps();
@@ -1510,7 +1540,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     protected function fireModelEvent($event, $halt = true)
     {
-        if (! isset(static::$dispatcher)) return true;
+        if (! isset(static::$dispatcher)) {
+            return true;
+        }
 
         //
         $event = "orm.{$event}: ".get_class($this);

@@ -158,8 +158,7 @@ class HasOneThrough extends Relation
         $dictionary = $this->buildDictionary($results);
 
         foreach ($models as $model) {
-            //$key = $model->getKey();
-            $key = $model->{$this->localKey};
+            $key = $model->getKey();
 
             if (isset($dictionary[$key])) {
                 $value = reset($dictionary[$key]);
@@ -181,8 +180,7 @@ class HasOneThrough extends Relation
     {
         $dictionary = array();
 
-        //$foreign = $this->firstKey;
-        $foreign = 'related_' .$this->localKey;
+        $foreign = $this->firstKey;
 
         foreach ($results as $result) {
             $dictionary[$result->{$foreign}][] = $result;
@@ -264,8 +262,7 @@ class HasOneThrough extends Relation
             $columns = array($this->related->getTable().'.*');
         }
 
-        //return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey));
-        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->localKey));
+        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey));
     }
 
     /**
@@ -276,25 +273,5 @@ class HasOneThrough extends Relation
     public function getHasCompareKey()
     {
         return $this->farParent->getQualifiedKeyName();
-    }
-
-    /**
-     * Get the qualified foreign key on the related model.
-     *
-     * @return string
-     */
-    public function getForeignKey()
-    {
-        return $this->related->getTable().'.'.$this->secondKey;
-    }
-
-    /**
-     * Get the qualified foreign key on the "through" model.
-     *
-     * @return string
-     */
-    public function getThroughKey()
-    {
-        return $this->parent->getTable().'.'.$this->firstKey;
     }
 }
