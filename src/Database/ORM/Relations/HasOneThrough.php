@@ -73,8 +73,6 @@ class HasOneThrough extends Relation
         if (static::$constraints) {
             $parentTable = $this->parent->getTable();
 
-            $localKey = $this->localKey;
-
             $localValue = $this->farParent->{$this->localKey};
 
             $this->query->where($parentTable .'.' .$this->firstKey, '=', $localValue);
