@@ -128,6 +128,16 @@ class Application extends Container implements ResponsePreparerInterface
     }
 
     /**
+     * Get the version number of the application.
+     *
+     * @return string
+     */
+    public function version()
+    {
+        return static::VERSION;
+    }
+
+    /**
      * Create a new request instance from the request class.
      *
      * @return \Nova\Http\Request
