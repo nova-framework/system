@@ -81,7 +81,7 @@ class RouteListCommand extends Command
     *
     * @return void
     */
-    public function fire()
+    public function handle()
     {
         $this->table = new Table($this->output);
 

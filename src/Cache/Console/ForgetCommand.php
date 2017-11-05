@@ -51,7 +51,7 @@ class ForgetCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $this->cache->driver($this->option('store'))->forget($key = $this->argument('key'));
 

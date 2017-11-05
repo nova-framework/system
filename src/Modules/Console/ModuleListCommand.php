@@ -51,7 +51,7 @@ class ModuleListCommand extends Command
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $modules = $this->module->all();
 

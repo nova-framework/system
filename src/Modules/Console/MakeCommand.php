@@ -100,7 +100,7 @@ class MakeCommand extends CommandGenerator
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $slug = $this->parseSlug($this->argument('slug'));
         $name = $this->parseName($this->argument('name'));

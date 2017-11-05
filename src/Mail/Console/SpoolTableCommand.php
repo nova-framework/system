@@ -51,7 +51,7 @@ class SpoolTableCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $table = $this->container['config']['mail.spool.table'];
 

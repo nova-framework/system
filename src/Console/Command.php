@@ -110,7 +110,7 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return $this->fire();
+        return $this->handle();
     }
 
     /**

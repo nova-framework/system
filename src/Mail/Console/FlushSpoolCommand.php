@@ -69,7 +69,7 @@ class FlushSpoolCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $config = $this->container['config'];
 
