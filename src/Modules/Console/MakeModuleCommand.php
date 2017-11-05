@@ -47,6 +47,7 @@ class MakeModuleCommand extends Command
         'Models/',
         'Policies/',
         'Providers/',
+        'Routes/',
         'Views/',
     );
 
@@ -62,9 +63,10 @@ class MakeModuleCommand extends Command
         'Providers/EventServiceProvider.php',
         'Providers/ModuleServiceProvider.php',
         'Providers/RouteServiceProvider.php',
+        'Routes/Api.php',
+        'Routes/Web.php',
         'Bootstrap.php',
         'Events.php',
-        'Routes.php',
     );
 
     /**
@@ -79,9 +81,10 @@ class MakeModuleCommand extends Command
         'event-service-provider',
         'module-service-provider',
         'route-service-provider',
+        'api-routes',
+        'web-routes',
         'bootstrap',
         'events',
-        'routes',
     );
 
     /**
