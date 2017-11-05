@@ -1,5 +1,6 @@
 <?php
-namespace Nova\Helpers;
+
+namespace Nova\Support;
 
 /**
  * Assets static helper.
