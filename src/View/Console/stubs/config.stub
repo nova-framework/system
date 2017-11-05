@@ -1,0 +1,13 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Theme Configuration
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the Configuration for the theme.
+*/
+
+return array(
+    //
+);

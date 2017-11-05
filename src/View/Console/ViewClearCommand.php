@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Foundation\Console;
+namespace Nova\View\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;

@@ -8,7 +8,6 @@ use Nova\Foundation\Console\ServeCommand;
 use Nova\Foundation\Console\OptimizeCommand;
 use Nova\Foundation\Console\RouteListCommand;
 use Nova\Foundation\Console\ModelMakeCommand;
-use Nova\Foundation\Console\ViewClearCommand;
 use Nova\Foundation\Console\ConsoleMakeCommand;
 use Nova\Foundation\Console\EnvironmentCommand;
 use Nova\Foundation\Console\EventMakeCommand;
@@ -50,7 +49,6 @@ class ForgeServiceProvider extends ServiceProvider
         'RouteList'     => 'command.route.list',
         'Serve'         => 'command.serve',
         'Up'            => 'command.up',
-        'ViewClear'     => 'command.view.clear',
     );
 
     /**
@@ -248,19 +246,6 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.up', function ()
         {
             return new UpCommand;
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerViewClearCommand()
-    {
-        $this->app->singleton('command.view.clear', function ($app)
-        {
-            return new ViewClearCommand($app['files']);
         });
     }
 
