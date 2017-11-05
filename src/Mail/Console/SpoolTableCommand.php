@@ -62,7 +62,7 @@ class SpoolTableCommand extends Command
         $stubPath = __DIR__ .DS . 'stubs' .DS .'spool.stub';
 
         $stub = str_replace(
-            ['{{table}}', '{{tableClassName}}'], [$table, $tableClassName], $this->files->get($stubPath)
+            array('{{table}}', '{{tableClassName}}'), array($table, $tableClassName), $this->files->get($stubPath)
         );
 
         $this->files->put($fullPath, $stub);
