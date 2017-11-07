@@ -911,14 +911,14 @@ class Factory
         $viewPath = str_replace('/', DS, $view);
 
         if (! empty($theme)) {
-            // Try to find the View file on the override locations.
-            $basePath = $this->getThemePath($theme) .'Overrides';
+            // Try to find the View file in the Theme's Views overriding.
+            $basePath = $this->getThemePath($theme) .DS .'Overrides';
 
             if (! empty($module)) {
-                $path = $basePath .DS .'Modules' .DS .$module .DS .$viewPath;
-            } else {
-                $path = $basePath .DS .$viewPath;
+                $basePath .= DS .'Modules';
             }
+
+            $path = $basePath .DS .'Views' .DS .$viewPath;
 
             try {
                 return $this->finder->find($path);
@@ -928,16 +928,13 @@ class Factory
             }
         }
 
-        // Try to find the View file on the base locations.
-        $viewPath = 'Views' .DS .$viewPath;
-
         if (! empty($module)) {
             $basePath = $this->getModulePath($module);
-
-            $path = $basePath .DS .$viewPath;
         } else {
-            $path = APPDIR .$viewPath;
+            $basePath = rtrim(APPDIR, DS);
         }
+
+        $path = $basePath .DS .'Views' .DS .$viewPath;
 
         // Try to find the View file.
         return $this->finder->find($path);
@@ -959,7 +956,7 @@ class Factory
         $layoutPath = str_replace('/', DS, $layout);
 
         // Calculate the path to Layouts in the requested Theme.
-        $basePath = $this->getThemePath($theme) .'Layouts';
+        $basePath = $this->getThemePath($theme) .DS .'Layouts';
 
         if ($language->direction() == 'rtl') {
             // Search for the Layout file used on the RTL languages.
@@ -987,9 +984,7 @@ class Factory
      */
     protected function getModulePath($module)
     {
-        $config = $this->container['config'];
-
-        $basePath = $config->get('modules.path', APPDIR .'Modules');
+        $basePath = $this->getConfig()->get('modules.path', APPDIR .'Modules');
 
         return rtrim($basePath, DS) .DS .$module;
     }
@@ -1002,7 +997,9 @@ class Factory
      */
     protected function getThemePath($theme)
     {
-        return APPDIR .'Themes' .DS .$theme .DS;
+        $basePath = $this->getConfig()->get('view.themes.path', APPDIR .'Themes');
+
+        return rtrim($basePath, DS) .DS .$theme;
     }
 
     /**
@@ -1012,9 +1009,7 @@ class Factory
      */
     protected function getDefaultTheme()
     {
-        $config = $this->container['config'];
-
-        return $config->get('app.theme', 'Default');
+        return $this->getConfig()->get('app.theme', 'Default');
     }
 
     /**
@@ -1028,8 +1023,11 @@ class Factory
             return $this->language;
         }
 
-        $language = $this->container['language'];
+        return $this->language = $this->container['language']->instance();
+    }
 
-        return $this->language = $language->instance();
+    protected function getConfig()
+    {
+        return $this->container['config'];
     }
 }
