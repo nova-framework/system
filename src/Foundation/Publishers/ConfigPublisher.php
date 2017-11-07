@@ -133,8 +133,6 @@ class ConfigPublisher
     {
         $packages = $this->config->getPackages();
 
-        dump($packages);
-
         $namespace = isset($packages[$package]) ? $packages[$package] : null;
 
         if (is_null($namespace)) {
