@@ -246,7 +246,7 @@ class HasManyThrough extends Relation
             $columns = array($this->related->getTable().'.*');
         }
 
-        return array_merge($columns, array($this->parent->getTable().'.'.$this->firstKey));
+        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->firstKey));
     }
 
     /**
