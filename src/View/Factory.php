@@ -918,7 +918,8 @@ class Factory
         if (! empty($module)) {
             $basePath = $this->getModulePath($module);
         } else {
-            $basePath = rtrim(APPDIR, DS);
+            // We will use the application path.
+            $basePath = $this->container['path'];
         }
 
         $path = $basePath .DS .'Views' .DS .$viewPath;
