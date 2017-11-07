@@ -16,6 +16,8 @@ use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
+use Nova\Foundation\Console\ConfigPublishCommand;
+use Nova\Foundation\Publishers\ConfigPublisher;
 
 use Nova\Support\ServiceProvider;
 
@@ -35,6 +37,7 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
+        'ConfigPublish' => 'command.config.publish',
         'ClearCompiled' => 'command.clear-compiled',
         'ConsoleMake'   => 'command.console.make',
         'Down'          => 'command.down',
@@ -65,6 +68,30 @@ class ForgeServiceProvider extends ServiceProvider
         }
 
         $this->commands(array_values($this->commands));
+    }
+
+    /**
+     * Register the configuration publisher class and command.
+     *
+     * @return void
+     */
+    protected function registerConfigPublishCommand()
+    {
+        $this->app->bindShared('config.publisher', function($app)
+        {
+            $path = $app['path'] .DS .'Config';
+
+            $publisher = new ConfigPublisher($app['files'], $app['config'], $path);
+
+            return $publisher;
+        });
+
+        $this->app->bindShared('command.config.publish', function($app)
+        {
+            $configPublisher = $app['config.publisher'];
+
+            return new ConfigPublishCommand($configPublisher);
+        });
     }
 
     /**
