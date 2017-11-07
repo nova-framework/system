@@ -910,22 +910,9 @@ class Factory
     {
         $viewPath = str_replace('/', DS, $view);
 
-        if (! empty($theme)) {
-            // Try to find the View file in the Theme's Views overriding.
-            $basePath = $this->getThemePath($theme) .DS .'Overrides';
-
-            if (! empty($module)) {
-                $basePath .= DS .'Modules';
-            }
-
-            $path = $basePath .DS .'Views' .DS .$viewPath;
-
-            try {
-                return $this->finder->find($path);
-            }
-            catch (InvalidArgumentException $e) {
-                // Do nothing.
-            }
+        // Try first to find the View file in the Theme's Views overriding location.
+        if (! is_null($view = $this->findOverridedView($viewPath, $theme, $module))) {
+            return $view;
         }
 
         if (! empty($module)) {
@@ -938,6 +925,38 @@ class Factory
 
         // Try to find the View file.
         return $this->finder->find($path);
+    }
+
+    /**
+     * Find the View file in the Theme's Views overriding location.
+     *
+     * @param    string  $view
+     * @param    string  $theme
+     * @param    string  $module
+     *
+     * @return    string
+     */
+    protected function findOverridedView($view, $theme, $module)
+    {
+        try {
+            if (empty($theme)) {
+                // We throw a exception to stop the processing.
+                throw new InvalidArgumentException;
+            }
+
+            $basePath = $this->getThemePath($theme) .DS .'Overrides';
+
+            if (! empty($module)) {
+                $basePath .= DS .'Modules';
+            }
+
+            $path = $basePath .DS .'Views' .DS .$view;
+
+            return $this->finder->find($path);
+        }
+        catch (InvalidArgumentException $e) {
+            // Do nothing.
+        }
     }
 
     /**
