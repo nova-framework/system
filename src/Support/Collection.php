@@ -292,6 +292,49 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     }
 
     /**
+     * Run a grouping map over the items.
+     *
+     * The callback should return an associative array with a single key/value pair.
+     *
+     * @param  callable  $callback
+     * @return static
+     */
+    public function mapToGroups(callable $callback)
+    {
+        $groups = $this->map($callback)->reduce(function ($groups, $pair) {
+            $groups[key($pair)][] = reset($pair);
+
+            return $groups;
+
+        }, array());
+
+        return with(new static($groups))->map(array($this, 'make'));
+    }
+
+    /**
+     * Run an associative map over each of the items.
+     *
+     * The callback should return an associative array with a single key/value pair.
+     *
+     * @param  callable  $callback
+     * @return static
+     */
+    public function mapWithKeys(callable $callback)
+    {
+        $result = array();
+
+        foreach ($this->items as $key => $value) {
+            $assoc = $callback($value, $key);
+
+            foreach ($assoc as $mapKey => $mapValue) {
+                $result[$mapKey] = $mapValue;
+            }
+        }
+
+        return new static($result);
+    }
+
+    /**
      * Merge the collection with the given items.
      *
      * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items

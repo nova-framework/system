@@ -340,7 +340,7 @@ class Str
      */
     public static function singular($value)
     {
-        return Plurarizer::singular($value);
+        return Pluralizer::singular($value);
     }
 
     /**
