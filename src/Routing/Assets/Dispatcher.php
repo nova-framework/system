@@ -5,6 +5,7 @@ namespace Nova\Routing\Assets;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
 use Nova\Foundation\Application;
+use Nova\Http\JsonResponse;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Support\Arr;
@@ -129,13 +130,20 @@ class Dispatcher
 
         // Create a Binary File Response instance.
         $headers = array(
-            'Content-Type' => $this->getMimeType($path)
+            'Content-Type' => $mimeType = $this->getMimeType($path)
         );
 
-        $response = new BinaryFileResponse($path, 200, $headers, true, $disposition, true, false);
+        if ($mimeType !== 'application/json') {
+            $response = new BinaryFileResponse($path, 200, $headers, true, $disposition, true, false);
 
-        // Set the Content Disposition.
-        $response->setContentDisposition($disposition, $fileName ?: basename($path));
+            // Set the Content Disposition.
+            $response->setContentDisposition($disposition, $fileName ?: basename($path));
+        } else {
+            // We will do a special processing for the JSON files.
+            $response = new JsonResponse(
+                json_decode(file_get_contents($path), true), 200, $headers
+            );
+        }
 
         // Setup the (browser) Cache Control.
         $this->setupCacheControl($response);
@@ -179,6 +187,9 @@ class Dispatcher
 
             case 'js':
                 return 'application/javascript';
+
+            case 'json':
+                return 'application/json';
 
             case 'svg':
                 return 'image/svg+xml';
