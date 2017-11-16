@@ -948,7 +948,7 @@ class Factory
             $basePath = $this->getThemePath($theme) .DS .'Overrides';
 
             if (! empty($module)) {
-                $basePath .= DS .'Modules';
+                $basePath .= DS .'Modules' .DS .$module;
             }
 
             $path = $basePath .DS .'Views' .DS .$view;
