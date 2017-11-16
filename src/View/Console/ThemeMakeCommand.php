@@ -59,6 +59,7 @@ class ThemeMakeCommand extends Command
         'Layouts/Default.php',
         'Layouts/RTL/Default.php',
         'Providers/ThemeServiceProvider.php',
+        'Bootstrap.php',
         'README.md',
     );
 
@@ -73,6 +74,7 @@ class ThemeMakeCommand extends Command
         'layout',
         'layout',
         'theme-service-provider',
+        'bootstrap',
         'readme',
     );
 
