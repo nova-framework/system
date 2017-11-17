@@ -15,15 +15,6 @@ class ModuleServiceProvider extends ServiceProvider
     protected $providers = array();
 
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
 
     protected function bootstrapFrom($path)
     {
