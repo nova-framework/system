@@ -1215,7 +1215,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         $instance = new static;
 
         foreach ($instance->getObservableEvents() as $event) {
-            static::$dispatcher->forget("orm.{$event}: ".get_called_class());
+            static::$dispatcher->forget("nova.database.orm.{$event}: ".get_called_class());
         }
     }
 
@@ -1231,7 +1231,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         if (isset(static::$dispatcher)) {
             $name = get_called_class();
 
-            static::$dispatcher->listen("orm.{$event}: {$name}", $callback);
+            static::$dispatcher->listen("nova.database.orm.{$event}: {$name}", $callback);
         }
     }
 
@@ -1545,7 +1545,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         }
 
         //
-        $event = "orm.{$event}: ".get_class($this);
+        $event = "nova.database.orm.{$event}: ".get_class($this);
 
         $method = $halt ? 'until' : 'fire';
 
