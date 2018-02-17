@@ -1004,7 +1004,7 @@ class Factory
      */
     protected function getModulePath($module)
     {
-        $basePath = $this->getConfig()->get('modules.path', APPDIR .'Modules');
+        $basePath = $this->getConfig()->get('modules.path', BASEPATH .'modules');
 
         return rtrim($basePath, DS) .DS .$module;
     }
@@ -1017,7 +1017,7 @@ class Factory
      */
     protected function getThemePath($theme)
     {
-        $basePath = $this->getConfig()->get('view.themes.path', APPDIR .'Themes');
+        $basePath = $this->getConfig()->get('view.themes.path', BASEPATH .'themes');
 
         return rtrim($basePath, DS) .DS .$theme;
     }
@@ -1029,7 +1029,7 @@ class Factory
      */
     protected function getDefaultTheme()
     {
-        return $this->getConfig()->get('app.theme', 'Default');
+        return $this->getConfig()->get('app.theme', 'Bootstrap');
     }
 
     /**

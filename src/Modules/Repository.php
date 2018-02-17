@@ -191,7 +191,7 @@ class Repository
      */
     public function getPath()
     {
-        $path = $this->config->get('modules.path', APPDIR .'Modules');
+        $path = $this->config->get('modules.path', BASEPATH .'modules');
 
         return str_replace('/', DS, realpath($path));
     }
@@ -217,7 +217,7 @@ class Repository
      */
     public function getNamespace()
     {
-        return rtrim($this->config->get('modules.namespace', 'App\Modules\\'), '/\\');
+        return rtrim($this->config->get('modules.namespace', 'Modules\\'), '/\\');
     }
 
     /*
@@ -318,7 +318,7 @@ class Repository
         }
 
         // Determine the path to the associated configuration file.
-        $path = APPDIR .'Config' .DS .'Modules.php';
+        $path = APPPATH .'Config' .DS .'Modules.php';
 
         $lastModified = $this->files->lastModified($path);
 

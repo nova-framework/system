@@ -295,7 +295,7 @@ return array (
      */
     protected function getThemePath($slug = null)
     {
-        $basePath = $this->config->get('view.themes.path', APPDIR .'Themes');
+        $basePath = $this->config->get('view.themes.path', BASEPATH .'themes');
 
         if (is_null($slug)) {
             return $basePath .DS;

@@ -216,7 +216,7 @@ class Dispatcher
         $path = STORAGE_PATH .'assets.php';
 
         // The config path for checking againts the cache file.
-        $configPath = APPDIR .'Config' .DS .'Routing.php';
+        $configPath = APPPATH .'Config' .DS .'Routing.php';
 
         $lastModified = $files->lastModified($configPath);
 

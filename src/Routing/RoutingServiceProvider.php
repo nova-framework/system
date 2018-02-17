@@ -135,42 +135,39 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('assets.dispatcher', function ($app)
         {
-            return new AssetDispatcher($app);
-        });
+            $dispatcher = new AssetDispatcher($app);
 
-        // Register the default Asset Routes to Dispatcher.
-        $dispatcher = $this->app['assets.dispatcher'];
+            // Register the route for assets from Vendor or main assets folder.
+            $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
+            {
+                if ($type == 'vendor') {
+                    $paths = $dispatcher->getPaths();
 
-        // For the assets from Vendor or main assets folder.
-        $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
-        {
-            if ($type == 'vendor') {
-                $paths = $dispatcher->getPaths();
-
-                if (! Str::startsWith($path, $paths)) {
-                    return new Response('File Not Found', 404);
+                    if (! Str::startsWith($path, $paths)) {
+                        return new Response('File Not Found', 404);
+                    }
                 }
-            }
 
-            $path = ROOTDIR .$type .DS .str_replace('/', DS, $path);
+                $path = BASEPATH .$type .DS .str_replace('/', DS, $path);
 
-            return $dispatcher->serve($path, $request);
-        });
+                return $dispatcher->serve($path, $request);
+            });
 
-        // For assets from Modules and Themes.
-        $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $component, $path) use ($dispatcher)
-        {
-            $type = (strtolower($type) == 'modules') ? 'Modules' : 'Themes';
+            // Register the route for assets from Modules and Themes.
+            $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
+            {
+                if (strlen($package) > 3) {
+                    $package = Str::studly($package);
+                } else {
+                    $package = Str::upper($package);
+                }
 
-            if (strlen($component) > 3) {
-                $component = Str::studly($component);
-            } else {
-                $component = Str::upper($component);
-            }
+                $path = BASEPATH .$type .DS .$package .DS .'Assets' .DS .str_replace('/', DS, $path);
 
-            $path = APPDIR .$type .DS .$component .DS .'Assets' .DS .str_replace('/', DS, $path);
+                return $dispatcher->serve($path, $request);
+            });
 
-            return $dispatcher->serve($path, $request);
+            return $dispatcher;
         });
     }
 }
