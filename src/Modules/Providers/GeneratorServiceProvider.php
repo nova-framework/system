@@ -5,12 +5,15 @@ namespace Nova\Modules\Providers;
 use Nova\Modules\Console\MakeModuleCommand;
 use Nova\Modules\Console\MakeConsoleCommand;
 use Nova\Modules\Console\MakeControllerCommand;
+use Nova\Modules\Console\MakeEventCommand;
+use Nova\Modules\Console\MakeListenerCommand;
 use Nova\Modules\Console\MakeMiddlewareCommand;
 use Nova\Modules\Console\MakeMigrationCommand;
 use Nova\Modules\Console\MakeModelCommand;
 use Nova\Modules\Console\MakePolicyCommand;
 use Nova\Modules\Console\MakeProviderCommand;
 use Nova\Modules\Console\MakeSeederCommand;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -41,6 +44,8 @@ class GeneratorServiceProvider extends ServiceProvider
             'MakeModule',
             'MakeConsole',
             'MakeController',
+            'MakeEvent',
+            'MakeListener',
             'MakeMiddleware',
             'MakeModel',
             'MakePolicy',
@@ -93,6 +98,32 @@ class GeneratorServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.module.controller');
+    }
+
+    /**
+     * Register the make:module:controller command.
+     */
+    private function registerMakeEventCommand()
+    {
+        $this->app->bindShared('command.make.module.event', function ($app)
+        {
+            return new MakeEventCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.event');
+    }
+
+    /**
+     * Register the make:module:controller command.
+     */
+    private function registerMakeListenerCommand()
+    {
+        $this->app->bindShared('command.make.module.listener', function ($app)
+        {
+            return new MakeListenerCommand($app['files'], $app['modules']);
+        });
+
+        $this->commands('command.make.module.listener');
     }
 
     /**

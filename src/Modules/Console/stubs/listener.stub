@@ -1,0 +1,30 @@
+<?php
+
+namespace {{path}}\{{namespace}};
+
+use {{fullEvent}};
+
+
+class {{className}}
+{
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  {{fullEvent}}  $event
+     * @return void
+     */
+    public function handle({{event}} $event)
+    {
+        //
+    }
+}

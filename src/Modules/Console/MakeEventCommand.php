@@ -3,34 +3,32 @@
 namespace Nova\Modules\Console;
 
 use Nova\Modules\Console\MakeCommand;
-use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeMigrationCommand extends MakeCommand
+class MakeEventCommand extends MakeCommand
 {
     /**
-     * The name and signature of the console command.
+     * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:migration';
+    protected $name = 'make:module:event';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Migration file';
+    protected $description = 'Create a new Module Event class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Migration';
+    protected $type = 'Event';
 
     /**
      * Module folders to be created.
@@ -38,7 +36,7 @@ class MakeMigrationCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Database/Migrations/',
+        'Events/',
     );
 
     /**
@@ -51,36 +49,20 @@ class MakeMigrationCommand extends MakeCommand
     );
 
     /**
-     * Module signature option.
-     *
-     * @var array
-     */
-    protected $signOption = array(
-        'create',
-        'table',
-    );
-
-    /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
-            'migration.stub',
-        ),
-        'create' => array(
-            'migration_create.stub',
-        ),
-        'table' => array(
-            'migration_table.stub',
+            'event.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $FilePath
+     * @param string $filePath
      *
      * @return array
      */
@@ -94,31 +76,7 @@ class MakeMigrationCommand extends MakeCommand
         $this->data['className'] = basename($filePath);
 
         //
-        $this->data['tableName'] = 'dummy';
-    }
-
-    /**
-     * Resolve Container after getting input option.
-     *
-     * @param string $option
-     *
-     * @return array
-     */
-    protected function resolveByOption($option)
-    {
-        $this->data['tableName'] = $option;
-    }
-
-    /**
-     * Make FileName.
-     *
-     * @param string $filePath
-     *
-     * @return string
-     */
-    protected function makeFileName($filePath)
-    {
-        return date('Y_m_d_His') .'_' .strtolower(Str::snake(basename($filePath)));
+        $this->data['rootNamespace'] = $this->container->getNamespace();
     }
 
     /**
@@ -133,7 +91,9 @@ class MakeMigrationCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
-            '{{tableName}}',
+
+            '{{rootNamespace}}',
+
         );
 
         $replaces = array(
@@ -141,11 +101,13 @@ class MakeMigrationCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
-            $this->data['tableName'],
+
+            $this->data['rootNamespace'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
+
 
     /**
      * Get the console command arguments.
@@ -156,20 +118,7 @@ class MakeMigrationCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Migration.'),
-        );
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
-            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
         );
     }
 }

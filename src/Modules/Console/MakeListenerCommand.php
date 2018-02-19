@@ -3,34 +3,42 @@
 namespace Nova\Modules\Console;
 
 use Nova\Modules\Console\MakeCommand;
-use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeMigrationCommand extends MakeCommand
+class MakeListenerCommand extends MakeCommand
 {
     /**
-     * The name and signature of the console command.
+     * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:migration';
+    protected $name = 'make:module:listener';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Migration file';
+    protected $description = 'Create a new Module Event Listener class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Migration';
+    protected $type = 'Listener';
+
+    /**
+     * Module signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'event',
+    );
 
     /**
      * Module folders to be created.
@@ -38,7 +46,7 @@ class MakeMigrationCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Database/Migrations/',
+        'Listeners/',
     );
 
     /**
@@ -51,36 +59,23 @@ class MakeMigrationCommand extends MakeCommand
     );
 
     /**
-     * Module signature option.
-     *
-     * @var array
-     */
-    protected $signOption = array(
-        'create',
-        'table',
-    );
-
-    /**
      * Module stubs used to populate defined files.
      *
      * @var array
      */
     protected $listStubs = array(
         'default' => array(
-            'migration.stub',
+            'listener.stub',
         ),
-        'create' => array(
-            'migration_create.stub',
-        ),
-        'table' => array(
-            'migration_table.stub',
+        'event' => array(
+            'listener.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $FilePath
+     * @param string $filePath
      *
      * @return array
      */
@@ -94,7 +89,10 @@ class MakeMigrationCommand extends MakeCommand
         $this->data['className'] = basename($filePath);
 
         //
-        $this->data['tableName'] = 'dummy';
+        $this->data['rootNamespace'] = $namespace = $this->container->getNamespace();
+
+        $this->data['event']     = 'Event';
+        $this->data['fullEvent'] = $namespace .'Events\Event';
     }
 
     /**
@@ -106,19 +104,9 @@ class MakeMigrationCommand extends MakeCommand
      */
     protected function resolveByOption($option)
     {
-        $this->data['tableName'] = $option;
-    }
+        $this->data['fullEvent'] = $option;
 
-    /**
-     * Make FileName.
-     *
-     * @param string $filePath
-     *
-     * @return string
-     */
-    protected function makeFileName($filePath)
-    {
-        return date('Y_m_d_His') .'_' .strtolower(Str::snake(basename($filePath)));
+        $this->data['event'] = class_basename($option);
     }
 
     /**
@@ -133,7 +121,10 @@ class MakeMigrationCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
-            '{{tableName}}',
+
+            '{{rootNamespace}}',
+            '{{event}}',
+            '{{fullEvent}}',
         );
 
         $replaces = array(
@@ -141,7 +132,10 @@ class MakeMigrationCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
-            $this->data['tableName'],
+
+            $this->data['rootNamespace'],
+            $this->data['event'],
+            $this->data['fullEvent'],
         );
 
         return str_replace($searches, $replaces, $content);
@@ -156,7 +150,7 @@ class MakeMigrationCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Migration.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
         );
     }
 
@@ -168,8 +162,7 @@ class MakeMigrationCommand extends MakeCommand
     protected function getOptions()
     {
         return array(
-            array('--create', null, InputOption::VALUE_OPTIONAL, 'The table to be created.'),
-            array('--table',  null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
+            array('event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
         );
     }
 }
