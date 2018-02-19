@@ -72,6 +72,21 @@ class MakeListenerCommand extends MakeCommand
         ),
     );
 
+
+    /**
+     * Execute the console command.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        if (! $this->option('event')) {
+            return $this->error('Missing required option: --event');
+        }
+
+        parent::handle();
+    }
+
     /**
      * Resolve Container after getting file path.
      *
@@ -89,10 +104,8 @@ class MakeListenerCommand extends MakeCommand
         $this->data['className'] = basename($filePath);
 
         //
-        $this->data['rootNamespace'] = $namespace = $this->container->getNamespace();
-
-        $this->data['event']     = 'Event';
-        $this->data['fullEvent'] = $namespace .'Events\Event';
+        $this->data['event']     = 'dummy';
+        $this->data['fullEvent'] = 'dummy';
     }
 
     /**
@@ -122,7 +135,6 @@ class MakeListenerCommand extends MakeCommand
             '{{namespace}}',
             '{{className}}',
 
-            '{{rootNamespace}}',
             '{{event}}',
             '{{fullEvent}}',
         );
@@ -133,7 +145,6 @@ class MakeListenerCommand extends MakeCommand
             $this->data['namespace'],
             $this->data['className'],
 
-            $this->data['rootNamespace'],
             $this->data['event'],
             $this->data['fullEvent'],
         );
