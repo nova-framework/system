@@ -369,7 +369,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         $instance = new static;
 
-        $className = get_class($class);
+        $className = is_string($class) ? $class : get_class($class);
 
         foreach ($instance->getObservableEvents() as $event) {
             if (method_exists($class, $event)) {
