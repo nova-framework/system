@@ -132,23 +132,6 @@ class RedirectResponse extends SymfonyRedirectResponse
     }
 
     /**
-     * Flash a array containing a message to the session.
-     *
-     * @param string $message
-     * @param string $type
-     *
-     * @return \Nova\Http\RedirectResponse
-     */
-    public function withStatus($message, $type = 'success')
-    {
-        $status = array('type' => $type, 'text' => $message);
-
-        $this->session->push('status', $status);
-
-        return $this;
-    }
-
-    /**
      * Flash a container of errors to the session.
      *
      * @param  \Nova\Support\Contracts\MessageProviderInterface|array  $provider
