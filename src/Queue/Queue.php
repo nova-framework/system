@@ -4,6 +4,7 @@ namespace Nova\Queue;
 
 use Nova\Container\Container;
 use Nova\Encryption\Encrypter;
+use Nova\Queue\QueueableEntityInterface;
 
 use SuperClosure\Serializer;
 
@@ -47,7 +48,7 @@ abstract class Queue
     {
         return $this->later($delay, $job, $data, $queue);
     }
-    
+
     /**
      * Marshal a push queue request and fire the job.
      *
@@ -85,9 +86,63 @@ abstract class Queue
     {
         if ($job instanceof Closure) {
             return json_encode($this->createClosurePayload($job, $data));
+        } else if (is_object($job)) {
+            return json_encode(array(
+                'job'  => 'Nova\Queue\CallQueuedHandler@call',
+
+                //
+                'data' => array(
+                    'command' => serialize(clone $job)
+                ),
+            ));
         }
 
-        return json_encode(array('job' => $job, 'data' => $data));
+        return json_encode(array(
+            'job'  => $job,
+            'data' => $this->prepareQueueableEntities($data)
+        ));
+    }
+
+    /**
+     * Prepare any queueable entities for storage in the queue.
+     *
+     * @param  mixed  $data
+     * @return mixed
+     */
+    protected function prepareQueueableEntities($data)
+    {
+        if ($data instanceof QueueableEntityInterface) {
+            return $this->prepareQueueableEntity($data);
+        }
+
+        if (is_array($data)) {
+            $data = array_map(function ($d)
+            {
+                if (is_array($d)) {
+                    return $this->prepareQueueableEntities($d);
+                }
+
+                return $this->prepareQueueableEntity($d);
+
+            }, $data);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Prepare a single queueable entity for storage on the queue.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function prepareQueueableEntity($value)
+    {
+        if ($value instanceof QueueableEntityInterface) {
+            return '::entity::|' .get_class($value) .'|' .$value->getQueueableId();
+        }
+
+        return $value;
     }
 
     /**

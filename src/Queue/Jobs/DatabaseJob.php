@@ -50,7 +50,17 @@ class DatabaseJob extends Job
      */
     public function handle()
     {
-        $this->resolveAndHandle(json_decode($this->job->payload, true));
+        $this->resolveAndHandle(json_decode($this->getRawBody(), true));
+    }
+
+    /**
+     * Get the raw body string for the job.
+     *
+     * @return string
+     */
+    public function getRawBody()
+    {
+        return $this->job->payload;
     }
 
     /**
@@ -73,8 +83,6 @@ class DatabaseJob extends Job
      */
     public function release($delay = 0)
     {
-        parent::release($delay);
-
         $this->delete();
 
         $this->database->release($this->queue, $this->job, $delay);
@@ -98,16 +106,6 @@ class DatabaseJob extends Job
     public function getJobId()
     {
         return $this->job->id;
-    }
-
-    /**
-     * Get the raw body string for the job.
-     *
-     * @return string
-     */
-    public function getRawBody()
-    {
-        return $this->job->payload;
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Nova\Bus;
 
+use Nova\Bus\DispatcherInterface;
+
 
 interface QueueingDispatcherInterface extends DispatcherInterface
 {

@@ -194,9 +194,9 @@ class DatabaseQueue extends Queue implements QueueInterface
         $expired = Carbon::now()->subSeconds($this->expire)->getTimestamp();
 
         $data = array(
-            'reserved'        => 0,
-            'reserved_at'    => null,
-            'attempts'        => new Expression('attempts + 1'),
+            'reserved'    => 0,
+            'reserved_at' => null,
+            'attempts'    => new Expression('attempts + 1'),
         );
 
         $this->getQuery()

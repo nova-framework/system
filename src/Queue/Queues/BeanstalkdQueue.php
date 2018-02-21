@@ -107,8 +107,7 @@ class BeanstalkdQueue extends Queue implements QueueInterface
 
         $job = $this->pheanstalk->watchOnly($queue)->reserve(0);
 
-        if ($job instanceof Pheanstalk_Job)
-        {
+        if ($job instanceof Pheanstalk_Job) {
             return new BeanstalkdJob($this->container, $this->pheanstalk, $job, $queue);
         }
     }

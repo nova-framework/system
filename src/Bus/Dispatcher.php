@@ -89,7 +89,7 @@ class Dispatcher implements QueueingDispatcherInterface
             };
         }
 
-        // The Command has no dedicated Handler.
+        // The given Command has no dedicated Handler.
         else {
             $callback = function ($command)
             {

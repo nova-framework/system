@@ -2,7 +2,7 @@
 
 namespace Nova\Queue;
 
-use Nova\Queue\Contracts\QueueableEntityInterface;
+use Nova\Queue\QueueableEntityInterface;
 use Nova\Database\ModelIdentifier;
 
 use ReflectionClass;
