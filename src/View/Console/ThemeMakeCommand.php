@@ -40,12 +40,13 @@ class ThemeMakeCommand extends Command
         'Assets/js/',
         'Config/',
         'Language/',
-        'Layouts/',
-        'Layouts/RTL',
-        'Overrides/',
-        'Overrides/Modules/',
-        'Overrides/Views/',
         'Providers/',
+        'Views/',
+        'Views/Layouts/',
+        'Views/Layouts/RTL',
+        'Views/Overrides/',
+        'Views/Overrides/App/',
+        'Views/Overrides/Modules/',
     );
 
     /**
@@ -56,9 +57,9 @@ class ThemeMakeCommand extends Command
     protected $themeFiles = array(
         'Assets/css/style.css',
         'Config/Config.php',
-        'Layouts/Default.php',
-        'Layouts/RTL/Default.php',
         'Providers/ThemeServiceProvider.php',
+        'Views/Layouts/Default.php',
+        'Views/Layouts/RTL/Default.php',
         'Bootstrap.php',
         'README.md',
     );
@@ -71,9 +72,9 @@ class ThemeMakeCommand extends Command
     protected $themeStubs = array(
         'style',
         'config',
-        'layout',
-        'layout',
         'theme-service-provider',
+        'layout',
+        'layout',
         'bootstrap',
         'readme',
     );
