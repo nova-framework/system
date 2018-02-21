@@ -5,7 +5,7 @@ namespace Nova\Queue\Connectors;
 use IronMQ;
 
 use Nova\Http\Request;
-use Nova\Queue\Connector\ConnectorInterface;
+use Nova\Queue\Connectors\ConnectorInterface;
 use Nova\Queue\Queues\IronQueue;
 use Nova\Encryption\Encrypter;
 

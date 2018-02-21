@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Queue\Connector\ConnectorInterface;
+use Nova\Queue\Connectors\ConnectorInterface;
 use Nova\Queue\Queues\NullQueue;
 
 
