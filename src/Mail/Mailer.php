@@ -2,11 +2,13 @@
 
 namespace Nova\Mail;
 
-use Nova\Container\Container;
-use Nova\Events\Dispatcher;
 use Nova\Log\Writer;
-use Nova\Support\Arr;
 use Nova\View\Factory;
+use Nova\Events\Dispatcher;
+use Nova\Container\Container;
+use Nova\Queue\QueueManager;
+
+use SuperClosure\Serializer;
 
 use Swift_Mailer;
 use Swift_Message;
@@ -29,13 +31,6 @@ class Mailer
      * @var \Swift_Mailer
      */
     protected $swift;
-
-    /**
-     * The Swift Spool Mailer instance.
-     *
-     * @var \Swift_Mailer
-     */
-    protected $swiftSpool;
 
     /**
      * The event dispatcher instance.
@@ -66,6 +61,13 @@ class Mailer
     protected $container;
 
     /**
+     * The QueueManager instance.
+     *
+     * @var \Nova\Queue\QueueManager
+     */
+    protected $queue;
+
+    /**
      * Indicates if the actual sending is disabled.
      *
      * @var bool
@@ -86,22 +88,19 @@ class Mailer
      */
     protected $parsedViews = array();
 
+
     /**
      * Create a new Mailer instance.
      *
      * @param  \Nova\View\Factory  $views
      * @param  \Swift_Mailer  $swift
-     * @param  \Swift_Mailer  $swiftSpool
      * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
-    public function __construct(Factory $views, Swift_Mailer $swift, Swift_Mailer $swiftSpool, Dispatcher $events = null)
+    public function __construct(Factory $views, Swift_Mailer $swift, Dispatcher $events = null)
     {
         $this->views = $views;
         $this->swift = $swift;
-
-        $this->swiftSpool = $swiftSpool;
-
         $this->events = $events;
     }
 
@@ -152,33 +151,6 @@ class Mailer
      */
     public function send($view, array $data, $callback)
     {
-        $this->sendMessage($view, $data, $callback, $this->swift);
-    }
-
-    /**
-     * Queue a new e-mail message for sending.
-     *
-     * @param  string|array  $view
-     * @param  array   $data
-     * @param  \Closure|string  $callback
-     * @return void
-     */
-    public function queue($view, array $data, $callback)
-    {
-        $this->sendMessage($view, $data, $callback, $this->swiftSpool);
-    }
-
-    /**
-     * Create and send a new message using a view.
-     *
-     * @param  string|array  $view
-     * @param  array  $data
-     * @param  \Closure|string  $callback
-     * @param  \Swift_Mailer  $mailer
-     * @return void
-     */
-    protected function sendMessage($view, array $data, $callback, $mailer)
-    {
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
@@ -195,7 +167,111 @@ class Mailer
 
         $message = $message->getSwiftMessage();
 
-        $this->sendSwiftMessage($message, $mailer);
+        $this->sendSwiftMessage($message);
+    }
+
+    /**
+     * Queue a new e-mail message for sending.
+     *
+     * @param  string|array  $view
+     * @param  array   $data
+     * @param  \Closure|string  $callback
+     * @param  string  $queue
+     * @return mixed
+     */
+    public function queue($view, array $data, $callback, $queue = null)
+    {
+        $callback = $this->buildQueueCallable($callback);
+
+        return $this->queue->push('mailer@handleQueuedMessage', compact('view', 'data', 'callback'), $queue);
+    }
+
+    /**
+     * Queue a new e-mail message for sending on the given queue.
+     *
+     * @param  string  $queue
+     * @param  string|array  $view
+     * @param  array   $data
+     * @param  \Closure|string  $callback
+     * @return mixed
+     */
+    public function queueOn($queue, $view, array $data, $callback)
+    {
+        return $this->queue($view, $data, $callback, $queue);
+    }
+
+    /**
+     * Queue a new e-mail message for sending after (n) seconds.
+     *
+     * @param  int  $delay
+     * @param  string|array  $view
+     * @param  array  $data
+     * @param  \Closure|string  $callback
+     * @param  string  $queue
+     * @return mixed
+     */
+    public function later($delay, $view, array $data, $callback, $queue = null)
+    {
+        $callback = $this->buildQueueCallable($callback);
+
+        return $this->queue->later($delay, 'mailer@handleQueuedMessage', compact('view', 'data', 'callback'), $queue);
+    }
+
+    /**
+     * Queue a new e-mail message for sending after (n) seconds on the given queue.
+     *
+     * @param  string  $queue
+     * @param  int  $delay
+     * @param  string|array  $view
+     * @param  array  $data
+     * @param  \Closure|string  $callback
+     * @return mixed
+     */
+    public function laterOn($queue, $delay, $view, array $data, $callback)
+    {
+        return $this->later($delay, $view, $data, $callback, $queue);
+    }
+
+    /**
+     * Build the callable for a queued e-mail job.
+     *
+     * @param  mixed  $callback
+     * @return mixed
+     */
+    protected function buildQueueCallable($callback)
+    {
+        if ( ! $callback instanceof Closure) return $callback;
+
+        return (new Serializer)->serialize($callback);
+    }
+
+    /**
+     * Handle a queued e-mail message job.
+     *
+     * @param  \Nova\Queue\Jobs\Job  $job
+     * @param  array  $data
+     * @return void
+     */
+    public function handleQueuedMessage($job, $data)
+    {
+        $this->send($data['view'], $data['data'], $this->getQueuedCallable($data));
+
+        $job->delete();
+    }
+
+    /**
+     * Get the true callable for a queued e-mail message.
+     *
+     * @param  array  $data
+     * @return mixed
+     */
+    protected function getQueuedCallable(array $data)
+    {
+        if (str_contains($data['callback'], 'SerializableClosure')) {
+            return with(unserialize($data['callback']))->getClosure();
+        }
+
+        return $data['callback'];
     }
 
     /**
@@ -242,7 +318,7 @@ class Mailer
         // If the given view is an array with numeric keys, we will just assume that
         // both a "pretty" and "plain" view were provided, so we will return this
         // array as is, since must should contain both views with numeric keys.
-        else if (is_array($view) && isset($view[0])) {
+        if (is_array($view) && isset($view[0])) {
             return array($view[0], $view[1], null);
         }
 
@@ -264,21 +340,16 @@ class Mailer
      * Send a Swift Message instance.
      *
      * @param  \Swift_Message  $message
-     * @param  \Swift_Mailer  $mailer
      * @return void
      */
-    protected function sendSwiftMessage($message, $mailer)
+    protected function sendSwiftMessage($message)
     {
-        if (isset($this->events)) {
+        if ($this->events) {
             $this->events->fire('mailer.sending', array($message));
         }
 
         if (! $this->pretending) {
-            try {
-                return $mailer->send($message, $this->failedRecipients);
-            } finally {
-                $mailer->getTransport()->stop();
-            }
+            $this->swift->send($message, $this->failedRecipients);
         } else if (isset($this->logger)) {
             $this->logMessage($message);
         }
@@ -320,7 +391,7 @@ class Mailer
     /**
      * Create a new message instance.
      *
-     * @return \Mail\Message
+     * @return \Nova\Mail\Message
      */
     protected function createMessage()
     {
@@ -413,12 +484,25 @@ class Mailer
     /**
      * Set the log writer instance.
      *
-     * @param  \Log\Writer  $logger
+     * @param  \Nova\Log\Writer  $logger
      * @return $this
      */
     public function setLogger(Writer $logger)
     {
         $this->logger = $logger;
+
+        return $this;
+    }
+
+    /**
+     * Set the Queue Manager instance.
+     *
+     * @param  \Nova\Queue\QueueManager  $queue
+     * @return $this
+     */
+    public function setQueue(QueueManager $queue)
+    {
+        $this->queue = $queue;
 
         return $this;
     }

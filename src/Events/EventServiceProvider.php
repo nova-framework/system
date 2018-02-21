@@ -16,7 +16,10 @@ class EventServiceProvider extends ServiceProvider
     {
         $this->app['events'] = $this->app->share(function($app)
         {
-            return new Dispatcher($app);
+            return with(new Dispatcher($app))->setQueueResolver(function () use ($app)
+            {
+                return $app['queue'];
+            });
         });
     }
 

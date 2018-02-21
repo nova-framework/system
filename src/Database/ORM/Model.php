@@ -18,6 +18,7 @@ use Nova\Database\ORM\Relations\BelongsToThrough;
 use Nova\Database\ORM\Relations\HasManyThrough;
 use Nova\Database\Query\Builder as QueryBuilder;
 use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Queue\QueueableEntityInterface as QueueableEntity;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\ArrayableInterface;
 use Nova\Support\Str;
@@ -30,7 +31,7 @@ use LogicException;
 use JsonSerializable;
 
 
-abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSerializable
+abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSerializable, QueueableEntity
 {
     /**
      * The connection name for the model.
@@ -1861,6 +1862,16 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     public function getQualifiedKeyName()
     {
         return $this->getTable() .'.' .$this->getKeyName();
+    }
+
+    /**
+     * Get the queueable identity for the entity.
+     *
+     * @return mixed
+     */
+    public function getQueueableId()
+    {
+        return $this->getKey();
     }
 
     /**

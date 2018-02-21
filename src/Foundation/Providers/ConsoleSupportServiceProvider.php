@@ -35,6 +35,7 @@ class ConsoleSupportServiceProvider extends ServiceProvider
 
         // Register the additional service providers.
         $this->app->register('Nova\Console\ScheduleServiceProvider');
+        $this->app->register('Nova\Queue\ConsoleServiceProvider');
     }
 
     /**

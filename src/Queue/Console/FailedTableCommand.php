@@ -1,28 +1,27 @@
 <?php
 
-namespace Nova\Mail\Console;
+namespace Nova\Queue\Console;
 
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
 
-use Nova\Support\Str;
 
-
-class SpoolTableCommand extends Command
+class FailedTableCommand extends Command
 {
+
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'mailer:spool:table';
+    protected $name = 'queue:failed-table';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a migration for the Mailer Spool database table';
+    protected $description = 'Create a migration for the failed queue jobs database table';
 
     /**
      * The filesystem instance.
@@ -31,12 +30,10 @@ class SpoolTableCommand extends Command
      */
     protected $files;
 
-
     /**
-     * Create a new queue job table command instance.
+     * Create a new session table command instance.
      *
      * @param  \Nova\Filesystem\Filesystem  $files
-     * @param  \Nova\Foundation\Composer    $composer
      * @return void
      */
     public function __construct(Filesystem $files)
@@ -53,37 +50,27 @@ class SpoolTableCommand extends Command
      */
     public function handle()
     {
-        $table = $this->container['config']['mail.spool.table'];
+        $fullPath = $this->createBaseMigration();
 
-        $tableClassName = Str::studly($table);
+        $stubPath = __DIR__ .DS .'stubs' .DS .'failed_jobs.stub';
 
-        $fullPath = $this->createBaseMigration($table);
-
-        $stubPath = __DIR__ .DS . 'stubs' .DS .'spool.stub';
-
-        $stub = str_replace(
-            array('{{table}}', '{{tableClassName}}'), array($table, $tableClassName), $this->files->get($stubPath)
-        );
-
-        $this->files->put($fullPath, $stub);
+        $this->files->put($fullPath, $this->files->get($stubPath));
 
         $this->info('Migration created successfully!');
-
-        $this->call('optimize');
     }
 
     /**
      * Create a base migration file for the table.
      *
-     * @param  string  $table
      * @return string
      */
-    protected function createBaseMigration($table = 'mailer_spool')
+    protected function createBaseMigration()
     {
-        $name = 'create_'.$table.'_table';
+        $name = 'create_failed_jobs_table';
 
         $path = $this->container['path'] .DS .'Database' .DS .'Migrations';
 
         return $this->container['migration.creator']->create($name, $path);
     }
+
 }
