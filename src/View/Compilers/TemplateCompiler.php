@@ -311,7 +311,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         {
             $whitespace = empty($matches[2]) ? '' : $matches[2] .$matches[2];
 
-            return '<?php echo e(' .$this->compileEchoDefaults($matches[1]) .'); ?>' .$whitespace;
+            return '<?php echo e('.$this->compileEchoDefaults($matches[1]).'); ?>'.$whitespace;
         };
 
         return preg_replace_callback($pattern, $callback, $value);
@@ -508,6 +508,28 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the can statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileCan($expression)
+    {
+        return "<?php if (app('Nova\\Auth\\Access\\GateInterface')->check{$expression}): ?>";
+    }
+
+    /**
+     * Compile the cannot statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileCannot($expression)
+    {
+        return "<?php if (app('Nova\\Auth\\Access\\GateInterface')->denies{$expression}): ?>";
+    }
+
+    /**
      * Compile the if statements into valid PHP.
      *
      * @param  string  $expression
@@ -598,6 +620,28 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Compile the end-can statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndcan($expression)
+    {
+        return '<?php endif; ?>';
+    }
+
+    /**
+     * Compile the end-cannot statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEndcannot($expression)
+    {
+        return '<?php endif; ?>';
+    }
+
+    /**
      * Compile the end-if statements into valid PHP.
      *
      * @param  string  $expression
@@ -662,7 +706,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        $data = "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+        $data = "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
 
         $this->footer[] = $data;
 
@@ -679,37 +723,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        return "<?php echo \$__env->make($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
-    }
-
-    /**
-     * Compile the layout statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compileLayout($expression)
-    {
-        $expression = $this->stripParentheses($expression);
-
-        $data = "<?php echo \$__env->createLayout($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
-
-        $this->footer[] = $data;
-
-        return '';
-    }
-
-    /**
-     * Compile the partial statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compilePartial($expression)
-    {
-        $expression = $this->stripParentheses($expression);
-
-        return "<?php echo \$__env->createLayout($expression)->with(array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+        return "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
     }
 
     /**

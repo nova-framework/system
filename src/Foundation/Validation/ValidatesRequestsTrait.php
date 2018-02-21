@@ -13,7 +13,7 @@ use Nova\Support\Facades\App;
 use Nova\Support\Facades\Redirect;
 
 
-trait ValidateRequestsTrait
+trait ValidatesRequestsTrait
 {
     /**
      * The default error bag.

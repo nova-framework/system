@@ -10,7 +10,9 @@ namespace Nova\View;
 
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
+use Nova\Support\Contracts\MessageProviderInterface as MessageProvider;
 use Nova\Support\MessageBag;
+use Nova\Support\Str;
 use Nova\View\Engines\EngineInterface;
 use Nova\View\Factory;
 
@@ -178,15 +180,14 @@ class View implements ArrayAccess, Renderable
      * @param  string  $key
      * @param  string  $view
      * @param  array   $data
-     * @param  string|null  $module
      * @return View
      */
-    public function nest($key, $view, array $data = array(), $module = null)
+    public function nest($key, $view, array $data = array())
     {
         // The nested View instance inherit parent Data if none is given.
         if (empty($data)) $data = $this->data;
 
-        return $this->with($key, $this->factory->make($view, $data, $module));
+        return $this->with($key, $this->factory->make($view, $data));
     }
 
     /**
@@ -217,7 +218,7 @@ class View implements ArrayAccess, Renderable
      */
     public function withErrors($provider)
     {
-        if ($provider instanceof MessageProviderInterface) {
+        if ($provider instanceof MessageProvider) {
             $this->with('errors', $provider->getMessageBag());
         } else {
             $this->with('errors', new MessageBag((array) $provider));
@@ -361,8 +362,8 @@ class View implements ArrayAccess, Renderable
     public function __call($method, $params)
     {
         // Add the support for the dynamic withX Methods.
-        if (starts_with($method, 'with')) {
-            $name = lcfirst(substr($method, 4));
+        if (Str::startsWith($method, 'with')) {
+            $name = Str::camel(substr($method, 4));
 
             return $this->with($name, array_shift($params));
         }

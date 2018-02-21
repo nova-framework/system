@@ -9,7 +9,7 @@ use Nova\View\Engines\CompilerEngine;
 use Nova\View\Engines\PhpEngine;
 use Nova\View\Factory;
 use Nova\View\FileViewFinder;
-use Nova\Support\MessageBag;
+use Nova\View\Section;
 use Nova\Support\ServiceProvider;
 
 
@@ -35,7 +35,7 @@ class ViewServiceProvider extends ServiceProvider
 
         $this->registerFactory();
 
-        $this->registerSessionBinder();
+        $this->registerSection();
     }
 
     /**
@@ -99,31 +99,31 @@ class ViewServiceProvider extends ServiceProvider
         });
     }
 
-	/**
-	 * Register the Markdown engine implementation.
-	 *
-	 * @param  \Nova\View\Engines\EngineResolver  $resolver
-	 * @return void
-	 */
-	public function registerMarkdownEngine($resolver)
-	{
-		$app = $this->app;
+    /**
+     * Register the Markdown engine implementation.
+     *
+     * @param  \Nova\View\Engines\EngineResolver  $resolver
+     * @return void
+     */
+    public function registerMarkdownEngine($resolver)
+    {
+        $app = $this->app;
 
-		// The Compiler engine requires an instance of the CompilerInterface, which in
-		// this case will be the Markdown compiler, so we'll first create the compiler
-		// instance to pass into the engine so it can compile the views properly.
-		$app->bindShared('markdown.compiler', function($app)
-		{
-			$cachePath = $app['config']['view.compiled'];
+        // The Compiler engine requires an instance of the CompilerInterface, which in
+        // this case will be the Markdown compiler, so we'll first create the compiler
+        // instance to pass into the engine so it can compile the views properly.
+        $app->bindShared('markdown.compiler', function($app)
+        {
+            $cachePath = $app['config']['view.compiled'];
 
-			return new MarkdownCompiler($app['files'], $cachePath);
-		});
+            return new MarkdownCompiler($app['files'], $cachePath);
+        });
 
-		$resolver->register('markdown', function() use ($app)
-		{
-			return new CompilerEngine($app['markdown.compiler'], $app['files']);
-		});
-	}
+        $resolver->register('markdown', function() use ($app)
+        {
+            return new CompilerEngine($app['markdown.compiler'], $app['files']);
+        });
+    }
 
     /**
      * Register the View Factory.
@@ -163,47 +163,23 @@ class ViewServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('view.finder', function($app)
         {
-            return new FileViewFinder($app['files']);
+            $paths = $app['config']->get('view.paths', array());
+
+            return new FileViewFinder($app['files'], $paths);
         });
     }
 
     /**
-     * Register the session binder for the view environment.
+     * Register the View Section instance.
      *
      * @return void
      */
-    protected function registerSessionBinder()
+    public function registerSection()
     {
-        list($app, $me) = array($this->app, $this);
-
-        $app->booted(function() use ($app, $me)
+        $this->app->bindShared('view.section', function($app)
         {
-            // If the current session has an "errors" variable bound to it, we will share
-            // its value with all view instances so the views can easily access errors
-            // without having to bind. An empty bag is set when there aren't errors.
-            if ($me->sessionHasErrors($app)) {
-                $errors = $app['session.store']->get('errors');
-
-                $app['view']->share('errors', $errors);
-            } else {
-                $app['view']->share('errors', new MessageBag());
-            }
+            return new Section($app['view']);
         });
-    }
-
-    /**
-     * Determine if the application session has errors.
-     *
-     * @param  \Nova\Foundation\Application  $app
-     * @return bool
-     */
-    public function sessionHasErrors($app)
-    {
-        $config = $app['config']['session'];
-
-        if (isset($app['session.store']) && ! is_null($config['driver'])) {
-            return $app['session.store']->has('errors');
-        }
     }
 
     /**
@@ -213,6 +189,11 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('view', 'view.finder', 'view.engine.resolver', 'template', 'template.compiler');
+        return array(
+            'view', 'view.finder', 'view.engine.resolver',
+            'template', 'template.compiler',
+            'markdown', 'markdown.compiler',
+            'section'
+        );
     }
 }

@@ -8,7 +8,10 @@
 
 namespace Nova\Support;
 
+use Nova\Support\Str;
+
 use BadMethodCallException;
+use ReflectionClass;
 
 
 abstract class ServiceProvider
@@ -26,6 +29,13 @@ abstract class ServiceProvider
      * @var bool
      */
     protected $defer = false;
+
+    /**
+     * The paths that should be published.
+     *
+     * @var array
+     */
+    protected static $publishes = array();
 
 
     /**
@@ -58,24 +68,56 @@ abstract class ServiceProvider
     {
         $namespace = $this->getPackageNamespace($package, $namespace);
 
+        //
+        $files = $this->app['files'];
+
         // In this method we will register the configuration package for the package
         // so that the configuration options cleanly cascade into the application
         // folder to make the developers lives much easier in maintaining them.
         $path = $path ?: $this->guessPackagePath();
 
-        // Determine the Package Configuration path.
+        // Register the Package Config path.
         $config = $path .DS .'Config';
 
-        if ($this->app['files']->isDirectory($config)) {
+        if ($files->isDirectory($config)) {
             $this->app['config']->package($package, $config, $namespace);
         }
 
-        // Determine the Package Language path.
+        // Register the Package Language path.
         $language = $path .DS .'Language';
 
-        if ($this->app['files']->isDirectory($language)) {
+        if ($files->isDirectory($language)) {
             $this->app['language']->package($package, $language, $namespace);
         }
+
+        // Register the Package Views path.
+        $views = $this->app['view'];
+
+        $appView = $this->getAppViewPath($package);
+
+        if ($files->isDirectory($appView)) {
+            $views->addNamespace($package, $appView);
+        }
+
+        $viewPath = $path .DS .'Views';
+
+        if ($files->isDirectory($viewPath)) {
+            $views->addNamespace($package, $viewPath);
+        }
+    }
+
+    /**
+     * Guess the package path for the provider.
+     *
+     * @return string
+     */
+    public function guessPackagePath()
+    {
+        $reflection = new ReflectionClass($this);
+
+        $path = $reflection->getFileName();
+
+        return realpath(dirname($path) .'/../');
     }
 
     /**
@@ -97,17 +139,42 @@ abstract class ServiceProvider
     }
 
     /**
-     * Guess the package path for the provider.
+     * Register paths to be published by the publish command.
      *
-     * @return string
+     * @param  array  $paths
+     * @param  string  $group
+     * @return void
      */
-    public function guessPackagePath()
+    protected function publishes(array $paths, $group)
     {
-        $reflection = new ReflectionClass($this);
+        if (! array_key_exists($group, static::$publishes)) {
+            static::$publishes[$group] = array();
+        }
 
-        $path = $reflection->getFileName();
+        static::$publishes[$group] = array_merge(static::$publishes[$group], $paths);
+    }
 
-        return realpath(dirname($path) .'/../');
+    /**
+     * Get the paths to publish.
+     *
+     * @param  string|null  $group
+     * @return array
+     */
+    public static function pathsToPublish($group = null)
+    {
+        if (is_null($group)) {
+            $paths = array();
+
+            foreach (static::$publishes as $class => $publish) {
+                $paths = array_merge($paths, $publish);
+            }
+
+            return array_unique($paths);
+        } else if (array_key_exists($group, static::$publishes)) {
+            return static::$publishes[$group];
+        }
+
+        return array();
     }
 
     /**
@@ -129,6 +196,17 @@ abstract class ServiceProvider
         {
             $forge->resolveCommands($commands);
         });
+    }
+
+    /**
+     * Get the application package view path.
+     *
+     * @param  string  $package
+     * @return string
+     */
+    protected function getAppViewPath($package)
+    {
+        return $this->app['path'] .str_replace('/', DS, "/Views/Packages/{$package}");
     }
 
     /**

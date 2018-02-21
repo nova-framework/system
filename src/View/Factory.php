@@ -6,7 +6,6 @@ use Nova\Container\Container;
 use Nova\Events\Dispatcher;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\Engines\EngineResolver;
-use Nova\View\Layout;
 use Nova\View\View;
 use Nova\View\ViewFinderInterface;
 
@@ -71,6 +70,7 @@ class Factory
     protected $extensions = array(
         'tpl' => 'template',
         'php' => 'php',
+        'css' => 'file',
         'md'  => 'markdown',
     );
 
@@ -103,6 +103,27 @@ class Factory
     protected $renderCount = 0;
 
     /**
+     *  Cached information about Modules.
+     *
+     * @var array
+     */
+    protected $modules = array();
+
+    /**
+     *  Cached information about Plugins.
+     *
+     * @var array
+     */
+    protected $plugins = array();
+
+    /**
+     * Cached information about the default Theme.
+     *
+     * @var string|null
+     */
+    protected $defaultTheme;
+
+    /**
      * Cached information about the current Language.
      *
      * @var \Nova\Language\Language
@@ -133,78 +154,29 @@ class Factory
      *
      * @param string $path
      * @param mixed $data
-     * @param string|null $module
-     * @param string|null $theme
+     * @param array $mergeData
      *
      * @return \Nova\View\View
      */
-    public function make($view, $data = array(), $module = null, $theme = null)
+    public function make($view, $data = array(), $mergeData = array())
     {
-        if (isset($this->aliases[$view])) {
-            $view = $this->aliases[$view];
+        if (isset($this->aliases[$view])) $view = $this->aliases[$view];
+
+        $path = $this->finder->find($view);
+
+        if (is_null($path) || ! is_readable($path)) {
+            throw new BadMethodCallException("File path [$path] does not exist");
         }
 
-        // Calculate the current Template name.
-        $theme = $theme ?: $this->getDefaultTheme();
+        $data = array_except(
+            array_merge($mergeData, $this->parseData($data)), array('__data', '__path')
+        );
 
-        // Get the View file path.
-        $path = $this->findViewFile($view, $module, $theme);
-
-        // Normalize the View name.
-        $domain = ! empty($module) ? $module : 'App';
-
-        $name = 'View/' .$domain .'::' .str_replace('/', '.', $view);
-
-        // Get the parsed View data.
-        $data = $this->parseData($data);
-
-        $this->callCreator($view = new View($this, $this->getEngineFromPath($path), $name, $path, $data));
+        $this->callCreator(
+            $view = new View($this, $this->getEngineFromPath($path), $view, $path, $data)
+        );
 
         return $view;
-    }
-
-    /**
-     * Create a Layout instance
-     *
-     * @param string $view
-     * @param string|null $theme
-     *
-     * @return \Nova\View\Layout
-     */
-    public function makeLayout($view, $theme = null)
-    {
-        $theme = $theme ?: $this->getDefaultTheme();
-
-        return $this->createLayout($view, $theme);
-    }
-
-    /**
-     * Create a Layout instance
-     *
-     * @param string $view
-     * @param string $theme
-     * @param mixed $data
-     *
-     * @return \Nova\View\Layout
-     */
-    public function createLayout($view, $theme, $data = array())
-    {
-        if (isset($this->aliases[$view])) {
-            $view = $this->aliases[$view];
-        }
-
-        // Get the View file path.
-        $path = $this->findLayoutFile($view, $theme);
-
-        // Normalize the Layout name.
-        $name = 'Layout/' .$theme .'::' .str_replace('/', '.', $view);
-
-        // Get the parsed View data.
-        $data = $this->parseData($data);
-
-        $this->callCreator($layout = new Layout($this, $this->getEngineFromPath($path), $name, $path, $data));
-
-        return $layout;
     }
 
     /**
@@ -212,22 +184,11 @@ class Factory
      *
      * @return string
      */
-    public function fetch($view, $data = array(), $module = null, Closure $callback = null)
+    public function fetch($view, $data = array(), Closure $callback = null)
     {
-        return $this->make($view, $data, $module)->render($callback);
-    }
+        unset($data['__path'], $data['__path']);
 
-    /**
-     * Create a Layout instance and return its rendered content.
-     *
-     * @param string $view
-     * @param string $theme
-     * @param mixed $data
-     * @return string
-     */
-    public function partial($view, $theme, $data = array(), Closure $callback = null)
-    {
-        return $this->createLayout($view, $theme, $data)->render($callback);
+        return $this->make($view, $data)->render($callback);
     }
 
     /**
@@ -238,13 +199,7 @@ class Factory
      */
     protected function parseData($data)
     {
-        if ($data instanceof Arrayable) {
-            $data = $data->toArray();
-        }
-
-        unset($data['__path'], $data['__path']);
-
-        return $data;
+        return ($data instanceof Arrayable) ? $data->toArray() : $data;
     }
 
     /**
@@ -286,34 +241,15 @@ class Factory
     /**
      * Check if the view file exists.
      *
-     * @param    string      $view
-     * @param    string|null $module
-     * @param    string|null $theme
+     * @param    string     $view
      * @return    bool
      */
-    public function exists($view, $module = null, $theme = null)
+    public function exists($view)
     {
         try {
-            $this->findViewFile($view, $module, $theme);
-        } catch (InvalidArgumentException $e) {
-            return false;
+            $this->finder->find($view);
         }
-
-        return true;
-    }
-
-    /**
-     * Check if the view file exists.
-     *
-     * @param    string      $layout
-     * @param    string|null $theme
-     * @return    bool
-     */
-    public function layoutExists($layout, $theme = null)
-    {
-        try {
-            $this->findLayoutFile($layout, $theme);
-        } catch (InvalidArgumentException $e) {
+        catch (InvalidArgumentException $e) {
             return false;
         }
 
@@ -330,7 +266,7 @@ class Factory
      * @param  string|null  $module
      * @return string
      */
-    public function renderEach($view, $data, $iterator, $empty = null, $module = null)
+    public function renderEach($view, $data, $iterator, $empty = null)
     {
         $empty = ! empty($empty) ? $empty : 'raw|';
 
@@ -344,7 +280,7 @@ class Factory
             foreach ($data as $key => $value) {
                 $data = array('key' => $key, $iterator => $value);
 
-                $result .= $this->make($view, $data, $module)->render();
+                $result .= $this->make($view, $data)->render();
             }
         }
 
@@ -352,7 +288,7 @@ class Factory
         // view. Alternatively, the "empty view" could be a raw string that begins
         // with "raw|" for convenience and to let this know that it is a string.
         else if (! starts_with($empty, 'raw|')) {
-            $result = $this->make($empty, array(), $module)->render();
+            $result = $this->make($empty)->render();
         } else {
             $result = substr($empty, 4);
         }
@@ -594,12 +530,10 @@ class Factory
      */
     public function startSection($section, $content = '')
     {
-        if ($content === '') {
-            if (ob_start()) {
-                $this->sectionStack[] = $section;
-            }
-        } else {
+        if (! empty($content)) {
             $this->extendSection($section, $content);
+        } else if (ob_start()) {
+            $this->sectionStack[] = $section;
         }
     }
 
@@ -753,6 +687,29 @@ class Factory
     }
 
     /**
+     * Add a location to the array of view locations.
+     *
+     * @param  string  $location
+     * @return void
+     */
+    public function addLocation($location)
+    {
+        $this->finder->addLocation($location);
+    }
+
+    /**
+     * Add a new namespace to the loader.
+     *
+     * @param  string  $namespace
+     * @param  string|array  $hints
+     * @return void
+     */
+    public function addNamespace($namespace, $hints)
+    {
+        $this->finder->addNamespace($namespace, $hints);
+    }
+
+    /**
      * Register a valid view extension and its engine.
      *
      * @param  string   $extension
@@ -897,157 +854,4 @@ class Factory
         return $this->names;
     }
 
-    /**
-     * Find the View file.
-     *
-     * @param    string  $view
-     * @param    string  $module
-     * @param    string  $theme
-     *
-     * @return    string
-     */
-    protected function findViewFile($view, $module, $theme = null)
-    {
-        $viewPath = str_replace('/', DS, $view);
-
-        // Try first to find the View file in the Theme's Views overriding location.
-        if (! is_null($view = $this->findOverridedView($viewPath, $theme, $module))) {
-            return $view;
-        }
-
-        if (! empty($module)) {
-            $basePath = $this->getModulePath($module);
-        } else {
-            // We will use the application path.
-            $basePath = $this->container['path'];
-        }
-
-        $path = $basePath .DS .'Views' .DS .$viewPath;
-
-        // Try to find the View file.
-        return $this->finder->find($path);
-    }
-
-    /**
-     * Find the View file in the Theme's Views overriding location.
-     *
-     * @param    string  $view
-     * @param    string  $theme
-     * @param    string  $module
-     *
-     * @return    string
-     */
-    protected function findOverridedView($view, $theme, $module)
-    {
-        try {
-            if (empty($theme)) {
-                // We throw a exception to stop the processing.
-                throw new InvalidArgumentException;
-            }
-
-            $basePath = $this->getThemePath($theme) .DS .'Overrides';
-
-            if (! empty($module)) {
-                $basePath .= DS .'Modules' .DS .$module;
-            }
-
-            $path = $basePath .DS .'Views' .DS .$view;
-
-            return $this->finder->find($path);
-        }
-        catch (InvalidArgumentException $e) {
-            // Do nothing.
-        }
-    }
-
-    /**
-     * Find the Layout file.
-     *
-     * @param    string     $layout
-     * @param    string     $theme
-     *
-     * @return    string
-     */
-    protected function findLayoutFile($layout, $theme)
-    {
-        $language = $this->getLanguage();
-
-        // Prepare the Layout path.
-        $layoutPath = str_replace('/', DS, $layout);
-
-        // Calculate the path to Layouts in the requested Theme.
-        $basePath = $this->getThemePath($theme) .DS .'Layouts';
-
-        if ($language->direction() == 'rtl') {
-            // Search for the Layout file used on the RTL languages.
-            $path = $basePath .DS .'RTL' .DS .$layoutPath;
-
-            try {
-                return $this->finder->find($path);
-            }
-            catch (InvalidArgumentException $e) {
-                // Do nothing.
-            }
-        }
-
-        // Search for the (main) Layout file.
-        $path = $basePath .DS .$layoutPath;
-
-        return $this->finder->find($path);
-    }
-
-    /**
-     * Return the Modules path, configured on Application.
-     *
-     * @param string $module
-     * @return string
-     */
-    protected function getModulePath($module)
-    {
-        $basePath = $this->getConfig()->get('modules.path', BASEPATH .'modules');
-
-        return rtrim($basePath, DS) .DS .$module;
-    }
-
-    /**
-     * Return the qualified Theme path.
-     *
-     * @param string $theme
-     * @return string
-     */
-    protected function getThemePath($theme)
-    {
-        $basePath = $this->getConfig()->get('view.themes.path', BASEPATH .'themes');
-
-        return rtrim($basePath, DS) .DS .$theme;
-    }
-
-    /**
-     * Return the default Theme, configured on Application.
-     *
-     * @return string
-     */
-    protected function getDefaultTheme()
-    {
-        return $this->getConfig()->get('app.theme', 'Bootstrap');
-    }
-
-    /**
-     * Return the current Language instance.
-     *
-     * @return \Language\Language
-     */
-    protected function getLanguage()
-    {
-        if (isset($this->language)) {
-            return $this->language;
-        }
-
-        return $this->language = $this->container['language']->instance();
-    }
-
-    protected function getConfig()
-    {
-        return $this->container['config'];
-    }
 }

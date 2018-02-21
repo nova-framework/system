@@ -9,7 +9,7 @@ use Nova\Support\Facades\App;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
-trait AuthorizeRequestsTrait
+trait AuthorizesRequestsTrait
 {
     /**
      * Authorize a given action against a set of arguments.

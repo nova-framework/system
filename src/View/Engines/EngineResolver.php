@@ -40,7 +40,7 @@ class EngineResolver
      * Resolve an Engine instance by name.
      *
      * @param  string  $engine
-     * @return \Nova\View\Engines\EngineInterface
+     * @return \Nova\View\Contracts\EngineInterface
      */
     public function resolve($engine)
     {
