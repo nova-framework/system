@@ -1,5 +1,6 @@
 <?php
 
+use Bova\Bus\Contracts\DispatcherInterface as BusDispatcher;
 use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
@@ -756,6 +757,34 @@ if (! function_exists('dd'))
     }
 }
 
+if (! function_exists('decrypt'))
+{
+    /**
+     * Decrypt the given value.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    function decrypt($value)
+    {
+        return app('encrypter')->decrypt($value);
+    }
+}
+
+if (! function_exists('dispatch'))
+{
+    /**
+     * Dispatch a job to its appropriate handler.
+     *
+     * @param  mixed  $job
+     * @return mixed
+     */
+    function dispatch($job)
+    {
+        return app(BusDispatcher::class)->dispatch($job);
+    }
+}
+
 if (! function_exists('e'))
 {
     /**
@@ -767,6 +796,20 @@ if (! function_exists('e'))
     function e($value)
     {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+    }
+}
+
+if (! function_exists('encrypt'))
+{
+    /**
+     * Encrypt the given value.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    function encrypt($value)
+    {
+        return app('encrypter')->encrypt($value);
     }
 }
 
