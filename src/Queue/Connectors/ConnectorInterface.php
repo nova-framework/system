@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Queue\Contracts;
+namespace Nova\Queue\Connectors;
 
 
 interface ConnectorInterface
