@@ -173,34 +173,49 @@ class Event
      */
     public function run(Container $container)
     {
-        $date = \Carbon\Carbon::now('Europe/Bucharest')->toDateTimeString();
-
-        file_put_contents($this->mutexName(), 'date: ' .$date ."\n", FILE_APPEND);
-        file_put_contents($this->mutexName(), 'withoutOverlapping: ' .$this->withoutOverlapping ."\n", FILE_APPEND);
-        file_put_contents($this->mutexName(), 'exists: ' .($this->mutex->exists($this) ? '1' : '0') ."\n", FILE_APPEND);
-
-        if ($this->withoutOverlapping && ! ($create = $this->mutex->create($this))) {
-            file_put_contents($this->mutexName(), "command overlapping\n\n", FILE_APPEND);
-
+        if ($this->withoutOverlapping && ! $this->mutex->create($this)) {
             return;
         }
 
-        file_put_contents($this->mutexName(), 'create: ' .($create ? '1' : '0') ."\n\n", FILE_APPEND);
+        if ($this->runInBackground) {
+            $this->runCommandInBackground($container);
+        } else {
+            $this->runCommandInForeground($container);
+        }
+    }
 
+    /**
+     * Run the command in the background.
+     *
+     * @param  \Nova\Container\Container  $container
+     * @return void
+     */
+    protected function runCommandInBackground(Container $container)
+    {
         $this->callBeforeCallbacks($container);
 
-        $command = $this->buildCommand();
+        $process = new Process($this->buildCommand(), base_path(), null, null, null);
 
-        file_put_contents($this->mutexName(), $command ."\n\n", FILE_APPEND);
+        $process->disableOutput();
 
-        //
-        $process = new Process($command, base_path(), null, null, null);
+        $process->run();
+    }
+
+    /**
+     * Run the command in the foreground.
+     *
+     * @param  \Nova\Container\Container  $container
+     * @return void
+     */
+    protected function runCommandInForeground(Container $container)
+    {
+        $this->callBeforeCallbacks($container);
+
+        $process = new Process($this->buildCommand(), base_path(), null, null, null);
 
         $process->run();
 
-        if (! $this->runInBackground) {
-            $this->callAfterCallbacks($container);
-        }
+        $this->callAfterCallbacks($container);
     }
 
     /**
