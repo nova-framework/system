@@ -169,7 +169,7 @@ class DatabaseQueue extends Queue implements QueueInterface
         $this->database->beginTransaction();
 
         if ($job = $this->getNextAvailableJob($queue)) {
-            $this->markJobAsReserved($job->id);
+            $this->markJobAsReserved($job->id, $job->attempts + 1);
 
             $this->database->commit();
 
@@ -239,11 +239,13 @@ class DatabaseQueue extends Queue implements QueueInterface
      * Mark the given job ID as reserved.
      *
      * @param  string  $id
+     * @param  int     $attempts
      * @return void
      */
-    protected function markJobAsReserved($id)
+    protected function markJobAsReserved($id, $attempts)
     {
         $this->database->table($this->table)->where('id', $id)->update(array(
+            'attempts'    => $attempts,
             'reserved_at' => $this->getTime(),
         ));
     }
