@@ -173,6 +173,9 @@ class Event
      */
     public function run(Container $container)
     {
+        $date = \Carbon\Carbon::now('Europe/Bucharest')->toDateTimeString();
+
+        file_put_contents($this->mutexName(), 'date: ' .$date ."\n", FILE_APPEND);
         file_put_contents($this->mutexName(), 'withoutOverlapping: ' .$this->withoutOverlapping ."\n", FILE_APPEND);
         file_put_contents($this->mutexName(), 'exists: ' .($this->mutex->exists($this) ? '1' : '0') ."\n", FILE_APPEND);
 
