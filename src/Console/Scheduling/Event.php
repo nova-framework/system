@@ -282,7 +282,7 @@ class Event
         $finished = $phpBinary .$forgeBinary .' schedule:finish "'.$this->mutexName().'"';
 
         return '(' .$this->command .$redirect .$output.' 2>&1 ' .(windows_os() ? '&' : ';') .' ' .$finished .') > '
-            .ProcessUtils::escapeArgument($this->getDefaultOutput()).' 2>&1 &';
+            .ProcessUtils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
     }
 
     /**
