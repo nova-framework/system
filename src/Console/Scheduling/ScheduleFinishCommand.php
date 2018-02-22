@@ -24,18 +24,12 @@ class ScheduleFinishCommand extends Command
     protected $description = 'Handle the completion of a scheduled command';
 
     /**
-     * Indicates whether the command should be shown in the Artisan command list.
-     *
-     * @var bool
-     */
-    protected $hidden = true;
-
-    /**
      * The schedule instance.
      *
      * @var \Nova\Console\Scheduling\Schedule
      */
     protected $schedule;
+
 
     /**
      * Create a new command instance.
