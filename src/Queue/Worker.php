@@ -82,12 +82,12 @@ class Worker
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
         while (true) {
-            if ($this->daemonShouldRun()) {
+            if (! $this->daemonShouldRun()) {
+                $this->sleep($sleep);
+            } else {
                 $this->runNextJobForDaemon(
                     $connectionName, $queue, $delay, $sleep, $maxTries
                 );
-            } else {
-                $this->sleep($sleep);
             }
 
             if ($this->memoryExceeded($memory) || $this->queueShouldRestart($lastRestart)) {
@@ -134,7 +134,9 @@ class Worker
             return false;
         }
 
-        return $this->events->until('nova.queue.looping') !== false;
+        $result = $this->events->until('nova.queue.looping');
+
+        return ($result !== false);
     }
 
     /**
@@ -313,7 +315,7 @@ class Worker
      */
     protected function getTimestampOfLastQueueRestart()
     {
-        if ($this->cache) {
+        if (isset($this->cache)) {
             return $this->cache->get('nova:queue:restart');
         }
     }
