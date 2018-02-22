@@ -3,6 +3,7 @@
 namespace Nova\Console\Scheduling;
 
 use Nova\Container\Container;
+use Nova\Console\Scheduling\MutexInterface as Mutex;
 
 use InvalidArgumentException;
 use LogicException;
@@ -28,21 +29,22 @@ class CallbackEvent extends Event
     /**
      * Create a new event instance.
      *
+     * @param  \Nova\Console\Scheduling\MutexInterface  $mutex
      * @param  string  $callback
      * @param  array  $parameters
      * @return void
      */
-    public function __construct($callback, array $parameters = array())
+    public function __construct(Mutex $mutex, $callback, array $parameters = array())
     {
-        $this->callback = $callback;
-
-        $this->parameters = $parameters;
-
         if (! is_string($this->callback) && ! is_callable($this->callback)) {
             throw new InvalidArgumentException(
                 "Invalid scheduled callback event. Must be string or callable."
             );
         }
+
+        $this->mutex = $mutex;
+        $this->callback = $callback;
+        $this->parameters = $parameters;
     }
 
     /**
@@ -55,18 +57,25 @@ class CallbackEvent extends Event
      */
     public function run(Container $container)
     {
-        if ($this->description) {
-            touch($this->mutexPath());
+        if ($this->description && $this->withoutOverlapping && ! $this->mutex->create($this)) {
+            return;
         }
+
+        register_shutdown_function(function ()
+        {
+            $this->removeMutex();
+        });
+
+        parent::callBeforeCallbacks($container);
 
         try {
             $response = $container->call($this->callback, $this->parameters);
         }
         finally {
             $this->removeMutex();
-        }
 
-        parent::callAfterCallbacks($container);
+            parent::callAfterCallbacks($container);
+        }
 
         return $response;
     }
@@ -78,17 +87,18 @@ class CallbackEvent extends Event
      */
     protected function removeMutex()
     {
-        if ($this->description) {
-            @unlink($this->mutexPath());
+        if (isset($this->description)) {
+            $this->mutex->forget($this);
         }
     }
 
     /**
      * Do not allow the event to overlap each other.
      *
+     * @param  int  $expiresAt
      * @return $this
      */
-    public function withoutOverlapping()
+    public function withoutOverlapping($expiresAt = 1440)
     {
         if (! isset($this->description)) {
             throw new LogicException(
@@ -96,9 +106,13 @@ class CallbackEvent extends Event
             );
         }
 
+        $this->withoutOverlapping = true;
+
+        $this->expiresAt = $expiresAt;
+
         return $this->skip(function ()
         {
-            return file_exists($this->mutexPath());
+            return $this->mutex->exists($this);
         });
     }
 
@@ -107,9 +121,9 @@ class CallbackEvent extends Event
      *
      * @return string
      */
-    protected function mutexPath()
+    protected function mutexName()
     {
-        return storage_path('schedule-' .md5($this->description));
+        return storage_path('schedule-' .sha1($this->description));
     }
 
     /**

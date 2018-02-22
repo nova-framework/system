@@ -27,7 +27,7 @@ class ScheduleServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('schedule', function ($app)
         {
-            return new Schedule();
+            return new Schedule($app);
         });
 
         $this->registerScheduleRunCommand();

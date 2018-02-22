@@ -3,6 +3,7 @@
 namespace Nova\Console\Scheduling;
 
 use Nova\Container\Container;
+use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
 use Nova\Mail\Mailer;
 
@@ -68,6 +69,13 @@ class Event
     public $withoutOverlapping = false;
 
     /**
+     * The amount of time the mutex should be valid.
+     *
+     * @var int
+     */
+    public $expiresAt = 1440;
+
+    /**
      * The filter callback.
      *
      * @var \Closure
@@ -116,15 +124,24 @@ class Event
      */
     public $description;
 
+    /**
+     * The mutex implementation.
+     *
+     * @var \Nova\Console\Scheduling\MutexInterface
+     */
+    public $mutex;
+
 
     /**
      * Create a new event instance.
      *
+     * @param  \Nova\Console\Scheduling\MutexInterface  $mutex
      * @param  string  $command
      * @return void
      */
-    public function __construct($command)
+    public function __construct(Mutex $mutex, $command)
     {
+        $this->mutex = $mutex;
         $this->command = $command;
 
         $this->output = $this->getDefaultOutput();
@@ -148,6 +165,10 @@ class Event
      */
     public function run(Container $container)
     {
+        if ($this->withoutOverlapping && ! $this->mutex->create($this)) {
+            return;
+        }
+
         if ((count($this->afterCallbacks) > 0) || (count($this->beforeCallbacks) > 0)) {
             $this->runCommandInForeground($container);
         } else {
@@ -245,14 +266,6 @@ class Event
         if (! $this->withoutOverlapping) {
             return $this->command .$redirect .$output .' 2>&1 &';
         }
-
-        $mutexPath = $this->mutexPath();
-
-        if (! windows_os()) {
-            return '(touch ' .$mutexPath .'; ' .$this->command .'; rm ' .$mutexPath .')' .$redirect .$output .' 2>&1 &';
-        } else {
-            return '(echo \'\' > "' .$mutexPath .'" & ' .$this->command .' & del "'.$mutexPath .'")' .$redirect .$output .' 2>&1 &';
-        }
     }
 
     /**
@@ -260,7 +273,7 @@ class Event
      *
      * @return string
      */
-    protected function mutexPath()
+    protected function mutexName()
     {
         return storage_path('schedule-' .md5($this->expression .$this->command));
     }
@@ -559,15 +572,22 @@ class Event
     /**
      * Do not allow the event to overlap each other.
      *
+     * @param  int  $expiresAt
      * @return $this
      */
-    public function withoutOverlapping()
+    public function withoutOverlapping($expiresAt = 1440)
     {
         $this->withoutOverlapping = true;
 
-        return $this->skip(function ()
+        $this->expiresAt = $expiresAt;
+
+        return $this->then(function ()
         {
-            return file_exists($this->mutexPath());
+            $this->mutex->forget($this);
+
+        })->skip(function ()
+        {
+            return $this->mutex->exists($this);
         });
     }
 
@@ -672,7 +692,7 @@ class Event
      */
     protected function getEmailSubject()
     {
-        if ($this->description) {
+        if (isset($this->description)) {
             return __d('nova', 'Scheduled Job Output ({0})', $this->description);
         }
 
@@ -781,5 +801,18 @@ class Event
     public function getExpression()
     {
         return $this->expression;
+    }
+
+    /**
+     * Set the mutex implementation to be used.
+     *
+     * @param  \Nova\Console\Scheduling\MutexInterface  $mutex
+     * @return $this
+     */
+    public function preventOverlapsUsing(Mutex $mutex)
+    {
+        $this->mutex = $mutex;
+
+        return $this;
     }
 }
