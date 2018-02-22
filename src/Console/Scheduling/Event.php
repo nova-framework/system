@@ -169,6 +169,11 @@ class Event
             return;
         }
 
+        register_shutdown_function(function ()
+        {
+            $this->removeMutex();
+        });
+
         if ((count($this->afterCallbacks) > 0) || (count($this->beforeCallbacks) > 0)) {
             $this->runCommandInForeground($container);
         } else {

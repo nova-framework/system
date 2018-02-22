@@ -110,7 +110,11 @@ class CallbackEvent extends Event
 
         $this->expiresAt = $expiresAt;
 
-        return $this->skip(function ()
+        return $this->then(function ()
+        {
+            $this->removeMutex();
+
+        })->skip(function ()
         {
             return $this->mutex->exists($this);
         });
