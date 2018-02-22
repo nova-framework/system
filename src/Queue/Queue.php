@@ -92,7 +92,8 @@ abstract class Queue
 
                 //
                 'data' => array(
-                    'command' => serialize(clone $job)
+                    'commandName' => get_class($job),
+                    'command'     => serialize(clone $job)
                 ),
             ));
         }

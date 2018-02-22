@@ -215,7 +215,7 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $query->where(function ($query)
         {
-            $query->where('reserved_at', 0)->where('available_at', '<=', $this->getTime());
+            $query->whereNull('reserved_at')->where('available_at', '<=', $this->getTime());
         });
     }
 
@@ -244,7 +244,6 @@ class DatabaseQueue extends Queue implements QueueInterface
     protected function markJobAsReserved($id)
     {
         $this->database->table($this->table)->where('id', $id)->update(array(
-            'reserved'    => 1,
             'reserved_at' => $this->getTime(),
         ));
     }
@@ -289,7 +288,6 @@ class DatabaseQueue extends Queue implements QueueInterface
             'queue'        => $queue,
             'payload'      => $payload,
             'attempts'     => $attempts,
-            'reserved'     => 0,
             'reserved_at'  => null,
             'available_at' => $availableAt,
             'created_at'   => $this->getTime(),

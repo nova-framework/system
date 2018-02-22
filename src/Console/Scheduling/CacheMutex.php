@@ -36,7 +36,7 @@ class CacheMutex implements MutexInterface
     public function create(Event $event)
     {
         return $this->cache->add(
-            $name = $event->mutexName(), $name, $event->expiresAt
+            $event->mutexName(), true, $event->expiresAt
         );
     }
 
