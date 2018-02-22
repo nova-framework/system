@@ -162,7 +162,7 @@ class Event
      */
     protected function getDefaultOutput()
     {
-        return (DIRECTORY_SEPARATOR === '\\') ? 'NUL' : '/dev/null';
+        return windows_os() ? 'NUL' : '/dev/null';
     }
 
     /**
