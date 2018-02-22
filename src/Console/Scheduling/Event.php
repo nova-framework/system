@@ -76,6 +76,13 @@ class Event
     public $expiresAt = 1440;
 
     /**
+     * Indicates if the command should run in background.
+     *
+     * @var bool
+     */
+    public $runInBackground = false;
+
+    /**
      * The filter callback.
      *
      * @var \Closure
@@ -169,15 +176,10 @@ class Event
             return;
         }
 
-        register_shutdown_function(function ()
-        {
-            $this->removeMutex();
-        });
-
-        if ((count($this->afterCallbacks) > 0) || (count($this->beforeCallbacks) > 0)) {
-            $this->runCommandInForeground($container);
+        if ($this->runInBackground) {
+            $this->runCommandInBackground($container);
         } else {
-            $this->runCommandInBackground();
+            $this->runCommandInForeground($container);
         }
     }
 
@@ -268,9 +270,20 @@ class Event
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
+        //
+        $phpBinary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
+
+        $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
+
+        $finished = $phpBinary .$forgeBinary .' schedule:finish "'.$event->mutexName().'"';
+
         if (! $this->withoutOverlapping) {
             return $this->command .$redirect .$output .' 2>&1 &';
         }
+
+        return '(' .$this->command .$redirect .$output.' 2>&1 '
+            .(windows_os() ? '&' : ';') .' ' .$finished .') > '
+            .ProcessUtils::escapeArgument($this->getDefaultOutput()).' 2>&1 &';
     }
 
     /**
@@ -532,6 +545,18 @@ class Event
     public function timezone($timezone)
     {
         $this->timezone = $timezone;
+
+        return $this;
+    }
+
+    /**
+     * State that the command should run in background.
+     *
+     * @return $this
+     */
+    public function runInBackground()
+    {
+        $this->runInBackground = true;
 
         return $this;
     }
