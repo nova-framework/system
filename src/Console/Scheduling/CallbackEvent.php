@@ -110,11 +110,7 @@ class CallbackEvent extends Event
 
         $this->expiresAt = $expiresAt;
 
-        return $this->then(function ()
-        {
-            $this->removeMutex();
-
-        })->skip(function ()
+        return $this->skip(function ()
         {
             return $this->mutex->exists($this);
         });
@@ -125,7 +121,7 @@ class CallbackEvent extends Event
      *
      * @return string
      */
-    protected function mutexName()
+    public function mutexName()
     {
         return storage_path('schedule-' .sha1($this->description));
     }

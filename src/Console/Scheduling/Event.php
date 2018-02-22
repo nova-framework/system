@@ -189,13 +189,16 @@ class Event
      *
      * @return void
      */
-    protected function runCommandInBackground()
+    protected function runCommandInBackground(Container $container)
     {
-        chdir(base_path());
+        $this->callBeforeCallbacks($container);
 
         $command = $this->buildCommand();
 
-        exec($command);
+        //
+        $process = new Process($command, base_path(), null, null, null);
+
+        $process->run();
     }
 
     /**
@@ -211,7 +214,7 @@ class Event
         $command = $this->buildCommand();
 
         //
-        $process = new Process(trim($command, '& '), base_path(), null, null, null);
+        $process = new Process($command, base_path(), null, null, null);
 
         $process->run();
 
@@ -271,17 +274,17 @@ class Event
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
-        if (! $this->withoutOverlapping) {
-            return $this->command .$redirect .$output .' 2>&1 &';
+        if (! $this->runInBackground) {
+            return $this->command .$redirect .$output .' 2>&1';
         }
 
         $phpBinary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
 
         $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
 
-        $finished = $phpBinary .$forgeBinary .' schedule:finish "'.$this->mutexName().'"';
+        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish "' .$this->mutexName() .'"';
 
-        return '(' .$this->command .$redirect .$output.' 2>&1 ' .(windows_os() ? '&' : ';') .' ' .$finished .') > '
+        return '(' .$this->command .$redirect .$output .' 2>&1 ' .(windows_os() ? '&' : ';') .' ' .$finished .') > '
             .ProcessUtils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
     }
 
@@ -290,9 +293,9 @@ class Event
      *
      * @return string
      */
-    protected function mutexName()
+    public function mutexName()
     {
-        return storage_path('schedule-' .md5($this->expression .$this->command));
+        return storage_path('schedule-' .sha1($this->expression .$this->command));
     }
 
     /**
