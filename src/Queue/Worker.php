@@ -112,12 +112,12 @@ class Worker
             $this->pop($connectionName, $queue, $delay, $sleep, $maxTries);
         }
         catch (Exception $e) {
-            if ($this->exceptions) {
+            if (isset($this->exceptions)) {
                 $this->exceptions->report($e);
             }
         }
         catch (Throwable $e) {
-            if ($this->exceptions) {
+            if (isset($this->exceptions)) {
                 $this->exceptions->report(new FatalThrowableError($e));
             }
         }
@@ -159,15 +159,15 @@ class Worker
         // then immediately return back out. If there is no job on the queue
         // we will "sleep" the worker for the specified number of seconds.
 
-        if (! is_null($job)) {
-            return $this->process(
-                $this->manager->getName($connectionName), $job, $maxTries, $delay
-            );
+        if (is_null($job)) {
+            $this->sleep($sleep);
+
+            return array('job' => null, 'failed' => false);
         }
 
-        $this->sleep($sleep);
-
-        return array('job' => null, 'failed' => false);
+        return $this->process(
+            $this->manager->getName($connectionName), $job, $maxTries, $delay
+        );
     }
 
     /**
@@ -184,7 +184,9 @@ class Worker
         }
 
         foreach (explode(',', $queue) as $queue) {
-            if ( ! is_null($job = $connection->pop($queue))) return $job;
+            if (! is_null($job = $connection->pop($queue))) {
+                return $job;
+            }
         }
     }
 
@@ -216,7 +218,7 @@ class Worker
                 $job->delete();
             }
 
-            return ['job' => $job, 'failed' => false];
+            return array('job' => $job, 'failed' => false);
         }
         catch (Exception $e) {
             // If we catch an exception, we will attempt to release the job back onto
@@ -247,15 +249,15 @@ class Worker
      */
     protected function logFailedJob($connection, Job $job)
     {
-        if ($this->failer) {
-            $this->failer->log($connection, $job->getQueue(), $job->getRawBody());
-
-            $job->delete();
-
-            $this->raiseFailedJobEvent($connection, $job);
+        if (! iset($this->failer)) {
+            return array('job' => $job, 'failed' => true);
         }
 
-        return ['job' => $job, 'failed' => true];
+        $this->failer->log($connection, $job->getQueue(), $job->getRawBody());
+
+        $job->delete();
+
+        $this->raiseFailedJobEvent($connection, $job);
     }
 
     /**
@@ -267,7 +269,7 @@ class Worker
      */
     protected function raiseFailedJobEvent($connection, Job $job)
     {
-        if ($this->events) {
+        if (isset($this->events)) {
             $data = json_decode($job->getRawBody(), true);
 
             $this->events->fire('nova.queue.failed', array($connection, $job, $data));
@@ -282,7 +284,9 @@ class Worker
      */
     public function memoryExceeded($memoryLimit)
     {
-        return (memory_get_usage() / 1024 / 1024) >= $memoryLimit;
+        $memoryUsage = memory_get_usage() / 1024 / 1024;
+
+        return ($memoryUsage >= $memoryLimit);
     }
 
     /**
@@ -328,7 +332,7 @@ class Worker
      */
     protected function queueShouldRestart($lastRestart)
     {
-        return $this->getTimestampOfLastQueueRestart() != $lastRestart;
+        return ($this->getTimestampOfLastQueueRestart() != $lastRestart);
     }
 
     /**

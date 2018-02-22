@@ -15,6 +15,7 @@ class CacheMutex implements MutexInterface
      */
     public $cache;
 
+
     /**
      * Create a new overlapping strategy.
      *
@@ -35,7 +36,7 @@ class CacheMutex implements MutexInterface
     public function create(Event $event)
     {
         return $this->cache->add(
-            $event->mutexName(), true, $event->expiresAt
+            $name = $event->mutexName(), $name, $event->expiresAt
         );
     }
 

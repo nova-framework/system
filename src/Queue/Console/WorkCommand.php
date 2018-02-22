@@ -54,12 +54,13 @@ class WorkCommand extends Command
      */
     public function handle()
     {
-        if ($this->downForMaintenance() && ! $this->option('daemon')) {
+        $daemon = $this->option('daemon');
+
+        if ($this->downForMaintenance() && ! $daemon) {
             return;
         }
 
         $queue = $this->option('queue');
-
         $delay = $this->option('delay');
 
         // The memory limit is the amount of memory we will allow the script to occupy
@@ -69,9 +70,7 @@ class WorkCommand extends Command
 
         $connection = $this->argument('connection');
 
-        $response = $this->runWorker(
-            $connection, $queue, $delay, $memory, $this->option('daemon')
-        );
+        $response = $this->runWorker($connection, $queue, $delay, $memory, $daemon);
 
         // If a job was fired by the worker, we'll write the output out to the console
         // so that the developer can watch live while the queue runs in the console
@@ -97,19 +96,18 @@ class WorkCommand extends Command
             $this->container['Nova\Foundation\Contracts\ExceptionHandlerInterface']
         );
 
-        if ($daemon) {
-            $this->worker->setCache($this->container['cache']->driver());
+        $sleep = $this->option('sleep');
+        $tries = $this->option('tries');
 
-            return $this->worker->daemon(
-                $connection, $queue, $delay, $memory,
-                $this->option('sleep'), $this->option('tries')
-            );
+        if (! $daemon) {
+            $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
         }
 
-        return $this->worker->pop(
-            $connection, $queue, $delay,
-            $this->option('sleep'), $this->option('tries')
+        $this->worker->setCache(
+            $this->container['cache']->driver()
         );
+
+        return $this->worker->daemon($connection, $queue, $delay, $memory, $sleep, $tries);
     }
 
     /**

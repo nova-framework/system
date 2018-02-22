@@ -63,7 +63,11 @@ class Repository implements ArrayAccess
     {
         $value = $this->store->get($key);
 
-        return ! is_null($value) ? $value : value($default);
+        if (! is_null($value)) {
+            return $value;
+        }
+
+        return value($default);
     }
 
     /**
@@ -109,11 +113,13 @@ class Repository implements ArrayAccess
      */
     public function add($key, $value, $minutes)
     {
-        if (is_null($this->get($key))) {
-            $this->put($key, $value, $minutes); return true;
+        if (! is_null($this->get($key))) {
+            return false;
         }
 
-        return false;
+        $this->put($key, $value, $minutes);
+
+        return true;
     }
 
     /**

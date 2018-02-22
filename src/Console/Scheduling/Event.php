@@ -173,52 +173,31 @@ class Event
      */
     public function run(Container $container)
     {
-        if ($this->withoutOverlapping && ! $this->mutex->create($this)) {
+        file_put_contents($this->mutexName(), 'withoutOverlapping: ' .$this->withoutOverlapping ."\n", FILE_APPEND);
+        file_put_contents($this->mutexName(), 'exists: ' .($this->mutex->exists($this) ? '1' : '0') ."\n", FILE_APPEND);
+
+        if ($this->withoutOverlapping && ! ($create = $this->mutex->create($this))) {
+            file_put_contents($this->mutexName(), "command overlapping\n\n", FILE_APPEND);
+
             return;
         }
 
-        if ($this->runInBackground) {
-            $this->runCommandInBackground($container);
-        } else {
-            $this->runCommandInForeground($container);
+        file_put_contents($this->mutexName(), 'create: ' .($create ? '1' : '0') ."\n\n", FILE_APPEND);
+
+        $this->callBeforeCallbacks($container);
+
+        $command = $this->buildCommand();
+
+        file_put_contents($this->mutexName(), $command ."\n\n", FILE_APPEND);
+
+        //
+        $process = new Process($command, base_path(), null, null, null);
+
+        $process->run();
+
+        if (! $this->runInBackground) {
+            $this->callAfterCallbacks($container);
         }
-    }
-
-    /**
-     * Run the command in the background using exec.
-     *
-     * @return void
-     */
-    protected function runCommandInBackground(Container $container)
-    {
-        $this->callBeforeCallbacks($container);
-
-        $command = $this->buildCommand();
-
-        //
-        $process = new Process($command, base_path(), null, null, null);
-
-        $process->run();
-    }
-
-    /**
-     * Run the command in the foreground.
-     *
-     * @param  \Nova\Container\Container  $container
-     * @return void
-     */
-    protected function runCommandInForeground(Container $container)
-    {
-        $this->callBeforeCallbacks($container);
-
-        $command = $this->buildCommand();
-
-        //
-        $process = new Process($command, base_path(), null, null, null);
-
-        $process->run();
-
-        $this->callAfterCallbacks($container);
     }
 
     /**
@@ -680,22 +659,50 @@ class Event
      * E-mail the results of the scheduled operation.
      *
      * @param  array|mixed  $addresses
+     * @param  bool  $onlyIfOutputExists
      * @return $this
      *
      * @throws \LogicException
      */
-    public function emailOutputTo($addresses)
+    public function emailOutputTo($addresses, $onlyIfOutputExists = false)
     {
-        if (is_null($this->output) || ($this->output == $this->getDefaultOutput())) {
-            throw new LogicException('Must direct output to a file in order to e-mail results.');
+        $this->ensureOutputIsBeingCapturedForEmail();
+
+        if (! is_array($addresses)) {
+            $addresses = array($addresses);
         }
 
-        $addresses = is_array($addresses) ? $addresses : func_get_args();
-
-        return $this->then(function (Mailer $mailer) use ($addresses)
+        return $this->then(function (Mailer $mailer) use ($addresses, $onlyIfOutputExists)
         {
-            $this->emailOutput($mailer, $addresses);
+            $this->emailOutput($mailer, $addresses, $onlyIfOutputExists);
         });
+    }
+
+    /**
+     * E-mail the results of the scheduled operation if it produces output.
+     *
+     * @param  array|mixed  $addresses
+     * @return $this
+     *
+     * @throws \LogicException
+     */
+    public function emailWrittenOutputTo($addresses)
+    {
+        return $this->emailOutputTo($addresses, true);
+    }
+
+    /**
+     * Ensure that output is being captured for email.
+     *
+     * @return void
+     */
+    protected function ensureOutputIsBeingCapturedForEmail()
+    {
+        if (is_null($this->output) || ($this->output == $this->getDefaultOutput())) {
+            $output = storage_path('logs/schedule-' .sha1($this->mutexName()) .'.log');
+
+            $this->sendOutputTo($output);
+        }
     }
 
     /**
@@ -703,11 +710,18 @@ class Event
      *
      * @param  \Nova\Contracts\Mail\Mailer  $mailer
      * @param  array  $addresses
+     * @param  bool  $onlyIfOutputExists
      * @return void
      */
-    protected function emailOutput(Mailer $mailer, $addresses)
+    protected function emailOutput(Mailer $mailer, $addresses, $onlyIfOutputExists = false)
     {
-        $mailer->raw(file_get_contents($this->output), function ($message) use ($addresses)
+        $text = file_exists($this->output) ? file_get_contents($this->output) : '';
+
+        if ($onlyIfOutputExists && empty($text)) {
+            return;
+        }
+
+        $mailer->raw($text, function ($message) use ($addresses)
         {
             $message->subject($this->getEmailSubject());
 
