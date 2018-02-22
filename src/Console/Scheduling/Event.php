@@ -271,19 +271,17 @@ class Event
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
-        //
-        $phpBinary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
-
-        $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
-
-        $finished = $phpBinary .$forgeBinary .' schedule:finish "'.$event->mutexName().'"';
-
         if (! $this->withoutOverlapping) {
             return $this->command .$redirect .$output .' 2>&1 &';
         }
 
-        return '(' .$this->command .$redirect .$output.' 2>&1 '
-            .(windows_os() ? '&' : ';') .' ' .$finished .') > '
+        $phpBinary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
+
+        $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
+
+        $finished = $phpBinary .$forgeBinary .' schedule:finish "'.$this->mutexName().'"';
+
+        return '(' .$this->command .$redirect .$output.' 2>&1 ' .(windows_os() ? '&' : ';') .' ' .$finished .') > '
             .ProcessUtils::escapeArgument($this->getDefaultOutput()).' 2>&1 &';
     }
 
