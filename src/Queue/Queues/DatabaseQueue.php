@@ -41,7 +41,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      *
      * @var int|null
      */
-    protected $expire = 60;
+    protected $retryAfter = 60;
 
     /**
      * Create a new database queue instance.
@@ -49,15 +49,15 @@ class DatabaseQueue extends Queue implements QueueInterface
      * @param  \Nova\Database\Connection  $database
      * @param  string  $table
      * @param  string  $default
-     * @param  int  $expire
+     * @param  int  $retryAfter
      * @return void
      */
-    public function __construct(Connection $database, $table, $default = 'default', $expire = 60)
+    public function __construct(Connection $database, $table, $default = 'default', $retryAfter = 60)
     {
         $this->table = $table;
-        $this->expire = $expire;
         $this->default = $default;
         $this->database = $database;
+        $this->retryAfter = $retryAfter;
     }
 
     /**
@@ -122,7 +122,7 @@ class DatabaseQueue extends Queue implements QueueInterface
 
         }, (array) $jobs);
 
-        return $this->getQuery()->insert($records);
+        return $this->database->table($this->table)->insert($records);
     }
 
     /**
@@ -153,7 +153,7 @@ class DatabaseQueue extends Queue implements QueueInterface
             $this->getQueue($queue), $payload, $this->getAvailableAt($delay), $attempts
         );
 
-        return $this->getQuery()->insertGetId($attributes);
+        return $this->database->table($this->table)->insertGetId($attributes);
     }
 
     /**
@@ -166,9 +166,7 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $queue = $this->getQueue($queue);
 
-        if (! is_null($this->expire)) {
-            $this->releaseJobsThatHaveBeenReservedTooLong($queue);
-        }
+        $this->database->beginTransaction();
 
         if ($job = $this->getNextAvailableJob($queue)) {
             $this->markJobAsReserved($job->id);
@@ -184,29 +182,6 @@ class DatabaseQueue extends Queue implements QueueInterface
     }
 
     /**
-     * Release the jobs that have been reserved for too long.
-     *
-     * @param  string  $queue
-     * @return void
-     */
-    protected function releaseJobsThatHaveBeenReservedTooLong($queue)
-    {
-        $expired = Carbon::now()->subSeconds($this->expire)->getTimestamp();
-
-        $data = array(
-            'reserved'    => 0,
-            'reserved_at' => null,
-            'attempts'    => new Expression('attempts + 1'),
-        );
-
-        $this->getQuery()
-            ->where('queue', $this->getQueue($queue))
-            ->where('reserved', 1)
-            ->where('reserved_at', '<=', $expired)
-            ->update($data);
-    }
-
-    /**
      * Get the next available job for the queue.
      *
      * @param  string|null  $queue
@@ -214,17 +189,50 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function getNextAvailableJob($queue)
     {
-        $this->database->beginTransaction();
-
-        $job = $this->getQuery()
+        $job = $this->database->table($this->table)
             ->lockForUpdate()
             ->where('queue', $this->getQueue($queue))
-            ->where('reserved', 0)
-            ->where('available_at', '<=', $this->getTime())
+            ->where(function ($query)
+            {
+                $this->isAvailable($query);
+                $this->isReservedButExpired($query);
+            })
             ->orderBy('id', 'asc')
             ->first();
 
-        return $job ? (object) $job : null;
+        if (! is_null($job)) {
+            return (object) $job;
+        }
+    }
+
+   /**
+     * Modify the query to check for available jobs.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return void
+     */
+    protected function isAvailable($query)
+    {
+        $query->where(function ($query)
+        {
+            $query->where('reserved_at', 0)->where('available_at', '<=', $this->getTime());
+        });
+    }
+
+    /**
+     * Modify the query to check for jobs that are reserved but have expired.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return void
+     */
+    protected function isReservedButExpired($query)
+    {
+        $expiration = Carbon::now()->subSeconds($this->retryAfter)->getTimestamp();
+
+        $query->orWhere(function ($query) use ($expiration)
+        {
+            $query->where('reserved_at', '<=', $expiration);
+        });
     }
 
     /**
@@ -235,7 +243,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function markJobAsReserved($id)
     {
-        $this->getQuery()->where('id', $id)->update(array(
+        $this->database->table($this->table)->where('id', $id)->update(array(
             'reserved'    => 1,
             'reserved_at' => $this->getTime(),
         ));
@@ -250,7 +258,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     public function deleteReserved($queue, $id)
     {
-        $this->getQuery()->where('id', $id)->delete();
+        $this->database->table($this->table)->where('id', $id)->delete();
     }
 
     /**
@@ -261,7 +269,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function getAvailableAt($delay)
     {
-        $availableAt = $delay instanceof DateTime ? $delay : Carbon::now()->addSeconds($delay);
+        $availableAt = ($delay instanceof DateTime) ? $delay : Carbon::now()->addSeconds($delay);
 
         return $availableAt->getTimestamp();
     }
@@ -307,16 +315,6 @@ class DatabaseQueue extends Queue implements QueueInterface
     public function getDatabase()
     {
         return $this->database;
-    }
-
-    /**
-     * Get a QueryBuilder instance for the used table.
-     *
-     * @return \Nova\Database\Query\Builder
-     */
-    protected function getQuery()
-    {
-        return $this->database->table($this->table);
     }
 
     /**
