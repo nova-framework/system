@@ -7,6 +7,7 @@ use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
 use Nova\Mail\Mailer;
 
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 
