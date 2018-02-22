@@ -68,16 +68,11 @@ class WorkCommand extends Command
         // is to protect us against any memory leaks that will be in the scripts.
         $memory = $this->option('memory');
 
-        $connection = $this->argument('connection');
-
-        $response = $this->runWorker($connection, $queue, $delay, $memory, $daemon);
-
-        // If a job was fired by the worker, we'll write the output out to the console
-        // so that the developer can watch live while the queue runs in the console
-        // window, which will also of get logged if stdout is logged out to disk.
-        if (! is_null($response['job'])) {
-            $this->writeOutput($response['job'], $response['failed']);
+        if (empty($connection = $this->argument('connection'))) {
+            $connection = $this->container['config']['queue.default'];
         }
+
+        $this->runWorker($connection, $queue, $delay, $memory, $daemon);
     }
 
     /**
@@ -100,7 +95,14 @@ class WorkCommand extends Command
         $tries = $this->option('tries');
 
         if (! $daemon) {
-            $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
+            $response = $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
+
+            // If a job was fired by the worker, we'll write the output out to the console
+            // so that the developer can watch live while the queue runs in the console
+            // window, which will also of get logged if stdout is logged out to disk.
+            if (is_array($response) && isset($response['job']) && isset($response['failed'])) {
+                $this->writeOutput($response['job'], $response['failed']);
+            }
         }
 
         $this->worker->setCache(

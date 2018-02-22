@@ -92,7 +92,9 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
      */
     public function forget($id)
     {
-        return $this->getTable()->where('id', $id)->delete() > 0;
+        $result = $this->getTable()->where('id', $id)->delete();
+
+        return $result > 0;
     }
 
     /**

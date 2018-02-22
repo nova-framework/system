@@ -28,7 +28,7 @@ class NullFailedJobProvider implements FailedJobProviderInterface
      */
     public function all()
     {
-        return [];
+        return array();
     }
 
     /**
