@@ -9,7 +9,7 @@ use Nova\Mail\Mailer;
 
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessUtils;
+use Symfony\Component\Process\ProcessUtils as Utils;
 
 use Carbon\Carbon;
 use Cron\CronExpression;
@@ -267,7 +267,7 @@ class Event
      */
     protected function compileCommand()
     {
-        $output = ProcessUtils::escapeArgument($this->output);
+        $output = Utils::escapeArgument($this->output);
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
@@ -275,14 +275,18 @@ class Event
             return $this->command .$redirect .$output .' 2>&1';
         }
 
-        $phpBinary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
+        $delimiter = windows_os() ? '&' : ';';
 
-        $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
+        $phpBinary = Utils::escapeArgument(
+            with(new PhpExecutableFinder)->find(false)
+        );
 
-        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish "' .$this->mutexName() .'"';
+        $forgeBinary = defined('FORGE_BINARY') ? Utils::escapeArgument(FORGE_BINARY) : 'forge';
 
-        return '(' .$this->command .$redirect .$output .' 2>&1 ' .(windows_os() ? '&' : ';') .' ' .$finished .') > '
-            .ProcessUtils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
+        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish ' .Utils::escapeArgument($this->mutexName());
+
+        return '(' .$this->command .$redirect .$output .' 2>&1 ' .$delimiter .' ' .$finished .') > '
+            .Utils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
     }
 
     /**

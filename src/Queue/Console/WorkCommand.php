@@ -60,6 +60,12 @@ class WorkCommand extends Command
             return;
         }
 
+        // We'll listen to the processed and failed events so we can write information
+        // to the console as jobs are processed, which will let the developer watch
+        // which jobs are coming through a queue and be informed on its progress.
+
+        $this->listenForEvents();
+
         $queue = $this->option('queue');
         $delay = $this->option('delay');
 
@@ -73,6 +79,24 @@ class WorkCommand extends Command
         }
 
         $this->runWorker($connection, $queue, $delay, $memory, $daemon);
+    }
+
+    /**
+     * Listen for the queue events in order to update the console output.
+     *
+     * @return void
+     */
+    protected function listenForEvents()
+    {
+        $this->container['events']->listen('nova.queue.processed', function ($connection, $job)
+        {
+            $this->writeOutput($job, false);
+        });
+
+        $this->container['events']->listen('nova.queue.failed', function ($connection, $job)
+        {
+            $this->writeOutput($job, true);
+        });
     }
 
     /**
@@ -95,14 +119,7 @@ class WorkCommand extends Command
         $tries = $this->option('tries');
 
         if (! $daemon) {
-            $response = $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
-
-            // If a job was fired by the worker, we'll write the output out to the console
-            // so that the developer can watch live while the queue runs in the console
-            // window, which will also of get logged if stdout is logged out to disk.
-            if (is_array($response) && isset($response['job']) && isset($response['failed'])) {
-                $this->writeOutput($response['job'], $response['failed']);
-            }
+            return $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
         }
 
         $this->worker->setCache(
@@ -122,9 +139,9 @@ class WorkCommand extends Command
     protected function writeOutput(Job $job, $failed)
     {
         if ($failed) {
-            $this->output->writeln('<error>Failed:</error> '.$job->getName());
+            $this->output->writeln('<error>Failed:</error> ' .$job->resolveName());
         } else {
-            $this->output->writeln('<info>Processed:</info> '.$job->getName());
+            $this->output->writeln('<info>Processed:</info> ' .$job->resolveName());
         }
     }
 

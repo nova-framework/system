@@ -46,6 +46,28 @@ class QueueManager
     }
 
     /**
+     * Register an event listener for the processing job event.
+     *
+     * @param  mixed  $callback
+     * @return void
+     */
+    public function processing($callback)
+    {
+        $this->app['events']->listen('nova.queue.processing', $callback);
+    }
+
+    /**
+     * Register an event listener for the processed job event.
+     *
+     * @param  mixed  $callback
+     * @return void
+     */
+    public function processed($callback)
+    {
+        $this->app['events']->listen('nova.queue.processed', $callback);
+    }
+
+    /**
      * Register an event listener for the failed job event.
      *
      * @param  mixed  $callback

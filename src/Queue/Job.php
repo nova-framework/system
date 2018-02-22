@@ -2,6 +2,8 @@
 
 namespace Nova\Queue;
 
+use Nova\Support\Arr;
+
 use DateTime;
 
 
@@ -166,7 +168,33 @@ abstract class Job
      */
     public function getName()
     {
-        return json_decode($this->getRawBody(), true)['job'];
+        $payload = json_decode($this->getRawBody(), true);
+
+        return $payload['job'];
+    }
+
+    /**
+     * Get the resolved name of the queued job class.
+     *
+     * @return string
+     */
+    public function resolveName()
+    {
+        $payload = json_decode($this->getRawBody(), true);
+
+        //
+        $name = $payload['job'];
+
+        if ($name === 'Nova\Queue\CallQueuedHandler@call') {
+            return Arr::get($payload, 'data.commandName', $name);
+        }
+
+        // If the Job is an Event.
+        else if ($name === 'Nova\Events\CallQueuedHandler@call') {
+            return Arr::get($payload, 'data.class') .'@' .Arr::get($payload, 'data.method');
+        }
+
+        return $name;
     }
 
     /**

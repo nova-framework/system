@@ -207,10 +207,12 @@ class Worker
             return $this->logFailedJob($connection, $job);
         }
 
+        // First we will raise the before job event and fire off the job. Once it is done
+        // we will see if it will be auto-deleted after processing and if so we will go
+        // ahead and run the delete method on the job. Otherwise we will just keep moving.
+
         try {
-            // First we will fire off the job. Once it is done we will see if it will
-            // be auto-deleted after processing and if so we will go ahead and run
-            // the delete method on the job. Otherwise we will just keep moving.
+            $this->raiseBeforeJobEvent($connectionName, $job);
 
             $job->handle();
 
@@ -218,13 +220,14 @@ class Worker
                 $job->delete();
             }
 
-            return array('job' => $job, 'failed' => false);
+            $this->raiseAfterJobEvent($connectionName, $job);
         }
-        catch (Exception $e) {
-            // If we catch an exception, we will attempt to release the job back onto
-            // the queue so it is not lost. This will let is be retried at a later
-            // time by another listener (or the same one). We will do that here.
 
+        // If we catch an exception, we will attempt to release the job back onto
+        // the queue so it is not lost. This will let is be retried at a later
+        // time by another listener (or the same one). We will do that here.
+
+        catch (Exception $e) {
             if (! $job->isDeleted()) {
                 $job->release($delay);
             }
@@ -261,6 +264,34 @@ class Worker
     }
 
     /**
+     * Raise the before queue job event.
+     *
+     * @param  string  $connection
+     * @param  \Nova\Queue\Job  $job
+     * @return void
+     */
+    protected function raiseBeforeJobEvent($connection, Job $job)
+    {
+        if (isset($this->events)) {
+            $this->events->fire('nova.queue.processing', array($connection, $job));
+        }
+    }
+
+    /**
+     * Raise the after queue job event.
+     *
+     * @param  string  $connectionName
+     * @param  \Nova\Queue\Job  $job
+     * @return void
+     */
+    protected function raiseAfterJobEvent($connection, Job $job)
+    {
+        if (isset($this->events)) {
+            $this->events->fire('nova.queue.processed', array($connection, $job));
+        }
+    }
+
+    /**
      * Raise the failed queue job event.
      *
      * @param  string  $connection
@@ -270,9 +301,7 @@ class Worker
     protected function raiseFailedJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $data = json_decode($job->getRawBody(), true);
-
-            $this->events->fire('nova.queue.failed', array($connection, $job, $data));
+            $this->events->fire('nova.queue.failed', array($connection, $job));
         }
     }
 
