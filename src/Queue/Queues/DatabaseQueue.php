@@ -81,7 +81,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      * @param  array   $options
      * @return mixed
      */
-    public function pushRaw($payload, $queue = null, array $options = [])
+    public function pushRaw($payload, $queue = null, array $options = array())
     {
         return $this->pushToDatabase(0, $queue, $payload);
     }
@@ -257,7 +257,13 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     public function deleteReserved($queue, $id)
     {
-        $this->database->table($this->table)->where('id', $id)->delete();
+        $this->database->beginTransaction();
+
+        if ($this->database->table($this->table)->lockForUpdate()->find($id)) {
+            $this->database->table($this->table)->where('id', $id)->delete();
+        }
+
+        $this->database->commit();
     }
 
     /**
