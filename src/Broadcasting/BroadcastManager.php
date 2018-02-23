@@ -70,22 +70,11 @@ class BroadcastManager implements FactoryInterface
     {
         $name = $name ?: $this->getDefaultDriver();
 
-        return $this->drivers[$name] = $this->get($name);
-    }
-
-    /**
-     * Attempt to get the connection from the local cache.
-     *
-     * @param  string  $name
-     * @return \Nova\Broadcasting\BroadcasterInterface
-     */
-    protected function get($name)
-    {
         if (isset($this->drivers[$name])) {
             return $this->drivers[$name];
         }
 
-        return $this->resolve($name);
+        return $this->drivers[$name] = $this->resolve($name);
     }
 
     /**
@@ -104,17 +93,19 @@ class BroadcastManager implements FactoryInterface
             throw new InvalidArgumentException("Broadcaster [{$name}] is not defined.");
         }
 
-        if (isset($this->customCreators[$config['driver']])) {
-            return $this->callCustomCreator($config);
-        } else {
-            $driverMethod = 'create'.ucfirst($config['driver']).'Driver';
+        $driver = $config['driver'];
 
-            if (method_exists($this, $driverMethod)) {
-                return $this->{$driverMethod}($config);
-            } else {
-                throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
-            }
+        if (isset($this->customCreators[$driver])) {
+            return $this->callCustomCreator($config);
         }
+
+        $method = 'create' .ucfirst($driver) .'Driver';
+
+        if (method_exists($this, $method)) {
+            return call_user_func(array($this, $method), $config);
+        }
+
+        throw new InvalidArgumentException("Driver [{$driver}] is not supported.");
     }
 
     /**
@@ -125,7 +116,9 @@ class BroadcastManager implements FactoryInterface
      */
     protected function callCustomCreator(array $config)
     {
-        return $this->customCreators[$config['driver']]($this->app, $config);
+        $driver = $config['driver'];
+
+        return call_user_func($this->customCreators[$driver], $this->app, $config);
     }
 
     /**
