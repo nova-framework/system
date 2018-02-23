@@ -301,7 +301,7 @@ class Repository
      */
     protected function getCachePath()
     {
-        return $this->config->get('modules.cache', STORAGE_PATH .'modules.php');
+        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'modules.php');
     }
 
     /*
