@@ -91,7 +91,7 @@ class RedisBroadcaster implements BroadcasterInterface
 
         $payload = json_encode(array(
             'event' => $event,
-            'data' => $payload
+            'data'  => $payload
         ));
 
         foreach ($channels as $channel) {

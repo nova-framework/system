@@ -57,7 +57,9 @@ abstract class Broadcaster implements BroadcasterInterface
             // Add the Auth User instance to the beginning of parameters.
             array_unshift($parameters, $request->user());
 
-            if (! is_null($result = call_user_func_array($callback, $parameters))) {
+            $result = call_user_func_array($callback, $parameters);
+
+            if (! is_null($result)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
