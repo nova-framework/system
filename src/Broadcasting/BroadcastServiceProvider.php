@@ -16,6 +16,7 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
+
     /**
      * Register the service provider.
      *
