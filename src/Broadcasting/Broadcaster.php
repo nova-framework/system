@@ -74,7 +74,7 @@ abstract class Broadcaster implements BroadcasterInterface
 
             array_unshift($parameters, $request->user());
 
-            // Resolve the Channel handler callable.
+            //
             $handler = $this->makeChannelHandler($callback);
 
             if ($result = call_user_func_array($handler, $parameters)) {
