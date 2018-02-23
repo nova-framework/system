@@ -54,7 +54,6 @@ abstract class Broadcaster implements BroadcasterInterface
 
             }, ARRAY_FILTER_USE_KEY);
 
-            // Add the Auth User instance to the beginning of parameters.
             array_unshift($parameters, $request->user());
 
             $result = call_user_func_array($callback, $parameters);
