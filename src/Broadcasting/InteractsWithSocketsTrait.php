@@ -1,6 +1,6 @@
 <?php
 
-namespace Shared\Broadcasting;
+namespace Nova\Broadcasting;
 
 use Nova\Support\Facades\Broadcast;
 

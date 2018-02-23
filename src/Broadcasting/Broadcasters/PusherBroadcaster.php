@@ -21,6 +21,7 @@ class PusherBroadcaster implements BroadcasterInterface
      */
     protected $pusher;
 
+
     /**
      * Create a new broadcaster instance.
      *
@@ -40,13 +41,15 @@ class PusherBroadcaster implements BroadcasterInterface
      */
     public function authenticate(Request $request)
     {
-        $channel = preg_replace('/^(private|presence)\-/', '', $request->input('channel_name'), 1, $count);
+        $user = $request->user();
 
-        if (($count > 0) && ! is_null($user = $request->user())) {
-            return $this->verifyUserCanAccessChannel($request, $channel);
+        $channel = $request->input('channel_name');
+
+        if (Str::startsWith($channel, array('private-', 'presence-')) && is_null($user)) {
+            throw new AccessDeniedHttpException;
         }
 
-        throw new AccessDeniedHttpException;
+        return $this->verifyUserCanAccessChannel($request, $channel);
     }
 
     /**

@@ -17,6 +17,7 @@ class LogBroadcaster implements BroadcasterInterface
      */
     protected $logger;
 
+
     /**
      * Create a new broadcaster instance.
      *
