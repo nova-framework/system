@@ -82,14 +82,14 @@ class Dispatcher implements QueueingDispatcherInterface
      */
     public function dispatchNow($command, $handler = null)
     {
-        if (! is_null($handler) || ($handler = $this->getCommandHandler($command))) {
+        if (! is_null($handler) || ! is_null($handler = $this->getCommandHandler($command))) {
             $callback = function ($command) use ($handler)
             {
                 return $handler->handle($command);
             };
         }
 
-        // The given Command has no dedicated Handler.
+        // The command is self handling.
         else {
             $callback = function ($command)
             {
@@ -130,8 +130,6 @@ class Dispatcher implements QueueingDispatcherInterface
 
             return $this->container->make($handler);
         }
-
-        return false;
     }
 
     /**
