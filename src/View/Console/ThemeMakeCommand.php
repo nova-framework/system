@@ -44,9 +44,6 @@ class ThemeMakeCommand extends Command
         'Views/',
         'Views/Layouts/',
         'Views/Layouts/RTL',
-        'Views/Overrides/',
-        'Views/Overrides/App/',
-        'Views/Overrides/Modules/',
     );
 
     /**
