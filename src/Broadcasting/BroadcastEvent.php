@@ -38,12 +38,11 @@ class BroadcastEvent
      * @param  array  $data
      * @return void
      */
-    public function fire(Job $job, array $data)
+    public function handle(Job $job, array $data)
     {
         $event = unserialize($data['event']);
 
-        $name = method_exists($event, 'broadcastAs')
-                ? $event->broadcastAs() : get_class($event);
+        $name = method_exists($event, 'broadcastAs') ? $event->broadcastAs() : get_class($event);
 
         $this->broadcaster->broadcast(
             $event->broadcastOn(), $name, $this->getPayloadFromEvent($event)
@@ -66,12 +65,14 @@ class BroadcastEvent
 
         $payload = array();
 
-        $properties = with(new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC);
+        $reflection = new ReflectionClass($event);
 
-        foreach ($properties as $property) {
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             $name = $property->getName();
 
-            $payload[$name] = $this->formatProperty($property->getValue($event));
+            $value = $property->getValue($event);
+
+            $payload[$name] = $this->formatProperty($value);
         }
 
         return $payload;
