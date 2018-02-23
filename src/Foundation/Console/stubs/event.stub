@@ -3,6 +3,12 @@
 namespace {{namespace}};
 
 use Nova\Broadcasting\ShouldBroadcastInterface;
+
+use Nova\Broadcasting\Channel;
+use Nova\Broadcasting\PrivateChannel;
+use Nova\Broadcasting\PresenceChannel;
+
+use Nova\Broadcasting\InteractsWithSocketsTrait;
 use Nova\Foundation\Events\DispatchableTrait;
 use Nova\Queue\SerializesModelsTrait;
 
@@ -12,7 +18,7 @@ use {{rootNamespace}}Events\Event;
 
 class {{className}} extends Event
 {
-    use DispatchableTrait, SerializesModelsTrait;
+    use DispatchableTrait, InteractsWithSocketsTrait, SerializesModelsTrait;
 
 
     /**
@@ -32,6 +38,6 @@ class {{className}} extends Event
      */
     public function broadcastOn()
     {
-        return array();
+        return new PrivateChannel('channel-name');
     }
 }
