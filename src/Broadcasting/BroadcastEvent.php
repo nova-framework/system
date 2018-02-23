@@ -49,7 +49,7 @@ class BroadcastEvent
         }
 
         if (! is_array($channels = $event->broadcastOn())) {
-            $channels = array($channels)l
+            $channels = array($channels);
         }
 
         $this->broadcaster->broadcast(

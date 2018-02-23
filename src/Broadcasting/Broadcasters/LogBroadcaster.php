@@ -56,8 +56,7 @@ class LogBroadcaster extends Broadcaster
     {
         $channels = implode(', ', $this->formatChannels($channels));
 
-        $message = 'Broadcasting [' .$event .'] on channels [' .$channels .'] with payload:' .PHP_EOL
-                        .json_encode($payload, JSON_PRETTY_PRINT);
+        $message = 'Broadcasting [' .$event .'] on channels [' .$channels .'] with payload:' .PHP_EOL .json_encode($payload, JSON_PRETTY_PRINT);
 
         $this->logger->info($message);
     }
