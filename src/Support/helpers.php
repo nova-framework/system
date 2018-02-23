@@ -1,5 +1,6 @@
 <?php
 
+use Nova\Broadcasting\FactoryInterface as BroadcastFactory;
 use Bova\Bus\Contracts\DispatcherInterface as BusDispatcher;
 use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
@@ -567,6 +568,35 @@ if (! function_exists('asset'))
     function asset($path, $secure = null)
     {
         return app('url')->asset($path, $secure);
+    }
+}
+
+if (! function_exists('bcrypt'))
+{
+    /**
+     * Hash the given value.
+     *
+     * @param  string  $value
+     * @param  array   $options
+     * @return string
+     */
+    function bcrypt($value, $options = array())
+    {
+        return app('hash')->make($value, $options);
+    }
+}
+
+if (! function_exists('broadcast'))
+{
+    /**
+     * Begin broadcasting an event.
+     *
+     * @param  mixed|null  $event
+     * @return \Nova\Broadcasting\PendingBroadcast|void
+     */
+    function broadcast($event = null)
+    {
+        return app(BroadcastFactory::class)->event($event);
     }
 }
 

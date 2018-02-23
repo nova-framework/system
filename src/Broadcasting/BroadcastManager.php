@@ -7,6 +7,7 @@ use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
 use Nova\Broadcasting\FactoryInterface;
+use Nova\Broadcasting\PendingBroadcast;
 use Nova\Support\Arr;
 
 use Closure;
@@ -66,6 +67,17 @@ class BroadcastManager implements FactoryInterface
         if ($request->hasHeader('X-Socket-ID')) {
             return $request->header('X-Socket-ID');
         }
+    }
+
+    /**
+     * Begin broadcasting an event.
+     *
+     * @param  mixed|null  $event
+     * @return \Nova\Broadcasting\PendingBroadcast|void
+     */
+    public function event($event = null)
+    {
+        return new PendingBroadcast($this->app->make('events'), $event);
     }
 
     /**
