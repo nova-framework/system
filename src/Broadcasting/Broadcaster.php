@@ -6,6 +6,7 @@ use Nova\Broadcasting\BroadcasterInterface;
 use Nova\Broadcasting\Channel;
 use Nova\Container\Container;
 use Nova\Http\Request;
+use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -110,7 +111,7 @@ abstract class Broadcaster implements BroadcasterInterface
     {
         return function () use ($handler)
         {
-            list($className, $method) = array_pad(explode('@', $handler, 2), 2, 'join');
+            list($className, $method) = Str::parseCallback($handler, 'join');
 
             $instance = $this->container->make($className);
 
