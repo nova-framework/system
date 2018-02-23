@@ -81,7 +81,11 @@ class BroadcastManager implements FactoryInterface
      */
     protected function get($name)
     {
-        return isset($this->drivers[$name]) ? $this->drivers[$name] : $this->resolve($name);
+        if (isset($this->drivers[$name])) {
+            return $this->drivers[$name];
+        }
+
+        return $this->resolve($name);
     }
 
     /**
