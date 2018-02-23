@@ -4,6 +4,7 @@ namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
+use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Support\Str;
 
@@ -25,11 +26,15 @@ class PusherBroadcaster extends Broadcaster
     /**
      * Create a new broadcaster instance.
      *
+     * @param  \Nova\Container\Container  $container
      * @param  \Pusher  $pusher
      * @return void
      */
-    public function __construct(Pusher $pusher)
+    public function __construct(Container $container, Pusher $pusher)
     {
+        parent::__construct($container);
+
+        //
         $this->pusher = $pusher;
     }
 
@@ -41,11 +46,11 @@ class PusherBroadcaster extends Broadcaster
      */
     public function authenticate(Request $request)
     {
-        $user = $request->user();
+        $channelName = $request->input('channel_name');
 
-        $channel = $request->input('channel_name');
+        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
 
-        if (Str::startsWith($channel, array('private-', 'presence-')) && is_null($user)) {
+        if (($count === 1) && is_null($request->user())) {
             throw new AccessDeniedHttpException;
         }
 
@@ -85,7 +90,7 @@ class PusherBroadcaster extends Broadcaster
     {
         $socket = Arr::pull($payload, 'socket');
 
-        $response = $this->pusher->trigger($channels, $event, $payload, $socket, true);
+        $response = $this->pusher->trigger($this->formatChannels($channels), $event, $payload, $socket, true);
 
         //
         $status = is_array($response) ? $response['status'] : 200;

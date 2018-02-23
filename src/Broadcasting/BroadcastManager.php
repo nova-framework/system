@@ -162,9 +162,10 @@ class BroadcastManager implements FactoryInterface
     {
         $options = Arr::get($config, 'options', array());
 
-        return new PusherBroadcaster(
-            new Pusher($config['key'], $config['secret'], $config['app_id'], $options)
-        );
+        // Create a Pusher instance.
+        $pusher = new Pusher($config['key'], $config['secret'], $config['app_id'], $options);
+
+        return new PusherBroadcaster($this->app, $pusher);
     }
 
     /**
@@ -177,9 +178,10 @@ class BroadcastManager implements FactoryInterface
     {
         $connection = Arr::get($config, 'connection');
 
-        return new RedisBroadcaster(
-            $this->app->make('redis'), $connection
-        );
+        // Create a Redis Database instance.
+        $redis = $this->app->make('redis');
+
+        return new RedisBroadcaster($this->app, $redis, $connection);
     }
 
     /**
@@ -190,9 +192,9 @@ class BroadcastManager implements FactoryInterface
      */
     protected function createLogDriver(array $config)
     {
-        return new LogBroadcaster(
-            $this->app->make('Psr\Log\LoggerInterface')
-        );
+        $logger = $this->app->make('Psr\Log\LoggerInterface');
+
+        return new LogBroadcaster($this->app, $logger);
     }
 
     /**
@@ -203,7 +205,7 @@ class BroadcastManager implements FactoryInterface
      */
     protected function createNullDriver(array $config)
     {
-        return new NullBroadcaster();
+        return new NullBroadcaster($this->app);
     }
 
     /**

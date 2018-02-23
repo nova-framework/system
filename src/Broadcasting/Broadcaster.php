@@ -3,6 +3,8 @@
 namespace Nova\Broadcasting;
 
 use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Channel;
+use Nova\Container\Container;
 use Nova\Http\Request;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -11,12 +13,28 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 abstract class Broadcaster implements BroadcasterInterface
 {
     /**
+     * @var \Nova\Container\Container
+     */
+    protected $container;
+
+    /**
      * The registered channel authenticators.
      *
      * @var array
      */
     protected $channels = array();
 
+
+    /**
+     * Create a new broadcaster instance.
+     *
+     * @param  \Nova\Container\Container  $container
+     * @return void
+     */
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
 
     /**
      * Register a channel authenticator.
@@ -56,13 +74,30 @@ abstract class Broadcaster implements BroadcasterInterface
 
             array_unshift($parameters, $request->user());
 
-            $result = call_user_func_array($callback, $parameters);
-
-            if (! is_null($result)) {
+            if ($result = call_user_func_array($callback, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
 
         throw new AccessDeniedHttpException;
+    }
+
+    /**
+     * Format the channel array into an array of strings.
+     *
+     * @param  array  $channels
+     * @return array
+     */
+    protected function formatChannels(array $channels)
+    {
+        return array_map(function ($channel)
+        {
+            if ($channel instanceof Channel) {
+                return $channel->getName();
+            }
+
+            return $channel;
+
+        }, $channels);
     }
 }

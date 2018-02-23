@@ -3,6 +3,7 @@
 namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
+use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Redis\Database as RedisDatabase;
 
@@ -33,8 +34,11 @@ class RedisBroadcaster implements Broadcaster
      * @param  string  $connection
      * @return void
      */
-    public function __construct(RedisDatabase $redis, $connection = null)
+    public function __construct(Container $container, RedisDatabase $redis, $connection = null)
     {
+        parent::__construct($container);
+
+        //
         $this->redis = $redis;
 
         $this->connection = $connection;
@@ -48,11 +52,11 @@ class RedisBroadcaster implements Broadcaster
      */
     public function authenticate(Request $request)
     {
-        $user = $request->user();
+        $channelName = $request->input('channel_name');
 
-        $channel = $request->input('channel_name');
+        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
 
-        if (Str::startsWith($channel, array('private-', 'presence-')) && is_null($user)) {
+        if (($count === 1) && is_null($request->user())) {
             throw new AccessDeniedHttpException;
         }
 
@@ -94,7 +98,7 @@ class RedisBroadcaster implements Broadcaster
             'data'  => $payload
         ));
 
-        foreach ($channels as $channel) {
+        foreach ($this->formatChannels($channels) as $channel) {
             $connection->publish($channel, $payload);
         }
     }
