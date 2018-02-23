@@ -2,11 +2,9 @@
 
 namespace Nova\Foundation\Console;
 
-use Nova\Console\GeneratorCommand;
 use Nova\Support\Str;
-
+use Nova\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
-
 
 class ListenerMakeCommand extends GeneratorCommand
 {
@@ -83,7 +81,11 @@ class ListenerMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return realpath(__DIR__) .str_replace('/', DS, '/stubs/listener.stub');
+        if ($this->option('queued')) {
+            return realpath(__DIR__) .str_replace('/', DS, '/stubs/listener-queued.stub');
+        } else {
+            return realpath(__DIR__) .str_replace('/', DS, '/stubs/listener.stub');
+        }
     }
 
     /**
@@ -106,6 +108,8 @@ class ListenerMakeCommand extends GeneratorCommand
     {
         return array(
             array('event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
+
+            array('queued', null, InputOption::VALUE_NONE, 'Indicates the event listener should be queued.'),
         );
     }
 }

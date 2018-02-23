@@ -11,6 +11,7 @@ use Nova\Foundation\Console\ModelMakeCommand;
 use Nova\Foundation\Console\ConsoleMakeCommand;
 use Nova\Foundation\Console\EnvironmentCommand;
 use Nova\Foundation\Console\EventMakeCommand;
+use Nova\Foundation\Console\JobMakeCommand;
 use Nova\Foundation\Console\KeyGenerateCommand;
 use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
@@ -43,6 +44,7 @@ class ForgeServiceProvider extends ServiceProvider
         'Down'          => 'command.down',
         'Environment'   => 'command.environment',
         'EventMake'     => 'command.event.make',
+        'JobMake'       => 'command.job.make',
         'KeyGenerate'   => 'command.key.generate',
         'ListenerMake'  => 'command.listener.make',
         'ModelMake'     => 'command.model.make',
@@ -156,6 +158,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.event.make', function ($app)
         {
             return new EventMakeCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerJobMakeCommand()
+    {
+        $this->app->singleton('command.job.make', function ($app)
+        {
+            return new JobMakeCommand($app['files']);
         });
     }
 

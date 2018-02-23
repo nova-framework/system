@@ -2,14 +2,18 @@
 
 namespace {{namespace}};
 
+use Nova\Broadcasting\ShouldBroadcastInterface;
 use Nova\Foundation\Events\DispatchableTrait;
+use Nova\Queue\SerializesModelsTrait;
+
 
 use {{rootNamespace}}Events\Event;
 
 
 class {{className}} extends Event
 {
-    use DispatchableTrait;
+    use DispatchableTrait, SerializesModelsTrait;
+
 
     /**
      * Create a new Event instance.
@@ -21,4 +25,13 @@ class {{className}} extends Event
         //
     }
 
+    /**
+     * Get the channels the event should be broadcast on.
+     *
+     * @return array
+     */
+    public function broadcastOn()
+    {
+        return array();
+    }
 }
