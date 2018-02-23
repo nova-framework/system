@@ -75,7 +75,7 @@ abstract class Broadcaster implements BroadcasterInterface
             array_unshift($parameters, $request->user());
 
             // Resolve the Channel handler callable.
-            $handler = $this->makeChannelHandler($callback);
+            $handler = $this->makeHandler($callback);
 
             if ($result = $this->container->call($handler, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
@@ -91,7 +91,7 @@ abstract class Broadcaster implements BroadcasterInterface
      * @param  mixed   $handler
      * @return mixed
      */
-    public function makeChannelHandler($handler)
+    public function makeHandler($handler)
     {
         if (is_string($handler)) {
             return $this->createClassHandler($handler);
