@@ -2,10 +2,10 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\Broadcaster;
+use Nova\Broadcasting\BroadcasterInterface;
 
 
-class NullBroadcaster extends Broadcaster
+class NullBroadcaster extends BroadcasterInterface
 {
 
     /**

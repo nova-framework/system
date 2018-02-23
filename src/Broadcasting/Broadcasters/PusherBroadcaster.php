@@ -7,7 +7,7 @@ use Nova\Broadcasting\BroadcasterInterface;
 use Pusher;
 
 
-class PusherBroadcaster implements Broadcaster
+class PusherBroadcaster implements BroadcasterInterface
 {
     /**
      * The Pusher SDK instance.

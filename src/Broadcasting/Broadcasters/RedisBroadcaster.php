@@ -6,7 +6,7 @@ use Nova\Broadcasting\BroadcasterInterface;
 use Nova\Redis\Database as RedisDatabase;
 
 
-class RedisBroadcaster implements Broadcaster
+class RedisBroadcaster implements BroadcasterInterface
 {
     /**
      * The Redis instance.
@@ -32,6 +32,7 @@ class RedisBroadcaster implements Broadcaster
     public function __construct(RedisDatabase $redis, $connection = null)
     {
         $this->redis = $redis;
+
         $this->connection = $connection;
     }
 
@@ -42,7 +43,10 @@ class RedisBroadcaster implements Broadcaster
     {
         $connection = $this->redis->connection($this->connection);
 
-        $payload = json_encode(['event' => $event, 'data' => $payload]);
+        $payload = json_encode(array(
+            'event' => $event,
+            'data' => $payload
+        ));
 
         foreach ($channels as $channel) {
             $connection->publish($channel, $payload);
