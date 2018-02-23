@@ -1,6 +1,7 @@
 <?php
 
-namespace Illuminate\Contracts\Broadcasting;
+namespace Nova\Contracts\Broadcasting;
+
 
 interface Broadcaster
 {
@@ -12,5 +13,5 @@ interface Broadcaster
      * @param  array  $payload
      * @return void
      */
-    public function broadcast(array $channels, $event, array $payload = []);
+    public function broadcast(array $channels, $event, array $payload = array());
 }
