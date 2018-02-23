@@ -4,7 +4,7 @@ namespace {{namespace}};
 
 use Nova\Bus\QueueableTrait;
 use Nova\Foundation\Bus\DispatchableTrait;
-use Nova\Queue\Contracts\ShouldQueueInterface;
+use Nova\Queue\ShouldQueueInterface;
 use Nova\Queue\SerializesModelsTrait;
 use Nova\Queue\InteractsWithQueueTrait;
 

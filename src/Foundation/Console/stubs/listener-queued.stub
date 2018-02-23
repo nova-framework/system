@@ -2,7 +2,7 @@
 
 namespace {{namespace}};
 
-use Nova\Queue\Contracts\ShouldQueueInterface;
+use Nova\Queue\ShouldQueueInterface;
 use Nova\Queue\InteractsWithQueueTrait;
 
 use {{fullEvent}};
