@@ -2,6 +2,8 @@
 
 namespace Nova\Events;
 
+use Nova\Broadcasting\ShouldBroadcastInterface;
+use Nova\Broadcasting\ShouldBroadcastNowInterface;
 use Nova\Container\Container;
 use Nova\Events\DispatcherInterface;
 use Nova\Support\Str;
@@ -214,6 +216,10 @@ class Dispatcher implements DispatcherInterface
 
         $this->firing[] = $event;
 
+        if (isset($payload[0]) && ($payload[0] instanceof ShouldBroadcastInterface)) {
+            $this->broadcastEvent($payload[0]);
+        }
+
         foreach ($this->getListeners($event) as $listener) {
             $response = call_user_func_array($listener, $payload);
 
@@ -239,6 +245,23 @@ class Dispatcher implements DispatcherInterface
         array_pop($this->firing);
 
         return $halt ? null : $responses;
+    }
+
+    /**
+     * Broadcast the given event class.
+     *
+     * @param  \Nova\Broadcasting\ShouldBroadcastInterface  $event
+     * @return void
+     */
+    protected function broadcastEvent($event)
+    {
+        $connection = ($event instanceof ShouldBroadcastNowInterface) ? 'sync' : null;
+
+        $queue = method_exists($event, 'onQueue') ? $event->onQueue() : null;
+
+        $this->resolveQueue()->connection($connection)->pushOn($queue, 'Nova\Broadcasting\BroadcastEvent', array(
+            'event' => serialize(clone $event),
+        ));
     }
 
     /**
@@ -395,31 +418,23 @@ class Dispatcher implements DispatcherInterface
     {
         return function () use ($className, $method)
         {
-            $arguments = $this->cloneArgumentsForQueueing(func_get_args());
+            // Clone the given arguments for queueing.
+            $arguments = array_map(function ($a)
+            {
+                return is_object($a) ? clone $a : $a;
+
+            }, func_get_args());
 
             if (method_exists($className, 'queue')) {
                 $this->callQueueMethodOnHandler($className, $method, $arguments);
             } else {
                 $this->resolveQueue()->push('Nova\Events\CallQueuedHandler@call', array(
-                    'class' => $className, 'method' => $method, 'data' => serialize($arguments),
+                    'class'  => $className,
+                    'method' => $method,
+                    'data'   => serialize($arguments),
                 ));
             }
         };
-    }
-
-    /**
-     * Clone the given arguments for queueing.
-     *
-     * @param  array  $arguments
-     * @return array
-     */
-    protected function cloneArgumentsForQueueing(array $arguments)
-    {
-        return array_map(function ($a)
-        {
-            return is_object($a) ? clone $a : $a;
-
-        }, $arguments);
     }
 
     /**
@@ -432,7 +447,7 @@ class Dispatcher implements DispatcherInterface
      */
     protected function callQueueMethodOnHandler($className, $method, $arguments)
     {
-        $handler = with(new ReflectionClass($class))->newInstanceWithoutConstructor();
+        $handler = with(new ReflectionClass($className))->newInstanceWithoutConstructor();
 
         $handler->queue($this->resolveQueue(), 'Nova\Events\CallQueuedHandler@call', array(
             'class'  => $className,
