@@ -111,14 +111,16 @@ abstract class Broadcaster implements BroadcasterInterface
     {
         return function () use ($handler)
         {
-            list($className, $method) = Str::parseCallback($handler, 'join');
-
-            $instance = $this->container->make($className);
-
             // We will make a callable of the handler instance and a method that should
             // be called on that instance, then we will pass in the arguments that we
             // received in this method into this handler class instance's methods.
+
             $parameters = func_get_args();
+
+            //
+            list($className, $method) = Str::parseCallback($handler, 'join');
+
+            $instance = $this->container->make($className);
 
             return call_user_func_array($instance, $parameters);
         };
