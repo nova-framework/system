@@ -50,7 +50,7 @@ class PusherBroadcaster extends Broadcaster
 
         $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
 
-        if (is_null($request->user()) && ($count > 0)) {
+        if ($count && is_null($request->user())) {
             throw new AccessDeniedHttpException;
         }
 
