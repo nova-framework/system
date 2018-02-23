@@ -42,7 +42,11 @@ class BroadcastEvent
     {
         $event = unserialize($data['event']);
 
-        $name = method_exists($event, 'broadcastAs') ? $event->broadcastAs() : get_class($event);
+        if (method_exists($event, 'broadcastAs')) {
+            $name = $event->broadcastAs();
+        } else {
+            $name = get_class($event);
+        }
 
         $this->broadcaster->broadcast(
             $event->broadcastOn(), $name, $this->getPayloadFromEvent($event)
@@ -65,14 +69,15 @@ class BroadcastEvent
 
         $payload = array();
 
+        //
         $reflection = new ReflectionClass($event);
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
+            $key = $property->getName();
 
             $value = $property->getValue($event);
 
-            $payload[$name] = $this->formatProperty($value);
+            $payload[$key] = $this->formatProperty($value);
         }
 
         return $payload;
