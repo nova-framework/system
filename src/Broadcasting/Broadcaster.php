@@ -73,32 +73,18 @@ abstract class Broadcaster implements BroadcasterInterface
 
             }, ARRAY_FILTER_USE_KEY);
 
+            if (is_string($callback)) {
+                $callback = $this->createClassHandler($callback);
+            }
+
             array_unshift($parameters, $request->user());
 
-            //
-            $handler = $this->makeChannelHandler($callback);
-
-            if ($result = call_user_func_array($handler, $parameters)) {
+            if ($result = call_user_func_array($callback, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
 
         throw new AccessDeniedHttpException;
-    }
-
-    /**
-     * Create a Channel handler callable.
-     *
-     * @param  mixed   $handler
-     * @return mixed
-     */
-    public function makeChannelHandler($handler)
-    {
-        if (is_string($handler)) {
-            return $this->createClassHandler($handler);
-        }
-
-        return $handler;
     }
 
     /**
