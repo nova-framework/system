@@ -45,7 +45,7 @@ abstract class Broadcaster implements BroadcasterInterface
             $regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
             if (preg_match('/^' .$regexp .'$/', $channel, $matches) !== 1) {
-                return continue;
+                continue;
             }
 
             $parameters = array_filter($matches, function ($key)

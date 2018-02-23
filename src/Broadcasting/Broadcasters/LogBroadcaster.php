@@ -2,13 +2,13 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 use Nova\Http\Request;
 
 use Psr\Log\LoggerInterface;
 
 
-class LogBroadcaster implements BroadcasterInterface
+class LogBroadcaster extends Broadcaster
 {
     /**
      * The logger implementation.

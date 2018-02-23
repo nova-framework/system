@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Contracts\Broadcasting;
+namespace Nova\Broadcasting;
 
 use Nova\Http\Request;
 

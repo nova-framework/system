@@ -136,35 +136,6 @@ if (! function_exists('__d'))
     }
 }
 
-if (! function_exists('collect'))
-{
-    /**
-     * Create a collection from the given value.
-     *
-     * @param  mixed  $value
-     * @return \Nova\Support\Collection
-     */
-    function collect($value = null)
-    {
-        return Collection::make($value);
-    }
-}
-
-if (! function_exists('event')) {
-    /**
-     * Fire an event and call the listeners.
-     *
-     * @param  string|object  $event
-     * @param  mixed  $payload
-     * @param  bool  $halt
-     * @return array|null
-     */
-    function event($event, $payload = array(), $halt = false)
-    {
-        return app('events')->fire($event, $payload, $halt);
-    }
-}
-
 if (! function_exists('action'))
 {
     /**
@@ -650,6 +621,20 @@ if (! function_exists('class_uses_recursive'))
     }
 }
 
+if (! function_exists('collect'))
+{
+    /**
+     * Create a collection from the given value.
+     *
+     * @param  mixed  $value
+     * @return \Nova\Support\Collection
+     */
+    function collect($value = null)
+    {
+        return Collection::make($value);
+    }
+}
+
 if (! function_exists('config')) {
     /**
      * Get / set the specified configuration value.
@@ -855,6 +840,63 @@ if (! function_exists('ends_with'))
     function ends_with($haystack, $needles)
     {
         return Str::endsWith($haystack, $needles);
+    }
+}
+
+if (! function_exists('env')) {
+    /**
+     * Gets the value of an environment variable. Supports boolean, empty and null.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    function env($key, $default = null)
+    {
+        $value = getenv($key);
+
+        if ($value === false) {
+            return value($default);
+        }
+
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+
+            case 'false':
+            case '(false)':
+                return false;
+
+            case 'empty':
+            case '(empty)':
+                return '';
+
+            case 'null':
+            case '(null)':
+                return null;
+        }
+
+        if ((strlen($value) > 1) && Str::startsWith($value, '"') && Str::endsWith($value, '"')) {
+            return substr($value, 1, -1);
+        }
+
+        return $value;
+    }
+}
+
+if (! function_exists('event')) {
+    /**
+     * Fire an event and call the listeners.
+     *
+     * @param  string|object  $event
+     * @param  mixed  $payload
+     * @param  bool  $halt
+     * @return array|null
+     */
+    function event($event, $payload = array(), $halt = false)
+    {
+        return app('events')->fire($event, $payload, $halt);
     }
 }
 

@@ -2,7 +2,7 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
 use Nova\Http\Request;
 use Nova\Support\Str;
@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Pusher;
 
 
-class PusherBroadcaster implements BroadcasterInterface
+class PusherBroadcaster extends Broadcaster
 {
     /**
      * The Pusher SDK instance.

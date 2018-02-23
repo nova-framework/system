@@ -2,14 +2,14 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 use Nova\Http\Request;
 use Nova\Redis\Database as RedisDatabase;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 
-class RedisBroadcaster implements BroadcasterInterface
+class RedisBroadcaster implements Broadcaster
 {
     /**
      * The Redis instance.

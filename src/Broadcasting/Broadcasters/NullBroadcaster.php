@@ -2,11 +2,11 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Broadcaster;
 use Nova\Http\Request;
 
 
-class NullBroadcaster extends BroadcasterInterface
+class NullBroadcaster extends Broadcaster
 {
 
     /**

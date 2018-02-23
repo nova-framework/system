@@ -14,7 +14,7 @@ class BroadcastServiceProvider extends ServiceProvider
      *
      * @var bool
      */
-    protected $defer = true;
+    protected $defer = false;
 
 
     /**
@@ -35,7 +35,7 @@ class BroadcastServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(
-            'Nova\Broadcasting\BroadcastManager', 'Nova\Contracts\Broadcasting\FactoryInterface'
+            'Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\FactoryInterface'
         );
     }
 
@@ -48,7 +48,7 @@ class BroadcastServiceProvider extends ServiceProvider
     {
         return array(
             'Nova\Broadcasting\BroadcastManager',
-            'Nova\Contracts\Broadcasting\FactoryInterface',
+            'Nova\Broadcasting\FactoryInterface',
             'Nova\Broadcasting\BroadcasterInterface',
         );
     }
