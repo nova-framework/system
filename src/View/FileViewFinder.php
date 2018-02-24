@@ -101,28 +101,16 @@ class FileViewFinder implements ViewFinderInterface
     {
         list($namespace, $view) = $this->getNamespaceSegments($name);
 
-        $this->addThemeInNamespacedViews($namespace, $view);
-
-        return $this->findInPaths($view, $this->hints[$namespace]);
-    }
-
-    /**
-     * Inject theme paths into namespaced views
-     *
-     * @param  string  $name
-     * @return string
-     */
-    protected function addThemeInNamespacedViews($namespace, $view)
-    {
-        $vendorPath = dirname(head($this->paths)) .DS .$namespace;
-
         $hints = $this->hints[$namespace];
 
-        if (! in_array($vendorPath, $hints) && $this->files->isDirectory($vendorPath)) {
-            array_unshift($hints, $vendorPath);
+        // Inject package paths into namespaced views.
+        $path = head($this->paths) .DS .'Packages' .DS .$namespace;
 
-            $this->hints[$namespace] = $hints;
+        if (! in_array($path, $hints) && $this->files->isDirectory($path)) {
+            array_unshift($hints, $path);
         }
+
+        return $this->findInPaths($view, $hints);
     }
 
     /**
@@ -275,10 +263,10 @@ class FileViewFinder implements ViewFinderInterface
      * @param  string  $namespace
      * @return void
      */
-    public function setupTheme($namespace)
+    public function setNamedTheme($namespace)
     {
         if (isset($this->hints[$namespace])) {
-            $path = head($this->hints[$namespace]) .DS .'Overrides' .DS .'App';
+            $path = head($this->hints[$namespace]);
 
             array_unshift($this->paths, $path);
         }

@@ -736,9 +736,9 @@ class Factory
      * @param  string  $namespace
      * @return void
      */
-    public function setupTheme($namespace)
+    public function setNamedTheme($namespace)
     {
-        $this->finder->setupTheme($namespace);
+        $this->finder->setNamedTheme($namespace);
     }
 
     /**
