@@ -264,14 +264,14 @@ class FileViewFinder implements ViewFinderInterface
      * @param  string  $namespace
      * @return void
      */
-    public function setNamedTheme($namespace)
+    public function overrides($namespace)
     {
         if (! isset($this->hints[$namespace])) {
             return;
         }
 
         // Remove first the previous theme overrides path.
-        else if (Str::endsWith($path = head($this->paths), 'Overrides')) {
+        else if (Str::endsWith(head($this->paths), 'Overrides')) {
             array_shift($this->paths);
         }
 
