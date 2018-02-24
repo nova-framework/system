@@ -3,6 +3,7 @@
 namespace Nova\View;
 
 use Nova\Filesystem\Filesystem;
+use Nova\Support\Arr;
 use Nova\View\ViewFinderInterface;
 
 
@@ -100,7 +101,28 @@ class FileViewFinder implements ViewFinderInterface
     {
         list($namespace, $view) = $this->getNamespaceSegments($name);
 
+        $this->addThemeInNamespacedViews($namespace, $view);
+
         return $this->findInPaths($view, $this->hints[$namespace]);
+    }
+
+    /**
+     * Inject theme paths into namespaced views
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function addThemeInNamespacedViews($namespace, $view)
+    {
+        $vendorPath = head($this->paths) .DS .'Overrides' .DS .$namespace;
+
+        $hints = $this->hints[$namespace];
+
+        if (! Arr::has($hints, $vendorPath) && $this->files->isDirectory($vendorPath)) {
+            array_unshift($hints, $vendorPath);
+
+            $this->hints[$namespace] = $hints;
+        }
     }
 
     /**
@@ -175,6 +197,17 @@ class FileViewFinder implements ViewFinderInterface
     }
 
     /**
+     * Add a location to the finder.
+     *
+     * @param  string  $location
+     * @return void
+     */
+    public function prependLocation($location)
+    {
+        array_unshift($this->paths, $location);
+    }
+
+    /**
      * Add a namespace hint to the finder.
      *
      * @param  string  $namespace
@@ -234,6 +267,21 @@ class FileViewFinder implements ViewFinderInterface
     public function hasHintInformation($name)
     {
         return strpos($name, static::HINT_PATH_DELIMITER) > 0;
+    }
+
+    /**
+     * Setup the paths for Views overriding with the view finder.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function setupTheme($namespace)
+    {
+        if (isset($this->hints[$namespace])) {
+            $path = head($this->hints[$namespace]);
+
+            array_unshift($this->paths, $path);
+        }
     }
 
     /**

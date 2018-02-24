@@ -731,6 +731,17 @@ class Factory
     }
 
     /**
+     * Setup the paths for Views overriding.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function setupTheme($namespace)
+    {
+        $this->finder->setupTheme($namespace);
+    }
+
+    /**
      * Get the extension to engine bindings.
      *
      * @return array
