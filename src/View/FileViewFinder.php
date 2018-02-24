@@ -264,7 +264,7 @@ class FileViewFinder implements ViewFinderInterface
      * @param  string  $namespace
      * @return void
      */
-    public function overrides($namespace)
+    public function overridesFrom($namespace)
     {
         if (! isset($this->hints[$namespace])) {
             return;
@@ -276,9 +276,9 @@ class FileViewFinder implements ViewFinderInterface
         $path = dirname($path) .DS .'Overrides';
 
         if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
-            $currentPath = head($this->paths);
+            $firstPath = head($this->paths);
 
-            if (Str::endsWith($currentPath, DS .'Overrides')) {
+            if (Str::endsWith($firstPath, DS .'Overrides')) {
                 array_shift($this->paths);
             }
 

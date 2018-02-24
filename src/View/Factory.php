@@ -736,9 +736,9 @@ class Factory
      * @param  string  $namespace
      * @return void
      */
-    public function overrides($namespace)
+    public function overridesFrom($namespace)
     {
-        $this->finder->overrides($namespace);
+        $this->finder->overridesFrom($namespace);
     }
 
     /**
