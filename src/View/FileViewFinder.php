@@ -118,7 +118,7 @@ class FileViewFinder implements ViewFinderInterface
 
         $hints = $this->hints[$namespace];
 
-        if (! Arr::has($hints, $vendorPath) && $this->files->isDirectory($vendorPath)) {
+        if (! in_array($vendorPath, $hints) && $this->files->isDirectory($vendorPath)) {
             array_unshift($hints, $vendorPath);
 
             $this->hints[$namespace] = $hints;
