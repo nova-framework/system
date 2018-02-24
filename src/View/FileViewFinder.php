@@ -270,17 +270,18 @@ class FileViewFinder implements ViewFinderInterface
             return;
         }
 
-        // Remove first the previous theme overrides path.
-        else if (Str::endsWith(head($this->paths), 'Overrides')) {
-            array_shift($this->paths);
-        }
-
         $path = head($this->hints[$namespace]);
 
         // Compute the final path for the Views overrides.
         $path = dirname($path) .DS .'Overrides';
 
         if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
+            $currentPath = head($this->paths);
+
+            if (Str::endsWith($currentPath, DS .'Overrides')) {
+                array_shift($this->paths);
+            }
+
             array_unshift($this->paths, $path);
         }
     }
