@@ -114,7 +114,7 @@ class FileViewFinder implements ViewFinderInterface
      */
     protected function addThemeInNamespacedViews($namespace, $view)
     {
-        $vendorPath = head($this->paths) .DS .'Overrides' .DS .$namespace;
+        $vendorPath = dirname(head($this->paths)) .DS .$namespace;
 
         $hints = $this->hints[$namespace];
 
@@ -278,7 +278,7 @@ class FileViewFinder implements ViewFinderInterface
     public function setupTheme($namespace)
     {
         if (isset($this->hints[$namespace])) {
-            $path = head($this->hints[$namespace]);
+            $path = head($this->hints[$namespace]) .DS .'Overrides' .DS .'App';
 
             array_unshift($this->paths, $path);
         }
