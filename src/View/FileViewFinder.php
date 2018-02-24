@@ -4,6 +4,7 @@ namespace Nova\View;
 
 use Nova\Filesystem\Filesystem;
 use Nova\Support\Arr;
+use Nova\Support\Str;
 use Nova\View\ViewFinderInterface;
 
 
@@ -265,12 +266,21 @@ class FileViewFinder implements ViewFinderInterface
      */
     public function setNamedTheme($namespace)
     {
-        if (isset($this->hints[$namespace])) {
-            $path = head($this->hints[$namespace]) .DS .'Overrides';
+        if (! isset($this->hints[$namespace])) {
+            return;
+        }
 
-            if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
-                array_unshift($this->paths, $path);
-            }
+        // Remove first the previous theme overrides path.
+        else if (Str::endsWith($path = head($this->paths), 'Overrides')) {
+            array_shift($this->paths);
+        }
+
+        $namedPath = head($this->hints[$namespace]);
+
+        $path = dirname($namedPath) .DS .'Overrides';
+
+        if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
+            array_unshift($this->paths, $path);
         }
     }
 
