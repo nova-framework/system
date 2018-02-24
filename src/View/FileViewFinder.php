@@ -258,12 +258,12 @@ class FileViewFinder implements ViewFinderInterface
     }
 
     /**
-     * Setup the paths for Views overriding with the view finder.
+     * Prepend a path specified by its namespace.
      *
      * @param  string  $namespace
      * @return void
      */
-    public function setNamedTheme($namespace)
+    public function prependNamedPath($namespace)
     {
         if (isset($this->hints[$namespace])) {
             $path = head($this->hints[$namespace]);
