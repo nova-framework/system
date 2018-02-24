@@ -40,6 +40,8 @@ class ThemeMakeCommand extends Command
         'Assets/js/',
         'Config/',
         'Language/',
+        'Overrides/',
+        'Overrides/Packages/',
         'Providers/',
         'Views/',
         'Views/Layouts/',
