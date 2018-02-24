@@ -104,7 +104,7 @@ class FileViewFinder implements ViewFinderInterface
 
         $hints = $this->hints[$namespace];
 
-        // Inject package paths into namespaced views.
+        // Inject the package paths into namespaced views.
         $path = head($this->paths) .DS .'Packages' .DS .$namespace;
 
         if (! in_array($path, $hints) && $this->files->isDirectory($path)) {
