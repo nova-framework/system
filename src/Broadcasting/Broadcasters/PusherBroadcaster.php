@@ -92,16 +92,11 @@ class PusherBroadcaster extends Broadcaster
 
         $response = $this->pusher->trigger($this->formatChannels($channels), $event, $payload, $socket, true);
 
-        //
-        $status = is_array($response) ? $response['status'] : 200;
-
-        if ((($status >= 200) && ($status <= 299)) || ($response === true)) {
+        if (($response['status'] >= 200) && ($response['status'] <= 299)) {
             return;
         }
 
-        throw new BroadcastException(
-            is_bool($response) ? 'Failed to connect to Pusher.' : $response['body']
-        );
+        throw new BroadcastException($response['body']);
     }
 
     /**
