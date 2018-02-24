@@ -736,9 +736,9 @@ class Factory
      * @param  string  $namespace
      * @return void
      */
-    public function prependNamedPath($namespace)
+    public function setNamedTheme($namespace)
     {
-        $this->finder->prependNamedPath($namespace);
+        $this->finder->setNamedTheme($namespace);
     }
 
     /**

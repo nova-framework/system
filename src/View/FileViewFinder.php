@@ -263,12 +263,14 @@ class FileViewFinder implements ViewFinderInterface
      * @param  string  $namespace
      * @return void
      */
-    public function prependNamedPath($namespace)
+    public function setNamedTheme($namespace)
     {
         if (isset($this->hints[$namespace])) {
-            $path = head($this->hints[$namespace]);
+            $path = head($this->hints[$namespace]) .DS .'Overrides';
 
-            array_unshift($this->paths, $path);
+            if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
+                array_unshift($this->paths, $path);
+            }
         }
     }
 
