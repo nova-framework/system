@@ -18,8 +18,8 @@ use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ConfigPublishCommand;
-use Nova\Foundation\Publishers\ConfigPublisher;
 use Nova\Foundation\Console\VendorPublishCommand;
+use Nova\Foundation\Publishers\ConfigPublisher;
 
 use Nova\Support\ServiceProvider;
 
