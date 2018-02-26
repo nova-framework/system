@@ -33,8 +33,6 @@ if (! function_exists('resource_url'))
      */
     function resource_url($path, $module = null)
     {
-        $basePath = '';
-
         if (is_null($module)) {
             $basePath = 'assets';
         } else {
