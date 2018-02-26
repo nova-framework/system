@@ -153,23 +153,12 @@ class RoutingServiceProvider extends ServiceProvider
                 return $dispatcher->serve($path, $request);
             });
 
-            // Register the route for assets from Modules and Themes.
-            $dispatcher->route('(themes|modules)/([^/]+)/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
+            // Register the route for assets from Packages, Modules and Themes.
+            $dispatcher->route('(themes|modules|packages)/([^/]+)/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
             {
-                if (strlen($package) > 3) {
-                    $package = Str::studly($package);
-                } else {
-                    $package = Str::upper($package);
-                }
+                $namespace = $type .'/' .$package;
 
-                $path = BASEPATH .$type .DS .$package .DS .'Assets' .DS .str_replace('/', DS, $path);
-
-                return $dispatcher->serve($path, $request);
-            });
-
-            $dispatcher->route('packages/([^/]+)/(.*)', function (Request $request, $package, $path) use ($dispatcher)
-            {
-                if (is_null($packagePath = $dispatcher->getPackagePath($package))) {
+                if (is_null($packagePath = $dispatcher->getPackagePath($namespace))) {
                     return new Response('File Not Found', 404);
                 }
 
