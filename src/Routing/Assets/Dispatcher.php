@@ -44,6 +44,13 @@ class Dispatcher
      */
     protected $paths;
 
+    /**
+     * All of the named path hints.
+     *
+     * @var array
+     */
+    protected $hints = array();
+
 
     /**
      * Create a new Default Dispatcher instance.
@@ -130,7 +137,7 @@ class Dispatcher
 
         // Create a Binary File Response instance.
         $headers = array(
-            'Content-Type' => $mimeType = $this->getMimeType($path)
+            'Content-Type' => $mimeType = $this->guessMimeType($path)
         );
 
         if ($mimeType !== 'application/json') {
@@ -138,18 +145,18 @@ class Dispatcher
 
             // Set the Content Disposition.
             $response->setContentDisposition($disposition, $fileName ?: basename($path));
+
+            // Setup the (browser) Cache Control.
+            $this->setupCacheControl($response);
+
+            // Setup the Not Modified since...
+            $response->isNotModified($request);
         } else {
             // We will do a special processing for the JSON files.
             $response = new JsonResponse(
                 json_decode(file_get_contents($path), true), 200, $headers
             );
         }
-
-        // Setup the (browser) Cache Control.
-        $this->setupCacheControl($response);
-
-        // Setup the Not Modified since...
-        $response->isNotModified($request);
 
         // Prepare the Response against the Request instance, if is requested.
         if ($prepared) {
@@ -175,7 +182,7 @@ class Dispatcher
         $response->setSharedMaxAge($sharedMaxAge);
     }
 
-    protected function getMimeType($path)
+    protected function guessMimeType($path)
     {
         // Even the Symfony's HTTP Foundation have troubles with the CSS and JS files?
         //
@@ -204,7 +211,7 @@ class Dispatcher
         return $guesser->guess($path);
     }
 
-    public function getPaths()
+    public function getVendorPaths()
     {
         if (isset($this->paths)) {
             return $this->paths;
@@ -248,5 +255,75 @@ class Dispatcher
         $files->put($path, $content);
 
         return $this->paths = $paths;
+    }
+
+    /**
+     * Register a Package for cascading configuration.
+     *
+     * @param  string  $package
+     * @param  string  $hint
+     * @param  string  $namespace
+     * @return void
+     */
+    public function package($package, $hint, $namespace = null)
+    {
+        $namespace = $this->getPackageNamespace($package, $namespace);
+
+        $this->addNamespace(str_replace('_', '-', $namespace), $hint);
+    }
+
+    /**
+     * Add a new namespace to the loader.
+     *
+     * @param  string  $namespace
+     * @param  string  $hint
+     * @return void
+     */
+    public function addNamespace($namespace, $hint)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        $this->hints[$namespace] = rtrim($hint, DS) .DS;
+    }
+
+    /**
+     * Get the configuration namespace for a Package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageNamespace($package, $namespace)
+    {
+        if (is_null($namespace)) {
+            list($vendor, $namespace) = explode('/', $package);
+
+            return Str::snake($namespace);
+        }
+
+        return $namespace;
+    }
+
+    /**
+     * Get the path for a registered namespace.
+     *
+     * @param  string  $namespace
+     * @return string|null
+     */
+    public function getPackagePath($namespace)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        return Arr::get($this->hints, $namespace);
+    }
+
+    /**
+     * Returns all registered namespaces with the router.
+     *
+     * @return array
+     */
+    public function getHints()
+    {
+        return $this->hints;
     }
 }

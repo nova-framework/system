@@ -104,6 +104,13 @@ abstract class ServiceProvider
         if ($files->isDirectory($viewPath)) {
             $views->addNamespace($package, $viewPath);
         }
+
+        // Register the Package Assets path.
+        $webroot = dirname($path) .DS .'webroot';
+
+        if ($files->isDirectory($webroot)) {
+            $this->app['assets.dispatcher']->package($package, $webroot, $namespace);
+        }
     }
 
     /**

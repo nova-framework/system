@@ -35,19 +35,13 @@ if (! function_exists('resource_url'))
     {
         $basePath = '';
 
-        if (! is_null($module)) {
-            $basePath = 'modules/';
-
-            if (Str::length($module) > 3) {
-                $basePath .= Str::snake($module, '-');
-            } else {
-                $basePath .= Str::lower($module);
-            }
-
-            $basePath .= '/';
+        if (is_null($module)) {
+            $basePath = 'assets';
+        } else {
+            $basePath = 'modules/' .$module;
         }
 
-        $path = $basePath .'assets/' .ltrim($path, '/');
+        $path = $basePath .'/' .ltrim($path, '/');
 
         return url($path);
     }
@@ -56,24 +50,30 @@ if (! function_exists('resource_url'))
 if (! function_exists('theme_url'))
 {
     /**
-     * Template URL helper
+     * Theme URL helper
      * @param string $path
      * @param string $theme
      * @return string
      */
-    function theme_url($path, $theme = null)
+    function theme_url($path, $theme)
     {
-        $config = app('config');
+        $path = sprintf('themes/%s/%s', $theme, ltrim($path, '/'));
 
-        $theme = $theme ?: $config['app']['theme'];
+        return url($path);
+    }
+}
 
-        if (Str::length($theme) > 3) {
-            $theme = Str::snake($theme, '-');
-        } else {
-            $theme = Str::lower($theme);
-        }
-
-        $path = sprintf('themes/%s/assets/%s', $theme, ltrim($path, '/'));
+if (! function_exists('package_url'))
+{
+    /**
+     * Package URL helper
+     * @param string $path
+     * @param string $package
+     * @return string
+     */
+    function package_url($path, $package)
+    {
+        $path = sprintf('packages/%s/%s', $package, ltrim($path, '/'));
 
         return url($path);
     }

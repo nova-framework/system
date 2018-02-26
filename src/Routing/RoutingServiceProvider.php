@@ -141,7 +141,7 @@ class RoutingServiceProvider extends ServiceProvider
             $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
             {
                 if ($type == 'vendor') {
-                    $paths = $dispatcher->getPaths();
+                    $paths = $dispatcher->getVendorPaths();
 
                     if (! Str::startsWith($path, $paths)) {
                         return new Response('File Not Found', 404);
@@ -154,7 +154,7 @@ class RoutingServiceProvider extends ServiceProvider
             });
 
             // Register the route for assets from Modules and Themes.
-            $dispatcher->route('(themes|modules)/([^/]+)/assets/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
+            $dispatcher->route('(themes|modules)/([^/]+)/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
             {
                 if (strlen($package) > 3) {
                     $package = Str::studly($package);
@@ -163,6 +163,17 @@ class RoutingServiceProvider extends ServiceProvider
                 }
 
                 $path = BASEPATH .$type .DS .$package .DS .'Assets' .DS .str_replace('/', DS, $path);
+
+                return $dispatcher->serve($path, $request);
+            });
+
+            $dispatcher->route('packages/([^/]+)/(.*)', function (Request $request, $package, $path) use ($dispatcher)
+            {
+                if (is_null($packagePath = $dispatcher->getPackagePath($package))) {
+                    return new Response('File Not Found', 404);
+                }
+
+                $path = $packagePath .str_replace('/', DS, $path);
 
                 return $dispatcher->serve($path, $request);
             });
