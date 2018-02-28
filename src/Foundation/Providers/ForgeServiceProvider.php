@@ -17,8 +17,12 @@ use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
+
+use Nova\Foundation\Console\AssetPublishCommand;
 use Nova\Foundation\Console\ConfigPublishCommand;
 use Nova\Foundation\Console\VendorPublishCommand;
+
+use Nova\Foundation\Publishers\AssetPublisher;
 use Nova\Foundation\Publishers\ConfigPublisher;
 
 use Nova\Support\ServiceProvider;
@@ -39,6 +43,7 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
+        'AssetPublish'  => 'command.asset.publish',
         'ConfigPublish' => 'command.config.publish',
         'ClearCompiled' => 'command.clear-compiled',
         'ConsoleMake'   => 'command.console.make',
@@ -72,6 +77,33 @@ class ForgeServiceProvider extends ServiceProvider
         }
 
         $this->commands(array_values($this->commands));
+    }
+
+    /**
+     * Register the configuration publisher class and command.
+     *
+     * @return void
+     */
+    protected function registerAssetPublishCommand()
+    {
+        $this->app->bindShared('asset.publisher', function($app)
+        {
+            $path = $app['path.public'];
+
+            $publisher = new AssetPublisher($app['files'], $path);
+
+            $publisher->setPackagePath($app['path.base'] .DS .'vendor');
+
+            return $publisher;
+        });
+
+        $this->app->bindShared('command.asset.publish', function($app)
+        {
+            $assetDispatcher = $app['assets.dispatcher'];
+            $assetPublisher  = $app['asset.publisher'];
+
+            return new AssetPublishCommand($assetDispatcher, $assetPublisher);
+        });
     }
 
     /**

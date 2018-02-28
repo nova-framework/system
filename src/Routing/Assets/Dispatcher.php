@@ -273,6 +273,19 @@ class Dispatcher
     }
 
     /**
+     * Return true if has the specified namespace hint on the router.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function hasNamespace($namespace)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        return isset($this->hints[$namespace]);
+    }
+
+    /**
      * Add a new namespace to the loader.
      *
      * @param  string  $namespace
