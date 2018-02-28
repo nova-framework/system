@@ -74,7 +74,9 @@ class ConsoleServiceProvider extends ServiceProvider
         );
 
         foreach ($commands as $command) {
-            $this->{'register' .$command .'Command'}();
+            $method = 'register' .$command .'Command';
+
+            call_user_func(array($this, $method));
         }
     }
 

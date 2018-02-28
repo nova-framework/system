@@ -19,6 +19,7 @@ use Nova\Package\Console\MiddlewareMakeCommand;
 use Nova\Package\Console\MigrationMakeCommand;
 use Nova\Package\Console\ModelMakeCommand;
 use Nova\Package\Console\PolicyMakeCommand;
+use Nova\Package\Console\ProviderMakeCommand;
 use Nova\Package\Console\SeederMakeCommand;
 
 use Nova\Support\ServiceProvider;
@@ -41,7 +42,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'PackageMigrateStatus',
             'PackageSeed',
 
-            // Generators
+            //
             'PackageMake',
             'ConsoleMake',
             'ControllerMake',
@@ -50,12 +51,15 @@ class ConsoleServiceProvider extends ServiceProvider
             'MiddlewareMake',
             'ModelMake',
             'PolicyMake',
+            'ProviderMake',
             'MigrationMake',
             'SeederMake',
         );
 
         foreach ($commands as $command) {
-            $this->{'register' .$command .'Command'}();
+            $method = 'register' .$command .'Command';
+
+            call_user_func(array($this, $method));
         }
     }
 
@@ -173,7 +177,7 @@ class ConsoleServiceProvider extends ServiceProvider
             return new ConsoleMakeCommand($app['files'], $app['packages']);
         });
 
-        $this->commands('command.make.package.controller');
+        $this->commands('command.make.package.console');
     }
 
     /**
@@ -252,6 +256,19 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.package.policy');
+    }
+
+    /**
+     * Register the make:module:provider command.
+     */
+    private function registerProviderMakeCommand()
+    {
+        $this->app->bindShared('command.make.package.provider', function ($app)
+        {
+            return new ProviderMakeCommand($app['files'], $app['packages']);
+        });
+
+        $this->commands('command.make.package.provider');
     }
 
     /**

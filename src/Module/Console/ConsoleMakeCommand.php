@@ -22,7 +22,7 @@ class ConsoleMakeCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new Module Forge command';
+    protected $description = 'Create a new Module Forge Command class';
 
     /**
      * String to store the command type.
