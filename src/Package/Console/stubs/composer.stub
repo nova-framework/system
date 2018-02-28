@@ -1,0 +1,25 @@
+{
+    "name": "{{lower_package}}",
+    "type": "nova-Package",
+    "description": "{{name}} is a Package for Nova Framework",
+    "license": "{{license}}",
+    "authors": [
+        {
+            "name": "{{author}}",
+            "email": "{{email}}",
+            "homepage": "{{homepage}}",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "nova-framework/system": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "{{json_namespace}}\\": "src/"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}

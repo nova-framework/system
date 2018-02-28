@@ -1,0 +1,50 @@
+<?php
+
+namespace {{namespace}}\Providers;
+
+use Nova\Package\Support\Providers\PackageServiceProvider as ServiceProvider;
+
+
+class PackageServiceProvider extends ServiceProvider
+{
+    /**
+     * The additional provider class names.
+     *
+     * @var array
+     */
+    protected $providers = array(
+        '{{namespace}}\Providers\AuthServiceProvider',
+        '{{namespace}}\Providers\EventServiceProvider',
+        '{{namespace}}\Providers\RouteServiceProvider'
+    );
+
+
+    /**
+     * Bootstrap the Application Events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $path = realpath(__DIR__ .'/../');
+
+        // Configure the Package.
+        $this->package('{{package}}', '{{slug}}', $path);
+
+        // Bootstrap the Package.
+        require $path .DS .'Bootstrap.php';
+    }
+
+    /**
+     * Register the {{name}} Package Service Provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        parent::register();
+
+        //
+    }
+
+}
