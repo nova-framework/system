@@ -1,7 +1,7 @@
 {
     "name": "{{lower_package}}",
     "type": "nova-Package",
-    "description": "{{name}} is a Package for Nova Framework",
+    "description": "{{name}} is a package for Nova Framework",
     "license": "{{license}}",
     "authors": [
         {
@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=5.6.0",
-        "nova-framework/system": "~4.0"
+        "nova-framework/system": "^3.81"
     },
     "autoload": {
         "psr-4": {
