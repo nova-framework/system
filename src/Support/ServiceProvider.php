@@ -111,7 +111,7 @@ abstract class ServiceProvider
         list ($vendor) = explode('/', $package);
 
         if (($vendor != 'Modules') && ($vendor != 'Themes')) {
-            $assets = dirname($path) .DS .'webroot';
+            $assets = dirname($path) .DS .'assets';
 
             $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
         }

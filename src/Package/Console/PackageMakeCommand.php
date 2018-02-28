@@ -35,6 +35,7 @@ class PackageMakeCommand extends Command
      */
     protected $packageFolders = array(
         'default' => array(
+            'assets/',
             'src/',
             'src/Config/',
             'src/Database/',
@@ -42,9 +43,9 @@ class PackageMakeCommand extends Command
             'src/Database/Seeds/',
             'src/Language/',
             'src/Providers/',
-            'webroot/'
         ),
         'extended' => array(
+            'assets/',
             'src/',
             'src/Config/',
             'src/Controllers/',
@@ -59,7 +60,6 @@ class PackageMakeCommand extends Command
             'src/Providers/',
             'src/Routes/',
             'src/Views/',
-            'webroot/'
         )
     );
 
@@ -290,10 +290,10 @@ class PackageMakeCommand extends Command
         }
 
         $steps = array(
-            'Generating folders...'                => 'generateFolders',
-            'Generating files...'                => 'generateFiles',
-            'Generating .gitkeep ...'            => 'generateGitkeep',
-            'Updating the composer.json ...'    => 'updateComposerJson',
+            'Generating folders...'          => 'generateFolders',
+            'Generating files...'            => 'generateFiles',
+            'Generating .gitkeep ...'        => 'generateGitkeep',
+            'Updating the composer.json ...' => 'updateComposerJson',
         );
 
         $progress = new ProgressBar($this->output, count($steps));
@@ -415,7 +415,7 @@ return array (
 
             if(! empty($files)) continue;
 
-            $gitkeep = $path .'/.gitkeep';
+            $gitkeep = $path .DS .'.gitkeep';
 
             $this->files->put($gitkeep, '');
         }
@@ -436,7 +436,7 @@ return array (
         if (is_array($config) && isset($config['autoload'])) {
             $namespace = $this->data['namespace'] .'\\';
 
-            $config['autoload']['psr-4'][$namespace] = 'Packages/' . $this->data['name'] . "/src/";
+            $config['autoload']['psr-4'][$namespace] = 'packages/' . $this->data['name'] . "/src/";
 
             $output = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
 
