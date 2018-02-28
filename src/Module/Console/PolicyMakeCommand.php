@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakePolicyCommand extends MakeCommand
+class PolicyMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.

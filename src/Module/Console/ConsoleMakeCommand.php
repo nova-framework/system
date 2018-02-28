@@ -5,30 +5,31 @@ namespace Nova\Module\Console;
 use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeEventCommand extends MakeCommand
+class ConsoleMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:event';
+    protected $name = 'make:module:console';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Event class';
+    protected $description = 'Create a new Module Forge command';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Event';
+    protected $type = 'Command';
 
     /**
      * Module folders to be created.
@@ -36,7 +37,7 @@ class MakeEventCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Events/',
+        'Console/Commands/',
     );
 
     /**
@@ -55,7 +56,7 @@ class MakeEventCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'event.stub',
+            'console.stub',
         ),
     );
 
@@ -70,13 +71,11 @@ class MakeEventCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-
-        $this->data['path'] = $this->getBaseNamespace();
-
+        $this->data['path']      = $this->getBaseNamespace();
         $this->data['className'] = basename($filePath);
 
         //
-        $this->data['rootNamespace'] = $this->container->getNamespace();
+        $this->data['command'] = $this->option('command');
     }
 
     /**
@@ -91,9 +90,7 @@ class MakeEventCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
-
-            '{{rootNamespace}}',
-
+            '{{command}}',
         );
 
         $replaces = array(
@@ -101,13 +98,11 @@ class MakeEventCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
-
-            $this->data['rootNamespace'],
+            $this->data['command'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
-
 
     /**
      * Get the console command arguments.
@@ -118,7 +113,19 @@ class MakeEventCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('command', null, InputOption::VALUE_OPTIONAL, 'The terminal command that should be assigned.', 'command:name'),
         );
     }
 }

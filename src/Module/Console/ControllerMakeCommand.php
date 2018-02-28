@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeControllerCommand extends MakeCommand
+class ControllerMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.

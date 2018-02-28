@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 
-class MakeModuleCommand extends Command
+class ModuleMakeCommand extends Command
 {
     /**
      * The name of the console command.

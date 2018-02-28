@@ -7,28 +7,28 @@ use Nova\Module\Console\MakeCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeSeederCommand extends MakeCommand
+class ProviderMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:seeder';
+    protected $name = 'make:module:provider';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Seeder class';
+    protected $description = 'Create a new Module Service Provider class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Seeder';
+    protected $type = 'Provider';
 
     /**
      * Module folders to be created.
@@ -36,7 +36,7 @@ class MakeSeederCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Database/Seeds/',
+        'Providers/',
     );
 
     /**
@@ -55,14 +55,14 @@ class MakeSeederCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'seeder_plus.stub',
+            'provider.stub',
         ),
     );
 
     /**
      * Resolve Container after getting file path.
      *
-     * @param string $FilePath
+     * @param string $filePath
      *
      * @return array
      */
@@ -70,9 +70,7 @@ class MakeSeederCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-
-        $this->data['path'] = $this->getBaseNamespace();
-
+        $this->data['path']      = $this->getBaseNamespace();
         $this->data['className'] = basename($filePath);
     }
 
@@ -109,7 +107,7 @@ class MakeSeederCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Seeder class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
         );
     }
 

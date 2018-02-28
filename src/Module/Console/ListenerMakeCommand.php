@@ -5,30 +5,40 @@ namespace Nova\Module\Console;
 use Nova\Module\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class MakeModelCommand extends MakeCommand
+class ListenerMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:model';
+    protected $name = 'make:module:listener';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Model class';
+    protected $description = 'Create a new Module Event Listener class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Model';
+    protected $type = 'Listener';
+
+    /**
+     * Module signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'event',
+    );
 
     /**
      * Module folders to be created.
@@ -36,7 +46,7 @@ class MakeModelCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Models/',
+        'Listeners/',
     );
 
     /**
@@ -55,9 +65,27 @@ class MakeModelCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'model.stub',
+            'listener.stub',
+        ),
+        'event' => array(
+            'listener.stub',
         ),
     );
+
+
+    /**
+     * Execute the console command.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        if (! $this->option('event')) {
+            return $this->error('Missing required option: --event');
+        }
+
+        parent::handle();
+    }
 
     /**
      * Resolve Container after getting file path.
@@ -70,8 +98,28 @@ class MakeModelCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-        $this->data['path']      = $this->getBaseNamespace();
+
+        $this->data['path'] = $this->getBaseNamespace();
+
         $this->data['className'] = basename($filePath);
+
+        //
+        $this->data['event']     = 'dummy';
+        $this->data['fullEvent'] = 'dummy';
+    }
+
+    /**
+     * Resolve Container after getting input option.
+     *
+     * @param string $option
+     *
+     * @return array
+     */
+    protected function resolveByOption($option)
+    {
+        $this->data['fullEvent'] = $option;
+
+        $this->data['event'] = class_basename($option);
     }
 
     /**
@@ -86,6 +134,9 @@ class MakeModelCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
+
+            '{{event}}',
+            '{{fullEvent}}',
         );
 
         $replaces = array(
@@ -93,11 +144,13 @@ class MakeModelCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
+
+            $this->data['event'],
+            $this->data['fullEvent'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
-
 
     /**
      * Get the console command arguments.
@@ -108,7 +161,19 @@ class MakeModelCommand extends MakeCommand
     {
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
         );
     }
 }

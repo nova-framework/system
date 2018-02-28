@@ -7,57 +7,57 @@ use Nova\Module\Console\MakeCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MakeProviderCommand extends MakeCommand
+class MiddlewareMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:module:provider';
+    protected $name = 'make:module:middleware';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Module Service Provider class';
+    protected $description = 'Create a new Module Middleware class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Provider';
+    protected $type = 'Middleware';
 
     /**
-     * Module folders to be created.
+     * Plugin folders to be created.
      *
      * @var array
      */
-    protected $listFolders = array(
-        'Providers/',
-    );
+    protected $listFolders = [
+        'Middleware/',
+    ];
 
     /**
-     * Module files to be created.
+     * Plugin files to be created.
      *
      * @var array
      */
-    protected $listFiles = array(
+    protected $listFiles = [
         '{{filename}}.php',
-    );
+    ];
 
     /**
-     * Module stubs used to populate defined files.
+     * Plugin stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = array(
-        'default' => array(
-            'provider.stub',
-        ),
-    );
+    protected $listStubs = [
+        'default' => [
+            'middleware.stub',
+        ],
+    ];
 
     /**
      * Resolve Container after getting file path.
@@ -70,7 +70,7 @@ class MakeProviderCommand extends MakeCommand
     {
         $this->data['filename']  = $this->makeFileName($filePath);
         $this->data['namespace'] = $this->getNamespace($filePath);
-        $this->data['path']      = $this->getBaseNamespace();
+
         $this->data['className'] = basename($filePath);
     }
 
@@ -83,20 +83,19 @@ class MakeProviderCommand extends MakeCommand
     {
         $searches = array(
             '{{filename}}',
-            '{{path}}',
             '{{namespace}}',
             '{{className}}',
         );
 
         $replaces = array(
             $this->data['filename'],
-            $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
+
 
     /**
      * Get the console command arguments.
@@ -106,9 +105,8 @@ class MakeProviderCommand extends MakeCommand
     protected function getArguments()
     {
         return array(
-            array('slug', InputArgument::REQUIRED, 'The slug of the Module.'),
-            array('name', InputArgument::REQUIRED, 'The name of the Model class.'),
+            array('slug', InputArgument::REQUIRED, 'The slug of the Plugin.'),
+            array('name', InputArgument::REQUIRED, 'The name of the Middleware class.'),
         );
     }
-
 }

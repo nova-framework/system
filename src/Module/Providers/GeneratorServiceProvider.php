@@ -2,17 +2,17 @@
 
 namespace Nova\Module\Providers;
 
-use Nova\Module\Console\MakeModuleCommand;
-use Nova\Module\Console\MakeConsoleCommand;
-use Nova\Module\Console\MakeControllerCommand;
-use Nova\Module\Console\MakeEventCommand;
-use Nova\Module\Console\MakeListenerCommand;
-use Nova\Module\Console\MakeMiddlewareCommand;
-use Nova\Module\Console\MakeMigrationCommand;
-use Nova\Module\Console\MakeModelCommand;
-use Nova\Module\Console\MakePolicyCommand;
-use Nova\Module\Console\MakeProviderCommand;
-use Nova\Module\Console\MakeSeederCommand;
+use Nova\Module\Console\ModuleMakeCommand;
+use Nova\Module\Console\ConsoleMakeCommand;
+use Nova\Module\Console\ControllerMakeCommand;
+use Nova\Module\Console\EventMakeCommand;
+use Nova\Module\Console\ListenerMakeCommand;
+use Nova\Module\Console\MiddlewareMakeCommand;
+use Nova\Module\Console\MigrationMakeCommand;
+use Nova\Module\Console\ModelMakeCommand;
+use Nova\Module\Console\PolicyMakeCommand;
+use Nova\Module\Console\ProviderMakeCommand;
+use Nova\Module\Console\SeederMakeCommand;
 
 use Nova\Support\ServiceProvider;
 
@@ -41,21 +41,21 @@ class GeneratorServiceProvider extends ServiceProvider
     public function register()
     {
         $commands = array(
-            'MakeModule',
-            'MakeConsole',
-            'MakeController',
-            'MakeEvent',
-            'MakeListener',
-            'MakeMiddleware',
-            'MakeModel',
-            'MakePolicy',
-            'MakeProvider',
-            'MakeMigration',
-            'MakeSeeder'
+            'Module',
+            'Console',
+            'Controller',
+            'Event',
+            'Listener',
+            'Middleware',
+            'Model',
+            'Policy',
+            'Provider',
+            'Migration',
+            'Seeder'
         );
 
         foreach ($commands as $command) {
-            $method = 'register' .$command .'Command';
+            $method = 'register' .$command .'MakeCommand';
 
             call_user_func(array($this, $method));
         }
@@ -64,11 +64,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module command.
      */
-    private function registerMakeModuleCommand()
+    private function registerModuleMakeCommand()
     {
         $this->app->bindShared('command.make.module', function ($app)
         {
-            return new MakeModuleCommand($app['files'], $app['modules']);
+            return new ModuleMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module');
@@ -77,11 +77,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:controller command.
      */
-    private function registerMakeConsoleCommand()
+    private function registerConsoleMakeCommand()
     {
         $this->app->bindShared('command.make.module.console', function ($app)
         {
-            return new MakeConsoleCommand($app['files'], $app['modules']);
+            return new ConsoleMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.console');
@@ -90,11 +90,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:controller command.
      */
-    private function registerMakeControllerCommand()
+    private function registerControllerMakeCommand()
     {
         $this->app->bindShared('command.make.module.controller', function ($app)
         {
-            return new MakeControllerCommand($app['files'], $app['modules']);
+            return new ControllerMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.controller');
@@ -103,11 +103,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:controller command.
      */
-    private function registerMakeEventCommand()
+    private function registerEventMakeCommand()
     {
         $this->app->bindShared('command.make.module.event', function ($app)
         {
-            return new MakeEventCommand($app['files'], $app['modules']);
+            return new EventMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.event');
@@ -116,11 +116,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:controller command.
      */
-    private function registerMakeListenerCommand()
+    private function registerListenerMakeCommand()
     {
         $this->app->bindShared('command.make.module.listener', function ($app)
         {
-            return new MakeListenerCommand($app['files'], $app['modules']);
+            return new ListenerMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.listener');
@@ -129,11 +129,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:controller command.
      */
-    private function registerMakeMiddlewareCommand()
+    private function registerMiddlewareMakeCommand()
     {
         $this->app->bindShared('command.make.module.middleware', function ($app)
         {
-            return new MakeMiddlewareCommand($app['files'], $app['modules']);
+            return new MiddlewareMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.middleware');
@@ -142,11 +142,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:model command.
      */
-    private function registerMakeModelCommand()
+    private function registerModelMakeCommand()
     {
         $this->app->bindShared('command.make.module.model', function ($app)
         {
-            return new MakeModelCommand($app['files'], $app['modules']);
+            return new ModelMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.model');
@@ -155,11 +155,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:policy command.
      */
-    private function registerMakePolicyCommand()
+    private function registerPolicyMakeCommand()
     {
         $this->app->bindShared('command.make.module.policy', function ($app)
         {
-            return new MakePolicyCommand($app['files'], $app['modules']);
+            return new PolicyMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.policy');
@@ -168,11 +168,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:module:provider command.
      */
-    private function registerMakeProviderCommand()
+    private function registerProviderMakeCommand()
     {
         $this->app->bindShared('command.make.module.provider', function ($app)
         {
-            return new MakeProviderCommand($app['files'], $app['modules']);
+            return new ProviderMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.module.provider');
@@ -181,11 +181,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:plugin:migration command.
      */
-    private function registerMakeMigrationCommand()
+    private function registerMigrationMakeCommand()
     {
         $this->app->bindShared('command.make.plugin.migration', function ($app)
         {
-            return new MakeMigrationCommand($app['files'], $app['modules']);
+            return new MigrationMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.plugin.migration');
@@ -194,11 +194,11 @@ class GeneratorServiceProvider extends ServiceProvider
     /**
      * Register the make:plugin:seeder command.
      */
-    private function registerMakeSeederCommand()
+    private function registerSeederMakeCommand()
     {
         $this->app->bindShared('command.make.plugin.seeder', function ($app)
         {
-            return new MakeSeederCommand($app['files'], $app['modules']);
+            return new SeederMakeCommand($app['files'], $app['modules']);
         });
 
         $this->commands('command.make.plugin.seeder');
