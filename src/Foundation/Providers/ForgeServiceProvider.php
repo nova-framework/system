@@ -21,9 +21,11 @@ use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\AssetPublishCommand;
 use Nova\Foundation\Console\ConfigPublishCommand;
 use Nova\Foundation\Console\VendorPublishCommand;
+use Nova\Foundation\Console\ViewPublishCommand;
 
 use Nova\Foundation\Publishers\AssetPublisher;
 use Nova\Foundation\Publishers\ConfigPublisher;
+use Nova\Foundation\Publishers\ViewPublisher;
 
 use Nova\Support\ServiceProvider;
 
@@ -61,6 +63,7 @@ class ForgeServiceProvider extends ServiceProvider
         'Serve'         => 'command.serve',
         'Up'            => 'command.up',
         'VendorPublish' => 'command.vendor.publish',
+        'ViewPublish'   => 'command.view.publish',
     );
 
     /**
@@ -88,21 +91,21 @@ class ForgeServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('asset.publisher', function($app)
         {
-            $path = $app['path.public'];
+            $publisher = new AssetPublisher($app['files'], $app['path.public']);
 
-            $publisher = new AssetPublisher($app['files'], $path);
+            //
+            $path = $app['path.base'] .DS .'vendor';
 
-            $publisher->setPackagePath($app['path.base'] .DS .'vendor');
+            $publisher->setPackagePath($path);
 
             return $publisher;
         });
 
         $this->app->bindShared('command.asset.publish', function($app)
         {
-            $assetDispatcher = $app['assets.dispatcher'];
             $assetPublisher  = $app['asset.publisher'];
 
-            return new AssetPublishCommand($assetDispatcher, $assetPublisher);
+            return new AssetPublishCommand($app['assets.dispatcher'], $assetPublisher);
         });
     }
 
@@ -335,6 +338,33 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.vendor.publish', function ($app)
         {
             return new VendorPublishCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the configuration publisher class and command.
+     *
+     * @return void
+     */
+    protected function registerViewPublishCommand()
+    {
+        $this->app->bindShared('view.publisher', function($app)
+        {
+            $viewPath = $app['path'] .DS .'Views';
+
+            $vendorPath = $app['path.base'] .DS .'vendor';
+
+            //
+            $publisher = new ViewPublisher($app['files'], $viewPath);
+
+            $publisher->setPackagePath($vendorPath);
+
+            return $publisher;
+        });
+
+        $this->app->bindShared('command.view.publish', function($app)
+        {
+            return new ViewPublishCommand($app['packages'], $app['view.publisher']);
         });
     }
 
