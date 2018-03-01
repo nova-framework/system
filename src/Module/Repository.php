@@ -45,7 +45,7 @@ class Repository
 
     public function all()
     {
-        return $this->getCache()->sortBy('order');
+        return $this->getCached()->sortBy('order');
     }
 
     /**
@@ -234,9 +234,11 @@ class Repository
      */
     public function optimize()
     {
-        $modules = $this->getAllModules();
+        $cachePath = $this->getCachePath();
 
-        $this->writeCache($modules);
+        $modules = $this->getModules();
+
+        $this->writeCache($path, $modules);
     }
 
     /**
@@ -248,34 +250,39 @@ class Repository
      *
      * @return Collection
      */
-    public function getCache()
+    public function getCached()
     {
-        if ($this->isCacheExpired()) {
-            $modules = $this->getAllModules();
-
-            $this->writeCache($modules);
-
-            return $modules;
+        if (isset(static::$modules)) {
+            return static::$modules;
         }
 
         $cachePath = $this->getCachePath();
 
-        $data = $this->files->getRequire($cachePath);
+        if ($this->isCacheExpired($cachePath)) {
+            $modules = $this->getModules();
 
-        return collect($data);
+            $this->writeCache($cachePath, $modules);
+        }
+
+        // The modules cache is valid.
+        else {
+            $modules = collect(
+                $this->files->getRequire($cachePath)
+            );
+        }
+
+        return static::$modules = $modules;
     }
 
     /**
      * Write the service cache file to disk.
      *
+     * @param  string $path
      * @param  array  $modules
      * @return void
      */
-    public function writeCache($modules)
+    public function writeCache($path, $modules)
     {
-        $cachePath = $this->getCachePath();
-
-        //
         $data = array();
 
         foreach ($modules->all() as $key => $module) {
@@ -307,22 +314,22 @@ class Repository
     /*
      * Determine if the cahe is expired.
      *
+     * @param  string $path
+     *
      * @return bool
      */
-    public function isCacheExpired()
+    public function isCacheExpired($path)
     {
-        $cachePath = $this->getCachePath();
-
-        if (! $this->files->exists($cachePath)) {
+        if (! $this->files->exists($path)) {
             return true;
         }
 
         // Determine the path to the associated configuration file.
-        $path = APPPATH .'Config' .DS .'Modules.php';
+        $configPath = APPPATH .'Config' .DS .'Modules.php';
 
-        $lastModified = $this->files->lastModified($path);
+        $lastModified = $this->files->lastModified($configPath);
 
-        if ($lastModified >= $this->files->lastModified($cachePath)) {
+        if ($lastModified >= $this->files->lastModified($path)) {
             return true;
         }
 
@@ -334,7 +341,7 @@ class Repository
      *
      * @return array
      */
-    protected function getAllModules()
+    protected function getModules()
     {
         $path = $this->getPath();
 

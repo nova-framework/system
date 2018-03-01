@@ -181,70 +181,72 @@ class Repository
         return ($package['enabled'] === false);
     }
 
+    /**
+     * Update cached repository of packages information.
+     *
+     * @return bool
+     */
+    public function optimize()
+    {
+        $path = $this->getCachePath();
+
+        $packages = $this->getPackages();
+
+        $this->writeCache($path, $packages);
+    }
+
     protected function getPackages()
     {
         $dataPath = base_path('vendor/nova-packages.php');
 
-        $cachePath = storage_path('framework/packages.php');
+        try {
+            $data = $this->files->getRequire($dataPath);
 
-        if ($this->isExpired($cachePath, $dataPath)) {
-            // Retrieve the Composer's Packages information.
-
-            try {
-                $data = $this->files->getRequire($dataPath);
-
-            } catch (FileNotFoundException $e) {
-                $data = array();
-            }
-
-            // Process the Packages data.
-            $path = $this->getPackagesPath();
-
-            $packages = collect();
-
-            foreach (Arr::get($data, 'packages', array()) as $name => $packagePath) {
-                $packagePath = realpath($packagePath);
-
-                $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
-
-                $packages->put($name, array('path' => $packagePath .DS, 'location' => $location));
-            }
-
-            // Process the retrieved information to generate their records.
-
-            $items = $packages->map(function ($properties, $name)
-            {
-                $basename = $this->getPackageName($name);
-
-                if (Str::length($basename) > 3) {
-                    $slug =  Str::snake($basename);
-                } else {
-                    $slug = Str::lower($basename);
-                }
-
-                $properties['name'] = $name;
-                $properties['slug'] = $slug;
-
-                $properties['namespace'] = str_replace('/', '\\', $name);
-
-                $properties['basename'] = $basename;
-
-                // Get the Package options from configuration.
-                $options = $this->config->get('packages.options.' .$slug, array());
-
-                $properties['enabled'] = Arr::get($options, 'enabled', true);
-
-                $properties['order'] = Arr::get($options, 'order', 9001);
-
-                return $properties;
-            });
-
-            $this->writeCache($cachePath, $items);
-        } else {
-            $items = collect(
-                $this->files->getRequire($cachePath)
-            );
+        } catch (FileNotFoundException $e) {
+            $data = array();
         }
+
+        // Process the Packages data.
+        $path = $this->getPackagesPath();
+
+        $packages = collect();
+
+        foreach (Arr::get($data, 'packages', array()) as $name => $packagePath) {
+            $packagePath = realpath($packagePath);
+
+            $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
+
+            $packages->put($name, array('path' => $packagePath .DS, 'location' => $location));
+        }
+
+        // Process the retrieved information to generate their records.
+
+        $items = $packages->map(function ($properties, $name)
+        {
+            $basename = $this->getPackageName($name);
+
+            if (Str::length($basename) > 3) {
+                $slug =  Str::snake($basename);
+            } else {
+                $slug = Str::lower($basename);
+            }
+
+            $properties['name'] = $name;
+            $properties['slug'] = $slug;
+
+            $properties['namespace'] = str_replace('/', '\\', $name);
+
+            $properties['basename'] = $basename;
+
+            // Get the Package options from configuration.
+            $options = $this->config->get('packages.options.' .$slug, array());
+
+            $properties['enabled'] = Arr::get($options, 'enabled', true);
+
+            $properties['order'] = Arr::get($options, 'order', 9001);
+
+            return $properties;
+        });
 
         return $items->sortBy('basename');
     }
@@ -263,17 +265,34 @@ class Repository
             return static::$packages;
         }
 
-        return static::$packages = $this->getPackages();
+        $cachePath = $this->getCachePath();
+
+        $dataPath = base_path('vendor/nova-packages.php');
+
+        if ($this->isExpired($cachePath, $dataPath)) {
+            $packages = $this->getPackages();
+
+            $this->writeCache($cachePath, $packages);
+        }
+
+        // The packages cache is valid.
+        else {
+            $packages = collect(
+                $this->files->getRequire($cachePath)
+            );
+        }
+
+        return static::$packages = $packages;
     }
 
     /**
      * Write the service cache file to disk.
      *
+     * @param  string $path
      * @param  array  $packages
-     * @param  string $cachePath
      * @return void
      */
-    public function writeCache($cachePath, $packages)
+    public function writeCache($path, $packages)
     {
         $data = array();
 
@@ -299,7 +318,7 @@ return $data;
 
 PHP;
 
-        $this->files->put($cachePath, $content);
+        $this->files->put($path, $content);
     }
 
     /**
@@ -321,6 +340,16 @@ PHP;
         }
 
         return false;
+    }
+
+    /**
+     * Get (local) Packages path.
+     *
+     * @return string
+     */
+    public function getCachePath()
+    {
+        return storage_path('framework/packages.php');
     }
 
     /**

@@ -59,7 +59,8 @@ class Filesystem
 
                     flock($handle, LOCK_UN);
                 }
-            } finally {
+            }
+            finally {
                 fclose($handle);
             }
         }
