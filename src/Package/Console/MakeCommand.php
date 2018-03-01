@@ -91,6 +91,7 @@ class MakeCommand extends CommandGenerator
     {
         parent::__construct();
 
+        //
         $this->files = $files;
 
         $this->packages = $packages;
@@ -106,20 +107,20 @@ class MakeCommand extends CommandGenerator
         $slug = $this->parseSlug($this->argument('slug'));
         $name = $this->parseName($this->argument('name'));
 
-        if ($this->packages->exists($slug)) {
-            $this->packageInfo = collect($this->packages->where('slug', $slug));
-
-            $this->packagesPath = ($this->packageInfo['type'] == 'module')
-                ? $this->packages->getModulesPath()
-                : $this->packages->getPackagesPath();
-
-            $this->data['slug'] = $slug;
-            $this->data['name'] = $name;
-
-            return $this->generate();
+        if (! $this->packages->exists($slug)) {
+            return $this->error('Package '.$this->data['slug'].' does not exist.');
         }
 
-        return $this->error('Package '.$this->data['slug'].' does not exist.');
+        $this->packageInfo = collect($this->packages->where('slug', $slug));
+
+        $this->packagesPath = ($this->packageInfo['type'] == 'module')
+            ? $this->packages->getModulesPath()
+            : $this->packages->getPackagesPath();
+
+        $this->data['slug'] = $slug;
+        $this->data['name'] = $name;
+
+        return $this->generate();
     }
 
     /**
@@ -292,7 +293,11 @@ class MakeCommand extends CommandGenerator
     {
         $basename = $this->packageInfo->get('basename');
 
-        $namespace = str_replace($this->packagesPath .DS .$basename .DS .'src', '', $file);
+        if ($this->packageInfo->get('type') == 'module') {
+            $namespace = str_replace($this->packagesPath .DS .$basename, '', $file);
+        } else {
+            $namespace = str_replace($this->packagesPath .DS .$basename .DS .'src', '', $file);
+        }
 
         $find = basename($namespace);
 
@@ -310,7 +315,11 @@ class MakeCommand extends CommandGenerator
      */
     protected function getBaseNamespace()
     {
-        return $this->packages->getNamespace();
+        if ($this->packageInfo->get('type') == 'module') {
+            return $this->packages->getModulesNamespace();
+        }
+
+        return $this->packages->getPackagesNamespace();
     }
 
     /**
