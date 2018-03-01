@@ -15,18 +15,14 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $namespace = trim(
-            $this->app['config']->get('view.themes.namespace'), '\\'
-        );
-
         $themes = $this->getInstalledThemes();
 
-        $themes->each(function ($theme) use ($namespace)
+        $themes->each(function ($theme)
         {
             // The main Service Provider from a theme should be named like:
             // Themes\AdminLite\Providers\ThemeServiceProvider
 
-            $provider = sprintf('%s\\%s\\Providers\\ThemeServiceProvider', $namespace, $theme);
+            $provider = sprintf('%s\\Providers\\ThemeServiceProvider', $theme);
 
             if (class_exists($provider)) {
                 $this->app->register($provider);
@@ -44,23 +40,33 @@ class ThemeServiceProvider extends ServiceProvider
 
     }
 
+    /**
+     * Get the installed Themes.
+     *
+     * @return \Nova\Support\Collection
+     */
     protected function getInstalledThemes()
     {
-        $themesPath = $this->app['config']->get('view.themes.path');
+        $config = $this->app['config'];
+
+        $path = $config->get('view.themes.path');
 
         try {
-            $paths = $this->app['files']->directories($themesPath);
+            $paths = collect(
+                $this->app['files']->directories($path)
+            );
         }
         catch (InvalidArgumentException $e) {
-            $paths = array();
+            $paths = collect();
         }
 
-        $themes = array_map(function ($path)
+        $namespace = trim(
+            $config->get('view.themes.namespace'), '\\'
+        );
+
+        return $paths->map(function ($path) use ($namespace)
         {
-            return basename($path);
-
-        }, $paths);
-
-        return collect($themes);
+            return $namespace .'\\' .basename($path);
+        });
     }
 }
