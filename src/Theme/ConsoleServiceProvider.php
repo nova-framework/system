@@ -23,7 +23,7 @@ class ConsoleServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.make.theme', function ($app)
         {
-            return new ThemeMakeCommand($app['files'], $app['config']);
+            return new ThemeMakeCommand($app['files'], $app['config'], $app['packages']);
         });
 
         $this->commands('command.make.theme');

@@ -5,6 +5,7 @@ namespace Nova\Theme\Console;
 use Nova\Config\Repository as Config;
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
+use Nova\Package\PackageManager;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -86,6 +87,13 @@ class ThemeMakeCommand extends Command
     protected $config;
 
     /**
+     * The Packages Manager instance.
+     *
+     * @var \Nova\Package\PackageManager
+     */
+    protected $packages;
+
+    /**
      * The filesystem instance.
      *
      * @var \Nova\Filesystem\Filesystem
@@ -103,15 +111,17 @@ class ThemeMakeCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \>Nova\Plugin\PluginManager    $theme
+     * @param \Nova\Config\Repository    $config
+     * @param \Nova\Package\PackageManager    $packages
      */
-    public function __construct(Filesystem $files, Config $config)
+    public function __construct(Filesystem $files, Config $config, PackageManager $packages)
     {
         parent::__construct();
 
         //
         $this->files  = $files;
         $this->config = $config;
+        $this->packages = $packages;
     }
 
     /**
@@ -134,8 +144,13 @@ class ThemeMakeCommand extends Command
         //
         $name = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
 
-        $this->data['name']      = $name;
-        $this->data['namespace'] = $name;
+        $this->data['name'] = $name;
+
+        $vendor = basename(
+            str_replace('\\', '/',  $this->packages->getThemesNamespace())
+        );
+
+        $this->data['namespace'] = $vendor .'\\' .$name;
 
         if ($this->option('quick')) {
             return $this->generate();
@@ -152,11 +167,19 @@ class ThemeMakeCommand extends Command
      */
     private function stepOne()
     {
-        $this->data['name'] = $this->ask('Please enter the name of the theme:', $this->data['name']);
+        $this->data['name'] = $this->ask('Please enter the name of the Theme:', $this->data['name']);
+        $this->data['slug'] = $this->ask('Please enter the slug of the Theme:', $this->data['slug']);
+
+        $vendor = basename(
+            str_replace('\\', '/',  $this->packages->getThemesNamespace())
+        );
+
+        $this->data['namespace'] = $vendor .'\\' .$this->data['name'];
 
         $this->comment('You have provided the following information:');
 
-        $this->comment('Name:        '.$this->data['name']);
+        $this->comment('Name:       ' .$this->data['name']);
+        $this->comment('Slug:       ' .$this->data['slug']);
 
         if ($this->confirm('Do you wish to continue?')) {
             $this->generate();
@@ -172,6 +195,14 @@ class ThemeMakeCommand extends Command
      */
     protected function generate()
     {
+        $slug = $this->data['slug'];
+
+        if ($this->files->exists($this->getThemesPath($slug))) {
+            $this->error('The Theme [' .$slug .'] already exists!');
+
+            return false;
+        }
+
         $steps = array(
             'Generating folders...'      => 'generateFolders',
             'Generating files...'        => 'generateFiles',

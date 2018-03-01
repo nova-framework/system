@@ -108,12 +108,21 @@ class MakeCommand extends CommandGenerator
         $name = $this->parseName($this->argument('name'));
 
         if (! $this->packages->exists($slug)) {
-            return $this->error('Package '.$this->data['slug'].' does not exist.');
+            return $this->error('Package ['.$this->data['slug'].'] does not exist.');
         }
 
-        $this->packageInfo = collect($this->packages->where('slug', $slug));
+        $this->packageInfo = collect(
+            $this->packages->where('slug', $slug)
+        );
 
-        $this->packagesPath = ($this->packageInfo['type'] == 'module')
+        // Check for a proper type of the
+        $type = $this->packageInfo->get('type');
+
+        if (($type != 'package') && ($type != 'module')) {
+            return $this->error('Package ['.$this->data['slug'].'] has no support.');
+        }
+
+        $this->packagesPath = ($type == 'module')
             ? $this->packages->getModulesPath()
             : $this->packages->getPackagesPath();
 

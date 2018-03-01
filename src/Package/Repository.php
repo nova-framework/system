@@ -262,6 +262,30 @@ class Repository
     }
 
     /**
+     * Get modules path.
+     *
+     * @return string
+     */
+    public function getThemesPath()
+    {
+        $path = $this->config->get('packages.themes.path', BASEPATH .'themes');
+
+        return str_replace('/', DS, realpath($path));
+    }
+
+    /**
+     * Get modules namespace.
+     *
+     * @return string
+     */
+    public function getThemesNamespace()
+    {
+        $namespace = $this->config->get('packages.themes.namespace', 'Themes\\');
+
+        return rtrim($namespace, '/\\');
+    }
+
+    /**
      * Update cached repository of packages information.
      *
      * @return bool
@@ -333,6 +357,37 @@ class Repository
                 'path'     => $path,
                 'location' => 'local',
                 'type'     => 'module',
+            ));
+        });
+
+        //
+        // Process for the local Modules.
+
+        $path = $this->getThemesPath();
+
+        try {
+            $paths = collect(
+                $this->files->directories($path)
+            );
+        }
+        catch (InvalidArgumentException $e) {
+            $paths = collect();
+        }
+
+        $namespace = $this->getThemesNamespace();
+
+        $vendor = class_basename($namespace);
+
+        $paths->each(function ($path) use ($packages, $vendor)
+        {
+            $name = $vendor .'/' .basename($path);
+
+            $path = Str::finish($path, DS);
+
+            $packages->put($name, array(
+                'path'     => $path,
+                'location' => 'local',
+                'type'     => 'theme',
             ));
         });
 

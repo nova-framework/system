@@ -4,6 +4,7 @@ namespace Nova\Package\Console;
 
 use Nova\Console\Command;
 use Nova\Package\PackageManager;
+use Nova\Support\Str;
 
 
 class PackageListCommand extends Command
@@ -91,7 +92,7 @@ class PackageListCommand extends Command
     {
         $location = ($package['location'] === 'local') ? 'Local' : 'Vendor';
 
-        $type = ($package['type'] == 'module') ? 'Module' : 'Package';
+        $type = Str::title($package['type']);
 
         if ($this->packages->isEnabled($package['slug'])) {
             $status = 'Enabled';
