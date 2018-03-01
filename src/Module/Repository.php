@@ -293,7 +293,7 @@ class Repository
         //
         $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
 
-        $this->files->put($cachePath, $content);
+        $this->files->put($path, $content);
     }
 
     /**
@@ -303,7 +303,7 @@ class Repository
      */
     protected function getCachePath()
     {
-        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'modules.php');
+        return $this->config->get('modules.manifest', STORAGE_PATH .'framework' .DS .'modules.php');
     }
 
     /**

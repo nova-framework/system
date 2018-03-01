@@ -271,7 +271,7 @@ class Repository
 
         $packagesPath = base_path('vendor/nova-packages.php');
 
-        if ($this->isCacheExpired($path, $dataPath) || $this->isCacheExpired($path, $packagesPath)) {
+        if ($this->isCacheExpired($path, $packagesPath) || $this->isCacheExpired($path, $configPath)) {
             $packages = $this->getPackages();
 
             $this->writeCache($path, $packages);
@@ -352,7 +352,7 @@ PHP;
      */
     public function getCachePath()
     {
-        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'packages.php');
+        return $this->config->get('modules.manifest', STORAGE_PATH .'framework' .DS .'packages.php');
     }
 
     /**
