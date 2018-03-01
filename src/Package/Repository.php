@@ -206,12 +206,14 @@ class Repository
             $data = array();
         }
 
+        $items = Arr::get($data, 'packages', array());
+
         // Process the Packages data.
         $path = $this->getPackagesPath();
 
         $packages = collect();
 
-        foreach (Arr::get($data, 'packages', array()) as $name => $packagePath) {
+        foreach ($items as $name => $packagePath) {
             $packagePath = realpath($packagePath);
 
             $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
