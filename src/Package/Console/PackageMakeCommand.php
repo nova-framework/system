@@ -520,6 +520,7 @@ return array (
     protected function updateComposerJson($module)
     {
         if ($module) {
+            // No need to modify the composer.json for a Module.
             return;
         }
 
