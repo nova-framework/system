@@ -16,7 +16,7 @@ class ModuleServiceProvider extends ServiceProvider
      * @param  string  $path
      * @return void
      */
-    protected function registerAssets($package, $namespace, $path)
+    protected function registerPackageAssets($package, $namespace, $path)
     {
         $assets = $path .DS .'Assets';
 

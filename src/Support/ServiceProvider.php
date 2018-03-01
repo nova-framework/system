@@ -106,7 +106,7 @@ abstract class ServiceProvider
         }
 
         // Finally, register the Package Assets path.
-        $this->registerAssets($package, $namespace, $path);
+        $this->registerPackageAssets($package, $namespace, $path);
     }
 
     /**
@@ -117,7 +117,7 @@ abstract class ServiceProvider
      * @param  string  $path
      * @return void
      */
-    protected function registerAssets($package, $namespace, $path)
+    protected function registerPackageAssets($package, $namespace, $path)
     {
         $assets = dirname($path) .DS .'assets';
 
