@@ -62,10 +62,9 @@ abstract class ServiceProvider
      * @param  string  $package
      * @param  string  $namespace
      * @param  string  $path
-     * @param  string  $type
      * @return void
      */
-    public function package($package, $namespace = null, $path = null, $type = 'package')
+    public function package($package, $namespace = null, $path = null)
     {
         $namespace = $this->getPackageNamespace($package, $namespace);
 
@@ -106,23 +105,27 @@ abstract class ServiceProvider
             $views->addNamespace($package, $viewPath);
         }
 
-        //
-        // Register the Package Assets path.
+        // Finally, register the Package Assets path.
+        $this->registerPackageAssets($package, $namespace, $path);
+    }
 
-        if ($type === 'package') {
-            $assets = dirname($path) .DS .'assets';
+    /**
+     * Register the package's assets.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @param  string  $path
+     * @return void
+     */
+    protected function registerPackageAssets($package, $namespace, $path)
+    {
+        $assets = dirname($path) .DS .'assets';
 
-            //
+        if ($this->app['files']->isDirectory($assets)) {
             list ($vendor) = explode('/', $package);
 
             $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
-        } else {
-            $assets = $path .DS .'Assets';
 
-            $namespace = Str::plural($type) .'/' .$namespace;
-        }
-
-        if ($files->isDirectory($assets)) {
             $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }
     }

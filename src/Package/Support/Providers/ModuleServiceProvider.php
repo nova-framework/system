@@ -2,37 +2,28 @@
 
 namespace Nova\Package\Support\Providers;
 
-use Nova\Support\ServiceProvider;
+use Nova\Package\Support\Providers\PackageServiceProvider as ServiceProvider;
 
 
 class ModuleServiceProvider extends ServiceProvider
 {
-    /**
-     * The provider class names.
-     *
-     * @var array
-     */
-    protected $providers = array();
-
-
-
-    protected function bootstrapFrom($path)
-    {
-        $app = $this->app;
-
-        return require $path;
-    }
 
     /**
-     * Register the service provider.
+     * Register the package's assets.
      *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @param  string  $path
      * @return void
      */
-    public function register()
+    protected function registerPackageAssets($package, $namespace, $path)
     {
-        foreach ($this->providers as $provider) {
-            $this->app->register($provider);
+        $assets = $path .DS .'Assets';
+
+        if ($this->app['files']->isDirectory($assets)) {
+            $namespace = 'modules/' .$namespace;
+
+            $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }
     }
-
 }
