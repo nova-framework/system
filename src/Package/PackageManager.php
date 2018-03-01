@@ -103,7 +103,13 @@ class PackageManager
      */
     public function resolveClassPath($properties)
     {
-        return $properties['path'] .'src' .DS;
+        $path = $properties['path'];
+
+        if ($properties['type'] == 'module') {
+            return $path;
+        }
+
+        return $path .'src' .DS;
     }
 
     /**
