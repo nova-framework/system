@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\View\Console;
+namespace Nova\Theme\Console;
 
 use Nova\Config\Repository as Config;
 use Nova\Console\Command;

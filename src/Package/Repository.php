@@ -182,6 +182,86 @@ class Repository
     }
 
     /**
+     * Get local path for the specified Package.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getPackagePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $package = Str::studly($slug);
+        } else {
+            $package = Str::upper($slug);
+        }
+
+        return $this->getPackagesPath() .DS .$package .DS;
+    }
+
+    /**
+     * Get (local) Packages path.
+     *
+     * @return string
+     */
+    public function getPackagesPath()
+    {
+        return base_path('packages');
+    }
+
+    /**
+     * Get Packages namespace.
+     *
+     * @return string
+     */
+    public function getPackagesNamespace()
+    {
+        return '';
+    }
+
+    /**
+     * Get path for the specified module.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getModulePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $module = Str::studly($slug);
+        } else {
+            $module = Str::upper($slug);
+        }
+
+        return $this->getModulesPath() .DS .$module .DS;
+    }
+
+    /**
+     * Get modules path.
+     *
+     * @return string
+     */
+    public function getModulesPath()
+    {
+        $path = $this->config->get('packages.modules.path', BASEPATH .'modules');
+
+        return str_replace('/', DS, realpath($path));
+    }
+
+    /**
+     * Get modules namespace.
+     *
+     * @return string
+     */
+    public function getModulesNamespace()
+    {
+        $namespace = $this->config->get('packages.modules.namespace', 'Modules\\');
+
+        return rtrim($namespace, '/\\');
+    }
+
+    /**
      * Update cached repository of packages information.
      *
      * @return bool
@@ -218,9 +298,44 @@ class Repository
 
             $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
 
-            $packages->put($name, array('path' => $packagePath .DS, 'location' => $location));
+            $packages->put($name, array(
+                'path'     => $packagePath .DS,
+                'location' => $location,
+                'type'     => 'package',
+            ));
         }
 
+        //
+        // Process the local Modules.
+
+        $path = $this->getModulesPath();
+
+        // Retrieve all local Modules information.
+        $classPath = str_replace('\\', '/', $this->getModulesNamespace());
+
+        $vendor = basename($classPath);
+
+        try {
+            $paths = collect(
+                $this->files->directories($path)
+            );
+        }
+        catch (InvalidArgumentException $e) {
+            $paths = collect();
+        }
+
+        $paths->each(function ($path) use (&$packages, $vendor)
+        {
+            $name = $vendor .'/' .basename($path);
+
+            $packages->put($name, array(
+                'path'     => $path .DS,
+                'location' => 'local',
+                'type'     => 'module',
+            ));
+        });
+
+        //
         // Process the retrieved information to generate their records.
 
         $items = $packages->map(function ($properties, $name)
@@ -309,7 +424,7 @@ class Repository
             //
             ksort($properties);
 
-            $data[$key] = $properties;
+            $data[] = $properties;
         }
 
         //
@@ -354,7 +469,7 @@ PHP;
      */
     public function getCachePath()
     {
-        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'packages.php');
+        return $this->config->get('packages.cache', STORAGE_PATH .'framework' .DS .'packages.php');
     }
 
     /**
@@ -373,43 +488,5 @@ PHP;
         list($vendor, $namespace) = explode('/', $package);
 
         return $namespace;
-    }
-
-    /**
-     * Get local path for the specified Package.
-     *
-     * @param string $slug
-     *
-     * @return string
-     */
-    public function getPackagePath($slug)
-    {
-        if (Str::length($slug) > 3) {
-            $package = Str::studly($slug);
-        } else {
-            $package = Str::upper($slug);
-        }
-
-        return $this->getPackagesPath() .DS .$package .DS;
-    }
-
-    /**
-     * Get (local) Packages path.
-     *
-     * @return string
-     */
-    public function getPackagesPath()
-    {
-        return base_path('packages');
-    }
-
-    /**
-     * Get Packages namespace.
-     *
-     * @return string
-     */
-    public function getNamespace()
-    {
-        return '';
     }
 }

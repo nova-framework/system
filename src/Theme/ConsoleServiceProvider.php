@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\View;
+namespace Nova\Theme;
 
-use Nova\View\Console\ViewClearCommand;
+use Nova\Theme\Console\ThemeMakeCommand;
 use Nova\Support\ServiceProvider;
 
 
@@ -21,11 +21,11 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('command.view.clear', function ($app)
+        $this->app->singleton('command.make.theme', function ($app)
         {
-            return new ViewClearCommand($app['files']);
+            return new ThemeMakeCommand($app['files'], $app['config']);
         });
 
-        $this->commands('command.view.clear');
+        $this->commands('command.make.theme');
     }
 }

@@ -62,8 +62,8 @@ class PackageManager
 
         $namespace = $this->resolveNamespace($properties);
 
-        if (isset($properties['type'])) {
-            $name = Str::studly('type');
+        if (isset($properties['type']) && ! empty($type = $properties['type'])) {
+            $name = Str::studly($type);
         } else {
             $name = 'Package';
         }

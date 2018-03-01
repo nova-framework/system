@@ -287,10 +287,8 @@ class Repository
 
              ksort($properties);
 
-             $data[$key] = $properties;
+             $data[] = $properties;
         }
-
-        ksort($data);
 
         //
         $content = "<?php\n\nreturn " .var_export($data, true) .";\n";
