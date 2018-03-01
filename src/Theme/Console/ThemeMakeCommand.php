@@ -360,7 +360,7 @@ return array (
      */
     protected function formatContent($content)
     {
-        $path = $this->config->get('view.themes.namespace', 'App\Themes\\');
+        $path = $this->config->get('view.themes.namespace', 'Themes\\');
 
         $searches = array(
             '{{slug}}',
