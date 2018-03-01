@@ -70,7 +70,7 @@ class PackageListCommand extends Command
      */
     protected function getPackages()
     {
-        $packages = $this->packages->all();
+        $packages = $this->packages->all()->sortBy('basename');
 
         $results = array();
 
