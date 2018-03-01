@@ -43,7 +43,7 @@ class ThemeServiceProvider extends ServiceProvider
      * @param  string  $path
      * @return void
      */
-    protected function registerPackageAssets($package, $namespace, $path)
+    protected function registerAssets($package, $namespace, $path)
     {
         $assets = $path .DS .'Assets';
 

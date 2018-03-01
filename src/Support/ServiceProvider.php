@@ -117,7 +117,7 @@ abstract class ServiceProvider
      * @param  string  $path
      * @return void
      */
-    protected function registerPackageAssets($package, $namespace, $path)
+    protected function registerAssets($package, $namespace, $path)
     {
         $assets = dirname($path) .DS .'assets';
 
