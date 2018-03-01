@@ -58,8 +58,6 @@ class PackageManager
      */
     protected function registerServiceProvider($properties)
     {
-        $basename = $properties['basename'];
-
         $namespace = $this->resolveNamespace($properties);
 
         if (isset($properties['type']) && ! empty($type = $properties['type'])) {
@@ -68,13 +66,16 @@ class PackageManager
             $name = 'Package';
         }
 
-        if (class_exists($provider = "{$namespace}\\Providers\\{$name}ServiceProvider")) {
-            //
-        }
+        $provider = "{$namespace}\\Providers\\{$name}ServiceProvider";
 
-        // If not exists the default Service Provider, try the alternate one.
-        else if (! class_exists($provider = "{$namespace}\\{$basename}ServiceProvider")) {
-            return;
+        if (! class_exists($provider)) {
+            // Try to find a service provider with the alternate naming.
+
+            $name = Str::singular($properties['basename']);
+
+            if (! class_exists($provider = "{$namespace}\\{$name}ServiceProvider")) {
+                return;
+            }
         }
 
         $this->app->register($provider);
