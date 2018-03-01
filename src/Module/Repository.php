@@ -361,7 +361,11 @@ class Repository
         {
             $basename = basename($path);
 
-            $slug = (Str::length($basename) > 3) ? Str::snake($basename) : Str::lower($basename);
+            if (Str::length($basename) > 3) {
+                $slug = Str::studly($basename);
+            } else {
+                $slug = Str::upper($basename);
+            }
 
             if (! $modules->has($slug)) {
                 $name = $vendor .'/' .basename($path);

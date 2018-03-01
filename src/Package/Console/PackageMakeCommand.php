@@ -155,7 +155,7 @@ class PackageMakeCommand extends Command
 
         $this->files  = $files;
 
-        $this->packages = $package;
+        $this->packages = $packages;
     }
 
     /**
