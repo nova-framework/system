@@ -106,7 +106,7 @@ abstract class ServiceProvider
         }
 
         // Finally, register the Package Assets path.
-        $this->registerPackageAssets($package, $namespace, $path);
+        $this->registerAssets($package, $namespace, $path);
     }
 
     /**
