@@ -93,7 +93,11 @@ class PackageListCommand extends Command
 
         $type = ($package['type'] == 'module') ? 'Module' : 'Package';
 
-        $status = $this->packages->isEnabled($package['slug']) ? 'Enabled' : 'Disabled';
+        if ($this->packages->isEnabled($package['slug'])) {
+            $status = 'Enabled';
+        } else {
+            $status = 'Disabled';
+        }
 
         return array(
             'name'     => $package['name'],
