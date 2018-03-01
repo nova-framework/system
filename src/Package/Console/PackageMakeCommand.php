@@ -155,7 +155,7 @@ class PackageMakeCommand extends Command
 
         $this->files  = $files;
 
-        $this->Package = $package;
+        $this->package = $package;
     }
 
     /**
@@ -325,7 +325,7 @@ class PackageMakeCommand extends Command
         $slug = $this->data['slug'];
 
         //
-        $path = $this->Package->getPath();
+        $path = $this->package->getPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
@@ -341,7 +341,7 @@ class PackageMakeCommand extends Command
         // Generate the Package directories.
         $mode = $this->option('extended') ? 'extended' : 'default';
 
-        $packageFolders = $this->PackageFolders[$mode];
+        $packageFolders = $this->packageFolders[$mode];
 
         foreach ($packageFolders as $folder) {
             $path = $packagePath .$folder;
@@ -366,7 +366,7 @@ class PackageMakeCommand extends Command
     {
         $mode = $this->option('extended') ? 'extended' : 'default';
 
-        $packageFiles = $this->PackageFiles[$mode];
+        $packageFiles = $this->packageFiles[$mode];
 
         foreach ($packageFiles as $key => $file) {
             $file = $this->formatContent($file);
@@ -405,7 +405,7 @@ return array (
         //
         $mode = $this->option('extended') ? 'extended' : 'default';
 
-        $packageFolders = $this->PackageFolders[$mode];
+        $packageFolders = $this->packageFolders[$mode];
 
         foreach ($packageFolders as $folder) {
             $path = $packagePath .$folder;
@@ -454,10 +454,10 @@ return array (
     protected function getPackagePath($slug = null)
     {
         if (! is_null($slug)) {
-            return $this->Package->getPackagePath($slug);
+            return $this->package->getPackagePath($slug);
         }
 
-        return $this->Package->getPath();
+        return $this->package->getPath();
     }
 
     protected function getLanguagePaths($slug)
@@ -497,7 +497,7 @@ return array (
      */
     protected function getStubContent($key, $mode)
     {
-        $packageStubs = $this->PackageStubs[$mode];
+        $packageStubs = $this->packageStubs[$mode];
 
         //
         $stub = $packageStubs[$key];

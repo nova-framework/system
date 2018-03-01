@@ -43,7 +43,7 @@ class PackageListCommand extends Command
     {
         parent::__construct();
 
-        $this->Packages = $packages;
+        $this->packages = $packages;
     }
 
     /**
@@ -53,7 +53,7 @@ class PackageListCommand extends Command
      */
     public function handle()
     {
-        $packages = $this->Packages->all();
+        $packages = $this->packages->all();
 
         if ($packages->isEmpty()) {
             return $this->error("Your application doesn't have any Packages.");
@@ -69,7 +69,7 @@ class PackageListCommand extends Command
      */
     protected function getPackages()
     {
-        $packages = $this->Packages->all();
+        $packages = $this->packages->all();
 
         $results = array();
 
@@ -95,7 +95,7 @@ class PackageListCommand extends Command
             $location = 'Vendor';
         }
 
-        $enabled = $this->Packages->isEnabled($package['slug']);
+        $enabled = $this->packages->isEnabled($package['slug']);
 
         return array(
             'name'         => $package['name'],

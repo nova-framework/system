@@ -52,7 +52,7 @@ class PackageMigrateCommand extends Command
         parent::__construct();
 
         $this->migrator = $migrator;
-        $this->Packages   = $packages;
+        $this->packages   = $packages;
     }
 
     /**
@@ -71,11 +71,11 @@ class PackageMigrateCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->Packages->exists($slug)) {
+            if (! $this->packages->exists($slug)) {
                 return $this->error('Package does not exist.');
             }
 
-            if ($this->Packages->isEnabled($slug)) {
+            if ($this->packages->isEnabled($slug)) {
                 return $this->migrate($slug);
             }
 
@@ -83,9 +83,9 @@ class PackageMigrateCommand extends Command
         }
 
         if ($this->option('force')) {
-            $packages = $this->Packages->all();
+            $packages = $this->packages->all();
         } else {
-            $packages = $this->Packages->enabled();
+            $packages = $this->packages->enabled();
         }
 
         foreach ($packages as $package) {
@@ -104,7 +104,7 @@ class PackageMigrateCommand extends Command
      */
     protected function migrate($slug)
     {
-        if (! $this->Packages->exists($slug)) {
+        if (! $this->packages->exists($slug)) {
             return $this->error('Package does not exist.');
         }
 
@@ -136,7 +136,7 @@ class PackageMigrateCommand extends Command
      */
     protected function getMigrationPath($slug)
     {
-        $path = $this->Packages->getPackagePath($slug);
+        $path = $this->packages->getPackagePath($slug);
 
         return $path .'src' .DS .'Database' .DS .'Migrations' .DS;
     }

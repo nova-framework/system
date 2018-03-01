@@ -42,7 +42,7 @@ class PackageMigrateRefreshCommand extends Command
     {
         parent::__construct();
 
-        $this->Packages = $packages;
+        $this->packages = $packages;
     }
 
     /**
@@ -58,7 +58,7 @@ class PackageMigrateRefreshCommand extends Command
 
         $slug = $this->argument('slug');
 
-        if (! $this->Packages->exists($slug)) {
+        if (! $this->packages->exists($slug)) {
             return $this->error('Package does not exist.');
         }
 

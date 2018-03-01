@@ -59,7 +59,7 @@ class PackageMigrateResetCommand extends Command
     {
         parent::__construct();
 
-        $this->Packages  = $packages;
+        $this->packages  = $packages;
         $this->files    = $files;
         $this->migrator = $migrator;
     }
@@ -78,18 +78,18 @@ class PackageMigrateResetCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->Packages->exists($slug)) {
+            if (! $this->packages->exists($slug)) {
                 return $this->error('Package does not exist.');
             }
 
-            if ($this->Packages->isEnabled($slug)) {
+            if ($this->packages->isEnabled($slug)) {
                 return $this->reset($slug);
             }
 
             return;
         }
 
-        $packages = $this->Packages->enabled()->reverse();
+        $packages = $this->packages->enabled()->reverse();
 
         foreach ($packages as $package) {
             $this->comment('Resetting the migrations of Package: ' .$package['name']);
@@ -111,7 +111,7 @@ class PackageMigrateResetCommand extends Command
      */
     protected function reset($slug)
     {
-        if (! $this->Packages->exists($slug)) {
+        if (! $this->packages->exists($slug)) {
             return $this->error('Package does not exist.');
         }
 

@@ -93,7 +93,7 @@ class MakeCommand extends CommandGenerator
 
         $this->files = $files;
 
-        $this->Packages = $packages;
+        $this->packages = $packages;
     }
 
     /**
@@ -106,10 +106,10 @@ class MakeCommand extends CommandGenerator
         $slug = $this->parseSlug($this->argument('slug'));
         $name = $this->parseName($this->argument('name'));
 
-        if ($this->Packages->exists($slug)) {
-            $this->PackagesPath = $this->Packages->getPath();
+        if ($this->packages->exists($slug)) {
+            $this->packagesPath = $this->packages->getPath();
 
-            $this->PackageInfo = collect($this->Packages->where('slug', $slug));
+            $this->PackageInfo = collect($this->packages->where('slug', $slug));
 
             $this->data['slug'] = $slug;
             $this->data['name'] = $name;
@@ -246,7 +246,7 @@ class MakeCommand extends CommandGenerator
         $name = ltrim($name, '\/');
         $name = rtrim($name, '\/');
 
-        return $this->PackagesPath .DS .$this->PackageInfo->get('basename') .DS .'src' .DS .$folder .DS .$name;
+        return $this->packagesPath .DS .$this->PackageInfo->get('basename') .DS .'src' .DS .$folder .DS .$name;
     }
 
     /**
@@ -286,7 +286,7 @@ class MakeCommand extends CommandGenerator
     {
         $basename = $this->PackageInfo->get('basename');
 
-        $namespace = str_replace($this->PackagesPath .DS .$basename .DS .'src', '', $file);
+        $namespace = str_replace($this->packagesPath .DS .$basename .DS .'src', '', $file);
 
         $find = basename($namespace);
 
@@ -304,7 +304,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function getBaseNamespace()
     {
-        return $this->Packages->getNamespace();
+        return $this->packages->getNamespace();
     }
 
     /**

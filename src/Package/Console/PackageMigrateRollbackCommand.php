@@ -53,7 +53,7 @@ class PackageMigrateRollbackCommand extends Command
         parent::__construct();
 
         $this->migrator = $migrator;
-        $this->Packages  = $packages;
+        $this->packages = $packages;
     }
 
     /**
@@ -70,14 +70,14 @@ class PackageMigrateRollbackCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->Packages->exists($slug)) {
+            if (! $this->packages->exists($slug)) {
                 return $this->error('Package does not exist.');
             }
 
             return $this->rollback($slug);
         }
 
-        foreach ($this->Packages->all() as $package) {
+        foreach ($this->packages->all() as $package) {
             $this->comment('Rollback the last migration from Package: ' .$package['name']);
 
             $this->rollback($package['slug']);
@@ -93,7 +93,7 @@ class PackageMigrateRollbackCommand extends Command
      */
     protected function rollback($slug)
     {
-        if (! $this->Packages->exists($slug)) {
+        if (! $this->packages->exists($slug)) {
             return $this->error('Package does not exist.');
         }
 

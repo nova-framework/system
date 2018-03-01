@@ -42,7 +42,7 @@ class PackageSeedCommand extends Command
     {
         parent::__construct();
 
-        $this->Packages = $packages;
+        $this->packages = $packages;
     }
 
     /**
@@ -59,11 +59,11 @@ class PackageSeedCommand extends Command
         $slug = $this->argument('slug');
 
         if (! empty($slug)) {
-            if (! $this->Packages->exists($slug)) {
+            if (! $this->packages->exists($slug)) {
                 return $this->error('Package does not exist.');
             }
 
-            if ($this->Packages->isEnabled($slug)) {
+            if ($this->packages->isEnabled($slug)) {
                 $this->seed($slug);
             } else if ($this->option('force')) {
                 $this->seed($slug);
@@ -73,9 +73,9 @@ class PackageSeedCommand extends Command
         }
 
         if ($this->option('force')) {
-            $packages = $this->Packages->all();
+            $packages = $this->packages->all();
         } else {
-            $packages = $this->Packages->enabled();
+            $packages = $this->packages->enabled();
         }
 
         foreach ($packages as $package) {
@@ -94,7 +94,7 @@ class PackageSeedCommand extends Command
      */
     protected function seed($slug)
     {
-        $package = $this->Packages->where('slug', $slug);
+        $package = $this->packages->where('slug', $slug);
 
         $className = $package['namespace'] .'\Database\Seeds\DatabaseSeeder';
 
