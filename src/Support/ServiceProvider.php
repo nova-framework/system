@@ -62,9 +62,10 @@ abstract class ServiceProvider
      * @param  string  $package
      * @param  string  $namespace
      * @param  string  $path
+     * @param  string  $type
      * @return void
      */
-    public function package($package, $namespace = null, $path = null)
+    public function package($package, $namespace = null, $path = null, $type = null)
     {
         $namespace = $this->getPackageNamespace($package, $namespace);
 
@@ -108,19 +109,17 @@ abstract class ServiceProvider
         //
         // Register the Package Assets path.
 
-        list ($vendor) = explode('/', $package);
-
-        if (($vendor != 'Modules') && ($vendor != 'Themes')) {
-            $assets = dirname($path) .DS .'assets';
-
-            $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
-        }
-
-        // The package is a Theme or Module.
-        else {
+        if (! is_null($type)) {
             $assets = $path .DS .'Assets';
 
-            $namespace = Str::lower($vendor) .'/' .$namespace;
+            $namespace = Str::plural($type) .'/' .$namespace;
+        } else {
+            $assets = dirname($path) .DS .'assets';
+
+            //
+            list ($vendor) = explode('/', $package);
+
+            $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
         }
 
         if ($files->isDirectory($assets)) {
