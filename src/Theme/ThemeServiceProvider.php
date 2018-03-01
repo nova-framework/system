@@ -11,9 +11,11 @@ class ThemeServiceProvider extends ServiceProvider
 {
 
     /**
-     * Boot the Service Provider.
+     * Register the Application's Themes.
+     *
+     * @return void
      */
-    public function boot()
+    public function register()
     {
         $themes = $this->getInstalledThemes();
 
@@ -28,16 +30,6 @@ class ThemeServiceProvider extends ServiceProvider
                 $this->app->register($provider);
             }
         });
-    }
-
-    /**
-     * Register the Application's Themes.
-     *
-     * @return void
-     */
-    public function register()
-    {
-
     }
 
     /**

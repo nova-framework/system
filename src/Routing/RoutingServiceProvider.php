@@ -3,6 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
+use Nova\Http\Response;
 use Nova\Filesystem\Filesystem;
 use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
 use Nova\Routing\ControllerDispatcher;

@@ -36,6 +36,8 @@ if (! function_exists('resource_url'))
         if (is_null($module)) {
             $basePath = 'assets';
         } else {
+            $module = str_replace('_', '-', $module);
+
             $basePath = 'modules/' .$module;
         }
 
@@ -55,6 +57,8 @@ if (! function_exists('theme_url'))
      */
     function theme_url($path, $theme)
     {
+        $theme = str_replace('_', '-', $theme);
+
         $path = sprintf('themes/%s/%s', $theme, ltrim($path, '/'));
 
         return url($path);
