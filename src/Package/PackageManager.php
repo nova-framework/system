@@ -62,19 +62,22 @@ class PackageManager
 
         $namespace = $this->resolveNamespace($properties);
 
-        // Calculate the name of possibile Service Providers.
-        $defaultProvider = "{$namespace}\\Providers\\PackageServiceProvider";
+        if (isset($properties['type'])) {
+            $name = Str::studly('type');
+        } else {
+            $name = 'Package';
+        }
 
-        $alternateProvider = "{$namespace}\\{$basename}ServiceProvider";
-
-        if (class_exists($defaultProvider)) {
-            $this->app->register($defaultProvider);
+        if (class_exists($provider = "{$namespace}\\Providers\\{$name}ServiceProvider")) {
+            //
         }
 
         // If not exists the default Service Provider, try the alternate one.
-        else if (class_exists($alternateProvider)) {
-            $this->app->register($alternateProvider);
+        else if (! class_exists($provider = "{$namespace}\\{$basename}ServiceProvider")) {
+            return;
         }
+
+        $this->app->register($provider);
     }
 
     /**

@@ -60,7 +60,23 @@ class PackageMakeCommand extends Command
             'src/Providers/',
             'src/Routes/',
             'src/Views/',
-        )
+        ),
+        'module' => array(
+            'Assets/',
+            'Config/',
+            'Controllers/',
+            'Database/',
+            'Database/Migrations/',
+            'Database/Seeds/',
+            'Events/',
+            'Language/',
+            'Listeners/',
+            'Models/',
+            'Policies/',
+            'Providers/',
+            'Routes/',
+            'Views/',
+        ),
     );
 
     /**
@@ -89,7 +105,19 @@ class PackageMakeCommand extends Command
             'src/Events.php',
             'README.md',
             'composer.json'
-        )
+        ),
+        'module' => array(
+            'Config/Config.php',
+            'Database/Seeds/DatabaseSeeder.php',
+            'Providers/AuthServiceProvider.php',
+            'Providers/EventServiceProvider.php',
+            'Providers/ModuleServiceProvider.php',
+            'Providers/RouteServiceProvider.php',
+            'Routes/Api.php',
+            'Routes/Web.php',
+            'Bootstrap.php',
+            'Events.php',
+        ),
     );
 
     /**
@@ -118,7 +146,19 @@ class PackageMakeCommand extends Command
             'events',
             'readme',
             'composer'
-        )
+        ),
+        'module' => array(
+            'config',
+            'seeder',
+            'auth-service-provider',
+            'event-service-provider',
+            'module-service-provider',
+            'route-service-provider',
+            'api-routes',
+            'web-routes',
+            'bootstrap',
+            'events',
+        ),
     );
 
     /**

@@ -28,22 +28,10 @@ class PackageServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register any additional module middleware.
-     *
-     * @param  array|string  $middleware
-     * @return void
-     */
-    protected function addMiddleware($middleware)
+    protected function bootstrapFrom($path)
     {
-        $middlewares = is_array($middleware) ? $middleware : func_get_args();
+        $app = $this->app;
 
-        //
-        $kernel = $this->app['Nova\Contracts\Http\KernelInterface'];
-
-        foreach ($middlewares as $middleware) {
-            $kernel->pushMiddleware($middleware);
-        }
+        return require $path;
     }
-
 }
