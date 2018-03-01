@@ -220,13 +220,6 @@ class Repository
         return rtrim($this->config->get('modules.namespace', 'Modules\\'), '/\\');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Optimization Methods
-    |--------------------------------------------------------------------------
-    |
-    */
-
     /**
      * Update cached repository of module information.
      *
@@ -258,7 +251,9 @@ class Repository
 
         $cachePath = $this->getCachePath();
 
-        if ($this->isCacheExpired($cachePath)) {
+        $configPath = app_path('Config/Packages.php');
+
+        if ($this->isCacheExpired($cachePath, $configPath)) {
             $modules = $this->getModules();
 
             $this->writeCache($cachePath, $modules);
@@ -311,25 +306,22 @@ class Repository
         return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'modules.php');
     }
 
-    /*
-     * Determine if the cahe is expired.
-     *
-     * @param  string $path
-     *
-     * @return bool
-     */
-    public function isCacheExpired($path)
+    /**
+    * Determine if the cache file is expired.
+    *
+    * @param  string  $cachePath
+    * @param  string  $path
+    * @return bool
+    */
+    public function isCacheExpired($cachePath, $path)
     {
-        if (! $this->files->exists($path)) {
+        if (! $this->files->exists($cachePath)) {
             return true;
         }
 
-        // Determine the path to the associated configuration file.
-        $configPath = APPPATH .'Config' .DS .'Modules.php';
+        $lastModified = $this->files->lastModified($path);
 
-        $lastModified = $this->files->lastModified($configPath);
-
-        if ($lastModified >= $this->files->lastModified($path)) {
+        if ($lastModified >= $this->files->lastModified($cachePath)) {
             return true;
         }
 
@@ -346,7 +338,7 @@ class Repository
         $path = $this->getPath();
 
         // Get the Modules from configuration.
-        $config = $this->config->get('modules.modules', array());
+        $config = $this->config->get('modules.options', array());
 
         $modules = collect($config);
 

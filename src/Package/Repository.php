@@ -197,10 +197,10 @@ class Repository
 
     protected function getPackages()
     {
-        $dataPath = base_path('vendor/nova-packages.php');
+        $packagesPath = base_path('vendor/nova-packages.php');
 
         try {
-            $data = $this->files->getRequire($dataPath);
+            $data = $this->files->getRequire($packagesPath);
 
         } catch (FileNotFoundException $e) {
             $data = array();
@@ -265,20 +265,22 @@ class Repository
             return static::$packages;
         }
 
-        $cachePath = $this->getCachePath();
+        $path = $this->getCachePath();
 
-        $dataPath = base_path('vendor/nova-packages.php');
+        $configPath = app_path('Config/Packages.php');
 
-        if ($this->isExpired($cachePath, $dataPath)) {
+        $packagesPath = base_path('vendor/nova-packages.php');
+
+        if ($this->isCacheExpired($path, $dataPath) || $this->isCacheExpired($path, $packagesPath)) {
             $packages = $this->getPackages();
 
-            $this->writeCache($cachePath, $packages);
+            $this->writeCache($path, $packages);
         }
 
         // The packages cache is valid.
         else {
             $packages = collect(
-                $this->files->getRequire($cachePath)
+                $this->files->getRequire($path)
             );
         }
 
@@ -324,10 +326,11 @@ PHP;
     /**
     * Determine if the cache file is expired.
     *
+    * @param  string  $cachePath
     * @param  string  $path
     * @return bool
     */
-    public function isExpired($cachePath, $path)
+    public function isCacheExpired($cachePath, $path)
     {
         if (! $this->files->exists($cachePath)) {
             return true;
@@ -343,13 +346,13 @@ PHP;
     }
 
     /**
-     * Get (local) Packages path.
+     * Get packages cache path.
      *
      * @return string
      */
     public function getCachePath()
     {
-        return storage_path('framework/packages.php');
+        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'packages.php');
     }
 
     /**
