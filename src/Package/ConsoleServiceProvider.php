@@ -55,6 +55,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'ProviderMake',
             'MigrationMake',
             'SeederMake',
+            'ThemeMake',
         );
 
         foreach ($commands as $command) {
@@ -301,7 +302,7 @@ class ConsoleServiceProvider extends ServiceProvider
     /**
      * Register the make:theme command.
      */
-    private function registerThemeCommand()
+    private function registerThemeMakeCommand()
     {
         $this->app->bindShared('command.make.package.theme', function ($app)
         {

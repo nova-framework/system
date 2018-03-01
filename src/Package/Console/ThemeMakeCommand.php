@@ -72,7 +72,7 @@ class ThemeMakeCommand extends Command
     protected $themeStubs = array(
         'themes/style',
         'config',
-        'themes/theme-service-provider',
+        'theme-service-provider',
         'themes/layout',
         'themes/layout',
         'themes/bootstrap',
@@ -194,7 +194,7 @@ class ThemeMakeCommand extends Command
     {
         $slug = $this->data['slug'];
 
-        if ($this->files->exists($this->getThemesPath($slug))) {
+        if ($this->files->exists($this->getThemePath($slug))) {
             $this->error('The Theme [' .$slug .'] already exists!');
 
             return false;
@@ -219,6 +219,10 @@ class ThemeMakeCommand extends Command
         }
 
         $progress->finish();
+
+        $this->info("\nGenerating optimized class loader");
+
+        $this->container['composer']->dumpOptimized();
 
         $this->info("\nTheme generated successfully.");
     }
@@ -423,7 +427,7 @@ return array (
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:theme Wizard and use default values'),
+            array('--quick', '-Q', InputOption::VALUE_NONE, 'Skip the make:theme Wizard and use default values'),
         );
     }
 }
