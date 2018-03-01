@@ -354,7 +354,7 @@ PHP;
      */
     public function getCachePath()
     {
-        return $this->config->get('modules.manifest', STORAGE_PATH .'framework' .DS .'packages.php');
+        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'packages.php');
     }
 
     /**
@@ -384,19 +384,13 @@ PHP;
      */
     public function getPackagePath($slug)
     {
-        $package = (Str::length($slug) > 3) ? Str::studly($slug) : Str::upper($slug);
+        if (Str::length($slug) > 3) {
+            $package = Str::studly($slug);
+        } else {
+            $package = Str::upper($slug);
+        }
 
-        return $this->getPath() .DS .$package .DS;
-    }
-
-    /**
-     * Get (local) Packages path.
-     *
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->getPackagesPath();
+        return $this->getPackagesPath() .DS .$package .DS;
     }
 
     /**

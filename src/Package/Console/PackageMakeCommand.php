@@ -325,7 +325,7 @@ class PackageMakeCommand extends Command
         $slug = $this->data['slug'];
 
         //
-        $path = $this->packages->getPath();
+        $path = $this->packages->getPackagesPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
@@ -457,7 +457,7 @@ return array (
             return $this->packages->getPackagePath($slug);
         }
 
-        return $this->packages->getPath();
+        return $this->packages->getPackagesPath();
     }
 
     protected function getLanguagePaths($slug)

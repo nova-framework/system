@@ -217,7 +217,9 @@ class Repository
      */
     public function getNamespace()
     {
-        return rtrim($this->config->get('modules.namespace', 'Modules\\'), '/\\');
+        $namespace = $this->config->get('modules.namespace', 'Modules\\');
+
+        return rtrim($namespace, '/\\');
     }
 
     /**
@@ -303,7 +305,7 @@ class Repository
      */
     protected function getCachePath()
     {
-        return $this->config->get('modules.manifest', STORAGE_PATH .'framework' .DS .'modules.php');
+        return $this->config->get('modules.cache', STORAGE_PATH .'framework' .DS .'modules.php');
     }
 
     /**
