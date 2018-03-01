@@ -597,9 +597,11 @@ if (! function_exists('class_basename'))
      */
     function class_basename($class)
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        $className = is_object($class) ? get_class($class) : $class;
 
-        return basename(str_replace('\\', '/', $class));
+        return basename(
+            str_replace('\\', '/', $className)
+        );
     }
 }
 
@@ -613,9 +615,9 @@ if (! function_exists('class_uses_recursive'))
      */
     function class_uses_recursive($class)
     {
-        $results = [];
+        $results = array();
 
-        foreach (array_merge([$class => $class], class_parents($class)) as $class) {
+        foreach (array_merge(array($class => $class), class_parents($class)) as $class) {
             $results += trait_uses_recursive($class);
         }
 

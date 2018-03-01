@@ -607,6 +607,7 @@ return array (
         return array(
             array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:package Wizard and use default values'),
             array('--extended', null, InputOption::VALUE_NONE, 'Generate an extended Package'),
+            array('--module', null, InputOption::VALUE_NONE, 'Generate an Application Module'),
         );
     }
 }

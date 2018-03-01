@@ -294,12 +294,12 @@ class Repository
         $packages = collect();
 
         foreach ($items as $name => $packagePath) {
-            $packagePath = realpath($packagePath);
+            $packagePath = Str::finish($packagePath, DS);
 
             $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
 
             $packages->put($name, array(
-                'path'     => $packagePath .DS,
+                'path'     => $packagePath,
                 'location' => $location,
                 'type'     => 'package',
             ));
@@ -319,16 +319,18 @@ class Repository
             $paths = collect();
         }
 
-        $vendor = class_basename(
-            $this->getModulesNamespace()
-        );
+        $namespace = $this->getModulesNamespace();
 
-        $paths->each(function ($path) use (&$packages, $vendor)
+        $vendor = class_basename($namespace);
+
+        $paths->each(function ($path) use ($packages, $vendor)
         {
             $name = $vendor .'/' .basename($path);
 
+            $path = Str::finish($path, DS);
+
             $packages->put($name, array(
-                'path'     => $path .DS,
+                'path'     => $path,
                 'location' => 'local',
                 'type'     => 'module',
             ));
