@@ -306,14 +306,9 @@ class Repository
         }
 
         //
-        // Process the local Modules.
+        // Process for the local Modules.
 
         $path = $this->getModulesPath();
-
-        // Retrieve all local Modules information.
-        $classPath = str_replace('\\', '/', $this->getModulesNamespace());
-
-        $vendor = basename($classPath);
 
         try {
             $paths = collect(
@@ -323,6 +318,10 @@ class Repository
         catch (InvalidArgumentException $e) {
             $paths = collect();
         }
+
+        $vendor = class_basename(
+            $this->getModulesNamespace()
+        );
 
         $paths->each(function ($path) use (&$packages, $vendor)
         {
