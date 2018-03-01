@@ -32,7 +32,7 @@ class PackageListCommand extends Command
      *
      * @var array
      */
-    protected $headers = ['Package', 'Slug', 'Order', 'Location', 'Status'];
+    protected $headers = ['Package', 'Slug', 'Order', 'Location', 'Type', 'Status'];
 
     /**
      * Create a new command instance.
@@ -89,20 +89,19 @@ class PackageListCommand extends Command
      */
     protected function getPackageInformation($package)
     {
-        if ($package['location'] === 'local') {
-            $location = 'Local';
-        } else {
-            $location = 'Vendor';
-        }
+        $location = ($package['location'] === 'local') ? 'Local' : 'Vendor';
 
-        $enabled = $this->packages->isEnabled($package['slug']);
+        $type = ($package['type'] == 'module') ? 'Module' : 'Package';
+
+        $status = $this->packages->isEnabled($package['slug']) ? 'Enabled' : 'Disabled';
 
         return array(
-            'name'         => $package['name'],
-            'slug'         => $package['slug'],
-            'order'        => $package['order'],
-            'location'    => $location,
-            'status'    => $enabled ? 'Enabled' : 'Disabled',
+            'name'     => $package['name'],
+            'slug'     => $package['slug'],
+            'order'    => $package['order'],
+            'location' => $location,
+            'type'     => $type,
+            'status'   => $status,
         );
     }
 
