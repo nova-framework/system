@@ -126,7 +126,7 @@ class PackageMakeCommand extends Command
      *
      * @var \Nova\Package\PackageManager
      */
-    protected $package;
+    protected $packages;
 
     /**
      * The filesystem instance.
@@ -147,15 +147,15 @@ class PackageMakeCommand extends Command
      * Create a new command instance.
      *
      * @param Filesystem $files
-     * @param \Nova\Package\PackageManager    $package
+     * @param \Nova\Package\PackageManager    $packages
      */
-    public function __construct(Filesystem $files, PackageManager $package)
+    public function __construct(Filesystem $files, PackageManager $packages)
     {
         parent::__construct();
 
         $this->files  = $files;
 
-        $this->package = $package;
+        $this->packages = $package;
     }
 
     /**
@@ -325,7 +325,7 @@ class PackageMakeCommand extends Command
         $slug = $this->data['slug'];
 
         //
-        $path = $this->package->getPath();
+        $path = $this->packages->getPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
@@ -454,10 +454,10 @@ return array (
     protected function getPackagePath($slug = null)
     {
         if (! is_null($slug)) {
-            return $this->package->getPackagePath($slug);
+            return $this->packages->getPackagePath($slug);
         }
 
-        return $this->package->getPath();
+        return $this->packages->getPath();
     }
 
     protected function getLanguagePaths($slug)
