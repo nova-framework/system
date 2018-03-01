@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Theme\Console;
+namespace Nova\Package\Console;
 
 use Nova\Config\Repository as Config;
 use Nova\Console\Command;
@@ -70,12 +70,12 @@ class ThemeMakeCommand extends Command
      * @var array
      */
     protected $themeStubs = array(
-        'style',
+        'themes/style',
         'config',
-        'theme-service-provider',
-        'layout',
-        'layout',
-        'bootstrap',
+        'themes/theme-service-provider',
+        'themes/layout',
+        'themes/layout',
+        'themes/bootstrap',
         'readme',
     );
 
@@ -131,6 +131,8 @@ class ThemeMakeCommand extends Command
      */
     public function handle()
     {
+        $namespace = $this->packages->getThemesNamespace();
+
         $name = $this->argument('name');
 
         if (Str::length($name) > 3) {
@@ -146,11 +148,7 @@ class ThemeMakeCommand extends Command
 
         $this->data['name'] = $name;
 
-        $vendor = basename(
-            str_replace('\\', '/',  $this->packages->getThemesNamespace())
-        );
-
-        $this->data['namespace'] = $vendor .'\\' .$name;
+        $this->data['namespace'] =  $namespace .'\\' .$name;
 
         if ($this->option('quick')) {
             return $this->generate();
@@ -167,14 +165,13 @@ class ThemeMakeCommand extends Command
      */
     private function stepOne()
     {
+        $namespace = $this->packages->getThemesNamespace();
+
         $this->data['name'] = $this->ask('Please enter the name of the Theme:', $this->data['name']);
         $this->data['slug'] = $this->ask('Please enter the slug of the Theme:', $this->data['slug']);
 
-        $vendor = basename(
-            str_replace('\\', '/',  $this->packages->getThemesNamespace())
-        );
-
-        $this->data['namespace'] = $vendor .'\\' .$this->data['name'];
+        //
+        $this->data['namespace'] = $namespace .'\\' .$this->data['name'];
 
         $this->comment('You have provided the following information:');
 
@@ -326,10 +323,10 @@ return array (
      */
     protected function getThemePath($slug = null)
     {
-        $basePath = $this->config->get('view.themes.path', BASEPATH .'themes');
+        $themesPath = $this->packages->getThemesPath();
 
         if (is_null($slug)) {
-            return $basePath .DS;
+            return $themesPath;
         }
 
         if (Str::length($slug) > 3) {
@@ -338,7 +335,7 @@ return array (
             $name = Str::upper($slug);
         }
 
-        return $basePath .DS .$name .DS;
+        return $themesPath .DS .$name .DS;
     }
 
     protected function getLanguagePaths($slug)
@@ -391,20 +388,16 @@ return array (
      */
     protected function formatContent($content)
     {
-        $path = $this->config->get('view.themes.namespace', 'Themes\\');
-
         $searches = array(
             '{{slug}}',
             '{{name}}',
             '{{namespace}}',
-            '{{path}}'
         );
 
         $replaces = array(
             $this->data['slug'],
             $this->data['name'],
             $this->data['namespace'],
-            $path,
         );
 
         return str_replace($searches, $replaces, $content);

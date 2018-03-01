@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}{{namespace}}\Providers;
+namespace {{namespace}}\Providers;
 
 use Nova\Package\Support\Providers\ThemeServiceProvider as ServiceProvider;
 
@@ -18,7 +18,7 @@ class ThemeServiceProvider extends ServiceProvider
         $path = realpath(__DIR__ .'/../');
 
         // Configure the Package.
-        $this->package('Themes/{{namespace}}', '{{slug}}', $path, 'theme');
+        $this->package('Themes/{{namespace}}', '{{slug}}', $path);
 
         // Bootstrap the Theme.
         require $path .DS .'Bootstrap.php';
