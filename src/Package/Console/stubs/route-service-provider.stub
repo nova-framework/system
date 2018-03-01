@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}\{{namespace}}\Providers;
+namespace {{namespace}}\Providers;
 
 use Nova\Routing\Router;
 use Nova\Package\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -13,7 +13,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string|null
      */
-    protected $namespace = '{{path}}\{{namespace}}\Controllers';
+    protected $namespace = '{{namespace}}\Controllers';
 
 
     /**

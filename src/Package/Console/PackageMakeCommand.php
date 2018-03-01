@@ -36,6 +36,9 @@ class PackageMakeCommand extends Command
     protected $packageFolders = array(
         'default' => array(
             'assets/',
+            'assets/css/',
+            'assets/images/',
+            'assets/js/',
             'src/',
             'src/Config/',
             'src/Database/',
@@ -46,6 +49,9 @@ class PackageMakeCommand extends Command
         ),
         'extended' => array(
             'assets/',
+            'assets/css/',
+            'assets/images/',
+            'assets/js/',
             'src/',
             'src/Config/',
             'src/Controllers/',
@@ -63,6 +69,9 @@ class PackageMakeCommand extends Command
         ),
         'module' => array(
             'Assets/',
+            'Assets/css/',
+            'Assets/images/',
+            'Assets/js/',
             'Config/',
             'Controllers/',
             'Database/',
@@ -233,10 +242,18 @@ class PackageMakeCommand extends Command
         //
         $otherSlug = str_replace('_', '-', $slug);
 
-        if (! is_null($vendor)) {
+        if (! empty($vendor)) {
             $package = Str::studly($vendor) .'/' .$name;
 
             $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$otherSlug;
+        } else if ($this->option('module')) {
+            $vendor = basename(
+                str_replace('\\', '/',  $this->packages->getModulesNamespace())
+            );
+
+            $package = $vendor .'/' .$name;
+
+            $this->data['lower_package'] = $vendor .$otherSlug;
         } else {
             $package = $name;
 
@@ -288,7 +305,15 @@ class PackageMakeCommand extends Command
             $this->data['package'] = Str::studly($vendor) .'/' .$this->data['name'];
 
             $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$slug;
-        } else {
+        } else if ($this->option('module')) {
+            $vendor = basename(
+                str_replace('\\', '/',  $this->packages->getModulesNamespace())
+            );
+
+            $this->data['package'] = $vendor .'/' .$name;
+
+            $this->data['lower_package'] = $vendor .$otherSlug;
+        }else {
             $this->data['package'] = $this->data['name'];
 
             $this->data['lower_package'] = 'acme-corp/' .$slug;
@@ -321,6 +346,8 @@ class PackageMakeCommand extends Command
      */
     protected function generate()
     {
+        $module = $this->option('module') ? true : false;
+
         $slug = $this->data['slug'];
 
         if ($this->files->exists($this->getPackagePath($slug))) {
@@ -343,7 +370,7 @@ class PackageMakeCommand extends Command
         foreach ($steps as $message => $method) {
             $progress->setMessage($message);
 
-            call_user_func(array($this, $method));
+            call_user_func(array($this, $method), $module);
 
             $progress->advance();
         }
@@ -359,27 +386,33 @@ class PackageMakeCommand extends Command
 
     /**
      * Generate defined Package folders.
+     *
+     * @param boolean $module
+     * @return void
      */
-    protected function generateFolders()
+    protected function generateFolders($module)
     {
         $slug = $this->data['slug'];
 
         //
-        $path = $this->packages->getPackagesPath();
+        $path = $module
+            ? $this->packages->getModulesPath()
+            : $this->packages->getPackagesPath();
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
         }
 
-        $path = $this->getPackagePath($slug, true);
+        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
 
-        $this->files->makeDirectory($path);
-
-        //
-        $packagePath = $this->getPackagePath($slug);
+        $this->files->makeDirectory($packagePath);
 
         // Generate the Package directories.
-        $mode = $this->option('extended') ? 'extended' : 'default';
+        if ($module) {
+            $mode = 'module';
+        } else {
+            $mode = $this->option('extended') ? 'extended' : 'default';
+        }
 
         $packageFolders = $this->packageFolders[$mode];
 
@@ -390,7 +423,7 @@ class PackageMakeCommand extends Command
         }
 
         // Generate the Language inner directories.
-        $languageFolders = $this->getLanguagePaths($slug);
+        $languageFolders = $this->getLanguagePaths($slug, $module);
 
         foreach ($languageFolders as $folder) {
             $path = $packagePath .$folder;
@@ -401,30 +434,40 @@ class PackageMakeCommand extends Command
 
     /**
      * Generate defined Package files.
+     *
+     * @param boolean $module
+     * @return void
      */
-    protected function generateFiles()
+    protected function generateFiles($module)
     {
-        $mode = $this->option('extended') ? 'extended' : 'default';
+        if ($module) {
+            $mode = 'module';
+        } else {
+            $mode = $this->option('extended') ? 'extended' : 'default';
+        }
 
         $packageFiles = $this->packageFiles[$mode];
+
+        //
+        $slug = $this->data['slug'];
+
+        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
 
         foreach ($packageFiles as $key => $file) {
             $file = $this->formatContent($file);
 
-            $this->files->put($this->getDestinationFile($file), $this->getStubContent($key, $mode));
+            $this->files->put(
+                $this->getDestinationFile($file, $packagePath), $this->getStubContent($key, $mode)
+            );
         }
 
         // Generate the Language files
-        $slug = $this->data['slug'];
-
-        $packagePath = $this->getPackagePath($slug);
-
         $content ='<?php
 
 return array (
 );';
 
-        $languageFolders = $this->getLanguagePaths($slug);
+        $languageFolders = $this->getLanguagePaths($slug, $module);
 
         foreach ($languageFolders as $folder) {
             $path = $packagePath .$folder .DS .'messages.php';
@@ -435,16 +478,23 @@ return array (
 
     /**
      * Generate .gitkeep files within generated folders.
+     *
+     * @param boolean $module
+     * @return void
      */
-    protected function generateGitkeep()
+    protected function generateGitkeep($module)
     {
         $slug = $this->data['slug'];
 
-        $packagePath = $this->getPackagePath($slug);
+        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
+
+        if ($module) {
+            $mode = 'module';
+        } else {
+            $mode = $this->option('extended') ? 'extended' : 'default';
+        }
 
         //
-        $mode = $this->option('extended') ? 'extended' : 'default';
-
         $packageFolders = $this->packageFolders[$mode];
 
         foreach ($packageFolders as $folder) {
@@ -463,9 +513,16 @@ return array (
 
     /**
      * Update the composer.json and run the Composer.
+     *
+     * @param boolean $module
+     * @return void
      */
-    protected function updateComposerJson()
+    protected function updateComposerJson($module)
     {
+        if ($module) {
+            return;
+        }
+
         $composerJson = getenv('COMPOSER') ?: 'composer.json';
 
         $path = base_path($composerJson);
@@ -491,6 +548,22 @@ return array (
      *
      * @return string
      */
+    protected function getModulePath($slug = null)
+    {
+        if (! is_null($slug)) {
+            return $this->packages->getModulePath($slug);
+        }
+
+        return $this->packages->getModulesPath();
+    }
+
+    /**
+     * Get the path to the Package.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
     protected function getPackagePath($slug = null)
     {
         if (! is_null($slug)) {
@@ -500,14 +573,20 @@ return array (
         return $this->packages->getPackagesPath();
     }
 
-    protected function getLanguagePaths($slug)
+    protected function getLanguagePaths($slug, $module)
     {
         $paths = array();
 
         $languages = $this->container['config']['languages'];
 
         foreach (array_keys($languages) as $code) {
-            $paths[] = 'src' .DS .'Language' .DS .strtoupper($code);
+            $path = 'Language' .DS .strtoupper($code);
+
+            if (! $module) {
+                $path = 'src' .DS .$path;
+            }
+
+            $paths[] = $path;
         }
 
         return $paths;
@@ -517,14 +596,15 @@ return array (
      * Get destination file.
      *
      * @param string $file
+     * @param string $packagePath
      *
      * @return string
      */
-    protected function getDestinationFile($file)
+    protected function getDestinationFile($file, $packagePath)
     {
         $slug = $this->data['slug'];
 
-        return $this->getPackagePath($slug) .$this->formatContent($file);
+        return $packagePath .$this->formatContent($file);
     }
 
     /**
@@ -605,9 +685,9 @@ return array (
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_REQUIRED, 'Skip the make:package Wizard and use default values'),
-            array('--extended', null, InputOption::VALUE_NONE, 'Generate an extended Package'),
-            array('--module', null, InputOption::VALUE_NONE, 'Generate an Application Module'),
+            array('--quick', '-Q', InputOption::VALUE_NONE, 'Skip the make:package Wizard and use default values'),
+            array('--extended', '-E', InputOption::VALUE_NONE, 'Generate an extended Package'),
+            array('--module', '-M', InputOption::VALUE_NONE, 'Generate an Application Module'),
         );
     }
 }

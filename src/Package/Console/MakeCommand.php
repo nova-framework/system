@@ -107,9 +107,11 @@ class MakeCommand extends CommandGenerator
         $name = $this->parseName($this->argument('name'));
 
         if ($this->packages->exists($slug)) {
-            $this->packagesPath = $this->packages->getPath();
+            $this->packageInfo = collect($this->packages->where('slug', $slug));
 
-            $this->PackageInfo = collect($this->packages->where('slug', $slug));
+            $this->packagesPath = ($this->packageInfo['type'] == 'module')
+                ? $this->packages->getModulesPath()
+                : $this->packages->getPackagesPath();
 
             $this->data['slug'] = $slug;
             $this->data['name'] = $name;
@@ -246,6 +248,10 @@ class MakeCommand extends CommandGenerator
         $name = ltrim($name, '\/');
         $name = rtrim($name, '\/');
 
+        if ($this->packageInfo->get('type') == 'module') {
+            return $this->packagesPath .DS .$this->packageInfo->get('basename') .DS .$folder .DS .$name;
+        }
+
         return $this->packagesPath .DS .$this->packageInfo->get('basename') .DS .'src' .DS .$folder .DS .$name;
     }
 
@@ -284,7 +290,7 @@ class MakeCommand extends CommandGenerator
      */
     protected function getNamespace($file)
     {
-        $basename = $this->PackageInfo->get('basename');
+        $basename = $this->packageInfo->get('basename');
 
         $namespace = str_replace($this->packagesPath .DS .$basename .DS .'src', '', $file);
 
@@ -292,7 +298,7 @@ class MakeCommand extends CommandGenerator
 
         $namespace = strrev(preg_replace(strrev("/$find/"), '', strrev($namespace), 1));
 
-        $namespace = $this->PackageInfo->get('namespace') .'\\' .trim($namespace, '\\/');
+        $namespace = $this->packageInfo->get('namespace') .'\\' .trim($namespace, '\\/');
 
         return str_replace('/', '\\', $namespace);
     }

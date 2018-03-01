@@ -1,6 +1,6 @@
 <?php
 
-namespace {{path}}\{{namespace}};
+namespace {{namespace}};
 
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 

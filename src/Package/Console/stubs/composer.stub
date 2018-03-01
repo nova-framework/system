@@ -1,6 +1,6 @@
 {
     "name": "{{lower_package}}",
-    "type": "nova-Package",
+    "type": "nova-package",
     "description": "{{name}} is a package for Nova Framework",
     "license": "{{license}}",
     "authors": [
