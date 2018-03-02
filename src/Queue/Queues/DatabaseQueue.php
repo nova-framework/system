@@ -166,19 +166,16 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $queue = $this->getQueue($queue);
 
-        $this->database->beginTransaction();
+        return $this->database->transaction(function () use ($queue)
+        {
+            if (! is_null($job = $this->getNextAvailableJob($queue))) {
+                $this->markJobAsReserved($job->id, $job->attempts + 1);
 
-        if ($job = $this->getNextAvailableJob($queue)) {
-            $this->markJobAsReserved($job->id, $job->attempts + 1);
-
-            $this->database->commit();
-
-            return new DatabaseJob(
-                $this->container, $this, $job, $queue
-            );
-        }
-
-        $this->database->commit();
+                return new DatabaseJob(
+                    $this->container, $this, $job, $queue
+                );
+            }
+        });
     }
 
     /**
@@ -259,13 +256,14 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     public function deleteReserved($queue, $id)
     {
-        $this->database->beginTransaction();
+        $this->database->transaction(function () use ($id)
+        {
+            $record = $this->database->table($this->table)->lockForUpdate()->find($id);
 
-        if ($this->database->table($this->table)->lockForUpdate()->find($id)) {
-            $this->database->table($this->table)->where('id', $id)->delete();
-        }
-
-        $this->database->commit();
+            if (! is_null($record)) {
+                $this->database->table($this->table)->where('id', $id)->delete();
+            }
+        });
     }
 
     /**
