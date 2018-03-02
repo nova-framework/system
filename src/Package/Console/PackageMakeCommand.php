@@ -219,7 +219,13 @@ class PackageMakeCommand extends Command
         if (strpos($name, '/') > 0) {
             list ($vendor, $name) = explode('/', $name);
         } else {
-            $vendor = null;
+            $vendor = 'AcmeCorp';
+        }
+
+        if ($this->option('module')) {
+            $namespace = $this->packages->getModulesNamespace();
+
+            $vendor = basename(str_replace('\\', '/',  $namespace));
         }
 
         if (Str::length($name) > 3) {
@@ -239,17 +245,7 @@ class PackageMakeCommand extends Command
 
         $this->data['name'] = $name;
 
-        if ($this->option('module')) {
-            $namespace = $this->packages->getModulesNamespace();
-
-            $vendor = basename(str_replace('\\', '/',  $namespace));
-        }
-
-        // We have an standard Package.
-        else if (empty($vendor)) {
-            $vendor = 'AcmeCorp';
-        }
-
+        //
         $this->data['package'] = $package = Str::studly($vendor) .'/' .$name;
 
         $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .str_replace('_', '-', $slug);
