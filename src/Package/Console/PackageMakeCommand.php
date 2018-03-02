@@ -275,42 +275,48 @@ class PackageMakeCommand extends Command
      */
     private function stepOne()
     {
-        $this->data['name'] = $this->ask('Please enter the name of the Package:', $this->data['name']);
-        $this->data['slug'] = $this->ask('Please enter the slug of the Package:', $this->data['slug']);
+        $input = $this->ask('Please enter the name of the Package:', $this->data['name']);
 
-        if (strpos($this->data['package'], '/') > 0) {
-            list ($vendor) = explode('/', $this->data['package']);
+        if (Str::length($input) > 3) {
+            $name = Str::studly($input);
         } else {
-            $vendor = null;
+            $name = Str::upper($input);
         }
 
-        $vendor = $this->ask('Please enter the vendor of the Package:', $vendor);
+        $this->data['name'] = $name;
 
         //
-        $slug = str_replace('_', '-', $this->data['slug']);
+        $input = $this->ask('Please enter the slug of the Package:', $this->data['slug']);
+
+        if (Str::length($input) > 3) {
+            $slug = Str::snake($input);
+        } else {
+            $slug = Str::lower($input);
+        }
+
+        $this->data['slug'] = $slug;
 
         if ($this->option('module')) {
-            $vendor = basename(
-                str_replace('\\', '/',  $this->packages->getModulesNamespace())
-            );
+            $namespace = $this->packages->getModulesNamespace();
 
-            $this->data['package'] = $vendor .'/' .$name;
-
-            $this->data['lower_package'] = $vendor .'/' .$otherSlug;
-
-        }
-
-        // We have an standard Package.
-        else if (! empty($vendor)) {
-            $this->data['package'] = Str::studly($vendor) .'/' .$this->data['name'];
-
-            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$slug;
+            $vendor = basename(str_replace('\\', '/',  $namespace));
         } else {
-            $this->data['package'] = $this->data['name'];
+            if (strpos($this->data['package'], '/') > 0) {
+                list ($vendor) = explode('/', $this->data['package']);
+            } else {
+                $vendor = 'AcmeCorp';
+            }
 
-            $this->data['lower_package'] = 'acme-corp/' .$slug;
+            if (empty($vendor = $this->ask('Please enter the vendor of the Package:', $vendor))) {
+                $vendor = 'AcmeCorp';
+            }
         }
 
+        $this->data['package'] = Str::studly($vendor) .'/' .$name;
+
+        $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .str_replace('_', '-', $slug);
+
+        //
         $this->data['namespace'] = $this->ask('Please enter the namespace of the Package:', $this->data['namespace']);
 
         $this->data['license'] = $this->ask('Please enter the license of the Package:', $this->data['license']);

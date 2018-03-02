@@ -398,7 +398,6 @@ return array (
 
             //
             '{{slug}}',
-            '{{url_slug}}',
             '{{name}}',
             '{{namespace}}',
         );
@@ -408,8 +407,7 @@ return array (
             'theme',
 
             //
-            $slug = $this->data['slug'],
-            str_replace('_', '-', $slug),
+            $this->data['slug'],
             $this->data['name'],
             $this->data['namespace'],
         );
