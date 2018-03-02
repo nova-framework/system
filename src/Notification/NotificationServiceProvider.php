@@ -4,7 +4,6 @@ namespace Nova\Notification;
 
 use Nova\Support\ServiceProvider;
 
-use Nova\Notification\Console\NotificationMakeCommand;
 use Nova\Notification\Console\NotificationTableCommand;
 use Nova\Notification\DispatcherInterface;
 use Nova\Notification\ChannelManager;
@@ -52,18 +51,12 @@ class NotificationServiceProvider extends ServiceProvider
 
     protected function registerCommands()
     {
-        $this->app->singleton('command.notification.table', function ($app) {
+        $this->app->singleton('command.notification.table', function ($app)
+        {
             return new NotificationTableCommand($app['files']);
         });
 
-        $this->app->singleton('command.notification.make', function ($app)
-        {
-            return new NotificationMakeCommand($app['files']);
-        });
-
-        $this->commands(
-            'command.notification.make', 'command.notification.table'
-        );
+        $this->commands('command.notification.table');
     }
 
     /**
@@ -74,7 +67,7 @@ class NotificationServiceProvider extends ServiceProvider
     public function provides()
     {
         return array(
-            'notifications', 'command.notification.make', 'command.notification.table'
+            'notifications', 'command.notification.table'
         );
     }
 }

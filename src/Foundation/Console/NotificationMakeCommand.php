@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notification\Console;
+namespace Nova\Foundation\Console;
 
 use Nova\Console\GeneratorCommand;
 

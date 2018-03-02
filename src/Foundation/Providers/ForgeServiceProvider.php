@@ -16,6 +16,7 @@ use Nova\Foundation\Console\KeyGenerateCommand;
 use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
+use Nova\Foundation\Console\NotificationMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ViewClearCommand;
 
@@ -46,26 +47,27 @@ class ForgeServiceProvider extends ServiceProvider
      * @var array
      */
     protected $commands = array(
-        'AssetPublish'  => 'command.asset.publish',
-        'ConfigPublish' => 'command.config.publish',
-        'ClearCompiled' => 'command.clear-compiled',
-        'ConsoleMake'   => 'command.console.make',
-        'Down'          => 'command.down',
-        'Environment'   => 'command.environment',
-        'EventMake'     => 'command.event.make',
-        'JobMake'       => 'command.job.make',
-        'KeyGenerate'   => 'command.key.generate',
-        'ListenerMake'  => 'command.listener.make',
-        'ModelMake'     => 'command.model.make',
-        'Optimize'      => 'command.optimize',
-        'PolicyMake'    => 'command.policy.make',
-        'ProviderMake'  => 'command.provider.make',
-        'RouteList'     => 'command.route.list',
-        'Serve'         => 'command.serve',
-        'Up'            => 'command.up',
-        'VendorPublish' => 'command.vendor.publish',
-        'ViewClear'     => 'command.view.clear',
-        'ViewPublish'   => 'command.view.publish',
+        'AssetPublish'     => 'command.asset.publish',
+        'ConfigPublish'    => 'command.config.publish',
+        'ClearCompiled'    => 'command.clear-compiled',
+        'ConsoleMake'      => 'command.console.make',
+        'Down'             => 'command.down',
+        'Environment'      => 'command.environment',
+        'EventMake'        => 'command.event.make',
+        'JobMake'          => 'command.job.make',
+        'KeyGenerate'      => 'command.key.generate',
+        'ListenerMake'     => 'command.listener.make',
+        'ModelMake'        => 'command.model.make',
+        'NotificationMake' => 'command.notification.make',
+        'Optimize'         => 'command.optimize',
+        'PolicyMake'       => 'command.policy.make',
+        'ProviderMake'     => 'command.provider.make',
+        'RouteList'        => 'command.route.list',
+        'Serve'            => 'command.serve',
+        'Up'               => 'command.up',
+        'VendorPublish'    => 'command.vendor.publish',
+        'ViewClear'        => 'command.view.clear',
+        'ViewPublish'      => 'command.view.publish',
     );
 
     /**
@@ -262,6 +264,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.model.make', function ($app)
         {
             return new ModelMakeCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerNotificationMakeCommand()
+    {
+        $this->app->singleton('command.notification.make', function ($app)
+        {
+            return new NotificationMakeCommand($app['files']);
         });
     }
 
