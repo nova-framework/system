@@ -51,11 +51,17 @@ class ScheduleFinishCommand extends Command
      */
     public function handle()
     {
-        collect($this->schedule->events())->filter(function ($value)
-        {
-            return ($value->mutexName() == $this->argument('id'));
+        $id = $this->argument('id');
 
-        })->each->callAfterCallbacks($this->container);
+        $events = collect($this->schedule->events())->filter(function ($event) use ($id)
+        {
+            return ($event->mutexName() == $id);
+        });
+
+        $events->each(function ($event)
+        {
+            $event->callAfterCallbacks($this->container);
+        });
     }
 
     /**

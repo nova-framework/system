@@ -9,6 +9,8 @@ use Nova\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
+use Carbon\Carbon;
+
 
 class WorkCommand extends Command
 {
@@ -138,10 +140,12 @@ class WorkCommand extends Command
      */
     protected function writeOutput(Job $job, $failed)
     {
+        $date = Carbon::now()->format('Y-m-d H:i:s');
+
         if ($failed) {
-            $this->output->writeln('<error>Failed:</error> ' .$job->resolveName());
+            $this->output->writeln('<error>Failed:</error> [' .$date .'] ' .$job->resolveName());
         } else {
-            $this->output->writeln('<info>Processed:</info> ' .$job->resolveName());
+            $this->output->writeln('<info>Processed:</info> [' .$date .'] ' .$job->resolveName());
         }
     }
 
