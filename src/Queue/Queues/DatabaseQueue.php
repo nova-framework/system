@@ -193,6 +193,7 @@ class DatabaseQueue extends Queue implements QueueInterface
             ->where(function ($query)
             {
                 $this->isAvailable($query);
+
                 $this->isReservedButExpired($query);
             })
             ->orderBy('id', 'asc')

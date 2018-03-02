@@ -52,7 +52,10 @@ class SyncJob extends Job
         if ($this->job instanceof Closure) {
             call_user_func($this->job, $this, $data);
         } else {
-            $this->resolveAndHandle(array('job' => $this->job, 'data' => $data));
+            $this->resolveAndHandle(array(
+                'job'  => $this->job,
+                'data' => $data
+            ));
         }
     }
 

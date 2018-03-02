@@ -9,7 +9,6 @@ use DateTime;
 
 abstract class Job
 {
-
     /**
      * The job handler instance.
      *
@@ -37,6 +36,7 @@ abstract class Job
      * @var bool
      */
     protected $deleted = false;
+
 
     /**
      * Fire the job.
@@ -99,7 +99,7 @@ abstract class Job
 
         $this->instance = $this->resolve($class);
 
-        $this->instance->{$method}($this, $payload['data']);
+        call_user_func(array($this->instance, $method), $this, $payload['data']);
     }
 
     /**

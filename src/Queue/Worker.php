@@ -15,7 +15,6 @@ use Throwable;
 
 class Worker
 {
-
     /**
      * The queue manager instance.
      *
@@ -50,6 +49,7 @@ class Worker
      * @var \Nova\Foundation\Exceptions\Handler
      */
     protected $exceptions;
+
 
     /**
      * Create a new queue worker.
@@ -134,9 +134,7 @@ class Worker
             return false;
         }
 
-        $result = $this->events->until('nova.queue.looping');
-
-        return ($result !== false);
+        return ($this->events->until('nova.queue.looping') !== false);
     }
 
     /**

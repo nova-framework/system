@@ -5,13 +5,13 @@ use Nova\Encryption\Encrypter;
 
 class QueueClosure
 {
-
     /**
      * The encrypter instance.
      *
      * @var \Nova\Encryption\Encrypter  $crypt
      */
     protected $crypt;
+
 
     /**
      * Create a new queued Closure job.

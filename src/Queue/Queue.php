@@ -14,13 +14,13 @@ use DateTime;
 
 abstract class Queue
 {
-
     /**
      * The IoC container instance.
      *
      * @var \Nova\Container\Container
      */
     protected $container;
+
 
     /**
      * Push a new job onto the queue.

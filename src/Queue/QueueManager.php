@@ -7,7 +7,6 @@ use Closure;
 
 class QueueManager
 {
-
     /**
      * The application instance.
      *
@@ -33,6 +32,7 @@ class QueueManager
     {
         $this->app = $app;
     }
+
 
     /**
      * Register an event listener for the daemon queue loop.
