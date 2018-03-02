@@ -220,7 +220,7 @@ class Dispatcher
         $files = $this->app['files'];
 
         // The cache file path.
-        $path = STORAGE_PATH .'framework' .DS .'assets.php';
+        $path = STORAGE_PATH .'assets.php';
 
         // The config path for checking againts the cache file.
         $configPath = APPPATH .'Config' .DS .'Routing.php';
