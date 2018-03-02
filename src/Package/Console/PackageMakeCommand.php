@@ -239,31 +239,20 @@ class PackageMakeCommand extends Command
 
         $this->data['name'] = $name;
 
-        //
-        $otherSlug = str_replace('_', '-', $slug);
-
         if ($this->option('module')) {
-            $vendor = basename(
-                str_replace('\\', '/',  $this->packages->getModulesNamespace())
-            );
+            $namespace = $this->packages->getModulesNamespace();
 
-            $package = $vendor .'/' .$name;
-
-            $this->data['lower_package'] = $vendor .'/' .$otherSlug;
+            $vendor = basename(str_replace('\\', '/',  $namespace));
         }
 
         // We have an standard Package.
-        else if (! empty($vendor)) {
-            $package = Str::studly($vendor) .'/' .$name;
-
-            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$otherSlug;
-        } else {
-            $package = $name;
-
-            $this->data['lower_package'] = 'acme-corp/' .$otherSlug;
+        else if (empty($vendor)) {
+            $vendor = 'AcmeCorp';
         }
 
-        $this->data['package'] = $package;
+        $this->data['package'] = $package = Str::studly($vendor) .'/' .$name;
+
+        $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .str_replace('_', '-', $slug);
 
         $this->data['namespace'] = str_replace('/', '\\', $package);
 

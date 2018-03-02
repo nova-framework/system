@@ -75,7 +75,7 @@ class ThemeMakeCommand extends Command
         'theme-service-provider',
         'layout',
         'layout',
-        'themes-bootstrap',
+        'theme-bootstrap',
         'readme',
     );
 
@@ -398,6 +398,7 @@ return array (
 
             //
             '{{slug}}',
+            '{{url_slug}}',
             '{{name}}',
             '{{namespace}}',
         );
@@ -407,7 +408,8 @@ return array (
             'theme',
 
             //
-            $this->data['slug'],
+            $slug = $this->data['slug'],
+            str_replace('_', '-', $slug),
             $this->data['name'],
             $this->data['namespace'],
         );
