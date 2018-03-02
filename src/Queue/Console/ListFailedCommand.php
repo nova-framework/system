@@ -41,11 +41,7 @@ class ListFailedCommand extends Command
             return $this->info('No failed jobs!');
         }
 
-        $table = $this->getHelperSet()->get('table');
-
-        $table->setHeaders(array('ID', 'Connection', 'Queue', 'Class', 'Failed At'))
-              ->setRows($rows)
-              ->render($this->output);
+        $this->table(array('ID', 'Connection', 'Queue', 'Class', 'Failed At'), $rows);
     }
 
     /**
