@@ -14,7 +14,6 @@ use IronMQ;
 
 class IronQueue extends Queue implements QueueInterface
 {
-
     /**
      * The IronMQ instance.
      *
@@ -42,6 +41,7 @@ class IronQueue extends Queue implements QueueInterface
      * @var bool
      */
     protected $shouldEncrypt;
+
 
     /**
      * Create a new IronMQ queue instance.

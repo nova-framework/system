@@ -43,6 +43,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected $retryAfter = 60;
 
+
     /**
      * Create a new database queue instance.
      *
@@ -169,7 +170,7 @@ class DatabaseQueue extends Queue implements QueueInterface
         return $this->database->transaction(function () use ($queue)
         {
             if (! is_null($job = $this->getNextAvailableJob($queue))) {
-                $this->markJobAsReserved($job->id, $job->attempts + 1);
+                $this->markJobAsReserved($job->id, $job->attempts);
 
                 return new DatabaseJob(
                     $this->container, $this, $job, $queue

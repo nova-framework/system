@@ -9,7 +9,6 @@ use Nova\Queue\QueueInterface;
 
 class SyncQueue extends Queue implements QueueInterface
 {
-
     /**
      * Push a new job onto the queue.
      *
@@ -37,6 +36,7 @@ class SyncQueue extends Queue implements QueueInterface
     {
         //
     }
+
 
     /**
      * Push a new job onto the queue after a delay.

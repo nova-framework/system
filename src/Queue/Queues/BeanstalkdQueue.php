@@ -34,6 +34,7 @@ class BeanstalkdQueue extends Queue implements QueueInterface
      */
     protected $timeToRun;
 
+
     /**
      * Create a new Beanstalkd queue instance.
      *

@@ -2,8 +2,8 @@
 
 namespace Nova\Queue\Console;
 
+use Nova\Queue\Job;
 use Nova\Queue\Worker;
-use Nova\Queue\Jobs\Job;
 use Nova\Console\Command;
 
 use Symfony\Component\Console\Input\InputOption;
