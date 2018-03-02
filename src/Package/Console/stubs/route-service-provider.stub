@@ -9,7 +9,7 @@ use Nova\Package\Support\Providers\RouteServiceProvider as ServiceProvider;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * The controller namespace for the package.
+     * The controller namespace for the {{lower_type}}.
      *
      * @var string|null
      */
@@ -30,7 +30,7 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Define the routes for the package.
+     * Define the routes for the {{lower_type}}.
      *
      * @param  \Nova\Routing\Router $router
      * @return void

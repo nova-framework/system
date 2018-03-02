@@ -2,8 +2,8 @@
 
 /*
 |--------------------------------------------------------------------------
-| Package Bootstrap
+| {{type}} Bootstrap
 |--------------------------------------------------------------------------
 |
-| Here is where you can register all of the Bootstrap for the package.
+| Here is where you can register all of the Bootstrap for the {{type}}.
 */

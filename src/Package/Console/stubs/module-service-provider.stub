@@ -38,7 +38,7 @@ class ModuleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the {{name}} module Service Provider.
+     * Register the {{name}} Module Service Provider.
      *
      * This service provider is a convenient place to register your modules
      * services in the IoC container. If you wish, you may make additional

@@ -9,7 +9,7 @@ use Nova\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
-     * The policy mappings for the application.
+     * The policy mappings for the {{lower_type}}.
      *
      * @var array
      */
@@ -19,7 +19,7 @@ class AuthServiceProvider extends ServiceProvider
 
 
     /**
-     * Register any application authentication / authorization services.
+     * Register any {{lower_type}} authentication / authorization services.
      *
      * @param  \Nova\Auth\Access\GateInterface  $gate
      * @return void

@@ -393,12 +393,20 @@ return array (
     protected function formatContent($content)
     {
         $searches = array(
+            '{{type}}',
+            '{{lower_type}}',
+
+            //
             '{{slug}}',
             '{{name}}',
             '{{namespace}}',
         );
 
         $replaces = array(
+            'Theme',
+            'theme',
+
+            //
             $this->data['slug'],
             $this->data['name'],
             $this->data['namespace'],

@@ -242,18 +242,21 @@ class PackageMakeCommand extends Command
         //
         $otherSlug = str_replace('_', '-', $slug);
 
-        if (! empty($vendor)) {
-            $package = Str::studly($vendor) .'/' .$name;
-
-            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$otherSlug;
-        } else if ($this->option('module')) {
+        if ($this->option('module')) {
             $vendor = basename(
                 str_replace('\\', '/',  $this->packages->getModulesNamespace())
             );
 
             $package = $vendor .'/' .$name;
 
-            $this->data['lower_package'] = $vendor .$otherSlug;
+            $this->data['lower_package'] = $vendor .'/' .$otherSlug;
+        }
+
+        // We have an standard Package.
+        else if (! empty($vendor)) {
+            $package = Str::studly($vendor) .'/' .$name;
+
+            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$otherSlug;
         } else {
             $package = $name;
 
@@ -301,25 +304,28 @@ class PackageMakeCommand extends Command
         //
         $slug = str_replace('_', '-', $this->data['slug']);
 
-        if (! empty($vendor)) {
-            $this->data['package'] = Str::studly($vendor) .'/' .$this->data['name'];
-
-            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$slug;
-        } else if ($this->option('module')) {
+        if ($this->option('module')) {
             $vendor = basename(
                 str_replace('\\', '/',  $this->packages->getModulesNamespace())
             );
 
             $this->data['package'] = $vendor .'/' .$name;
 
-            $this->data['lower_package'] = $vendor .$otherSlug;
-        }else {
+            $this->data['lower_package'] = $vendor .'/' .$otherSlug;
+
+        }
+
+        // We have an standard Package.
+        else if (! empty($vendor)) {
+            $this->data['package'] = Str::studly($vendor) .'/' .$this->data['name'];
+
+            $this->data['lower_package'] = Str::snake($vendor, '-') .'/' .$slug;
+        } else {
             $this->data['package'] = $this->data['name'];
 
             $this->data['lower_package'] = 'acme-corp/' .$slug;
         }
 
-        //
         $this->data['namespace'] = $this->ask('Please enter the namespace of the Package:', $this->data['namespace']);
 
         $this->data['license'] = $this->ask('Please enter the license of the Package:', $this->data['license']);
@@ -346,11 +352,18 @@ class PackageMakeCommand extends Command
      */
     protected function generate()
     {
-        $module = $this->option('module') ? true : false;
-
         $slug = $this->data['slug'];
 
-        if ($this->files->exists($this->getPackagePath($slug))) {
+        //
+        $module = $this->option('module') ? true : false;
+
+        if ($module) {
+            $path = $this->getModulePath($slug);
+        } else {
+            $path = $this->getPackagePath($slug);
+        }
+
+        if ($this->files->exists($path)) {
             $this->error('The Package [' .$slug .'] already exists!');
 
             return false;
@@ -394,16 +407,19 @@ class PackageMakeCommand extends Command
     {
         $slug = $this->data['slug'];
 
-        //
-        $path = $module
-            ? $this->packages->getModulesPath()
-            : $this->packages->getPackagesPath();
+        if ($module) {
+            $path = $this->packages->getModulesPath();
+
+            $packagePath = $this->getModulePath($slug);
+        } else {
+            $path = $this->packages->getPackagesPath();
+
+            $packagePath = $this->getPackagePath($slug);
+        }
 
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path);
         }
-
-        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
 
         $this->files->makeDirectory($packagePath);
 
@@ -442,8 +458,14 @@ class PackageMakeCommand extends Command
     {
         if ($module) {
             $mode = 'module';
+
+            $this->data['type']       = 'Module';
+            $this->data['lower_type'] = 'module';
         } else {
             $mode = $this->option('extended') ? 'extended' : 'default';
+
+            $this->data['type']       = 'Package';
+            $this->data['lower_type'] = 'package';
         }
 
         $packageFiles = $this->packageFiles[$mode];
@@ -638,6 +660,8 @@ return array (
     protected function formatContent($content)
     {
         $searches = array(
+            '{{type}}',
+            '{{lower_type}}',
             '{{slug}}',
             '{{name}}',
             '{{namespace}}',
@@ -651,6 +675,8 @@ return array (
         );
 
         $replaces = array(
+            $this->data['type'],
+            $this->data['lower_type'],
             $this->data['slug'],
             $this->data['name'],
             $this->data['namespace'],
@@ -660,7 +686,7 @@ return array (
             $this->data['email'],
             $this->data['homepage'],
             $this->data['license'],
-            str_replace('/', '\\\\', $this->data['package'])
+            str_replace('/', '\\\\', $this->data['package']),
         );
 
         return str_replace($searches, $replaces, $content);
