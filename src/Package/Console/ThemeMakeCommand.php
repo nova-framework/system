@@ -70,12 +70,12 @@ class ThemeMakeCommand extends Command
      * @var array
      */
     protected $themeStubs = array(
-        'themes/style',
+        'style',
         'config',
         'theme-service-provider',
-        'themes/layout',
-        'themes/layout',
-        'themes/bootstrap',
+        'layout',
+        'layout',
+        'themes-bootstrap',
         'readme',
     );
 
