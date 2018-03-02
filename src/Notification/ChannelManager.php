@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 use Nova\Bus\DispatcherInterface as Bus;
 use Nova\Database\ORM\Collection as ModelCollection;
@@ -10,13 +10,13 @@ use Nova\Queue\ShouldQueueInterface;
 use Nova\Support\Collection;
 use Nova\Support\Manager;
 
-use Nova\Notifications\Channels\BroadcastChannel;
-use Nova\Notifications\Channels\DatabaseChannel;
-use Nova\Notifications\Channels\MailChannel;
-use Nova\Notifications\Events\NotificationSending;
-use Nova\Notifications\Events\NotificationSent;
-use Nova\Notifications\DispatcherInterface;
-use Nova\Notifications\SendQueuedNotifications;
+use Nova\Notification\Channels\BroadcastChannel;
+use Nova\Notification\Channels\DatabaseChannel;
+use Nova\Notification\Channels\MailChannel;
+use Nova\Notification\Events\NotificationSending;
+use Nova\Notification\Events\NotificationSent;
+use Nova\Notification\DispatcherInterface;
+use Nova\Notification\SendQueuedNotifications;
 
 use Ramsey\Uuid\Uuid;
 
@@ -199,7 +199,7 @@ class ChannelManager extends Manager implements DispatcherInterface
     /**
      * Create an instance of the database driver.
      *
-     * @return \Nova\Notifications\Channels\DatabaseChannel
+     * @return \Nova\Notification\Channels\DatabaseChannel
      */
     protected function createDatabaseDriver()
     {
@@ -209,7 +209,7 @@ class ChannelManager extends Manager implements DispatcherInterface
     /**
      * Create an instance of the broadcast driver.
      *
-     * @return \Nova\Notifications\Channels\BroadcastChannel
+     * @return \Nova\Notification\Channels\BroadcastChannel
      */
     protected function createBroadcastDriver()
     {
@@ -219,7 +219,7 @@ class ChannelManager extends Manager implements DispatcherInterface
     /**
      * Create an instance of the mail driver.
      *
-     * @return \Nova\Notifications\Channels\MailChannel
+     * @return \Nova\Notification\Channels\MailChannel
      */
     protected function createMailDriver()
     {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Notifications\Messages;
+namespace Nova\Notification\Messages;
 
-use Nova\Notifications\Action;
+use Nova\Notification\Action;
 
 
 class SimpleMessage
@@ -123,7 +123,7 @@ class SimpleMessage
     /**
      * Add a line of text to the notification.
      *
-     * @param  \Nova\Notifications\Action|string  $line
+     * @param  \Nova\Notification\Action|string  $line
      * @return $this
      */
     public function line($line)
@@ -134,7 +134,7 @@ class SimpleMessage
     /**
      * Add a line of text to the notification.
      *
-     * @param  \Nova\Notifications\Action|string|array  $line
+     * @param  \Nova\Notification\Action|string|array  $line
      * @return $this
      */
     public function with($line)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 class Action
 {

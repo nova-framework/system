@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Notifications\Channels;
+namespace Nova\Notification\Channels;
 
-use Nova\Notifications\Notification;
+use Nova\Notification\Notification;
 
 use RuntimeException;
 
@@ -13,7 +13,7 @@ class DatabaseChannel
      * Send the given notification.
      *
      * @param  mixed  $notifiable
-     * @param  \Nova\Notifications\Notification  $notification
+     * @param  \Nova\Notification\Notification  $notification
      * @return \Nova\Database\ORM\Model
      */
     public function send($notifiable, Notification $notification)
@@ -30,7 +30,7 @@ class DatabaseChannel
      * Get the data for the notification.
      *
      * @param  mixed  $notifiable
-     * @param  \Nova\Notifications\Notification  $notification
+     * @param  \Nova\Notification\Notification  $notification
      * @return array
      *
      * @throws \RuntimeException

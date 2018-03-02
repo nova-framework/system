@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notifications\Events;
+namespace Nova\Notification\Events;
 
 use Nova\Bus\QueueableTrait;
 use Nova\Queue\SerializesModelsTrait;
@@ -22,7 +22,7 @@ class BroadcastNotificationCreated implements ShouldBroadcastInterface
     /**
      * The notification instance.
      *
-     * @var \Nova\Notifications\Notification
+     * @var \Nova\Notification\Notification
      */
     public $notification;
 
@@ -37,7 +37,7 @@ class BroadcastNotificationCreated implements ShouldBroadcastInterface
      * Create a new event instance.
      *
      * @param  mixed  $notifiable
-     * @param  \Nova\Notifications\Notification  $notification
+     * @param  \Nova\Notification\Notification  $notification
      * @param  array  $data
      * @return void
      */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Notification;
@@ -14,7 +14,7 @@ trait NotifiableTrait
      */
     public function notifications()
     {
-        return $this->morphMany('Nova\Notifications\DatabaseNotification', 'notifiable')
+        return $this->morphMany('Nova\Notification\DatabaseNotification', 'notifiable')
             ->orderBy('created_at', 'desc');
     }
 
@@ -23,7 +23,7 @@ trait NotifiableTrait
      */
     public function unreadNotifications()
     {
-        return $this->morphMany('Nova\Notifications\DatabaseNotification', 'notifiable')
+        return $this->morphMany('Nova\Notification\DatabaseNotification', 'notifiable')
             ->whereNull('read_at')
             ->orderBy('created_at', 'desc');
     }

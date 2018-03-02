@@ -1,8 +1,8 @@
 <?php
 
-namespace Nova\Notifications\Messages;
+namespace Nova\Notification\Messages;
 
-use Nova\Notifications\Messages\SimpleMessage;
+use Nova\Notification\Messages\SimpleMessage;
 
 
 class MailMessage extends SimpleMessage

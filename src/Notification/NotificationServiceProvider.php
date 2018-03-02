@@ -1,13 +1,13 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 use Nova\Support\ServiceProvider;
 
-use Nova\Notifications\Console\NotificationMakeCommand;
-use Nova\Notifications\Console\NotificationTableCommand;
-use Nova\Notifications\DispatcherInterface;
-use Nova\Notifications\ChannelManager;
+use Nova\Notification\Console\NotificationMakeCommand;
+use Nova\Notification\Console\NotificationTableCommand;
+use Nova\Notification\DispatcherInterface;
+use Nova\Notification\ChannelManager;
 
 
 class NotificationServiceProvider extends ServiceProvider

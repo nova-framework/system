@@ -1,11 +1,11 @@
 <?php
 
-namespace Nova\Notifications\Channels;
+namespace Nova\Notification\Channels;
 
 use Nova\Mail\Mailer;
 use Nova\Support\Str;
 
-use Nova\Notifications\Notification;
+use Nova\Notification\Notification;
 
 
 class MailChannel

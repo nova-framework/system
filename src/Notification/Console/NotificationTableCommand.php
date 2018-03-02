@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Notifications\Console;
+namespace Nova\Notification\Console;
 
 
 use Nova\Console\Command;

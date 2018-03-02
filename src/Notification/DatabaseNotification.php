@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 use Nova\Database\ORM\Model as BaseModel;
 use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Support\Contracts\ArrayableInterface;
 
-use Nova\Notifications\DatabaseNotificationCollection as Collection;
+use Nova\Notification\DatabaseNotificationCollection as Collection;
 
 
 class DatabaseNotification extends BaseModel

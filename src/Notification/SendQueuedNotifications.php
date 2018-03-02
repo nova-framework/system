@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\Notifications;
+namespace Nova\Notification;
 
 use Nova\Bus\QueueableTrait;
 use Nova\Queue\ShouldQueueInterface;
 use Nova\Queue\SerializesModelsTrait;
 
-use Nova\Notifications\ChannelManager;
+use Nova\Notification\ChannelManager;
 
 
 class SendQueuedNotifications implements ShouldQueueInterface
@@ -23,7 +23,7 @@ class SendQueuedNotifications implements ShouldQueueInterface
     /**
      * The notification to be sent.
      *
-     * @var \Nova\Notifications\Notification
+     * @var \Nova\Notification\Notification
      */
     protected $notification;
 
@@ -39,7 +39,7 @@ class SendQueuedNotifications implements ShouldQueueInterface
      * Create a new job instance.
      *
      * @param  \Nova\Support\Collection  $notifiables
-     * @param  \Nova\Notifications\Notification  $notification
+     * @param  \Nova\Notification\Notification  $notification
      * @param  array  $channels
      * @return void
      */
@@ -53,7 +53,7 @@ class SendQueuedNotifications implements ShouldQueueInterface
     /**
      * Send the notifications.
      *
-     * @param  \Nova\Notifications\ChannelManager  $manager
+     * @param  \Nova\Notification\ChannelManager  $manager
      * @return void
      */
     public function handle(ChannelManager $manager)

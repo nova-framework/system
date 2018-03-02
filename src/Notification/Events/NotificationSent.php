@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Notifications\Events;
+namespace Nova\Notification\Events;
 
 
-class NotificationSending
+class NotificationSent
 {
     /**
      * The notifiable entity who received the notification.
@@ -15,7 +15,7 @@ class NotificationSending
     /**
      * The notification instance.
      *
-     * @var \Nova\Notifications\Notification
+     * @var \Nova\Notification\Notification
      */
     public $notification;
 
@@ -27,16 +27,25 @@ class NotificationSending
     public $channel;
 
     /**
+     * The channel's response.
+     *
+     * @var mixed
+     */
+    public $response;
+
+    /**
      * Create a new event instance.
      *
      * @param  mixed  $notifiable
-     * @param  \Nova\Notifications\Notification  $notification
+     * @param  \Nova\Notification\Notification  $notification
      * @param  string  $channel
+     * @param  mixed  $response
      * @return void
      */
-    public function __construct($notifiable, $notification, $channel)
+    public function __construct($notifiable, $notification, $channel, $response = null)
     {
         $this->channel = $channel;
+        $this->response = $response;
         $this->notifiable = $notifiable;
         $this->notification = $notification;
     }
