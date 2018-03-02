@@ -7,7 +7,7 @@ use Nova\Package\Console\MakeCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class PackageNotificationMakeCommand extends MakeCommand
+class NotificationMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.

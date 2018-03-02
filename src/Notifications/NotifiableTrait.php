@@ -3,9 +3,8 @@
 namespace Nova\Notifications;
 
 use Nova\Support\Facades\Config;
+use Nova\Support\Facades\Notification;
 use Nova\Support\Str;
-
-use Shared\Support\Facades\Notification;
 
 
 trait NotifiableTrait
