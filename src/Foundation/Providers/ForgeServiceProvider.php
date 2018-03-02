@@ -17,6 +17,7 @@ use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
+use Nova\Foundation\Console\ViewClearCommand;
 
 use Nova\Foundation\Console\AssetPublishCommand;
 use Nova\Foundation\Console\ConfigPublishCommand;
@@ -63,6 +64,7 @@ class ForgeServiceProvider extends ServiceProvider
         'Serve'         => 'command.serve',
         'Up'            => 'command.up',
         'VendorPublish' => 'command.vendor.publish',
+        'ViewClear'     => 'command.view.clear',
         'ViewPublish'   => 'command.view.publish',
     );
 
@@ -143,6 +145,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.clear-compiled', function ()
         {
             return new ClearCompiledCommand;
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerViewClearCommand()
+    {
+        $this->app->singleton('command.view.clear', function ($app)
+        {
+            return new ViewClearCommand($app['files']);
         });
     }
 
