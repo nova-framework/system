@@ -18,6 +18,7 @@ use Nova\Package\Console\ListenerMakeCommand;
 use Nova\Package\Console\MiddlewareMakeCommand;
 use Nova\Package\Console\MigrationMakeCommand;
 use Nova\Package\Console\ModelMakeCommand;
+use Nova\Package\Console\NotificationMakeCommand;
 use Nova\Package\Console\PolicyMakeCommand;
 use Nova\Package\Console\ProviderMakeCommand;
 use Nova\Package\Console\SeederMakeCommand;
@@ -51,6 +52,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'ListenerMake',
             'MiddlewareMake',
             'ModelMake',
+            'NotificationMake',
             'PolicyMake',
             'ProviderMake',
             'MigrationMake',
@@ -245,6 +247,19 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.package.model');
+    }
+
+    /**
+     * Register the make:package:model command.
+     */
+    private function registerNotificationMakeCommand()
+    {
+        $this->app->bindShared('command.make.package.notification', function ($app)
+        {
+            return new NotificationMakeCommand($app['files'], $app['packages']);
+        });
+
+        $this->commands('command.make.package.notification');
     }
 
     /**
