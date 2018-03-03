@@ -86,6 +86,20 @@ class PackageMakeCommand extends Command
             'Routes/',
             'Views/',
         ),
+        'theme' =>  array(
+            'Assets/',
+            'Assets/css/',
+            'Assets/images/',
+            'Assets/js/',
+            'Config/',
+            'Language/',
+            'Providers/',
+            'Views/',
+            'Views/Layouts/',
+            'Views/Layouts/RTL',
+            'Views/Overrides/',
+            'Views/Overrides/Packages/',
+        ),
     );
 
     /**
@@ -126,6 +140,15 @@ class PackageMakeCommand extends Command
             'Routes/Web.php',
             'Bootstrap.php',
             'Events.php',
+            'README.md',
+        ),
+        'theme' => array(
+            'Assets/css/style.css',
+            'Config/Config.php',
+            'Providers/ThemeServiceProvider.php',
+            'Views/Layouts/Default.php',
+            'Views/Layouts/RTL/Default.php',
+            'Bootstrap.php',
             'README.md',
         ),
     );
@@ -170,6 +193,15 @@ class PackageMakeCommand extends Command
             'events',
             'readme',
         ),
+        'theme' => array(
+            'style',
+            'config',
+            'theme-service-provider',
+            'layout',
+            'layout',
+            'theme-bootstrap',
+            'readme',
+        )
     );
 
     /**
@@ -216,6 +248,10 @@ class PackageMakeCommand extends Command
      */
     public function handle()
     {
+        if ($this->option('module') && $this->option('theme')) {
+            return $this->error('The options --module and --theme cannot be used simultaneous.');
+        }
+
         $name = $this->argument('name');
 
         if (strpos($name, '/') > 0) {
@@ -302,6 +338,10 @@ class PackageMakeCommand extends Command
             $namespace = $this->packages->getModulesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
+        } else if ($this->option('theme')) {
+            $namespace = $this->packages->getThemesNamespace();
+
+            $vendor = basename(str_replace('\\', '/',  $namespace));
         } else {
             if (strpos($this->data['package'], '/') > 0) {
                 list ($vendor) = explode('/', $this->data['package']);
@@ -347,13 +387,18 @@ class PackageMakeCommand extends Command
     {
         $slug = $this->data['slug'];
 
-        //
-        $module = $this->option('module') ? true : false;
-
-        if ($module) {
+        if ($this->option('module')) {
             $path = $this->getModulePath($slug);
+
+            $type = 'module';
+        } else if ($this->option('theme')) {
+            $path = $this->getThemePath($slug);
+
+            $type = 'theme';
         } else {
             $path = $this->getPackagePath($slug);
+
+            $type = 'package';
         }
 
         if ($this->files->exists($path)) {
@@ -376,7 +421,7 @@ class PackageMakeCommand extends Command
         foreach ($steps as $message => $method) {
             $progress->setMessage($message);
 
-            call_user_func(array($this, $method), $module);
+            call_user_func(array($this, $method), $type);
 
             $progress->advance();
         }
@@ -393,21 +438,31 @@ class PackageMakeCommand extends Command
     /**
      * Generate defined Package folders.
      *
-     * @param boolean $module
+     * @param string $type
      * @return void
      */
-    protected function generateFolders($module)
+    protected function generateFolders($type)
     {
         $slug = $this->data['slug'];
 
-        if ($module) {
+        if ($type == 'module') {
             $path = $this->packages->getModulesPath();
 
             $packagePath = $this->getModulePath($slug);
+
+            $mode = 'module';
+        } else if ($type == 'theme') {
+            $path = $this->packages->getThemesPath();
+
+            $packagePath = $this->getThemePath($slug);
+
+            $mode = 'theme';
         } else {
             $path = $this->packages->getPackagesPath();
 
             $packagePath = $this->getPackagePath($slug);
+
+            $mode = $this->option('extended') ? 'extended' : 'default';
         }
 
         if (! $this->files->isDirectory($path)) {
@@ -417,12 +472,6 @@ class PackageMakeCommand extends Command
         $this->files->makeDirectory($packagePath);
 
         // Generate the Package directories.
-        if ($module) {
-            $mode = 'module';
-        } else {
-            $mode = $this->option('extended') ? 'extended' : 'default';
-        }
-
         $packageFolders = $this->packageFolders[$mode];
 
         foreach ($packageFolders as $folder) {
@@ -432,7 +481,7 @@ class PackageMakeCommand extends Command
         }
 
         // Generate the Language inner directories.
-        $languageFolders = $this->getLanguagePaths($slug, $module);
+        $languageFolders = $this->getLanguagePaths($slug, $type);
 
         foreach ($languageFolders as $folder) {
             $path = $packagePath .$folder;
@@ -444,16 +493,21 @@ class PackageMakeCommand extends Command
     /**
      * Generate defined Package files.
      *
-     * @param boolean $module
+     * @param string $type
      * @return void
      */
-    protected function generateFiles($module)
+    protected function generateFiles($type)
     {
-        if ($module) {
+        if ($type == 'module') {
             $mode = 'module';
 
             $this->data['type']       = 'Module';
             $this->data['lower_type'] = 'module';
+        } else if ($type == 'theme') {
+            $mode = 'theme';
+
+            $this->data['type']       = 'Theme';
+            $this->data['lower_type'] = 'theme';
         } else {
             $mode = $this->option('extended') ? 'extended' : 'default';
 
@@ -466,7 +520,13 @@ class PackageMakeCommand extends Command
         //
         $slug = $this->data['slug'];
 
-        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
+        if ($type == 'module') {
+            $packagePath = $this->getModulePath($slug);
+        } else if ($type == 'theme') {
+            $packagePath = $this->getThemePath($slug);
+        } else {
+            $packagePath = $this->getPackagePath($slug);
+        }
 
         foreach ($packageFiles as $key => $file) {
             $file = $this->formatContent($file);
@@ -482,7 +542,7 @@ class PackageMakeCommand extends Command
 return array (
 );';
 
-        $languageFolders = $this->getLanguagePaths($slug, $module);
+        $languageFolders = $this->getLanguagePaths($slug, $type);
 
         foreach ($languageFolders as $folder) {
             $path = $packagePath .$folder .DS .'messages.php';
@@ -494,22 +554,27 @@ return array (
     /**
      * Generate .gitkeep files within generated folders.
      *
-     * @param boolean $module
+     * @param string $type
      * @return void
      */
-    protected function generateGitkeep($module)
+    protected function generateGitkeep($type)
     {
         $slug = $this->data['slug'];
 
-        $packagePath = $module ? $this->getModulePath($slug) : $this->getPackagePath($slug);
+        if ($type == 'module') {
+            $packagePath = $this->getModulePath($slug);
 
-        if ($module) {
             $mode = 'module';
+        } else if ($type == 'theme') {
+            $packagePath = $this->getThemePath($slug);
+
+            $mode = 'theme';
         } else {
+            $packagePath = $this->getPackagePath($slug);
+
             $mode = $this->option('extended') ? 'extended' : 'default';
         }
 
-        //
         $packageFolders = $this->packageFolders[$mode];
 
         foreach ($packageFolders as $folder) {
@@ -529,12 +594,12 @@ return array (
     /**
      * Update the composer.json and run the Composer.
      *
-     * @param boolean $module
+     * @param string $type
      * @return void
      */
-    protected function updateComposerJson($module)
+    protected function updateComposerJson($type)
     {
-        if ($module) {
+        if ($type != 'package') {
             // No need to modify the composer.json for a Module.
             return;
         }
@@ -564,6 +629,22 @@ return array (
      *
      * @return string
      */
+    protected function getPackagePath($slug = null)
+    {
+        if (! is_null($slug)) {
+            return $this->packages->getPackagePath($slug);
+        }
+
+        return $this->packages->getPackagesPath();
+    }
+
+    /**
+     * Get the path to the Package.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
     protected function getModulePath($slug = null)
     {
         if (! is_null($slug)) {
@@ -580,16 +661,16 @@ return array (
      *
      * @return string
      */
-    protected function getPackagePath($slug = null)
+    protected function getThemePath($slug = null)
     {
         if (! is_null($slug)) {
-            return $this->packages->getPackagePath($slug);
+            return $this->packages->getThemePath($slug);
         }
 
-        return $this->packages->getPackagesPath();
+        return $this->packages->getThemesPath();
     }
 
-    protected function getLanguagePaths($slug, $module)
+    protected function getLanguagePaths($slug, $type)
     {
         $paths = array();
 
@@ -598,7 +679,7 @@ return array (
         foreach (array_keys($languages) as $code) {
             $path = 'Language' .DS .strtoupper($code);
 
-            if (! $module) {
+            if ($type == 'package') {
                 $path = 'src' .DS .$path;
             }
 
@@ -705,9 +786,10 @@ return array (
     protected function getOptions()
     {
         return array(
-            array('--quick', '-Q', InputOption::VALUE_NONE, 'Skip the make:package Wizard and use default values'),
-            array('--extended', '-E', InputOption::VALUE_NONE, 'Generate an extended Package'),
-            array('--module', '-M', InputOption::VALUE_NONE, 'Generate an Application Module'),
+            array('--quick',    '-Q', InputOption::VALUE_NONE, 'Skip the make:package Wizard and use default values'),
+            array('--extended', null, InputOption::VALUE_NONE, 'Generate an extended Package'),
+            array('--module',   null, InputOption::VALUE_NONE, 'Generate an Application Module'),
+            array('--theme',    null, InputOption::VALUE_NONE, 'Generate an Application Theme'),
         );
     }
 }

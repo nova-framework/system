@@ -220,7 +220,7 @@ class Repository
     }
 
     /**
-     * Get path for the specified module.
+     * Get path for the specified Module.
      *
      * @param string $slug
      *
@@ -259,6 +259,24 @@ class Repository
         $namespace = $this->config->get('packages.modules.namespace', 'Modules\\');
 
         return rtrim($namespace, '/\\');
+    }
+
+    /**
+     * Get path for the specified Theme.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getThemePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $module = Str::studly($slug);
+        } else {
+            $module = Str::upper($slug);
+        }
+
+        return $this->getThemesPath() .DS .$module .DS;
     }
 
     /**

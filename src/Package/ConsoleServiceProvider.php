@@ -23,7 +23,6 @@ use Nova\Package\Console\NotificationMakeCommand;
 use Nova\Package\Console\PolicyMakeCommand;
 use Nova\Package\Console\ProviderMakeCommand;
 use Nova\Package\Console\SeederMakeCommand;
-use Nova\Package\Console\ThemeMakeCommand;
 
 use Nova\Support\ServiceProvider;
 
@@ -59,7 +58,6 @@ class ConsoleServiceProvider extends ServiceProvider
             'ProviderMake',
             'MigrationMake',
             'SeederMake',
-            'ThemeMake',
         );
 
         foreach ($commands as $command) {
@@ -327,18 +325,5 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.package.seeder');
-    }
-
-    /**
-     * Register the make:theme command.
-     */
-    private function registerThemeMakeCommand()
-    {
-        $this->app->bindShared('command.make.package.theme', function ($app)
-        {
-            return new ThemeMakeCommand($app['files'], $app['config'], $app['packages']);
-        });
-
-        $this->commands('command.make.package.theme');
     }
 }
