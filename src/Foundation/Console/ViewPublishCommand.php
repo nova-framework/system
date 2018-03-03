@@ -5,6 +5,7 @@ namespace Nova\Foundation\Console;
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\ViewPublisher;
 use Nova\Package\PackageManager;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -83,7 +84,11 @@ class ViewPublishCommand extends Command
             //
             $package = $properties['name'];
 
-            $path = $properties['path'] .str_replace('/', DS, '/src/Views');
+            if ($properties['type'] == 'package') {
+                $path = $properties['path'] .str_replace('/', DS, '/src/Views');
+            } else {
+                $path = $properties['path'] .DS . 'Views';
+            }
 
             $this->publisher->publish($package, $path);
         }
