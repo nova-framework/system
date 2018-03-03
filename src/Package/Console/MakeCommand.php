@@ -119,7 +119,7 @@ class MakeCommand extends CommandGenerator
         $type = $this->packageInfo->get('type');
 
         if (($type != 'package') && ($type != 'module')) {
-            return $this->error('Package ['.$this->data['slug'].'] has no support.');
+            return $this->error('Package [' .$this->data['slug'] .'] has no generator of this type.');
         }
 
         $this->packagesPath = ($type == 'module')
