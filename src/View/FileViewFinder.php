@@ -91,7 +91,6 @@ class FileViewFinder implements ViewFinderInterface
         return $this->views[$name] = $this->findInPaths($name, $this->paths);
     }
 
-
     /**
      * Get the path to a template with a named path.
      *
@@ -102,16 +101,17 @@ class FileViewFinder implements ViewFinderInterface
     {
         list($namespace, $view) = $this->getNamespaceSegments($name);
 
-        $hints = $this->hints[$namespace];
+        $paths = $this->hints[$namespace];
 
-        // Inject the package paths into namespaced views.
-        $path = head($this->paths) .DS .'Packages' .DS .$namespace;
+        if (Str::endsWith($path = head($this->paths), 'Overrides')) {
+            $path = $path .DS .'Packages' .DS .$namespace;
 
-        if (! in_array($path, $hints) && $this->files->isDirectory($path)) {
-            array_unshift($hints, $path);
+            if (! in_array($path, $paths) && $this->files->isDirectory($path)) {
+                array_unshift($paths, $path);
+            }
         }
 
-        return $this->findInPaths($view, $hints);
+        return $this->findInPaths($view, $paths);
     }
 
     /**
@@ -146,11 +146,13 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @throws \InvalidArgumentException
      */
-    protected function findInPaths($name, $paths)
+    protected function findInPaths($name, array $paths)
     {
-        foreach ((array) $paths as $path) {
-            foreach ($this->getPossibleViewFiles($name) as $file) {
-                if ($this->files->exists($viewPath = $path .DS .$file)) {
+        foreach ($paths as $path) {
+            foreach ($this->getPossibleViewFiles($name) as $fileName) {
+                $viewPath = $path .DS .$fileName;
+
+                if ($this->files->exists($viewPath)) {
                     return $viewPath;
                 }
             }
