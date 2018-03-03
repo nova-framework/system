@@ -41,12 +41,12 @@ class ThemeMakeCommand extends Command
         'Assets/js/',
         'Config/',
         'Language/',
-        'Overrides/',
-        'Overrides/Packages/',
         'Providers/',
         'Views/',
         'Views/Layouts/',
         'Views/Layouts/RTL',
+        'Views/Overrides/',
+        'Views/Overrides/Packages/',
     );
 
     /**
