@@ -1,0 +1,35 @@
+<?php
+
+namespace {{namespace}};
+
+use Nova\Bus\QueueableTrait;
+use Nova\Foundation\Bus\DispatchableTrait;
+
+use {{rootNamespace}}Jobs\Job;
+
+
+class {{className}} extends Job
+{
+    use DispatchableTrait, QueueableTrait;
+
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        //
+    }
+}

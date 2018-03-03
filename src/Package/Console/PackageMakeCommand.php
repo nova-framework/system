@@ -126,6 +126,7 @@ class PackageMakeCommand extends Command
             'Routes/Web.php',
             'Bootstrap.php',
             'Events.php',
+            'README.md',
         ),
     );
 
@@ -167,6 +168,7 @@ class PackageMakeCommand extends Command
             'web-routes',
             'bootstrap',
             'events',
+            'readme',
         ),
     );
 

@@ -22,7 +22,7 @@ class ListenerMakeCommand extends MakeCommand
      *
      * @var string
      */
-    protected $description = 'Create a new package Event Listener class';
+    protected $description = 'Create a new Package Event Listener class';
 
     /**
      * String to store the command type.
@@ -37,7 +37,7 @@ class ListenerMakeCommand extends MakeCommand
      * @var array
      */
     protected $signOption = array(
-        'event',
+        'queued',
     );
 
     /**
@@ -67,8 +67,8 @@ class ListenerMakeCommand extends MakeCommand
         'default' => array(
             'listener.stub',
         ),
-        'event' => array(
-            'listener.stub',
+        'queued' => array(
+            'listener-queued.stub',
         ),
     );
 
@@ -104,20 +104,7 @@ class ListenerMakeCommand extends MakeCommand
         $this->data['className'] = basename($filePath);
 
         //
-        $this->data['event']     = 'dummy';
-        $this->data['fullEvent'] = 'dummy';
-    }
-
-    /**
-     * Resolve Container after getting input option.
-     *
-     * @param string $option
-     *
-     * @return array
-     */
-    protected function resolveByOption($option)
-    {
-        $this->data['fullEvent'] = $option;
+        $this->data['fullEvent'] = $option = $this->option('event');
 
         $this->data['event'] = class_basename($option);
     }
@@ -160,7 +147,7 @@ class ListenerMakeCommand extends MakeCommand
     protected function getArguments()
     {
         return array(
-            array('slug', InputArgument::REQUIRED, 'The slug of the package.'),
+            array('slug', InputArgument::REQUIRED, 'The slug of the Package.'),
             array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
         );
     }
@@ -173,7 +160,9 @@ class ListenerMakeCommand extends MakeCommand
     protected function getOptions()
     {
         return array(
-            array('event', 'e', InputOption::VALUE_REQUIRED, 'The event class being listened for.'),
+            array('event', 'e', InputOption::VALUE_REQUIRED, 'The Event class being listened for.'),
+
+            array('queued', null, InputOption::VALUE_NONE, 'Indicates that Event Listener should be queued.'),
         );
     }
 }

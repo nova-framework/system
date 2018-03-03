@@ -5,30 +5,40 @@ namespace Nova\Package\Console;
 use Nova\Package\Console\MakeCommand;
 
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 
-class EventMakeCommand extends MakeCommand
+class JobMakeCommand extends MakeCommand
 {
     /**
      * The name of the console command.
      *
      * @var string
      */
-    protected $name = 'make:package:event';
+    protected $name = 'make:package:job';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new Package Event class';
+    protected $description = 'Create a new Package Job class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Event';
+    protected $type = 'Job';
+
+    /**
+     * package signature option.
+     *
+     * @var array
+     */
+    protected $signOption = array(
+        'queued',
+    );
 
     /**
      * package folders to be created.
@@ -36,7 +46,7 @@ class EventMakeCommand extends MakeCommand
      * @var array
      */
     protected $listFolders = array(
-        'Events/',
+        'Jobs/',
     );
 
     /**
@@ -55,9 +65,13 @@ class EventMakeCommand extends MakeCommand
      */
     protected $listStubs = array(
         'default' => array(
-            'event.stub',
+            'job.stub',
+        ),
+        'queued' => array(
+            'job-queued.stub',
         ),
     );
+
 
     /**
      * Resolve Container after getting file path.
@@ -74,9 +88,6 @@ class EventMakeCommand extends MakeCommand
         $this->data['path'] = $this->getBaseNamespace();
 
         $this->data['className'] = basename($filePath);
-
-        //
-        $this->data['rootNamespace'] = $this->container->getNamespace();
     }
 
     /**
@@ -91,9 +102,6 @@ class EventMakeCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
-
-            '{{rootNamespace}}',
-
         );
 
         $replaces = array(
@@ -101,13 +109,10 @@ class EventMakeCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
-
-            $this->data['rootNamespace'],
         );
 
         return str_replace($searches, $replaces, $content);
     }
-
 
     /**
      * Get the console command arguments.
@@ -119,6 +124,18 @@ class EventMakeCommand extends MakeCommand
         return array(
             array('slug', InputArgument::REQUIRED, 'The slug of the Package.'),
             array('name', InputArgument::REQUIRED, 'The name of the Event class.'),
+        );
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('queued', null, InputOption::VALUE_NONE, 'Indicates that Job should be queued.'),
         );
     }
 }

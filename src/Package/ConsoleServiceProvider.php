@@ -14,6 +14,7 @@ use Nova\Package\Console\PackageMakeCommand;
 use Nova\Package\Console\ConsoleMakeCommand;
 use Nova\Package\Console\ControllerMakeCommand;
 use Nova\Package\Console\EventMakeCommand;
+use Nova\Package\Console\JobMakeCommand;
 use Nova\Package\Console\ListenerMakeCommand;
 use Nova\Package\Console\MiddlewareMakeCommand;
 use Nova\Package\Console\MigrationMakeCommand;
@@ -49,6 +50,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'ConsoleMake',
             'ControllerMake',
             'EventMake',
+            'JobMake',
             'ListenerMake',
             'MiddlewareMake',
             'ModelMake',
@@ -198,7 +200,7 @@ class ConsoleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the make:package:controller command.
+     * Register the make:package:event command.
      */
     private function registerEventMakeCommand()
     {
@@ -211,7 +213,20 @@ class ConsoleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the make:package:controller command.
+     * Register the make:package:job command.
+     */
+    private function registerJobMakeCommand()
+    {
+        $this->app->bindShared('command.make.package.job', function ($app)
+        {
+            return new JobMakeCommand($app['files'], $app['packages']);
+        });
+
+        $this->commands('command.make.package.job');
+    }
+
+    /**
+     * Register the make:package:listener command.
      */
     private function registerListenerMakeCommand()
     {
@@ -250,7 +265,7 @@ class ConsoleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the make:package:model command.
+     * Register the make:package:notification command.
      */
     private function registerNotificationMakeCommand()
     {
