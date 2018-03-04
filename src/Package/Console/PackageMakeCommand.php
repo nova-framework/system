@@ -96,7 +96,7 @@ class PackageMakeCommand extends Command
             'Providers/',
             'Views/',
             'Views/Layouts/',
-            'Views/Layouts/RTL',
+            'Views/Layouts/RTL/',
             'Views/Overrides/',
             'Views/Overrides/Packages/',
         ),
