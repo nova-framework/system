@@ -68,7 +68,6 @@ class WorkCommand extends Command
 
         $this->listenForEvents();
 
-        $queue = $this->option('queue');
         $delay = $this->option('delay');
 
         // The memory limit is the amount of memory we will allow the script to occupy
@@ -76,9 +75,14 @@ class WorkCommand extends Command
         // is to protect us against any memory leaks that will be in the scripts.
         $memory = $this->option('memory');
 
-        if (empty($connection = $this->argument('connection'))) {
-            $connection = $this->container['config']['queue.default'];
-        }
+        //
+        $config = $this->container['config'];
+
+        $connection = $this->argument('connection') ?: $config->get('queue.default');
+
+        $queue = $this->option('queue') ?: $config->get(
+            "queue.connections.{$connection}.queue", 'default'
+        );
 
         $this->runWorker($connection, $queue, $delay, $memory, $daemon);
     }

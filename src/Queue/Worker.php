@@ -85,7 +85,7 @@ class Worker
      * @param  int     $maxTries
      * @return array
      */
-    public function daemon($connectionName, $queue = null, $delay = 0, $memory = 128, $sleep = 3, $maxTries = 0)
+    public function daemon($connectionName, $queue, $delay = 0, $memory = 128, $sleep = 3, $maxTries = 0)
     {
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
@@ -96,7 +96,13 @@ class Worker
                 $this->runNextJob($connectionName, $queue, $delay, $sleep, $maxTries);
             }
 
-            $this->stopIfNecessary($memory, $lastRestart);
+            if ($this->shouldQuit) {
+                $this->kill();
+            } else if ($this->memoryExceeded($memory)) {
+                $this->stop(12);
+            } else if ($this->queueShouldRestart($lastRestart)) {
+                $this->stop();
+            }
         }
     }
 
@@ -116,25 +122,6 @@ class Worker
         $payload = array($connectionName, $queue);
 
         return ($this->events->until('nova.queue.looping', $payload) !== false);
-    }
-
-    /**
-     * Stop the process if necessary.
-     *
-     * @param  int  $memory
-     * @param  int  $lastRestart
-     */
-    protected function stopIfNecessary($memory, $lastRestart)
-    {
-        if ($this->shouldQuit) {
-            $this->kill();
-        }
-
-        if ($this->memoryExceeded($memory)) {
-            $this->stop(12);
-        } else if ($this->queueShouldRestart($lastRestart)) {
-            $this->stop();
-        }
     }
 
     /**
