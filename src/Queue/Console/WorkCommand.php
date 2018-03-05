@@ -99,14 +99,21 @@ class WorkCommand extends Command
      */
     protected function listenForEvents()
     {
-        $this->container['events']->listen('nova.queue.processed', function ($connection, $job)
+        $events = $this->container['events'];
+
+        $events->listen('nova.queue.processing', function ($connection, $job)
         {
-            $this->writeOutput($job, false);
+            $this->writeOutput($job, 'starting');
         });
 
-        $this->container['events']->listen('nova.queue.failed', function ($connection, $job)
+        $events->listen('nova.queue.processed', function ($connection, $job)
         {
-            $this->writeOutput($job, true);
+            $this->writeOutput($job, 'success');
+        });
+
+        $events->listen('nova.queue.failed', function ($connection, $job)
+        {
+            $this->writeOutput($job, 'failed');
         });
     }
 
@@ -144,18 +151,36 @@ class WorkCommand extends Command
      * Write the status output for the queue worker.
      *
      * @param  \Nova\Queue\Jobs\Job  $job
-     * @param  bool  $failed
+     * @param  string  $status
      * @return void
      */
-    protected function writeOutput(Job $job, $failed)
+    protected function writeOutput(Job $job, $status)
+    {
+        switch ($status) {
+            case 'starting':
+                return $this->writeStatus($job, 'Processing', 'comment');
+            case 'success':
+                return $this->writeStatus($job, 'Processed', 'info');
+            case 'failed':
+                return $this->writeStatus($job, 'Failed', 'error');
+        }
+    }
+
+    /**
+     * Format the status output for the queue worker.
+     *
+     * @param  \Illuminate\Contracts\Queue\Job  $job
+     * @param  string  $status
+     * @param  string  $type
+     * @return void
+     */
+    protected function writeStatus(Job $job, $status, $type)
     {
         $date = Carbon::now()->format('Y-m-d H:i:s');
 
-        if ($failed) {
-            $this->output->writeln('<error>Failed:</error> [' .$date .'] ' .$job->resolveName());
-        } else {
-            $this->output->writeln('<info>Processed:</info> [' .$date .'] ' .$job->resolveName());
-        }
+        $message = sprintf("<{$type}>[%s] %s</{$type}> %s", $date, str_pad("{$status}:", 11), $job->resolveName());
+
+        $this->output->writeln($message);
     }
 
     /**
