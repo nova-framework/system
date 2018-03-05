@@ -231,7 +231,20 @@ class Worker
             $this->exceptions->report($e);
         }
 
-        $errors = array(
+        if ($this->causedByLostConnection($e)) {
+            $this->shouldQuit = true;
+        }
+    }
+
+    /**
+     * Determine if the given exception was caused by a lost connection.
+     *
+     * @param  \Exception
+     * @return bool
+     */
+    protected function causedByLostConnection(Exception $e)
+    {
+        return Str::contains($e->getMessage(), array(
             'server has gone away',
             'no connection to the server',
             'Lost connection',
@@ -244,11 +257,7 @@ class Worker
             'Resource deadlock avoided',
             'Transaction() on null',
             'child connection forced to terminate due to client_idle_limit',
-        );
-
-        if (Str::contains($e->getMessage(), $errors)) {
-            $this->shouldQuit = true;
-        }
+        ));
     }
 
     /**
