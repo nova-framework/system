@@ -77,7 +77,7 @@ class Worker
     /**
      * Listen to the given queue in a loop.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  string  $queue
      * @param  int     $delay
      * @param  int     $memory
@@ -85,15 +85,15 @@ class Worker
      * @param  int     $maxTries
      * @return array
      */
-    public function daemon($connectionName, $queue, $delay = 0, $memory = 128, $sleep = 3, $maxTries = 0)
+    public function daemon($connection, $queue, $delay = 0, $memory = 128, $sleep = 3, $maxTries = 0)
     {
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
         while (true) {
-            if (! $this->daemonShouldRun($connectionName, $queue)) {
+            if (! $this->daemonShouldRun($connection, $queue)) {
                 $this->sleep($sleep);
             } else {
-                $this->runNextJob($connectionName, $queue, $delay, $sleep, $maxTries);
+                $this->runNextJob($connection, $queue, $delay, $sleep, $maxTries);
             }
 
             if ($this->daemonShouldQuit()) {
@@ -110,17 +110,17 @@ class Worker
     /**
      * Determine if the daemon should process on this iteration.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  string  $queue
      * @return bool
      */
-    protected function daemonShouldRun($connectionName, $queue)
+    protected function daemonShouldRun($connection, $queue)
     {
         if ($this->manager->isDownForMaintenance()) {
             return false;
         }
 
-        $payload = array($connectionName, $queue);
+        $payload = array($connection, $queue);
 
         return ($this->events->until('nova.queue.looping', $payload) !== false);
     }
@@ -138,17 +138,17 @@ class Worker
     /**
      * Listen to the given queue.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  string  $queue
      * @param  int     $delay
      * @param  int     $sleep
      * @param  int     $maxTries
      * @return array
      */
-    public function runNextJob($connectionName, $queue = null, $delay = 0, $sleep = 3, $maxTries = 0)
+    public function runNextJob($connection, $queue = null, $delay = 0, $sleep = 3, $maxTries = 0)
     {
         $job = $this->getNextJob(
-            $this->manager->connection($connectionName), $queue
+            $this->manager->connection($connection), $queue
         );
 
         // If we're able to pull a job off of the stack, we will process it and
@@ -156,7 +156,7 @@ class Worker
         // we will "sleep" the worker for the specified number of seconds.
 
         if (! is_null($job)) {
-            return $this->runJob($job, $connectionName, $maxTries, $delay);
+            return $this->runJob($job, $connection, $maxTries, $delay);
         }
 
         $this->sleep($sleep);
@@ -196,14 +196,14 @@ class Worker
      * Process the given job.
      *
      * @param  \Illuminate\Contracts\Queue\Job  $job
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Illuminate\Queue\WorkerOptions  $options
      * @return void
      */
-    protected function runJob($job, $connectionName, $maxTries, $delay)
+    protected function runJob($job, $connection, $maxTries, $delay)
     {
         try {
-            return $this->process($connectionName, $job, $maxTries, $delay);
+            return $this->process($connection, $job, $maxTries, $delay);
         }
         catch (Exception $e) {
             $this->handleException($e);
@@ -257,7 +257,7 @@ class Worker
     /**
      * Process a given job from the queue.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Nova\Queue\Job  $job
      * @param  int  $maxTries
      * @param  int  $delay
@@ -265,10 +265,10 @@ class Worker
      *
      * @throws \Exception
      */
-    public function process($connectionName, Job $job, $maxTries = 0, $delay = 0)
+    public function process($connection, Job $job, $maxTries = 0, $delay = 0)
     {
         if (($maxTries > 0) && ($job->attempts() > $maxTries)) {
-            return $this->logFailedJob($connectionName, $job);
+            return $this->logFailedJob($connection, $job);
         }
 
         // First we will raise the before job event and fire off the job. Once it is done
@@ -276,7 +276,7 @@ class Worker
         // ahead and run the delete method on the job. Otherwise we will just keep moving.
 
         try {
-            $this->raiseBeforeJobEvent($connectionName, $job);
+            $this->raiseBeforeJobEvent($connection, $job);
 
             $job->handle();
 
@@ -284,7 +284,7 @@ class Worker
                 $job->delete();
             }
 
-            $this->raiseAfterJobEvent($connectionName, $job);
+            $this->raiseAfterJobEvent($connection, $job);
 
             return array('job' => $job, 'failed' => false);
         }
@@ -312,20 +312,20 @@ class Worker
     /**
      * Log a failed job into storage.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Nova\Queue\Job  $job
      * @return array
      */
-    protected function logFailedJob($connectionName, Job $job)
+    protected function logFailedJob($connection, Job $job)
     {
         if (isset($this->failer)) {
             $this->failer->log(
-                $connectionName, $job->getQueue(), $job->getRawBody()
+                $connection, $job->getQueue(), $job->getRawBody()
             );
 
             $job->delete();
 
-            $this->raiseFailedJobEvent($connectionName, $job);
+            $this->raiseFailedJobEvent($connection, $job);
         }
 
         return array('job' => $job, 'failed' => true);
@@ -334,42 +334,42 @@ class Worker
     /**
      * Raise the before queue job event.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Nova\Queue\Job  $job
      * @return void
      */
-    protected function raiseBeforeJobEvent($connectionName, Job $job)
+    protected function raiseBeforeJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.processing', array($connectionName, $job));
+            $this->events->fire('nova.queue.processing', array($connection, $job));
         }
     }
 
     /**
      * Raise the after queue job event.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Nova\Queue\Job  $job
      * @return void
      */
-    protected function raiseAfterJobEvent($connectionName, Job $job)
+    protected function raiseAfterJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.processed', array($connectionName, $job));
+            $this->events->fire('nova.queue.processed', array($connection, $job));
         }
     }
 
     /**
      * Raise the failed queue job event.
      *
-     * @param  string  $connectionName
+     * @param  string  $connection
      * @param  \Nova\Queue\Job  $job
      * @return void
      */
-    protected function raiseFailedJobEvent($connectionName, Job $job)
+    protected function raiseFailedJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.failed', array($connectionName, $job));
+            $this->events->fire('nova.queue.failed', array($connection, $job));
         }
     }
 
