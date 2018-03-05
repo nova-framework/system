@@ -85,23 +85,17 @@ abstract class Queue
     protected function createPayload($job, $data = '', $queue = null)
     {
         if ($job instanceof Closure) {
-            return json_encode($this->createClosurePayload($job, $data));
+            $payload = $this->createClosurePayload($job, $data);
         } else if (is_object($job)) {
-            return json_encode(array(
-                'job'  => 'Nova\Queue\CallQueuedHandler@call',
-
-                //
-                'data' => array(
-                    'commandName' => get_class($job),
-                    'command'     => serialize(clone $job)
-                ),
-            ));
+            $payload = $this->createObjectPayload($job, $data);
+        } else {
+            $payload = array(
+                'job'  => $job,
+                'data' => $this->prepareQueueableEntities($data)
+            );
         }
 
-        return json_encode(array(
-            'job'  => $job,
-            'data' => $this->prepareQueueableEntities($data)
-        ));
+        return json_encode($payload);
     }
 
     /**
@@ -149,15 +143,41 @@ abstract class Queue
     /**
      * Create a payload string for the given Closure job.
      *
+     * @param  object  $job
+     * @param  mixed   $data
+     * @return string
+     */
+    protected function createObjectPayload($job, $data)
+    {
+        $commandName = get_class($job);
+
+        $command = serialize(clone $job);
+
+        return array(
+            'job'  => 'Nova\Queue\CallQueuedHandler@call',
+
+            'data' => compact('commandName', 'command'),
+        );
+    }
+
+    /**
+     * Create a payload string for the given Closure job.
+     *
      * @param  \Closure  $job
      * @param  mixed     $data
      * @return string
      */
     protected function createClosurePayload($job, $data)
     {
-        $closure = $this->crypt->encrypt((new Serializer)->serialize($job));
+        $closure = $this->crypt->encrypt(
+            with(new Serializer)->serialize($job)
+        );
 
-        return array('job' => 'QueueClosure', 'data' => compact('closure'));
+        return array(
+            'job'  => 'Nova\Queue\CallQueuedClosure@call',
+
+            'data' => compact('closure')
+        );
     }
 
     /**

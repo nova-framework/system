@@ -1,9 +1,10 @@
 <?php
 
 use Nova\Encryption\Encrypter;
+use Nova\Queue\Job;
 
 
-class QueueClosure
+class CallQueuedClosure
 {
     /**
      * The encrypter instance.
@@ -27,15 +28,18 @@ class QueueClosure
     /**
      * Fire the Closure based queue job.
      *
-     * @param  \Nova\Queue\Jobs\Job  $job
+     * @param  \Nova\Queue\Job  $job
      * @param  array  $data
      * @return void
      */
-    public function fire($job, $data)
+    public function call(Job $job, array $data)
     {
-        $closure = unserialize($this->crypt->decrypt($data['closure']));
+        $payload = $this->crypt->decrypt(
+            $data['closure']
+        );
 
-        $closure($job);
+        $closure = unserialize($payload);
+
+        call_user_func($closure, $job);
     }
-
 }
