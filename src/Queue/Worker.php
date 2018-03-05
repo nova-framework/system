@@ -227,6 +227,10 @@ class Worker
      */
     protected function handleException($e)
     {
+        if (isset($this->exceptions)) {
+            $this->exceptions->report($e);
+        }
+
         $errors = array(
             'server has gone away',
             'no connection to the server',
@@ -244,10 +248,6 @@ class Worker
 
         if (Str::contains($e->getMessage(), $errors)) {
             $this->shouldQuit = true;
-        }
-
-        if (isset($this->exceptions)) {
-            $this->exceptions->report($e);
         }
     }
 
