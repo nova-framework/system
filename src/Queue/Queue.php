@@ -91,7 +91,7 @@ abstract class Queue
         } else {
             $payload = array(
                 'job'  => $job,
-                'data' => $this->prepareQueueableEntities($data)
+                'data' => $this->prepareQueueableEntities($data),
             );
         }
 

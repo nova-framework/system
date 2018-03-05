@@ -3,6 +3,7 @@
 namespace Nova\Queue;
 
 use Nova\Support\Arr;
+use Nova\Support\Str;
 
 use DateTime;
 
@@ -95,7 +96,7 @@ abstract class Job
      */
     protected function resolveAndHandle(array $payload)
     {
-        list($class, $method) = $this->parseJob($payload['job']);
+        list($class, $method) = Str::parseCallback($payload['job'], 'handle');
 
         $this->instance = $this->resolve($class);
 
@@ -111,19 +112,6 @@ abstract class Job
     protected function resolve($class)
     {
         return $this->container->make($class);
-    }
-
-    /**
-     * Parse the job declaration into class and method.
-     *
-     * @param  string  $job
-     * @return array
-     */
-    protected function parseJob($job)
-    {
-        $segments = explode('@', $job);
-
-        return (count($segments) > 1) ? $segments : array($segments[0], 'handle');
     }
 
     /**
@@ -185,13 +173,23 @@ abstract class Job
         //
         $name = $payload['job'];
 
-        if ($name === 'Nova\Queue\CallQueuedHandler@call') {
+        // When the job is a Closure.
+        if ($name == 'Nova\Queue\CallQueuedClosure@call') {
+            return 'Closure';
+        }
+
+        // When the job is a Handler.
+        else if ($name == 'Nova\Queue\CallQueuedHandler@call') {
             return Arr::get($payload, 'data.commandName', $name);
         }
 
-        // If the Job is an Event.
-        else if ($name === 'Nova\Events\CallQueuedHandler@call') {
-            return Arr::get($payload, 'data.class') .'@' .Arr::get($payload, 'data.method');
+        // When the job is an Event.
+        else if ($name == 'Nova\Events\CallQueuedHandler@call') {
+            $className = Arr::get($payload, 'data.class');
+
+            $method = Arr::get($payload, 'data.method');
+
+            return $className .'@' .$method;
         }
 
         return $name;
