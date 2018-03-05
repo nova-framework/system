@@ -93,16 +93,14 @@ class Worker
             if (! $this->daemonShouldRun()) {
                 $this->sleep($sleep);
             } else {
-                $this->pop(
-                    $connectionName, $queue, $delay, $sleep, $maxTries
-                );
+                $this->runNextJob($connectionName, $queue, $delay, $sleep, $maxTries);
             }
 
-            if ($this->shouldQuit) {
+            if ($this->daemonShouldQuit()) {
                 $this->kill();
             }
 
-            // Check the running constraints.
+            // Check if the used memory exceeded or the queue should be restarted.
             else if ($this->memoryExceeded($memory) || $this->queueShouldRestart($lastRestart)) {
                 $this->stop();
             }
@@ -123,6 +121,17 @@ class Worker
         return ($this->events->until('nova.queue.looping') !== false);
     }
 
+
+    /**
+     * Determine if the daemon should quit.
+     *
+     * @return bool
+     */
+    protected function daemonShouldQuit()
+    {
+        return $this->shouldQuit;
+    }
+
     /**
      * Listen to the given queue.
      *
@@ -133,7 +142,7 @@ class Worker
      * @param  int     $maxTries
      * @return array
      */
-    public function pop($connectionName, $queue = null, $delay = 0, $sleep = 3, $maxTries = 0)
+    public function runNextJob($connectionName, $queue = null, $delay = 0, $sleep = 3, $maxTries = 0)
     {
         $job = $this->getNextJob(
             $this->manager->connection($connectionName), $queue
@@ -173,18 +182,12 @@ class Worker
             }
         }
         catch (Exception $e) {
-            if (isset($this->exceptions)) {
-                $this->exceptions->report($e);
-            }
-
-            $this->stopWorkerIfLostConnection($e);
+            $this->handleException($e);
         }
         catch (Throwable $e) {
-            if (isset($this->exceptions)) {
-                $this->exceptions->report($e = new FatalThrowableError($e));
-            }
-
-            $this->stopWorkerIfLostConnection($e);
+            $this->handleException(
+                new FatalThrowableError($e)
+            );
         }
     }
 
@@ -202,18 +205,44 @@ class Worker
             return $this->process($connectionName, $job, $maxTries, $delay);
         }
         catch (Exception $e) {
-            if (isset($this->exceptions)) {
-                $this->exceptions->report($e);
-            }
-
-            $this->stopWorkerIfLostConnection($e);
+            $this->handleException($e);
         }
         catch (Throwable $e) {
-            if (isset($this->exceptions)) {
-                $this->exceptions->report($e = new FatalThrowableError($e));
-            }
+            $this->handleException(
+                new FatalThrowableError($e)
+            );
+        }
+    }
 
-            $this->stopWorkerIfLostConnection($e);
+    /**
+     * Handle an exception that occurred while handling a job.
+     *
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function handleException($e)
+    {
+        $errors = array(
+            'server has gone away',
+            'no connection to the server',
+            'Lost connection',
+            'is dead or not enabled',
+            'Error while sending',
+            'decryption failed or bad record mac',
+            'server closed the connection unexpectedly',
+            'SSL connection has been closed unexpectedly',
+            'Error writing data to the connection',
+            'Resource deadlock avoided',
+            'Transaction() on null',
+            'child connection forced to terminate due to client_idle_limit',
+        );
+
+        if (Str::contains($e->getMessage(), $errors)) {
+            $this->shouldQuit = true;
+        }
+
+        if (isset($this->exceptions)) {
+            $this->exceptions->report($e);
         }
     }
 
@@ -333,34 +362,6 @@ class Worker
     {
         if (isset($this->events)) {
             $this->events->fire('nova.queue.failed', array($connectionName, $job));
-        }
-    }
-
-    /**
-     * Stop the worker if we have lost connection to a database.
-     *
-     * @param  \Exception  $e
-     * @return void
-     */
-    protected function stopWorkerIfLostConnection($e)
-    {
-        $errors = array(
-            'server has gone away',
-            'no connection to the server',
-            'Lost connection',
-            'is dead or not enabled',
-            'Error while sending',
-            'decryption failed or bad record mac',
-            'server closed the connection unexpectedly',
-            'SSL connection has been closed unexpectedly',
-            'Error writing data to the connection',
-            'Resource deadlock avoided',
-            'Transaction() on null',
-            'child connection forced to terminate due to client_idle_limit',
-        );
-
-        if (Str::contains($e->getMessage(), $errors)) {
-            $this->shouldQuit = true;
         }
     }
 

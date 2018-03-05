@@ -121,7 +121,7 @@ class WorkCommand extends Command
         $tries = $this->option('tries');
 
         if (! $daemon) {
-            return $this->worker->pop($connection, $queue, $delay, $sleep, $tries);
+            return $this->worker->runNextJob($connection, $queue, $delay, $sleep, $tries);
         }
 
         $this->worker->setCache(
