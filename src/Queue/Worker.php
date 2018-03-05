@@ -90,46 +90,51 @@ class Worker
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
         while (true) {
-            if (! $this->daemonShouldRun()) {
+            if (! $this->daemonShouldRun($connectionName, $queue)) {
                 $this->sleep($sleep);
             } else {
                 $this->runNextJob($connectionName, $queue, $delay, $sleep, $maxTries);
             }
 
-            if ($this->daemonShouldQuit()) {
-                $this->kill();
-            }
-
-            // Check if the used memory exceeded or the queue should be restarted.
-            else if ($this->memoryExceeded($memory) || $this->queueShouldRestart($lastRestart)) {
-                $this->stop();
-            }
+            $this->stopIfNecessary($memory, $lastRestart);
         }
     }
 
     /**
      * Determine if the daemon should process on this iteration.
      *
+     * @param  string  $connectionName
+     * @param  string  $queue
      * @return bool
      */
-    protected function daemonShouldRun()
+    protected function daemonShouldRun($connectionName, $queue)
     {
         if ($this->manager->isDownForMaintenance()) {
             return false;
         }
 
-        return ($this->events->until('nova.queue.looping') !== false);
+        $payload = array($connectionName, $queue);
+
+        return ($this->events->until('nova.queue.looping', $payload) !== false);
     }
 
-
     /**
-     * Determine if the daemon should quit.
+     * Stop the process if necessary.
      *
-     * @return bool
+     * @param  int  $memory
+     * @param  int  $lastRestart
      */
-    protected function daemonShouldQuit()
+    protected function stopIfNecessary($memory, $lastRestart)
     {
-        return $this->shouldQuit;
+        if ($this->shouldQuit) {
+            $this->kill();
+        }
+
+        if ($this->memoryExceeded($memory)) {
+            $this->stop(12);
+        } else if ($this->queueShouldRestart($lastRestart)) {
+            $this->stop();
+        }
     }
 
     /**
@@ -381,13 +386,14 @@ class Worker
     /**
      * Stop listening and bail out of the script.
      *
+     * @param  int  $status
      * @return void
      */
-    public function stop()
+    public function stop($status = 0)
     {
         $this->events->fire('nova.queue.stopping');
 
-        die;
+        exit($status);
     }
 
     /**
