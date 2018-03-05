@@ -98,9 +98,10 @@ class Worker
 
             if ($this->shouldQuit) {
                 $this->kill();
-            } else if ($this->memoryExceeded($memory)) {
-                $this->stop(12);
-            } else if ($this->queueShouldRestart($lastRestart)) {
+            }
+
+            // Check if the daemon should be stopped.
+            else if ($this->memoryExceeded($memory) || $this->queueShouldRestart($lastRestart)) {
                 $this->stop();
             }
         }
