@@ -169,7 +169,7 @@ class Worker
      *
      * @param  \Nova\Queue\Queue  $connection
      * @param  string  $queue
-     * @return \Nova\Queue\Jobs\Job|null
+     * @return \Nova\Queue\Job|null
      */
     protected function getNextJob($connection, $queue)
     {
@@ -258,7 +258,7 @@ class Worker
      * Process a given job from the queue.
      *
      * @param  string  $connectionName
-     * @param  \Nova\Queue\Jobs\Job  $job
+     * @param  \Nova\Queue\Job  $job
      * @param  int  $maxTries
      * @param  int  $delay
      * @return void
@@ -313,7 +313,7 @@ class Worker
      * Log a failed job into storage.
      *
      * @param  string  $connectionName
-     * @param  \Nova\Queue\Jobs\Job  $job
+     * @param  \Nova\Queue\Job  $job
      * @return array
      */
     protected function logFailedJob($connectionName, Job $job)
@@ -363,7 +363,7 @@ class Worker
      * Raise the failed queue job event.
      *
      * @param  string  $connectionName
-     * @param  \Nova\Queue\Jobs\Job  $job
+     * @param  \Nova\Queue\Job  $job
      * @return void
      */
     protected function raiseFailedJobEvent($connectionName, Job $job)
