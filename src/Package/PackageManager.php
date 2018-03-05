@@ -60,18 +60,22 @@ class PackageManager
     {
         $namespace = $this->resolveNamespace($properties);
 
-        if (isset($properties['type']) && ! empty($type = $properties['type'])) {
-            $name = Str::studly($type);
-        } else {
-            $name = 'Package';
-        }
+        $name = Str::studly(
+            isset($properties['type']) ? $properties['type'] : 'package'
+        );
+
+        // The main service provider from a package should be named like:
+        // AcmeCorp\Pages\Providers\PackageServiceProvider
 
         $provider = "{$namespace}\\Providers\\{$name}ServiceProvider";
 
         if (! class_exists($provider)) {
-            // Try to find a service provider with the alternate naming.
+            // We will try to find the alternate service provider, named like:
+            // AcmeCorp\Pages\PageServiceProvider
 
-            $name = Str::singular($properties['basename']);
+            $name = Str::singular(
+                $properties['basename']
+            );
 
             if (! class_exists($provider = "{$namespace}\\{$name}ServiceProvider")) {
                 return;
