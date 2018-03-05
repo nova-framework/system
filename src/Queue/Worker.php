@@ -96,7 +96,7 @@ class Worker
                 $this->runNextJob($connectionName, $queue, $delay, $sleep, $maxTries);
             }
 
-            if ($this->shouldQuit) {
+            if ($this->daemonShouldQuit()) {
                 $this->kill();
             }
 
@@ -123,6 +123,16 @@ class Worker
         $payload = array($connectionName, $queue);
 
         return ($this->events->until('nova.queue.looping', $payload) !== false);
+    }
+
+    /**
+     * Returns true if the daemon should quit.
+     *
+     * @return bool
+     */
+    protected function daemonShouldQuit()
+    {
+        return $this->shouldQuit();
     }
 
     /**
