@@ -627,9 +627,7 @@ class Connection implements ConnectionInterface
      */
     protected function causedByLostConnection(QueryException $e)
     {
-        $message = $e->getMessage();
-
-        return str_contains($message, array(
+        return str_contains($e->getMessage(), array(
             'server has gone away',
             'no connection to the server',
             'Lost connection',
