@@ -62,11 +62,14 @@ class WorkCommand extends Command
             return;
         }
 
+        $config = $this->container['config'];
+
         // We'll listen to the processed and failed events so we can write information
         // to the console as jobs are processed, which will let the developer watch
         // which jobs are coming through a queue and be informed on its progress.
-
         $this->listenForEvents();
+
+        $connection = $this->argument('connection') ?: $config->get('queue.default');
 
         $delay = $this->option('delay');
 
@@ -75,11 +78,9 @@ class WorkCommand extends Command
         // is to protect us against any memory leaks that will be in the scripts.
         $memory = $this->option('memory');
 
-        //
-        $config = $this->container['config'];
-
-        $connection = $this->argument('connection') ?: $config->get('queue.default');
-
+        // We need to get the right queue for the connection which is set in the queue
+        // configuration file for the application. We will pull it based on the set
+        // connection being run for the queue operation currently being executed.
         $queue = $this->option('queue') ?: $config->get(
             "queue.connections.{$connection}.queue", 'default'
         );
