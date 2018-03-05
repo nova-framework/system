@@ -188,9 +188,7 @@ class Worker
             $this->handleException($e);
         }
         catch (Throwable $e) {
-            $this->handleException(
-                new FatalThrowableError($e)
-            );
+            $this->handleException(new FatalThrowableError($e));
         }
     }
 
@@ -211,9 +209,7 @@ class Worker
             $this->handleException($e);
         }
         catch (Throwable $e) {
-            $this->handleException(
-                new FatalThrowableError($e)
-            );
+            $this->handleException(new FatalThrowableError($e));
         }
     }
 
