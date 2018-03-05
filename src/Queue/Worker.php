@@ -132,7 +132,7 @@ class Worker
      */
     protected function daemonShouldQuit()
     {
-        return $this->shouldQuit();
+        return $this->shouldQuit;
     }
 
     /**
