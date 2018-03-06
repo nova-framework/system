@@ -23,33 +23,4 @@ trait DispatchesJobsTrait
 
         return $dispatcher->dispatch($job);
     }
-
-    /**
-     * Marshal a job and dispatch it to its appropriate handler.
-     *
-     * @param  mixed  $job
-     * @param  array  $array
-     * @return mixed
-     */
-    protected function dispatchFromArray($job, array $array)
-    {
-        $dispatcher = App::make(Dispatcher::class);
-
-        return $dispatcher->dispatchFromArray($job, $array);
-    }
-
-    /**
-     * Marshal a job and dispatch it to its appropriate handler.
-     *
-     * @param  mixed  $job
-     * @param  \ArrayAccess  $source
-     * @param  array  $extras
-     * @return mixed
-     */
-    protected function dispatchFrom($job, ArrayAccess $source, $extras = array())
-    {
-        $dispatcher = App::make(Dispatcher::class);
-
-        return $dispatcher->dispatchFrom($job, $source, $extras);
-    }
 }
