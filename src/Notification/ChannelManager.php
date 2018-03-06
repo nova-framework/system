@@ -86,31 +86,39 @@ class ChannelManager extends Manager implements DispatcherInterface
         $original = clone $notification;
 
         foreach ($notifiables as $notifiable) {
-            $notificationId = Uuid::uuid4()->toString();
-
-            $channels = $channels ?: $notification->via($notifiable);
-
-            if (empty($channels)) {
+            if (empty($viaChannels = $channels ?: $notification->via($notifiable))) {
                 continue;
             }
 
-            foreach ($channels as $channel) {
-                $notification = clone $original;
+            $notificationId = Uuid::uuid4()->toString();
 
-                if (is_null($notification->id)) {
-                    $notification->id = $notificationId;
-                }
-
-                if (! $this->shouldSendNotification($notifiable, $notification, $channel)) {
-                    continue;
-                }
-
-                $response = $this->driver($channel)->send($notifiable, $notification);
-
-                $this->events->fire(
-                    new NotificationSent($notifiable, $notification, $channel, $response)
-                );
+            foreach ((array) $viaChannels as $channel) {
+                $this->sendToNotifiable($notifiable, $notificationId, clone $original, $channel);
             }
+        }
+    }
+
+    /**
+     * Send the given notification to the given notifiable via a channel.
+     *
+     * @param  mixed  $notifiable
+     * @param  string  $id
+     * @param  mixed  $notification
+     * @param  string  $channel
+     * @return void
+     */
+    protected function sendToNotifiable($notifiable, $id, $notification, $channel)
+    {
+        if (is_null($notification->id)) {
+            $notification->id = $id;
+        }
+
+        if ($this->shouldSendNotification($notifiable, $notification, $channel)) {
+            $response = $this->driver($channel)->send($notifiable, $notification);
+
+            $this->events->fire(
+                new NotificationSent($notifiable, $notification, $channel, $response)
+            );
         }
     }
 
@@ -148,11 +156,9 @@ class ChannelManager extends Manager implements DispatcherInterface
         $original = clone $notification;
 
         foreach ($notifiables as $notifiable) {
-            $channels = $notification->via($notifiable);
-
             $notificationId = Uuid::uuid4()->toString();
 
-            foreach ($channels as $channel) {
+            foreach ($original->via($notifiable) as $channel) {
                 $notification = clone $original;
 
                 $notification->id = $notificationId;
