@@ -23,4 +23,17 @@ trait DispatchesJobsTrait
 
         return $dispatcher->dispatch($job);
     }
+
+    /**
+     * Dispatch a job to its appropriate handler in the current process.
+     *
+     * @param  mixed  $job
+     * @return mixed
+     */
+    public function dispatchNow($job)
+    {
+        $dispatcher = App::make(Dispatcher::class);
+
+        return $dispatcher->dispatchNow($job);
+    }
 }
