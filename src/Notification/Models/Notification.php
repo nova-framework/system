@@ -1,15 +1,15 @@
 <?php
 
-namespace Nova\Notification;
+namespace Nova\Notification\Models;
 
 use Nova\Database\ORM\Model as BaseModel;
 use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Support\Contracts\ArrayableInterface;
 
-use Nova\Notification\DatabaseNotificationCollection as Collection;
+use Nova\Notification\Models\NotificationCollection;
 
 
-class DatabaseNotification extends BaseModel
+class Notification extends BaseModel
 {
     /**
      * The table associated with the Model.
@@ -110,6 +110,6 @@ class DatabaseNotification extends BaseModel
      */
     public function newCollection(array $models = array())
     {
-        return new Collection($models);
+        return new NotificationCollection($models);
     }
 }

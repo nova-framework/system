@@ -14,7 +14,7 @@ trait NotifiableTrait
      */
     public function notifications()
     {
-        return $this->morphMany('Nova\Notification\DatabaseNotification', 'notifiable')
+        return $this->morphMany('Nova\Notification\Models\Notification', 'notifiable')
             ->orderBy('created_at', 'desc');
     }
 
@@ -23,7 +23,7 @@ trait NotifiableTrait
      */
     public function unreadNotifications()
     {
-        return $this->morphMany('Nova\Notification\DatabaseNotification', 'notifiable')
+        return $this->morphMany('Nova\Notification\Models\Notification', 'notifiable')
             ->whereNull('read_at')
             ->orderBy('created_at', 'desc');
     }
