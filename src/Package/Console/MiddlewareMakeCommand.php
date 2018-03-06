@@ -35,29 +35,29 @@ class MiddlewareMakeCommand extends MakeCommand
      *
      * @var array
      */
-    protected $listFolders = [
+    protected $listFolders = array(
         'Middleware/',
-    ];
+    );
 
     /**
      * Package files to be created.
      *
      * @var array
      */
-    protected $listFiles = [
+    protected $listFiles = array(
         '{{filename}}.php',
-    ];
+    );
 
     /**
      * Package stubs used to populate defined files.
      *
      * @var array
      */
-    protected $listStubs = [
-        'default' => [
+    protected $listStubs = array(
+        'default' => array(
             'middleware.stub',
-        ],
-    ];
+        ),
+    );
 
     /**
      * Resolve Container after getting file path.

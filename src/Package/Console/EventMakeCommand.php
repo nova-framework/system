@@ -74,9 +74,6 @@ class EventMakeCommand extends MakeCommand
         $this->data['path'] = $this->getBaseNamespace();
 
         $this->data['className'] = basename($filePath);
-
-        //
-        $this->data['rootNamespace'] = $this->container->getNamespace();
     }
 
     /**
@@ -91,9 +88,6 @@ class EventMakeCommand extends MakeCommand
             '{{path}}',
             '{{namespace}}',
             '{{className}}',
-
-            '{{rootNamespace}}',
-
         );
 
         $replaces = array(
@@ -101,8 +95,6 @@ class EventMakeCommand extends MakeCommand
             $this->data['path'],
             $this->data['namespace'],
             $this->data['className'],
-
-            $this->data['rootNamespace'],
         );
 
         return str_replace($searches, $replaces, $content);
