@@ -248,8 +248,10 @@ class PackageMakeCommand extends Command
      */
     public function handle()
     {
-        if ($this->option('module') && $this->option('theme')) {
-            return $this->error('The options --module and --theme cannot be used simultaneous.');
+        $type = $this->option('type');
+
+        if (! in_array($type, array('module', 'theme', 'package'))) {
+            return $this->error('Invalid package type specified.');
         }
 
         $name = $this->argument('name');
@@ -260,7 +262,7 @@ class PackageMakeCommand extends Command
             $vendor = 'AcmeCorp';
         }
 
-        if ($this->option('module')) {
+        if ($type == 'module') {
             $namespace = $this->packages->getModulesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
@@ -300,18 +302,19 @@ class PackageMakeCommand extends Command
         $this->data['license'] = 'MIT';
 
         if ($this->option('quick')) {
-            return $this->generate();
+            return $this->generate($type);
         }
 
-        $this->stepOne();
+        $this->stepOne($type);
     }
 
     /**
      * Step 1: Configure Package.
      *
+     * @param  string  $type
      * @return mixed
      */
-    private function stepOne()
+    private function stepOne($type)
     {
         $input = $this->ask('Please enter the name of the Package:', $this->data['name']);
 
@@ -334,11 +337,11 @@ class PackageMakeCommand extends Command
 
         $this->data['slug'] = $slug;
 
-        if ($this->option('module')) {
+        if ($type = 'module') {
             $namespace = $this->packages->getModulesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
-        } else if ($this->option('theme')) {
+        } else if ($type = 'theme') {
             $namespace = $this->packages->getThemesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
@@ -372,9 +375,9 @@ class PackageMakeCommand extends Command
         $this->comment('License:    ' .$this->data['license']);
 
         if ($this->confirm('Do you wish to continue?')) {
-            $this->generate();
+            $this->generate($type);
         } else {
-            return $this->stepOne();
+            return $this->stepOne($type);
         }
 
         return true;
@@ -383,22 +386,16 @@ class PackageMakeCommand extends Command
     /**
      * Generate the Package.
      */
-    protected function generate()
+    protected function generate($type)
     {
         $slug = $this->data['slug'];
 
-        if ($this->option('module')) {
+        if ($type == 'module') {
             $path = $this->getModulePath($slug);
-
-            $type = 'module';
-        } else if ($this->option('theme')) {
+        } else if ($type == 'theme') {
             $path = $this->getThemePath($slug);
-
-            $type = 'theme';
         } else {
             $path = $this->getPackagePath($slug);
-
-            $type = 'package';
         }
 
         if ($this->files->exists($path)) {
@@ -788,8 +785,8 @@ return array (
         return array(
             array('--quick',    '-Q', InputOption::VALUE_NONE, 'Skip the make:package Wizard and use default values'),
             array('--extended', null, InputOption::VALUE_NONE, 'Generate an extended Package'),
-            array('--module',   null, InputOption::VALUE_NONE, 'Generate an Application Module'),
-            array('--theme',    null, InputOption::VALUE_NONE, 'Generate an Application Theme'),
+
+            array('--type', null, InputOption::VALUE_REQUIRED, 'Generate an Application Module, Theme or Package', 'package'),
         );
     }
 }
