@@ -120,9 +120,9 @@ class Worker
             return false;
         }
 
-        $payload = array($connection, $queue);
+        $result = $this->events->until('nova.queue.looping', array($connection, $queue));
 
-        return ($this->events->until('nova.queue.looping', $payload) !== false);
+        return ($result !== false);
     }
 
     /**
