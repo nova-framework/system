@@ -148,9 +148,11 @@ class ChannelManager extends Manager implements DispatcherInterface
         $original = clone $notification;
 
         foreach ($notifiables as $notifiable) {
+            $channels = $notification->via($notifiable);
+
             $notificationId = Uuid::uuid4()->toString();
 
-            foreach ($notification->via($notifiable) as $channel) {
+            foreach ($channels as $channel) {
                 $notification = clone $original;
 
                 $notification->id = $notificationId;
