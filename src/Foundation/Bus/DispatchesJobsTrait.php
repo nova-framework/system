@@ -5,8 +5,6 @@ namespace Nova\Foundation\Bus;
 use Nova\Bus\DispatcherInterface as Dispatcher;
 use Nova\Support\Facades\App;
 
-use ArrayAccess;
-
 
 trait DispatchesJobsTrait
 {
