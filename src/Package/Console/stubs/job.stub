@@ -5,10 +5,8 @@ namespace {{namespace}};
 use Nova\Bus\QueueableTrait;
 use Nova\Foundation\Bus\DispatchableTrait;
 
-use {{rootNamespace}}Jobs\Job;
 
-
-class {{className}} extends Job
+class {{className}}
 {
     use DispatchableTrait, QueueableTrait;
 

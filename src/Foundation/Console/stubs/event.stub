@@ -3,20 +3,15 @@
 namespace {{namespace}};
 
 use Nova\Broadcasting\ShouldBroadcastInterface;
-
 use Nova\Broadcasting\Channel;
+use Nova\Broadcasting\InteractsWithSocketsTrait;
 use Nova\Broadcasting\PrivateChannel;
 use Nova\Broadcasting\PresenceChannel;
-
-use Nova\Broadcasting\InteractsWithSocketsTrait;
 use Nova\Foundation\Events\DispatchableTrait;
 use Nova\Queue\SerializesModelsTrait;
 
 
-use {{rootNamespace}}Events\Event;
-
-
-class {{className}} extends Event
+class {{className}}
 {
     use DispatchableTrait, InteractsWithSocketsTrait, SerializesModelsTrait;
 
