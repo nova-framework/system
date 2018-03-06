@@ -387,7 +387,7 @@ class SessionGuard implements GuardInterface
         if ($this->events) {
             $payload = array($credentials, $remember, $login);
 
-            $this->events->fire('auth.attempt', $payload);
+            $this->events->dispatch('auth.attempt', $payload);
         }
     }
 
@@ -428,7 +428,7 @@ class SessionGuard implements GuardInterface
         // any listeners will hook into the authentication events and run actions
         // based on the login and logout events fired from the guard instances.
         if (isset($this->events)) {
-            $this->events->fire('auth.login', array($user, $remember));
+            $this->events->dispatch('auth.login', array($user, $remember));
         }
 
         $this->setUser($user);
@@ -527,7 +527,7 @@ class SessionGuard implements GuardInterface
         }
 
         if (isset($this->events)) {
-            $this->events->fire('auth.logout', array($user));
+            $this->events->dispatch('auth.logout', array($user));
         }
 
         // Once we have fired the logout event we will clear the users out of memory

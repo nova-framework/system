@@ -123,7 +123,7 @@ class Dispatcher implements DispatcherInterface
     {
         $this->listen($event .'_pushed', function() use ($event, $payload)
         {
-            $this->fire($event, $payload);
+            $this->dispatch($event, $payload);
         });
     }
 
@@ -164,7 +164,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function until($event, $payload = array())
     {
-        return $this->fire($event, $payload, true);
+        return $this->dispatch($event, $payload, true);
     }
 
     /**
@@ -175,7 +175,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function flush($event)
     {
-        $this->fire($event .'_pushed');
+        $this->dispatch($event .'_pushed');
     }
 
     /**
@@ -189,14 +189,14 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Fire an event and call the listeners.
+     * Dispatch an event and call the listeners.
      *
      * @param  string  $event
      * @param  mixed   $payload
      * @param  bool    $halt
      * @return array|null
      */
-    public function fire($event, $payload = array(), $halt = false)
+    public function dispatch($event, $payload = array(), $halt = false)
     {
         $responses = array();
 

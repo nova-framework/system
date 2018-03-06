@@ -507,7 +507,7 @@ class Factory
      */
     public function callComposer(View $view)
     {
-        $this->events->fire('composing: ' .$view->getName(), array($view));
+        $this->events->dispatch('composing: ' .$view->getName(), array($view));
     }
 
     /**
@@ -518,7 +518,7 @@ class Factory
      */
     public function callCreator(View $view)
     {
-        $this->events->fire('creating: ' .$view->getName(), array($view));
+        $this->events->dispatch('creating: ' .$view->getName(), array($view));
     }
 
     /**

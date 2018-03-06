@@ -382,7 +382,7 @@ class Application extends Container implements ResponsePreparerInterface
      */
     protected function markAsRegistered($provider)
     {
-        $this['events']->fire($class = get_class($provider), array($provider));
+        $this['events']->dispatch($class = get_class($provider), array($provider));
 
         $this->serviceProviders[] = $provider;
 
@@ -1060,7 +1060,7 @@ class Application extends Container implements ResponsePreparerInterface
 
         $this['language']->setLocale($locale);
 
-        $this['events']->fire('locale.changed', array($locale));
+        $this['events']->dispatch('locale.changed', array($locale));
     }
 
     /**

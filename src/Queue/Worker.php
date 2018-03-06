@@ -341,7 +341,7 @@ class Worker
     protected function raiseBeforeJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.processing', array($connection, $job));
+            $this->events->dispatch('nova.queue.processing', array($connection, $job));
         }
     }
 
@@ -355,7 +355,7 @@ class Worker
     protected function raiseAfterJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.processed', array($connection, $job));
+            $this->events->dispatch('nova.queue.processed', array($connection, $job));
         }
     }
 
@@ -369,7 +369,7 @@ class Worker
     protected function raiseFailedJobEvent($connection, Job $job)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.queue.failed', array($connection, $job));
+            $this->events->dispatch('nova.queue.failed', array($connection, $job));
         }
     }
 
@@ -394,7 +394,7 @@ class Worker
      */
     public function stop($status = 0)
     {
-        $this->events->fire('nova.queue.stopping');
+        $this->events->dispatch('nova.queue.stopping');
 
         exit($status);
     }

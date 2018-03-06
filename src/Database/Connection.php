@@ -691,7 +691,7 @@ class Connection implements ConnectionInterface
     public function logQuery($query, $bindings, $time = null)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.query', array($query, $bindings, $time, $this->getName()));
+            $this->events->dispatch('nova.query', array($query, $bindings, $time, $this->getName()));
         }
 
         if (! $this->loggingQueries) return;
@@ -721,7 +721,7 @@ class Connection implements ConnectionInterface
     protected function fireConnectionEvent($event)
     {
         if (isset($this->events)) {
-            $this->events->fire('connection.'.$this->getName().'.'.$event, $this);
+            $this->events->dispatch('connection.'.$this->getName().'.'.$event, $this);
         }
     }
 

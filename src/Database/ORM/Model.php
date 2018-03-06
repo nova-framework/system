@@ -1548,9 +1548,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
         //
         $event = "nova.database.orm.{$event}: ".get_class($this);
 
-        $method = $halt ? 'until' : 'fire';
+        $method = $halt ? 'until' : 'dispatch';
 
-        return static::$dispatcher->$method($event, $this);
+        return call_user_func(array(static::$dispatcher,$method), $event, $this);
     }
 
     /**

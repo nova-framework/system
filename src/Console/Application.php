@@ -71,7 +71,7 @@ class Application extends \Symfony\Component\Console\Application
         if (isset($this->container['events'])) {
             $events = $this->container['events'];
 
-            $events->fire('forge.start', array($this));
+            $events->dispatch('forge.start', array($this));
         }
 
         return $this;

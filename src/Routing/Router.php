@@ -611,7 +611,7 @@ class Router
             return $route;
         });
 
-        $this->events->fire('router.matched', array($route, $request));
+        $this->events->dispatch('router.matched', array($route, $request));
 
         $response = $this->runRouteWithinStack($route, $request);
 

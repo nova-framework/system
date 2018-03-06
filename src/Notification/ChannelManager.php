@@ -131,7 +131,7 @@ class ChannelManager extends Manager implements DispatcherInterface
         if ($this->shouldSendNotification($notifiable, $notification, $channel)) {
             $response = $this->driver($channel)->send($notifiable, $notification);
 
-            $this->events->fire(
+            $this->events->dispatch(
                 new NotificationSent($notifiable, $notification, $channel, $response)
             );
         }
