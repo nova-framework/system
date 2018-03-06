@@ -5,14 +5,11 @@ namespace Nova\Queue\Console;
 use Nova\Queue\Job;
 use Nova\Queue\Worker;
 use Nova\Console\Command;
-use Nova\Support\Facades\DB;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 use Carbon\Carbon;
-
-use Exception;
 
 
 class WorkCommand extends Command
@@ -92,32 +89,7 @@ class WorkCommand extends Command
             "queue.connections.{$connection}.queue", 'default'
         );
 
-        // When is used a database queue, we will check first for a valid connection.
-
-        if (($connection == 'database') && ! $this->validDatabaseConnection()) {
-            $sleep = $this->option('sleep');
-
-            return $this->worker->sleep($sleep);
-        }
-
         $this->runWorker($connection, $queue, $delay, $memory, $daemon);
-    }
-
-    /**
-     * Return true if has a valid database connection.
-     *
-     * @return bool
-     */
-    protected function validDatabaseConnection()
-    {
-        try {
-            DB::table('failed_jobs')->count();
-        }
-        catch (Exception $e) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
