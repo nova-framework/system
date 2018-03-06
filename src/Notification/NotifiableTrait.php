@@ -47,21 +47,28 @@ trait NotifiableTrait
      */
     public function routeNotificationFor($driver)
     {
-        if (method_exists($this, $method = 'routeNotificationFor'. Str::studly($driver))) {
+        $method = 'routeNotificationFor'. Str::studly($driver);
+
+        if (method_exists($this, $method)) {
             return call_user_func(array($this, $method));
         }
 
-        switch ($driver) {
-            case 'database':
-                return $this->notifications();
-
-            case 'mail':
-                if (preg_match('/^\w+@\w+\.dev$/s', $this->email)) {
-                    return Config::get('mail.from.address');
-                }
-
-                return $this->email;
+        // No custom method for routing the notifications.
+        else if ($driver == 'database') {
+            return $this->notifications();
         }
+
+        // Finally, we will accept only the mail driver.
+        else if ($driver != 'mail') {
+            return null;
+        }
+
+        // If the email field is like: admin@novaframework.dev
+        if (preg_match('/^\w+@\w+\.dev$/s', $this->email) === 1) {
+            return Config::get('mail.from.address');
+        }
+
+        return $this->email;
     }
 
 }
