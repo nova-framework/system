@@ -140,9 +140,10 @@ class ChannelManager extends Manager implements DispatcherInterface
      */
     protected function queueNotification($notifiables, $notification)
     {
-        $notifiables = $this->formatNotifiables($notifiables);
+        $commandBus = $this->app->make(Bus::class);
 
-        $bus = $this->app->make(Bus::class);
+        //
+        $notifiables = $this->formatNotifiables($notifiables);
 
         $original = clone $notification;
 
@@ -157,12 +158,12 @@ class ChannelManager extends Manager implements DispatcherInterface
                 //
                 $notifiable = $this->formatNotifiables($notifiable);
 
-                $bus->dispatch(
-                    with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
-                        ->onConnection($notification->connection)
-                        ->onQueue($notification->queue)
-                        ->delay($notification->delay)
-                );
+                $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
+                    ->onConnection($notification->connection)
+                    ->onQueue($notification->queue)
+                    ->delay($notification->delay);
+
+                $commandBus->dispatch($job);
             }
         }
     }
@@ -176,10 +177,13 @@ class ChannelManager extends Manager implements DispatcherInterface
     protected function formatNotifiables($notifiables)
     {
         if ((! $notifiables instanceof Collection) && ! is_array($notifiables)) {
-            $notifiables = array($notifiables);
+            $items = array($notifiables);
 
-            return ($notifiables instanceof Model)
-                ? new ModelCollection($notifiables) : $notifiables;
+            if ($notifiables instanceof Model) {
+                return new ModelCollection($items);
+            }
+
+            return $items;
         }
 
         return $notifiables;
