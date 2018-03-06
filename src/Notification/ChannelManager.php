@@ -33,6 +33,13 @@ class ChannelManager extends Manager implements DispatcherInterface
     protected $events;
 
     /**
+     * The command bus dispatcher instance.
+     *
+     * @var \Nova\Bus\Dispatcher
+     */
+    protected $bus;
+
+    /**
      * The default channels used to deliver messages.
      *
      * @var array
@@ -48,9 +55,11 @@ class ChannelManager extends Manager implements DispatcherInterface
      */
     public function __construct(Application $app, Dispatcher $events)
     {
-        $this->app = $app;
-
+        $this->app    = $app;
         $this->events = $events;
+
+        //
+        $this->bus = $app->make(Bus::class);
     }
 
     /**
@@ -64,11 +73,17 @@ class ChannelManager extends Manager implements DispatcherInterface
     {
         $notifiables = $this->formatNotifiables($notifiables);
 
-        if ($notification instanceof ShouldQueueInterface) {
-            return $this->queueNotification($notifiables, $notification);
+        if (! $notification instanceof ShouldQueueInterface) {
+            return $this->sendNow($notifiables, $notification);
         }
 
-        return $this->sendNow($notifiables, $notification);
+        foreach ($notifiables as $notifiable) {
+            $notificationId = Uuid::uuid4()->toString();
+
+            foreach ($notification->via($notifiable) as $channel) {
+                $this->queueToNotifiable($notifiable, $notificationId, clone $notification, $channel);
+            }
+        }
     }
 
     /**
@@ -136,44 +151,30 @@ class ChannelManager extends Manager implements DispatcherInterface
             new NotificationSending($notifiable, $notification, $channel)
         );
 
-        return $result !== false;
+        return ($result !== false);
     }
 
     /**
-     * Queue the given notification instances.
+     * Queue the given notification to the given notifiable via a channel.
      *
-     * @param  mixed  $notifiables
-     * @param  array  $notification
+     * @param  mixed  $notifiable
+     * @param  string  $id
+     * @param  mixed  $notification
+     * @param  string  $channel
      * @return void
      */
-    protected function queueNotification($notifiables, $notification)
+    protected function queueToNotifiable($notifiable, $id, $notification, $channel)
     {
-        $commandBus = $this->app->make(Bus::class);
+        $notification->id = $id;
 
-        //
-        $notifiables = $this->formatNotifiables($notifiables);
+        $notifiable = $this->formatNotifiables($notifiable);
 
-        $original = clone $notification;
+        $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
+            ->onConnection($notification->connection)
+            ->onQueue($notification->queue)
+            ->delay($notification->delay);
 
-        foreach ($notifiables as $notifiable) {
-            $notificationId = Uuid::uuid4()->toString();
-
-            foreach ($original->via($notifiable) as $channel) {
-                $notification = clone $original;
-
-                $notification->id = $notificationId;
-
-                //
-                $notifiable = $this->formatNotifiables($notifiable);
-
-                $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
-                    ->onConnection($notification->connection)
-                    ->onQueue($notification->queue)
-                    ->delay($notification->delay);
-
-                $commandBus->dispatch($job);
-            }
-        }
+        $this->bus->dispatch($job);
     }
 
     /**

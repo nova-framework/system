@@ -19,13 +19,19 @@ trait NotifiableTrait
     }
 
     /**
+     * Get the entity's read notifications.
+     */
+    public function readNotifications()
+    {
+        return $this->notifications()->whereNotNull('read_at');
+    }
+
+    /**
      * Get the entity's unread notifications.
      */
     public function unreadNotifications()
     {
-        return $this->morphMany('Nova\Notification\Models\Notification', 'notifiable')
-            ->whereNull('read_at')
-            ->orderBy('created_at', 'desc');
+        return $this->notifications()->whereNotNull('read_at');
     }
 
     /**
