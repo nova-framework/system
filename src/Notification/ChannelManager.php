@@ -167,8 +167,6 @@ class ChannelManager extends Manager implements DispatcherInterface
     {
         $notification->id = $id;
 
-        $notifiable = $this->formatNotifiables($notifiable);
-
         $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
             ->onConnection($notification->connection)
             ->onQueue($notification->queue)

@@ -31,7 +31,7 @@ trait NotifiableTrait
      */
     public function unreadNotifications()
     {
-        return $this->notifications()->whereNotNull('read_at');
+        return $this->notifications()->whereNull('read_at');
     }
 
     /**
