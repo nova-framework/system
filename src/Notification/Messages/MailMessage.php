@@ -73,13 +73,6 @@ class MailMessage extends SimpleMessage
      */
     public $priority;
 
-    /**
-     * Whether or not this message should be queued.
-     *
-     * @var bool
-     */
-    public $queued = false;
-
 
     /**
      * Set the view for the mail message.
@@ -191,19 +184,6 @@ class MailMessage extends SimpleMessage
     public function priority($level)
     {
         $this->priority = $level;
-
-        return $this;
-    }
-
-    /**
-     * Set whether or not this message should be queued.
-     *
-     * @param  bool  $queued
-     * @return $this
-     */
-    public function queued($queued = true)
-    {
-        $this->queued = $queued;
 
         return $this;
     }
