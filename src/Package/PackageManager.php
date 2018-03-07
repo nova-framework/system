@@ -110,11 +110,11 @@ class PackageManager
     {
         $path = $properties['path'];
 
-        if ($properties['type'] == 'module') {
-            return $path;
+        if ($properties['type'] == 'package') {
+            return $path .'src' .DS;
         }
 
-        return $path .'src' .DS;
+        return $path;
     }
 
     /**

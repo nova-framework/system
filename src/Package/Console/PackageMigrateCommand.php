@@ -136,9 +136,11 @@ class PackageMigrateCommand extends Command
      */
     protected function getMigrationPath($slug)
     {
-        $path = $this->packages->getPackagePath($slug);
+        $package = $this->packages->where('slug', $slug);
 
-        return $path .'src' .DS .'Database' .DS .'Migrations' .DS;
+        $path = $this->packages->resolveClassPath($package);
+
+        return $path .'Database' .DS .'Migrations' .DS;
     }
 
     /**
