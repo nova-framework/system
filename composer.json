@@ -37,6 +37,7 @@
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
         "predis/predis": "1.1.*",
+        "ramsey/uuid": "~3.0",
         "erusev/parsedown": "~1.6"
     },
     "require-dev": {

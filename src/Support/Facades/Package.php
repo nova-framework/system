@@ -6,14 +6,14 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\Module\ModuleManager
+ * @see \Nova\Package\PackageManager
  */
-class Module extends Facade
+class Package extends Facade
 {
     /**
      * Get the registered name of the component.
      *
      * @return string
      */
-    protected static function getFacadeAccessor() { return 'modules'; }
+    protected static function getFacadeAccessor() { return 'packages'; }
 }

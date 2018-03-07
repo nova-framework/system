@@ -9,6 +9,7 @@ use Nova\Package\Console\PackageMigrateResetCommand;
 use Nova\Package\Console\PackageMigrateRollbackCommand;
 use Nova\Package\Console\PackageMigrateStatusCommand;
 use Nova\Package\Console\PackageSeedCommand;
+use Nova\Package\Console\PackageOptimizeCommand;
 
 use Nova\Package\Console\PackageMakeCommand;
 use Nova\Package\Console\ConsoleMakeCommand;
@@ -43,6 +44,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'PackageMigrateRollback',
             'PackageMigrateStatus',
             'PackageSeed',
+            'PackageOptimize',
 
             //
             'PackageMake',
@@ -159,16 +161,29 @@ class ConsoleServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the module:list command.
+     */
+    protected function registerPackageOptimizeCommand()
+    {
+        $this->app->singleton('command.package.optimize', function ($app)
+        {
+            return new PackageOptimizeCommand($app['packages']);
+        });
+
+        $this->commands('command.package.optimize');
+    }
+
+    /**
      * Register the make:package command.
      */
     private function registerPackageMakeCommand()
     {
-        $this->app->bindShared('command.make.Package', function ($app)
+        $this->app->bindShared('command.make.package', function ($app)
         {
             return new PackageMakeCommand($app['files'], $app['packages']);
         });
 
-        $this->commands('command.make.Package');
+        $this->commands('command.make.package');
     }
 
     /**
