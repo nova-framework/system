@@ -6,6 +6,8 @@ use Nova\Console\Command;
 use Nova\Package\PackageManager;
 use Nova\Support\Str;
 
+use Symfony\Component\Console\Input\InputOption;
+
 
 class PackageListCommand extends Command
 {
@@ -54,13 +56,23 @@ class PackageListCommand extends Command
      */
     public function handle()
     {
-        $packages = $this->packages->all();
+        $type = $this->option('type');
 
-        if ($packages->isEmpty()) {
+        if (! is_null($type) && ! in_array($type, array('package', 'module', 'theme'))) {
+            return $this->error("Invalid Packages type [$type].");
+        }
+
+        $packages = $this->getPackages($type);
+
+        if (empty($packages)) {
+            if (! is_null($type)) {
+                return $this->error("Your application doesn't have any Packages of type [$type].");
+            }
+
             return $this->error("Your application doesn't have any Packages.");
         }
 
-        $this->displayPackages($this->getPackages());
+        $this->displayPackages($packages);
     }
 
     /**
@@ -68,13 +80,17 @@ class PackageListCommand extends Command
      *
      * @return array
      */
-    protected function getPackages()
+    protected function getPackages($type)
     {
-        $packages = $this->packages->all()->sortBy('basename');
+        $packages = $this->packages->all();
+
+        if (! is_null($type)) {
+            $packages = $packages->where('type', $type);
+        }
 
         $results = array();
 
-        foreach ($packages as $package) {
+        foreach ($packages->sortBy('basename') as $package) {
             $results[] = $this->getPackageInformation($package);
         }
 
@@ -118,5 +134,17 @@ class PackageListCommand extends Command
     protected function displayPackages(array $packages)
     {
         $this->table($this->headers, $packages);
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('--type', null, InputOption::VALUE_REQUIRED, 'The type of Packages', null),
+        );
     }
 }
