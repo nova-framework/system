@@ -72,7 +72,7 @@ interface DispatcherInterface
      *
      * @return string
      */
-    public function firing();
+    public function dispatching();
 
     /**
      * Remove a set of listeners from the dispatcher.
