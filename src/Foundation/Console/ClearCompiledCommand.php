@@ -33,6 +33,8 @@ class ClearCompiledCommand extends Command
         if (file_exists($path = $config->get('app.manifest') .DS .'services.php')) {
             @unlink($path);
         }
+
+        //$this->info('Compiled class file removed successfully!');
     }
 
 }

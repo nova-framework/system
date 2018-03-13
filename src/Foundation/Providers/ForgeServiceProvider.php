@@ -18,6 +18,7 @@ use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\NotificationMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
+use Nova\Foundation\Console\ClearLogCommand;
 use Nova\Foundation\Console\ViewClearCommand;
 
 use Nova\Foundation\Console\AssetPublishCommand;
@@ -50,6 +51,7 @@ class ForgeServiceProvider extends ServiceProvider
         'AssetPublish'     => 'command.asset.publish',
         'ConfigPublish'    => 'command.config.publish',
         'ClearCompiled'    => 'command.clear-compiled',
+        'ClearLog'         => 'command.clear-log',
         'ConsoleMake'      => 'command.console.make',
         'Down'             => 'command.down',
         'Environment'      => 'command.environment',
@@ -147,6 +149,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.clear-compiled', function ()
         {
             return new ClearCompiledCommand;
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerClearLogCommand()
+    {
+        $this->app->singleton('command.clear-log', function ($app)
+        {
+            return new ClearLogCommand($app['files']);
         });
     }
 
