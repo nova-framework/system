@@ -24,9 +24,9 @@ if (! function_exists('site_url'))
 
         $result = preg_replace_callback('#/\{(\d+)\}#', function ($matches) use ($parameters)
         {
-            list ($capture, $name) = $matches;
+            list ($value, $key) = $matches;
 
-            return isset($parameters[$name]) ? '/' .$parameters[$name] : $capture;
+            return isset($parameters[$key]) ? '/' .$parameters[$key] : $value;
 
         }, $path);
 
