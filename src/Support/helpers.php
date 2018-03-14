@@ -22,7 +22,7 @@ if (! function_exists('site_url'))
 
         $path = ! empty($parameters) ? array_shift($parameters) : '/';
 
-        $path = preg_replace_callback('#/\{(\d+)\}#', function ($matches) use ($parameters)
+        $result = preg_replace_callback('#/\{(\d+)\}#', function ($matches) use ($parameters)
         {
             list ($capture, $name) = $matches;
 
@@ -30,7 +30,7 @@ if (! function_exists('site_url'))
 
         }, $path);
 
-        return url($path);
+        return url($result);
     }
 }
 
