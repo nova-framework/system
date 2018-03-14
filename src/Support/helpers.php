@@ -18,9 +18,7 @@ if (! function_exists('site_url'))
      */
     function site_url()
     {
-        $parameters = func_get_args();
-
-        $path = ! empty($parameters) ? array_shift($parameters) : '/';
+        $path = ! empty($parameters = func_get_args()) ? array_shift($parameters) : '/';
 
         $result = preg_replace_callback('#/\{(\d+)\}#', function ($matches) use ($parameters)
         {
