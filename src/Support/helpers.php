@@ -21,7 +21,11 @@ if (! function_exists('site_url'))
         if (! empty($parameters = func_get_args())) {
             $path = array_shift($parameters);
         } else {
-            $path = '/';
+            return url('/');
+        }
+
+        if (empty($parameters)) {
+            return url($path);
         }
 
         $result = preg_replace_callback('#\{(\d+)\}#', function ($matches) use ($parameters)
