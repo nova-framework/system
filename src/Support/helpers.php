@@ -24,10 +24,6 @@ if (! function_exists('site_url'))
             return url('/');
         }
 
-        if (empty($parameters)) {
-            return url($path);
-        }
-
         $result = preg_replace_callback('#\{(\d+)\}#', function ($matches) use ($parameters)
         {
             list ($value, $key) = $matches;
