@@ -13,13 +13,24 @@ if (! function_exists('site_url'))
 {
     /**
      * Site URL helper
-     * @param string $path
-     * @param null|string $language
+     *
      * @return string
      */
-    function site_url($path = '/')
+    function site_url()
     {
-        return url($path);
+        $parameters = func_get_args();
+
+        $path = ! empty($parameters) ? array_shift($parameters) : '/';
+
+        $result = preg_replace_callback('#/\{(.*?)\}#', function ($matches) use ($parameters)
+        {
+            list ($capture, $name) = $matches;
+
+            return isset($parameters[$name]) ? '/' .$parameters[$name] : $capture;
+
+        }, $path);
+
+        return url($result);
     }
 }
 
