@@ -101,30 +101,14 @@ class Redirector
     }
 
     /**
-     * Create a new redirect response to the given path.
-     *
-     * @param  string  $path
-     * @param  int     $status
-     * @param  array   $headers
-     * @param  bool    $secure
-     * @return \Nova\Http\RedirectResponse
-     */
-    public function to($path, $status = 302, $headers = array(), $secure = null)
-    {
-        $path = $this->generator->to($path, array(), $secure);
-
-        return $this->createRedirect($path, $status, $headers);
-    }
-
-    /**
-     * Create a new redirect response to the given path.
+     * Create a new redirect response from the given path and arguments.
      *
      * @return \Nova\Http\RedirectResponse
      */
     public function url()
     {
         if (empty($parameters = func_get_args())) {
-            return url('/');
+            return $this->to('/');
         }
 
         $path = array_shift($parameters);
@@ -138,6 +122,22 @@ class Redirector
         }, $path);
 
         return $this->to($path);
+    }
+
+    /**
+     * Create a new redirect response to the given path.
+     *
+     * @param  string  $path
+     * @param  int     $status
+     * @param  array   $headers
+     * @param  bool    $secure
+     * @return \Nova\Http\RedirectResponse
+     */
+    public function to($path, $status = 302, $headers = array(), $secure = null)
+    {
+        $path = $this->generator->to($path, array(), $secure);
+
+        return $this->createRedirect($path, $status, $headers);
     }
 
     /**
