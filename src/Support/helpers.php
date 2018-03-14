@@ -18,13 +18,17 @@ if (! function_exists('site_url'))
      */
     function site_url()
     {
-        $path = ! empty($parameters = func_get_args()) ? array_shift($parameters) : '/';
+        if (! empty($parameters = func_get_args())) {
+            $path = array_shift($parameters);
+        } else {
+            $path = '/';
+        }
 
-        $result = preg_replace_callback('#/\{(\d+)\}#', function ($matches) use ($parameters)
+        $result = preg_replace_callback('#\{(\d+)\}#', function ($matches) use ($parameters)
         {
-            list ($value, $name) = $matches;
+            list ($value, $key) = $matches;
 
-            return isset($parameters[$name]) ? '/' .$parameters[$name] : $value;
+            return isset($parameters[$key]) ? $parameters[$key] : $value;
 
         }, $path);
 
