@@ -166,10 +166,12 @@ class HasManyThrough extends Relation
     {
         $dictionary = array();
 
-        $foreign = $this->firstKey;
+        $foreign = 'related_' .$this->firstKey;
 
         foreach ($results as $result) {
-            $dictionary[$result->{$foreign}][] = $result;
+            $key = $result->{$foreign};
+
+            $dictionary[$key][] = $result;
         }
 
         return $dictionary;
