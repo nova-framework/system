@@ -103,7 +103,7 @@ class Dispatcher
      */
     protected function findRoute(Request $request)
     {
-        if (! in_array($request->method(), array('GET', 'HEAD'))) {
+        if (! in_array($request->method(), array('GET', 'HEAD', 'OPTIONS'))) {
             return;
         }
 
@@ -137,8 +137,24 @@ class Dispatcher
 
         // Create a Binary File Response instance.
         $headers = array(
-            'Content-Type' => $mimeType = $this->guessMimeType($path)
+            'Access-Control-Allow-Origin' => '*',
         );
+
+        $mimeType = $this->guessMimeType($path);
+
+        if ($request->getMethod() == 'OPTIONS') {
+            $headers = array_merge($headers, array(
+                'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type, X-Auth-Token, Origin',
+            ));
+
+            return new Response('OK', 200, $headers);
+        }
+
+        // Not an OPTIONS request.
+        else {
+            $headers['Content-Type'] = $mimeType;
+        }
 
         if ($mimeType !== 'application/json') {
             $response = new BinaryFileResponse($path, 200, $headers, true, $disposition, true, false);
