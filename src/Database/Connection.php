@@ -4,7 +4,6 @@ namespace Nova\Database;
 
 
 use Nova\Events\Dispatcher;
-use Nova\Database\Contracts\ConnectionInterface;
 use Nova\Database\Query\Processors\Processor;
 
 use Doctrine\DBAL\Connection as DoctrineConnection;
@@ -148,18 +147,14 @@ class Connection implements ConnectionInterface
     {
         $this->pdo = $pdo;
 
-        // First we will setup the default properties. We keep track of the DB
-        // name we are connected to since it is needed when some reflective
-        // type commands are run such as checking whether a table exists.
+        //
         $this->database = $database;
 
         $this->tablePrefix = $tablePrefix;
 
         $this->config = $config;
 
-        // We need to initialize a query grammar and the query post processors
-        // which are both very important parts of the database abstractions
-        // so we initialize these to their default values while starting.
+        //
         $this->useDefaultQueryGrammar();
 
         $this->useDefaultPostProcessor();
@@ -302,9 +297,7 @@ class Connection implements ConnectionInterface
         {
             if ($me->pretending()) return array();
 
-            // For select statements, we'll simply execute the query and return an array
-            // of the database result set. Each element in the array will be a single
-            // row from the database table, and will either be an array or objects.
+            //
             $statement = $this->getPdoForSelect($useReadPdo)->prepare($query);
 
             $statement->execute($me->prepareBindings($bindings));
@@ -392,9 +385,7 @@ class Connection implements ConnectionInterface
         {
             if ($me->pretending()) return 0;
 
-            // For update or delete statements, we want to get the number of rows affected
-            // by the statement and return that back to the developer. We'll first need
-            // to execute the statement and then we'll use PDO to fetch the affected.
+            //
             $statement = $me->getPdo()->prepare($query);
 
             $statement->execute($me->prepareBindings($bindings));
@@ -429,11 +420,7 @@ class Connection implements ConnectionInterface
     {
         $grammar = $this->getQueryGrammar();
 
-        foreach ($bindings as $key => $value)
-        {
-            // We need to transform all instances of the DateTime class into an actual
-            // date string. Each query grammar maintains its own date string format
-            // so we'll just ask the grammar for the format to get from the date.
+        foreach ($bindings as $key => $value) {
             if ($value instanceof DateTime) {
                 $bindings[$key] = $value->format($grammar->getDateFormat());
             } else if ($value === false) {
@@ -457,18 +444,11 @@ class Connection implements ConnectionInterface
     {
         $this->beginTransaction();
 
-        // We'll simply execute the given callback within a try / catch block
-        // and if we catch any exception we can rollback the transaction
-        // so that none of the changes are persisted to the database.
         try {
             $result = $callback($this);
 
             $this->commit();
         }
-
-        // If we catch an exception, we will roll back so nothing gets messed
-        // up in the database. Then we'll re-throw the exception so it can
-        // be handled how the developer sees fit for their applications.
         catch (\Exception $e) {
             $this->rollBack();
 
@@ -553,9 +533,7 @@ class Connection implements ConnectionInterface
 
         $this->queryLog = array();
 
-        // Basically to make the database connection "pretend", we will just return
-        // the default values for all the query methods, then we will return an
-        // array of queries that were "executed" within the Closure callback.
+        //
         $callback($this);
 
         $this->pretending = false;
@@ -571,7 +549,7 @@ class Connection implements ConnectionInterface
      * @param  \Closure  $callback
      * @return mixed
      *
-     * @throws \Nova\Database\QueryException
+     * @throws \Database\QueryException
      */
     protected function run($query, $bindings, Closure $callback)
     {
@@ -579,9 +557,6 @@ class Connection implements ConnectionInterface
 
         $start = microtime(true);
 
-        // Here we will run this query. If an exception occurs we'll determine if it was
-        // caused by a connection that has been lost. If that is the cause, we'll try
-        // to re-establish connection and re-run the query with a fresh connection.
         try {
             $result = $this->runQueryCallback($query, $bindings, $callback);
         }
@@ -591,9 +566,6 @@ class Connection implements ConnectionInterface
             );
         }
 
-        // Once we have run the query we will calculate the time that it took to run and
-        // then log the query, bindings, and execution time so we will report them on
-        // the event that the developer needs them. We'll log time in milliseconds.
         $time = $this->getElapsedTime($start);
 
         $this->logQuery($query, $bindings, $time);
@@ -609,20 +581,13 @@ class Connection implements ConnectionInterface
      * @param  \Closure  $callback
      * @return mixed
      *
-     * @throws \Nova\Database\QueryException
+     * @throws \Database\QueryException
      */
     protected function runQueryCallback($query, $bindings, Closure $callback)
     {
-        // To execute the statement, we'll simply call the callback, which will actually
-        // run the SQL against the PDO connection. Then we can calculate the time it
-        // took to execute and log the query SQL, bindings and time in our memory.
         try {
             $result = $callback($this, $query, $bindings);
         }
-
-        // If an exception occurs when attempting to run a query, we'll format the error
-        // message to include the bindings with SQL, which will make this exception a
-        // lot more helpful to the developer instead of just the database's errors.
         catch (\Exception $e) {
             throw new QueryException(
                 $query, $this->prepareBindings($bindings), $e
@@ -641,7 +606,7 @@ class Connection implements ConnectionInterface
      * @param  \Closure  $callback
      * @return mixed
      *
-     * @throws \Nova\Database\QueryException
+     * @throws \Database\QueryException
      */
     protected function tryAgainIfCausedByLostConnection(QueryException $e, $query, $bindings, Closure $callback)
     {
@@ -662,9 +627,7 @@ class Connection implements ConnectionInterface
      */
     protected function causedByLostConnection(QueryException $e)
     {
-        $message = $e->getMessage();
-
-        return str_contains($message, array(
+        return str_contains($e->getMessage(), array(
             'server has gone away',
             'no connection to the server',
             'Lost connection',
@@ -672,6 +635,10 @@ class Connection implements ConnectionInterface
             'Error while sending',
             'decryption failed or bad record mac',
             'SSL connection has been closed unexpectedly',
+            'Error writing data to the connection',
+            'Resource deadlock avoided',
+            'Transaction() on null',
+            'child connection forced to terminate due to client_idle_limit',
         ));
     }
 
@@ -724,7 +691,7 @@ class Connection implements ConnectionInterface
     public function logQuery($query, $bindings, $time = null)
     {
         if (isset($this->events)) {
-            $this->events->fire('nova.query', array($query, $bindings, $time, $this->getName()));
+            $this->events->dispatch('nova.query', array($query, $bindings, $time, $this->getName()));
         }
 
         if (! $this->loggingQueries) return;
@@ -754,7 +721,7 @@ class Connection implements ConnectionInterface
     protected function fireConnectionEvent($event)
     {
         if (isset($this->events)) {
-            $this->events->fire('connection.'.$this->getName().'.'.$event, $this);
+            $this->events->dispatch('connection.'.$this->getName().'.'.$event, $this);
         }
     }
 
@@ -969,7 +936,7 @@ class Connection implements ConnectionInterface
     /**
      * Get the event dispatcher used by the connection.
      *
-     * @return \Nova\Events\Dispatcher
+     * @return \Events\Dispatcher
      */
     public function getEventDispatcher()
     {

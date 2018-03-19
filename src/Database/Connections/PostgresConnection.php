@@ -19,7 +19,7 @@ class PostgresConnection extends Connection
      */
     protected function getDefaultQueryGrammar()
     {
-        return $this->withTablePrefix(new QueryGrammar);
+        return $this->withTablePrefix(new QueryGrammar());
     }
 
     /**
@@ -39,7 +39,7 @@ class PostgresConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new QueryProcessor;
+        return new QueryProcessor();
     }
 
     /**
@@ -51,5 +51,4 @@ class PostgresConnection extends Connection
     {
         return new DoctrineDriver;
     }
-
 }

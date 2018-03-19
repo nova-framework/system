@@ -44,7 +44,9 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('cache', 'cache.store', 'memcached.connector');
+        return array(
+            'cache', 'cache.store', 'memcached.connector'
+        );
     }
 
 }

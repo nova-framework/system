@@ -2,7 +2,6 @@
 
 namespace Nova\Config;
 
-use Nova\Config\Contracts\EnvironmentVariablesLoaderInterface;
 use Nova\Filesystem\Filesystem;
 
 

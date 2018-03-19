@@ -2,7 +2,7 @@
 
 namespace Nova\View\Engines;
 
-use Nova\View\Contracts\CompilerInterface;
+use Nova\View\Compilers\CompilerInterface;
 
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 

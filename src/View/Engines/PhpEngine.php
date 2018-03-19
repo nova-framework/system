@@ -2,7 +2,7 @@
 
 namespace Nova\View\Engines;
 
-use Nova\View\Contracts\EngineInterface;
+use Nova\View\Engines\EngineInterface;
 
 use Exception;
 

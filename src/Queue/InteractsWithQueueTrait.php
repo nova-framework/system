@@ -5,7 +5,7 @@ namespace Nova\Queue;
 use Nova\Queue\Job;
 
 
-trait InteractsWithQueue
+trait InteractsWithQueueTrait
 {
     /**
      * The underlying queue job instance.

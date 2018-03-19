@@ -3,6 +3,8 @@
 namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
+use Nova\Container\Container;
+use Nova\Http\Request;
 
 use Psr\Log\LoggerInterface;
 
@@ -16,21 +18,25 @@ class LogBroadcaster extends Broadcaster
      */
     protected $logger;
 
+
     /**
      * Create a new broadcaster instance.
      *
      * @param  \Psr\Log\LoggerInterface  $logger
      * @return void
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(Container $container, LoggerInterface $logger)
     {
+        parent::__construct($container);
+
+        //
         $this->logger = $logger;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function authenticate($request)
+    public function authenticate(Request $request)
     {
         //
     }
@@ -38,7 +44,7 @@ class LogBroadcaster extends Broadcaster
     /**
      * {@inheritdoc}
      */
-    public function validAuthenticationResponse($request, $result)
+    public function validAuthenticationResponse(Request $request, $result)
     {
         //
     }
@@ -48,10 +54,10 @@ class LogBroadcaster extends Broadcaster
      */
     public function broadcast(array $channels, $event, array $payload = array())
     {
-        $channels = implode(', ', $channels);
+        $channels = implode(', ', $this->formatChannels($channels));
 
-        $payload = json_encode($payload, JSON_PRETTY_PRINT);
+        $message = 'Broadcasting [' .$event .'] on channels [' .$channels .'] with payload:' .PHP_EOL .json_encode($payload, JSON_PRETTY_PRINT);
 
-        $this->logger->info('Broadcasting [' .$event .'] on channels [' .$channels .'] with payload:' .PHP_EOL .$payload);
+        $this->logger->info($message);
     }
 }

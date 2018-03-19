@@ -2,14 +2,14 @@
 
 namespace Nova\Queue;
 
-use Nova\Queue\Contracts\QueueableEntityInterface;
+use Nova\Queue\QueueableEntityInterface;
 use Nova\Database\ModelIdentifier;
 
 use ReflectionClass;
 use ReflectionProperty;
 
 
-trait SerializesModels
+trait SerializesModelsTrait
 {
     /**
      * Prepare the instance for serialization.
@@ -66,7 +66,7 @@ trait SerializesModels
     protected function getRestoredPropertyValue($value)
     {
         return ($value instanceof ModelIdentifier)
-            ? (new $value->class)->newQuery()->useWritePdo()->findOrFail($value->id)
+            ? (new $value->class)->newQuery()->findOrFail($value->id)
             : $value;
     }
 

@@ -1,13 +1,22 @@
 <?php
+/**
+ * SQLiteConnector - A PDO based SQLite Database Connector.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Database\Connectors;
 
 use Nova\Database\Connector;
-use Nova\Database\Contracts\ConnectorInterface;
+use Nova\Database\ConnectorInterface;
+
+use PDO;
 
 
 class SQLiteConnector extends Connector implements ConnectorInterface
 {
+
     /**
      * Establish a database connection.
      *
@@ -20,18 +29,12 @@ class SQLiteConnector extends Connector implements ConnectorInterface
     {
         $options = $this->getOptions($config);
 
-        // SQLite supports "in-memory" databases that only last as long as the owning
-        // connection does. These are useful for tests or for short lifetime store
-        // querying. In-memory databases may only have a single open connection.
         if ($config['database'] == ':memory:') {
             return $this->createConnection('sqlite::memory:', $config, $options);
         }
 
         $path = realpath($config['database']);
 
-        // Here we'll verify that the SQLite database exists before going any further
-        // as the developer probably wants to know if the database exists and this
-        // SQLite driver will not throw any exception if it does not by default.
         if ($path === false) {
             throw new \InvalidArgumentException("Database does not exist.");
         }

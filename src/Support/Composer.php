@@ -3,6 +3,7 @@
 namespace Nova\Support;
 
 use Nova\Filesystem\Filesystem;
+
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -23,6 +24,7 @@ class Composer
      * @var string
      */
     protected $workingPath;
+
 
     /**
      * Create a new Composer manager instance.

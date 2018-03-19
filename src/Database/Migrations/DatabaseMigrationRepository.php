@@ -2,8 +2,8 @@
 
 namespace Nova\Database\Migrations;
 
-use Nova\Database\Contracts\Migrations\MigrationRepositoryInterface;
-use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
+use Nova\Database\Migrations\MigrationRepositoryInterface;
+use Nova\Database\ConnectionResolverInterface as Resolver;
 
 
 class DatabaseMigrationRepository implements MigrationRepositoryInterface
@@ -11,7 +11,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * The database connection resolver instance.
      *
-     * @var \Nova\Database\Contracts\ConnectionResolverInterface
+     * @var \Nova\Database\ConnectionResolverInterface
      */
     protected $resolver;
 
@@ -32,7 +32,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Create a new database migration repository instance.
      *
-     * @param  \Nova\Database\Contracts\ConnectionResolverInterface  $resolver
+     * @param  \Nova\Database\ConnectionResolverInterface  $resolver
      * @param  string  $table
      * @return void
      */
@@ -166,7 +166,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     /**
      * Get the connection resolver instance.
      *
-     * @return \Nova\Database\Contracts\ConnectionResolverInterface
+     * @return \Nova\Database\ConnectionResolverInterface
      */
     public function getConnectionResolver()
     {

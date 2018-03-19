@@ -43,7 +43,7 @@ class ConsoleMakeCommand extends GeneratorCommand
     {
         $stub = parent::replaceClass($stub, $name);
 
-        return str_replace('command:name', $this->option('command'), $stub);
+        return str_replace('{{command}}', $this->option('command'), $stub);
     }
 
     /**
@@ -53,7 +53,7 @@ class ConsoleMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return realpath(__DIR__).str_replace('/', DS, '/stubs/console.stub');
+        return realpath(__DIR__) .str_replace('/', DS, '/stubs/console.stub');
     }
 
     /**

@@ -23,7 +23,7 @@ class Response extends SymfonyResponse
      */
     public $original;
 
-    /**
+   /**
      * The exception that triggered the error response (if applicable).
      *
      * @var \Exception|null

@@ -2,6 +2,8 @@
 
 namespace Nova\Foundation\Contracts;
 
+use Nova\Http\Request;
+
 use Exception;
 
 
@@ -23,6 +25,6 @@ interface ExceptionHandlerInterface
      * @param  \Exception  $e
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function render($request, Exception $e);
+    public function render(Request $request, Exception $e);
 
 }

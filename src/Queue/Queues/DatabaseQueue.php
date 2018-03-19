@@ -6,7 +6,7 @@ use Nova\Database\Query\Expression;
 use Nova\Database\Connection;
 use Nova\Queue\Jobs\DatabaseJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 use Carbon\Carbon;
 
@@ -41,7 +41,8 @@ class DatabaseQueue extends Queue implements QueueInterface
      *
      * @var int|null
      */
-    protected $expire = 60;
+    protected $retryAfter = 60;
+
 
     /**
      * Create a new database queue instance.
@@ -49,15 +50,15 @@ class DatabaseQueue extends Queue implements QueueInterface
      * @param  \Nova\Database\Connection  $database
      * @param  string  $table
      * @param  string  $default
-     * @param  int  $expire
+     * @param  int  $retryAfter
      * @return void
      */
-    public function __construct(Connection $database, $table, $default = 'default', $expire = 60)
+    public function __construct(Connection $database, $table, $default = 'default', $retryAfter = 60)
     {
         $this->table = $table;
-        $this->expire = $expire;
         $this->default = $default;
         $this->database = $database;
+        $this->retryAfter = $retryAfter;
     }
 
     /**
@@ -81,7 +82,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      * @param  array   $options
      * @return mixed
      */
-    public function pushRaw($payload, $queue = null, array $options = [])
+    public function pushRaw($payload, $queue = null, array $options = array())
     {
         return $this->pushToDatabase(0, $queue, $payload);
     }
@@ -122,7 +123,7 @@ class DatabaseQueue extends Queue implements QueueInterface
 
         }, (array) $jobs);
 
-        return $this->getQuery()->insert($records);
+        return $this->database->table($this->table)->insert($records);
     }
 
     /**
@@ -153,7 +154,7 @@ class DatabaseQueue extends Queue implements QueueInterface
             $this->getQueue($queue), $payload, $this->getAvailableAt($delay), $attempts
         );
 
-        return $this->getQuery()->insertGetId($attributes);
+        return $this->database->table($this->table)->insertGetId($attributes);
     }
 
     /**
@@ -166,44 +167,16 @@ class DatabaseQueue extends Queue implements QueueInterface
     {
         $queue = $this->getQueue($queue);
 
-        if (! is_null($this->expire)) {
-            $this->releaseJobsThatHaveBeenReservedTooLong($queue);
-        }
+        return $this->database->transaction(function () use ($queue)
+        {
+            if (! is_null($job = $this->getNextAvailableJob($queue))) {
+                $this->markJobAsReserved($job->id, $job->attempts);
 
-        if ($job = $this->getNextAvailableJob($queue)) {
-            $this->markJobAsReserved($job->id);
-
-            $this->database->commit();
-
-            return new DatabaseJob(
-                $this->container, $this, $job, $queue
-            );
-        }
-
-        $this->database->commit();
-    }
-
-    /**
-     * Release the jobs that have been reserved for too long.
-     *
-     * @param  string  $queue
-     * @return void
-     */
-    protected function releaseJobsThatHaveBeenReservedTooLong($queue)
-    {
-        $expired = Carbon::now()->subSeconds($this->expire)->getTimestamp();
-
-        $data = array(
-            'reserved'        => 0,
-            'reserved_at'    => null,
-            'attempts'        => new Expression('attempts + 1'),
-        );
-
-        $this->getQuery()
-            ->where('queue', $this->getQueue($queue))
-            ->where('reserved', 1)
-            ->where('reserved_at', '<=', $expired)
-            ->update($data);
+                return new DatabaseJob(
+                    $this->container, $this, $job, $queue
+                );
+            }
+        });
     }
 
     /**
@@ -214,30 +187,65 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function getNextAvailableJob($queue)
     {
-        $this->database->beginTransaction();
-
-        $job = $this->getQuery()
+        $job = $this->database->table($this->table)
             ->lockForUpdate()
             ->where('queue', $this->getQueue($queue))
-            ->where('reserved', 0)
-            ->where('available_at', '<=', $this->getTime())
+            ->where(function ($query)
+            {
+                $this->isAvailable($query);
+
+                $this->isReservedButExpired($query);
+            })
             ->orderBy('id', 'asc')
             ->first();
 
-        return $job ? (object) $job : null;
+        if (! is_null($job)) {
+            return (object) $job;
+        }
+    }
+
+   /**
+     * Modify the query to check for available jobs.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return void
+     */
+    protected function isAvailable($query)
+    {
+        $query->where(function ($query)
+        {
+            $query->whereNull('reserved_at')->where('available_at', '<=', $this->getTime());
+        });
+    }
+
+    /**
+     * Modify the query to check for jobs that are reserved but have expired.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return void
+     */
+    protected function isReservedButExpired($query)
+    {
+        $expiration = Carbon::now()->subSeconds($this->retryAfter)->getTimestamp();
+
+        $query->orWhere(function ($query) use ($expiration)
+        {
+            $query->where('reserved_at', '<=', $expiration);
+        });
     }
 
     /**
      * Mark the given job ID as reserved.
      *
      * @param  string  $id
+     * @param  int     $attempts
      * @return void
      */
-    protected function markJobAsReserved($id)
+    protected function markJobAsReserved($id, $attempts)
     {
-        $this->getQuery()->where('id', $id)->update(array(
-            'reserved'        => 1,
-            'reserved_at'    => $this->getTime(),
+        $this->database->table($this->table)->where('id', $id)->update(array(
+            'attempts'    => $attempts,
+            'reserved_at' => $this->getTime(),
         ));
     }
 
@@ -250,7 +258,14 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     public function deleteReserved($queue, $id)
     {
-        $this->getQuery()->where('id', $id)->delete();
+        $this->database->transaction(function () use ($id)
+        {
+            $record = $this->database->table($this->table)->lockForUpdate()->find($id);
+
+            if (! is_null($record)) {
+                $this->database->table($this->table)->where('id', $id)->delete();
+            }
+        });
     }
 
     /**
@@ -261,7 +276,7 @@ class DatabaseQueue extends Queue implements QueueInterface
      */
     protected function getAvailableAt($delay)
     {
-        $availableAt = $delay instanceof DateTime ? $delay : Carbon::now()->addSeconds($delay);
+        $availableAt = ($delay instanceof DateTime) ? $delay : Carbon::now()->addSeconds($delay);
 
         return $availableAt->getTimestamp();
     }
@@ -278,13 +293,12 @@ class DatabaseQueue extends Queue implements QueueInterface
     protected function buildDatabaseRecord($queue, $payload, $availableAt, $attempts = 0)
     {
         return array(
-            'queue'            => $queue,
-            'payload'        => $payload,
-            'attempts'        => $attempts,
-            'reserved'        => 0,
-            'reserved_at'    => null,
-            'available_at'    => $availableAt,
-            'created_at'    => $this->getTime(),
+            'queue'        => $queue,
+            'payload'      => $payload,
+            'attempts'     => $attempts,
+            'reserved_at'  => null,
+            'available_at' => $availableAt,
+            'created_at'   => $this->getTime(),
         );
     }
 
@@ -307,16 +321,6 @@ class DatabaseQueue extends Queue implements QueueInterface
     public function getDatabase()
     {
         return $this->database;
-    }
-
-    /**
-     * Get a QueryBuilder instance for the used table.
-     *
-     * @return \Nova\Database\Query\Builder
-     */
-    protected function getQuery()
-    {
-        return $this->database->table($this->table);
     }
 
     /**

@@ -3,14 +3,16 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
+use Nova\Http\Response;
+use Nova\Filesystem\Filesystem;
 use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
-use Nova\Support\Facades\Config;
 use Nova\Support\ServiceProvider;
+use Nova\Support\Str;
 
 
 class RoutingServiceProvider extends ServiceProvider
@@ -134,29 +136,39 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->bindShared('assets.dispatcher', function ($app)
         {
-            return new AssetDispatcher();
-        });
+            $dispatcher = new AssetDispatcher($app);
 
-        // Register the default Asset Routes to Dispatcher.
-        $dispatcher = $this->app['assets.dispatcher'];
+            // Register the route for assets from Vendor or main assets folder.
+            $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
+            {
+                if ($type == 'vendor') {
+                    $paths = $dispatcher->getVendorPaths();
 
-        $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
-        {
-            $path = base_path('assets') .DS .str_replace('/', DS, $path);
+                    if (! Str::startsWith($path, $paths)) {
+                        return new Response('File Not Found', 404);
+                    }
+                }
 
-            return $dispatcher->serve($path, $request);
-        });
-
-        $dispatcher->route('packages/([^/]+)/(.*)', function (Request $request, $plugin, $path) use ($dispatcher)
-        {
-            if (! is_null($basePath = $dispatcher->findNamedPath($plugin))) {
-                $path = $basePath .str_replace('/', DS, $path);
+                $path = BASEPATH .$type .DS .str_replace('/', DS, $path);
 
                 return $dispatcher->serve($path, $request);
-            }
+            });
 
-            return new Response('File Not Found', 404);
+            // Register the route for assets from Packages, Modules and Themes.
+            $dispatcher->route('(themes|modules|packages)/([^/]+)/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
+            {
+                $namespace = $type .'/' .$package;
+
+                if (is_null($packagePath = $dispatcher->getPackagePath($namespace))) {
+                    return new Response('File Not Found', 404);
+                }
+
+                $path = $packagePath .str_replace('/', DS, $path);
+
+                return $dispatcher->serve($path, $request);
+            });
+
+            return $dispatcher;
         });
     }
-
 }

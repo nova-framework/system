@@ -2,31 +2,39 @@
 
 namespace Nova\Foundation;
 
-use Nova\Config\FileEnvironmentVariablesLoader;
-use Nova\Config\FileLoader;
-use Nova\Container\Container;
-use Nova\Events\EventServiceProvider;
-use Nova\Filesystem\Filesystem;
-use Nova\Foundation\Http\Kernel;
+use Closure;
+
+use Stack\Builder;
+
 use Nova\Http\Request;
 use Nova\Http\Response;
-use Nova\Log\LogServiceProvider;
-use Nova\Routing\RoutingServiceProvider;
+use Nova\Config\FileLoader;
+use Nova\Container\Container;
+use Nova\Filesystem\Filesystem;
+use Nova\Pipeline\Pipeline;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
+use Nova\Events\EventServiceProvider;
+use Nova\Log\LogServiceProvider;
+use Nova\Routing\RoutingServiceProvider;
+use Nova\Exception\ExceptionServiceProvider;
+use Nova\Config\FileEnvironmentVariablesLoader;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
+
+use Nova\Support\Contracts\ResponsePreparerInterface;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Closure;
-use RuntimeException;
+use Exception;
+use Throwable;
 
 
-class Application extends Container
+class Application extends Container implements ResponsePreparerInterface
 {
     /**
      * The Nova framework version.
@@ -41,13 +49,6 @@ class Application extends Container
      * @var bool
      */
     protected $booted = false;
-
-    /**
-     * Indicates if the application has been bootstrapped before.
-     *
-     * @var bool
-     */
-    protected $hasBeenBootstrapped = false;
 
     /**
      * The array of booting callbacks.
@@ -71,6 +72,13 @@ class Application extends Container
     protected $terminatingCallbacks = array();
 
     /**
+     * All of the developer defined middlewares.
+     *
+     * @var array
+     */
+    protected $middlewares = array();
+
+    /**
      * All of the registered service providers.
      *
      * @var array
@@ -92,6 +100,13 @@ class Application extends Container
     protected $deferredServices = array();
 
     /**
+     * The request class used by the application.
+     *
+     * @var string
+     */
+    protected static $requestClass = 'Nova\Http\Request';
+
+    /**
      * The application namespace.
      *
      * @var string
@@ -102,15 +117,14 @@ class Application extends Container
     /**
      * Create a new Nova application instance.
      *
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request = null)
     {
-        $this->registerBaseBindings();
+        $this->registerBaseBindings($request ?: $this->createNewRequest());
 
         $this->registerBaseServiceProviders();
-
-        $this->registerCoreContainerAliases();
     }
 
     /**
@@ -118,21 +132,30 @@ class Application extends Container
      *
      * @return string
      */
-    public function version()
+    public static function version()
     {
         return static::VERSION;
     }
 
     /**
+     * Create a new request instance from the request class.
+     *
+     * @return \Nova\Http\Request
+     */
+    protected function createNewRequest()
+    {
+        return forward_static_call(array(static::$requestClass, 'createFromGlobals'));
+    }
+
+    /**
      * Register the basic bindings into the container.
      *
+     * @param  \Nova\Http\Request  $request
      * @return void
      */
-    protected function registerBaseBindings()
+    protected function registerBaseBindings($request)
     {
-        static::setInstance($this);
-
-        $this->instance('app', $this);
+        $this->instance('request', $request);
 
         $this->instance('Nova\Container\Container', $this);
     }
@@ -144,21 +167,9 @@ class Application extends Container
      */
     protected function registerBaseServiceProviders()
     {
-        $this->register(new EventServiceProvider($this));
-
-        $this->register(new LogServiceProvider($this));
-
-        $this->register(new RoutingServiceProvider($this));
-    }
-
-    /**
-     * Register the routing service provider.
-     *
-     * @return void
-     */
-    protected function registerRoutingProvider()
-    {
-        $this->register(new RoutingServiceProvider($this));
+        foreach (array('Event', 'Log', 'Exception', 'Routing') as $name) {
+            $this->{"register{$name}Provider"}();
+        }
     }
 
     /**
@@ -172,28 +183,33 @@ class Application extends Container
     }
 
     /**
-     * Run the given array of bootstrap classes.
+     * Register the log service provider.
      *
-     * @param  array  $bootstrappers
      * @return void
      */
-    public function bootstrapWith(array $bootstrappers)
+    protected function registerLogProvider()
     {
-        $this->hasBeenBootstrapped = true;
-
-        foreach ($bootstrappers as $bootstrapper) {
-            $this->make($bootstrapper)->bootstrap($this);
-        }
+        $this->register(new LogServiceProvider($this));
     }
 
     /**
-     * Determine if the application has been bootstrapped before.
+     * Register the exception service provider.
      *
-     * @return bool
+     * @return void
      */
-    public function hasBeenBootstrapped()
+    protected function registerExceptionProvider()
     {
-        return $this->hasBeenBootstrapped;
+        $this->register(new ExceptionServiceProvider($this));
+    }
+
+    /**
+     * Register the routing service provider.
+     *
+     * @return void
+     */
+    protected function registerRoutingProvider()
+    {
+        $this->register(new RoutingServiceProvider($this));
     }
 
     /**
@@ -206,12 +222,24 @@ class Application extends Container
     {
         $this->instance('path', realpath($paths['app']));
 
-        // Here we will bind the install paths into the container as strings that can be
-        // accessed from any point in the system. Each path key is prefixed with path
-        // so that they have the consistent naming convention inside the container.
         foreach (array_except($paths, array('app')) as $key => $value) {
             $this->instance("path.{$key}", realpath($value));
         }
+    }
+
+    /**
+     * Start the exception handling for the request.
+     *
+     * @return void
+     */
+    public function startExceptionHandling()
+    {
+        $this['exception']->register($this->environment());
+
+        //
+        $debug = $this['config']['app.debug'];
+
+        $this['exception']->setDebug($debug);
     }
 
     /**
@@ -249,7 +277,7 @@ class Application extends Container
     {
         $args = isset($_SERVER['argv']) ? $_SERVER['argv'] : null;
 
-        return $this['env'] = with(new EnvironmentDetector())->detect($envs, $args);
+        return $this['env'] = (new EnvironmentDetector())->detect($envs, $args);
     }
 
     /**
@@ -270,21 +298,6 @@ class Application extends Container
     public function runningUnitTests()
     {
         return $this['env'] == 'testing';
-    }
-
-    /**
-     * Register all of the configured providers..
-     *
-     * @return void
-     */
-    public function registerConfiguredProviders()
-    {
-        $config = $this->make('config');
-
-        $files = new Filesystem;
-
-        with(new ProviderRepository($this, $files, $config['app.manifest']))
-            ->load($config['app.providers']);
     }
 
     /**
@@ -313,27 +326,18 @@ class Application extends Container
             return $registered;
         }
 
-        // If the given "provider" is a string, we will resolve it, passing in the
-        // application instance automatically for the developer. This is simply
-        // a more convenient way of specifying your service provider classes.
         if (is_string($provider)) {
             $provider = $this->resolveProviderClass($provider);
         }
 
         $provider->register();
 
-        // Once we have registered the service we will iterate through the options
-        // and set each of them on the application so they will be available on
-        // the actual loading of the service objects and for developer usage.
         foreach ($options as $key => $value) {
             $this[$key] = $value;
         }
 
         $this->markAsRegistered($provider);
 
-        // If the application has already booted, we will call this boot method on
-        // the provider class so it has an opportunity to do its boot logic and
-        // will be ready for any usage by the developer's application logics.
         if ($this->booted) {
             $this->bootProvider($provider);
         }
@@ -378,7 +382,7 @@ class Application extends Container
      */
     protected function markAsRegistered($provider)
     {
-        $this['events']->fire($class = get_class($provider), array($provider));
+        $this['events']->dispatch($class = get_class($provider), array($provider));
 
         $this->serviceProviders[] = $provider;
 
@@ -392,9 +396,6 @@ class Application extends Container
      */
     public function loadDeferredProviders()
     {
-        // We will simply spin through each of the deferred providers and register each
-        // one and boot them if the application has booted. This should make each of
-        // the remaining services available to this application for immediate use.
         foreach ($this->deferredServices as $service => $provider) {
             $this->loadDeferredProvider($service);
         }
@@ -412,9 +413,6 @@ class Application extends Container
     {
         $provider = $this->deferredServices[$service];
 
-        // If the service provider has not already been loaded and registered we can
-        // register it with the application and remove the service from this list
-        // of deferred services, since it will already be loaded on subsequent.
         if (! isset($this->loadedProviders[$provider])) {
             $this->registerDeferredProvider($provider, $service);
         }
@@ -429,9 +427,6 @@ class Application extends Container
      */
     public function registerDeferredProvider($provider, $service = null)
     {
-        // Once the provider that provides the deferred service has been registered we
-        // will remove it from our local list of the deferred services with related
-        // providers so that this container does not try to resolve it out again.
         if ($service) unset($this->deferredServices[$service]);
 
         $this->register($instance = new $provider($this));
@@ -562,10 +557,6 @@ class Application extends Container
      */
     protected function bootApplication()
     {
-        // Once the application has booted we will also fire some "booted" callbacks
-        // for any listeners that need to do work after this initial booting gets
-        // finished. This is useful when ordering the boot-up processes we run.
-
         $this->fireAppCallbacks($this->bootingCallbacks);
 
         $this->booted = true;
@@ -594,17 +585,105 @@ class Application extends Container
     {
         $this->bootedCallbacks[] = $callback;
 
-        if ($this->isBooted()) $this->fireAppCallbacks(array($callback));
+        if ($this->isBooted()) {
+            $this->fireAppCallbacks(array($callback));
+        }
     }
 
     /**
-     * Determine if middleware has been disabled for the application.
+     * Run the application and send the response.
      *
-     * @return bool
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @return void
      */
-    public function shouldSkipMiddleware()
+    public function run(SymfonyRequest $request = null)
     {
-        return $this->bound('middleware.disable') && ($this->make('middleware.disable') === true);
+        $request = $request ?: $this['request'];
+
+        // Setup the Router middlewares.
+        $middlewareGroups = $this['config']->get('app.middlewareGroups');
+
+        foreach ($middlewareGroups as $key => $middleware) {
+            $this['router']->middlewareGroup($key, $middleware);
+        }
+
+        $routeMiddleware = $this['config']->get('app.routeMiddleware');
+
+        foreach($routeMiddleware as $name => $middleware) {
+            $this['router']->middleware($name, $middleware);
+        }
+
+        try {
+            $request->enableHttpMethodParameterOverride();
+
+            $response = $this->sendRequestThroughRouter($request);
+        }
+        catch (Exception $e) {
+            $response = $this->handleException($request, $e);
+        }
+        catch (Throwable $e) {
+            $response = $this->handleException($request, new FatalThrowableError($e));
+        }
+
+        $response->send();
+
+        $this->shutdown($request, $response);
+    }
+
+    /**
+     * Send the given request through the middleware / router.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return \Nova\Http\Response
+     */
+    protected function sendRequestThroughRouter($request)
+    {
+        $this->refreshRequest($request = Request::createFromBase($request));
+
+        $this->boot();
+
+        // Create a Pipeline instance.
+        $pipeline = new Pipeline(
+            $this, $this->shouldSkipMiddleware() ? array() : $this->middleware
+        );
+
+        return $pipeline->handle($request, function ($request)
+        {
+            $this->instance('request', $request);
+
+            return $this->router->dispatch($request);
+        });
+    }
+
+    /**
+     * Call the terminate method on any terminable middleware.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Nova\Http\Response  $response
+     * @return void
+     */
+    public function shutdown($request, $response)
+    {
+        $middlewares = $this->shouldSkipMiddleware() ? array() : array_merge(
+            $this->gatherRouteMiddleware($request),
+            $this->middleware
+        );
+
+        foreach ($middlewares as $middleware) {
+            if (! is_string($middleware)) {
+                continue;
+            }
+
+            list($name, $parameters) = $this->parseMiddleware($middleware);
+
+            $instance = $this->app->make($name);
+
+            if (method_exists($instance, 'terminate')) {
+                $instance->terminate($request, $response);
+            }
+        }
+
+        $this->terminate();
     }
 
     /**
@@ -633,6 +712,162 @@ class Application extends Container
     }
 
     /**
+     * Handle the given exception.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Exception  $e
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function handleException($request, Exception $e)
+    {
+        $this->reportException($e);
+
+        return $this->renderException($request, $e);
+    }
+
+    /**
+     * Report the exception to the exception handler.
+     *
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function reportException(Exception $e)
+    {
+        $this->getExceptionHandler()->report($e);
+    }
+
+    /**
+     * Render the exception to a response.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @param  \Exception  $e
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function renderException($request, Exception $e)
+    {
+        return $this->getExceptionHandler()->render($request, $e);
+    }
+
+    /**
+     * Get the Nova application instance.
+     *
+     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     */
+    public function getExceptionHandler()
+    {
+        return $this->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+    }
+
+    /**
+     * Gather the route middleware for the given request.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return array
+     */
+    protected function gatherRouteMiddleware($request)
+    {
+        if (! is_null($route = $request->route())) {
+            return $this->router->gatherRouteMiddleware($route);
+        }
+
+        return array();
+    }
+
+    /**
+     * Parse a middleware string to get the name and parameters.
+     *
+     * @param  string  $middleware
+     * @return array
+     */
+    protected function parseMiddleware($middleware)
+    {
+        list($name, $parameters) = array_pad(explode(':', $middleware, 2), 2, array());
+
+        if (is_string($parameters)) {
+            $parameters = explode(',', $parameters);
+        }
+
+        return array($name, $parameters);
+    }
+
+    /**
+     * Determine if middleware has been disabled for the application.
+     *
+     * @return bool
+     */
+    public function shouldSkipMiddleware()
+    {
+        return $this->bound('middleware.disable') && ($this->make('middleware.disable') === true);
+    }
+
+    /**
+     * Add the middleware.
+     *
+     * @param  array  $middlewares
+     * @return \Nova\Foundation\Application
+     */
+    public function middleware(array $middleware)
+    {
+        $this->middleware = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * Add a new middleware to beginning of the stack if it does not already exist.
+     *
+     * @param  string  $middleware
+     * @return \Nova\Foundation\Application
+     */
+    public function prependMiddleware($middleware)
+    {
+        if (array_search($middleware, $this->middleware) === false) {
+            array_unshift($this->middleware, $middleware);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add a new middleware to end of the stack if it does not already exist.
+     *
+     * @param  string|\Closure  $middleware
+     * @return \Nova\Foundation\Application
+     */
+    public function pushMiddleware($middleware)
+    {
+        if (array_search($middleware, $this->middleware) === false) {
+            array_push($this->middleware, $middleware);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Determine if the kernel has a given middleware.
+     *
+     * @param  string  $middleware
+     * @return bool
+     */
+    public function hasMiddleware($middleware)
+    {
+        return in_array($middleware, $this->middleware);
+    }
+
+    /**
+     * Refresh the bound request instance in the container.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return void
+     */
+    protected function refreshRequest(Request $request)
+    {
+        $this->instance('request', $request);
+
+        Facade::clearResolvedInstance('request');
+    }
+
+    /**
      * Call the booting callbacks for the application.
      *
      * @param  array  $callbacks
@@ -643,6 +878,21 @@ class Application extends Container
         foreach ($callbacks as $callback) {
             call_user_func($callback, $this);
         }
+    }
+
+    /**
+     * Prepare the given value as a Response object.
+     *
+     * @param  mixed  $value
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function prepareResponse($value)
+    {
+        if (! $value instanceof SymfonyResponse) {
+            $value = new Response($value);
+        }
+
+        return $value->prepare($this['request']);
     }
 
     /**
@@ -692,9 +942,7 @@ class Application extends Container
      */
     public function getConfigLoader()
     {
-        $files = new Filesystem();
-
-        return new FileLoader($files, $this['path'] .DS .'Config');
+        return new FileLoader(new Filesystem, $this['path'] .DS .'Config');
     }
 
     /**
@@ -704,9 +952,7 @@ class Application extends Container
      */
     public function getEnvironmentVariablesLoader()
     {
-        $files = new Filesystem();
-
-        return new FileEnvironmentVariablesLoader($files, $this['path.base']);
+        return new FileEnvironmentVariablesLoader(new Filesystem, $this['path.base']);
     }
 
     /**
@@ -716,11 +962,9 @@ class Application extends Container
      */
     public function getProviderRepository()
     {
-        $files = new Filesystem();
-
         $manifest = $this['config']['app.manifest'];
 
-        return new ProviderRepository($files, $manifest, $this->runningInConsole());
+        return new ProviderRepository(new Filesystem, $manifest);
     }
 
     /**
@@ -756,6 +1000,45 @@ class Application extends Container
     }
 
     /**
+     * Get or set the request class for the application.
+     *
+     * @param  string  $class
+     * @return string
+     */
+    public static function requestClass($class = null)
+    {
+        if (! is_null($class)) static::$requestClass = $class;
+
+        return static::$requestClass;
+    }
+
+    /**
+     * Set the application request for the console environment.
+     *
+     * @return void
+     */
+    public function setRequestForConsoleEnvironment()
+    {
+        $url = $this['config']->get('app.url', 'http://localhost');
+
+        $parameters = array($url, 'GET', array(), array(), array(), $_SERVER);
+
+        $this->refreshRequest(static::onRequest('create', $parameters));
+    }
+
+    /**
+     * Call a method on the default request class.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    public static function onRequest($method, $parameters = array())
+    {
+        return forward_static_call_array(array(static::requestClass(), $method), $parameters);
+    }
+
+    /**
      * Get the current application locale.
      *
      * @return string
@@ -777,7 +1060,7 @@ class Application extends Container
 
         $this['language']->setLocale($locale);
 
-        $this['events']->fire('locale.changed', array($locale));
+        $this['events']->dispatch('locale.changed', array($locale));
     }
 
     /**
@@ -788,37 +1071,30 @@ class Application extends Container
     public function registerCoreContainerAliases()
     {
         $aliases = array(
-            'app'               => 'Nova\Foundation\Application',
-            'forge'             => 'Nova\Console\Application',
-            'auth'              => 'Nova\Auth\AuthManager',
-            'broadcast'         => 'Nova\Broadcasting\BroadcastManager',
-            'cache'             => 'Nova\Cache\CacheManager',
-            'cache.store'       => 'Nova\Cache\Repository',
-            'template.compiler' => 'Nova\View\Compilers\TemplateCompiler',
-            'config'            => 'Nova\Config\Repository',
-            'cookie'            => 'Nova\Cookie\CookieJar',
-            'encrypter'         => 'Nova\Encryption\Encrypter',
-            'db'                => 'Nova\Database\DatabaseManager',
-            'db.connection'     => array('Nova\Database\Connection', 'Nova\Database\Contracts\ConnectionInterface'),
-            'broadcast'         => array('Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\Contracts\FactoryInterface'),
-            'events'            => 'Nova\Events\Dispatcher',
-            'files'             => 'Nova\Filesystem\Filesystem',
-            'hash'              => 'Nova\Hashing\HasherInterface',
-            'log'               => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
-            'language'          => 'Nova\Language\LanguageManager',
-            'mailer'            => 'Nova\Mail\Mailer',
-            'paginator'         => 'Nova\Pagination\Factory',
-            'auth.reminder'     => 'Nova\Auth\Reminders\PasswordBroker',
-            'queue'             => 'Nova\Queue\QueueManager',
-            'queue.connection'  => 'Nova\Queue\Queue',
-            'redirect'          => 'Nova\Routing\Redirector',
-            'request'           => 'Nova\Http\Request',
-            'router'            => 'Nova\Routing\Router',
-            'session'           => 'Nova\Session\SessionManager',
-            'session.store'     => 'Nova\Session\Store',
-            'url'               => 'Nova\Routing\UrlGenerator',
-            'validator'         => 'Nova\Validation\Factory',
-            'view'              => 'Nova\View\Factory',
+            'app'            => 'Nova\Foundation\Application',
+            'forge'          => 'Nova\Console\Application',
+            'auth'           => 'Nova\Auth\AuthManager',
+            'cache'          => 'Nova\Cache\CacheManager',
+            'cache.store'    => 'Nova\Cache\Repository',
+            'config'         => 'Nova\Config\Repository',
+            'cookie'         => 'Nova\Cookie\CookieJar',
+            'encrypter'      => 'Nova\Encryption\Encrypter',
+            'db'             => 'Nova\Database\DatabaseManager',
+            'events'         => 'Nova\Events\Dispatcher',
+            'files'          => 'Nova\Filesystem\Filesystem',
+            'hash'           => 'Nova\Hashing\HasherInterface',
+            'language'       => 'Nova\Language\LanguageManager',
+            'log'            => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
+            'mailer'         => 'Nova\Mail\Mailer',
+            'paginator'      => 'Nova\Pagination\Environment',
+            'redirect'       => 'Nova\Routing\Redirector',
+            'request'        => 'Nova\Http\Request',
+            'router'         => 'Nova\Routing\Router',
+            'session'        => 'Nova\Session\SessionManager',
+            'session.store'  => 'Nova\Session\Store',
+            'url'            => 'Nova\Routing\UrlGenerator',
+            'validator'      => 'Nova\Validation\Factory',
+            'view'           => 'Nova\View\Factory',
         );
 
         foreach ($aliases as $key => $value) {
@@ -826,32 +1102,6 @@ class Application extends Container
                 $this->alias($key, $alias);
             }
         }
-    }
-
-    /**
-     * Flush the container of all bindings and resolved instances.
-     *
-     * @return void
-     */
-    public function flush()
-    {
-        parent::flush();
-
-        $this->loadedProviders = array();
-    }
-
-    /**
-     * Get the used kernel object.
-     *
-     * @return \Nova\Console\Contracts\KernelInterface|\Nova\Http\Contracts\KernelInterface
-     */
-    protected function getKernel()
-    {
-        $kernelInterface = $this->runningInConsole()
-            ? 'Nova\Console\Contracts\KernelInterface'
-            : 'Nova\Http\Contracts\KernelInterface';
-
-        return $this->make($kernelInterface);
     }
 
     /**
@@ -884,5 +1134,4 @@ class Application extends Container
 
         throw new RuntimeException('Unable to detect application namespace.');
     }
-
 }

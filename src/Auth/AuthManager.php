@@ -2,7 +2,6 @@
 
 namespace Nova\Auth;
 
-use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Auth\DatabaseUserProvider;
 use Nova\Auth\ExtendedUserProvider;
 use Nova\Auth\RequestGuard;
@@ -258,7 +257,7 @@ class AuthManager
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['auth.default'];
+        return $this->app['config']['auth.defaults.guard'];
     }
 
     /**
@@ -285,7 +284,7 @@ class AuthManager
      */
     public function setDefaultDriver($name)
     {
-        $this->app['config']['auth.default'] = $name;
+        $this->app['config']['auth.defaults.guard'] = $name;
     }
 
     /**

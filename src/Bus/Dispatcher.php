@@ -5,15 +5,15 @@ namespace Nova\Bus;
 
 use Nova\Container\Container;
 use Nova\Pipeline\Pipeline;
-use Nova\Queue\Contracts\QueueInterface;
-use Nova\Queue\Contracts\ShouldQueueInterface;
-use Nova\Contracts\Bus\QueueingDispatcherInterface;
+use Nova\Queue\QueueInterface;
+use Nova\Queue\ShouldQueueInterface;
+use Nova\Bus\QueueingDispatcherInterface;
 
 use Closure;
 use RuntimeException;
 
 
-class Dispatcher implements QueueingDispatcher
+class Dispatcher implements QueueingDispatcherInterface
 {
     /**
      * The container implementation.
@@ -82,12 +82,15 @@ class Dispatcher implements QueueingDispatcher
      */
     public function dispatchNow($command, $handler = null)
     {
-        if (! is_null($handler) || ($handler = $this->getCommandHandler($command))) {
+        if (! is_null($handler) || ! is_null($handler = $this->getCommandHandler($command))) {
             $callback = function ($command) use ($handler)
             {
                 return $handler->handle($command);
             };
-        } else {
+        }
+
+        // The command is self handling.
+        else {
             $callback = function ($command)
             {
                 return $this->container->call(array($command, 'handle'));
@@ -127,8 +130,6 @@ class Dispatcher implements QueueingDispatcher
 
             return $this->container->make($handler);
         }
-
-        return false;
     }
 
     /**

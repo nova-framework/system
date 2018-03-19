@@ -5,6 +5,7 @@ namespace Nova\Session\Console;
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
 
+
 class SessionTableCommand extends Command
 {
     /**
@@ -54,7 +55,7 @@ class SessionTableCommand extends Command
 
         $this->info('Migration created successfully!');
 
-        $this->call('dump-autoload');
+        $this->call('optimize');
     }
 
     /**

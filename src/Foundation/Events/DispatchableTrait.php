@@ -15,7 +15,7 @@ trait DispatchableTrait
     {
         return event(new static(...func_get_args()));
     }
-
+    
     /**
      * Broadcast the event with the given arguments.
      *

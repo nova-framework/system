@@ -9,7 +9,7 @@ use Nova\Support\MessageBag;
 use Nova\Support\Contracts\MessageProviderInterface;
 use Nova\Support\Arr;
 use Nova\Support\Str;
-use Nova\Validation\Contracts\PresenceVerifierInterface;
+use Nova\Validation\PresenceVerifierInterface;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -33,7 +33,7 @@ class Validator implements MessageProviderInterface
     /**
      * The Presence Verifier implementation.
      *
-     * @var \Nova\Validation\Contracts\PresenceVerifierInterface
+     * @var \Nova\Validation\PresenceVerifierInterface
      */
     protected $presenceVerifier;
 
@@ -199,8 +199,8 @@ class Validator implements MessageProviderInterface
      */
     protected function explodeRules($rules)
     {
-        foreach ($rules as $key => &$rule) {
-            $rule = is_string($rule) ? explode('|', $rule) : $rule;
+        foreach ($rules as $key => $rule) {
+            $rules[$key] = is_string($rule) ? explode('|', $rule) : $rule;
         }
 
         return $rules;

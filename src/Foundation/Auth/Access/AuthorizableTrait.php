@@ -2,7 +2,6 @@
 
 namespace Nova\Foundation\Auth\Access;
 
-use Nova\Auth\Access\GateInterface as Gate;
 use Nova\Support\Facades\App;
 
 
@@ -17,7 +16,7 @@ trait AuthorizableTrait
      */
     public function can($ability, $arguments = array())
     {
-        $gate = App::make(Gate::class)->forUser($this);
+        $gate = App::make('Nova\Auth\Access\GateInterface')->forUser($this);
 
         return $gate->check($ability, $arguments);
     }
@@ -31,6 +30,6 @@ trait AuthorizableTrait
      */
     public function cannot($ability, $arguments = array())
     {
-        return $this->cant($ability, $arguments);
+        return ! $this->can($ability, $arguments);
     }
 }

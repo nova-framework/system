@@ -13,13 +13,6 @@ use ReflectionParameter;
 class Container implements ArrayAccess
 {
     /**
-     * The current globally available container (if any).
-     *
-     * @var static
-     */
-    protected static $instance;
-
-    /**
      * An array of the types that have been resolved.
      *
      * @var array
@@ -443,7 +436,7 @@ class Container implements ArrayAccess
             return false;
         }
 
-        return (strpos($callback, '@') !== false);
+        return strpos($callback, '@') !== false;
     }
 
     /**
@@ -963,27 +956,6 @@ class Container implements ArrayAccess
         $this->instances = array();
     }
 
-    /**
-     * Set the globally available instance of the container.
-     *
-     * @return static
-     */
-    public static function getInstance()
-    {
-        return static::$instance;
-    }
-
-    /**
-     * Set the shared instance of the container.
-     *
-     * @param  \Mini\Container\Container  $container
-     * @return void
-     */
-    public static function setInstance(Container $container)
-    {
-        static::$instance = $container;
-    }
-    
     /**
      * Determine if a given offset exists.
      *

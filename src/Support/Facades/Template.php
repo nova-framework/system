@@ -15,7 +15,7 @@ class Template extends Facade
      */
     protected static function getFacadeAccessor()
     {
-    return static::$app['view']->getEngineResolver()->resolve('template')->getCompiler();
+        return static::$app['view']->getEngineResolver()->resolve('template')->getCompiler();
     }
 
 }

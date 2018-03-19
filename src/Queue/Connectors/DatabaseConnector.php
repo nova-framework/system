@@ -2,8 +2,8 @@
 
 namespace Nova\Queue\Connectors;
 
-use Nova\Database\Contracts\ConnectionResolverInterface;
-use Nova\Queue\Contracts\ConnectorInterface;
+use Nova\Database\ConnectionResolverInterface;
+use Nova\Queue\Connectors\ConnectorInterface;
 use Nova\Queue\Queues\DatabaseQueue;
 use Nova\Support\Arr;
 
@@ -43,7 +43,7 @@ class DatabaseConnector implements ConnectorInterface
 
             $config['table'],
             $config['queue'],
-            
+
             Arr::get($config, 'expire', 60)
         );
     }

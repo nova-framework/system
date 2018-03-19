@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Queues;
 
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 
 class NullQueue extends Queue implements QueueInterface

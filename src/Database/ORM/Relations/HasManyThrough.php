@@ -4,9 +4,9 @@ namespace Nova\Database\ORM\Relations;
 
 use Nova\Database\ORM\Model;
 use Nova\Database\ORM\Builder;
-use Nova\Database\Query\Expression;
 use Nova\Database\ORM\Collection;
 use Nova\Database\ORM\ModelNotFoundException;
+use Nova\Database\Query\Expression;
 
 
 class HasManyThrough extends Relation
@@ -143,9 +143,6 @@ class HasManyThrough extends Relation
     {
         $dictionary = $this->buildDictionary($results);
 
-        // Once we have the dictionary we can simply spin through the parent models to
-        // link them up with their children using the keyed dictionary to make the
-        // matching very convenient and easy work. Then we'll just return them.
         foreach ($models as $model) {
             $key = $model->getKey();
 
@@ -169,13 +166,12 @@ class HasManyThrough extends Relation
     {
         $dictionary = array();
 
-        $foreign = $this->firstKey;
+        $foreign = 'related_' .$this->firstKey;
 
-        // First we will create a dictionary of models keyed by the foreign key of the
-        // relationship as this will allow us to quickly access all of the related
-        // models without having to do nested looping which will be quite slow.
         foreach ($results as $result) {
-            $dictionary[$result->{$foreign}][] = $result;
+            $key = $result->{$foreign};
+
+            $dictionary[$key][] = $result;
         }
 
         return $dictionary;
@@ -210,11 +206,13 @@ class HasManyThrough extends Relation
      * @param  array  $columns
      * @return \Nova\Database\ORM\Model|static
      *
-     * @throws \Nova\Database\ORM\ModelNotFoundException
+     * @throws \Database\ORM\ModelNotFoundException
      */
     public function firstOrFail($columns = array('*'))
     {
-        if (! is_null($model = $this->first($columns))) return $model;
+        if (! is_null($model = $this->first($columns))) {
+            return $model;
+        }
 
         throw new ModelNotFoundException;
     }
@@ -227,16 +225,10 @@ class HasManyThrough extends Relation
      */
     public function get($columns = array('*'))
     {
-        // First we'll add the proper select columns onto the query so it is run with
-        // the proper columns. Then, we will get the results and hydrate out pivot
-        // models with the result of those columns as a separate model relation.
         $select = $this->getSelectColumns($columns);
 
         $models = $this->query->addSelect($select)->getModels();
 
-        // If we actually found models we will also eager load any relationships that
-        // have been specified as needing to be eager loaded. This will solve the
-        // n + 1 query problem for the developer and also increase performance.
         if (count($models) > 0) {
             $models = $this->query->eagerLoadRelations($models);
         }
@@ -256,7 +248,7 @@ class HasManyThrough extends Relation
             $columns = array($this->related->getTable().'.*');
         }
 
-        return array_merge($columns, array($this->parent->getTable().'.'.$this->firstKey));
+        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->firstKey));
     }
 
     /**

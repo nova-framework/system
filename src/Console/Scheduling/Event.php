@@ -3,11 +3,13 @@
 namespace Nova\Console\Scheduling;
 
 use Nova\Container\Container;
+use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
 use Nova\Mail\Mailer;
 
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessUtils;
+use Symfony\Component\Process\ProcessUtils as Utils;
 
 use Carbon\Carbon;
 use Cron\CronExpression;
@@ -68,6 +70,20 @@ class Event
     public $withoutOverlapping = false;
 
     /**
+     * The amount of time the mutex should be valid.
+     *
+     * @var int
+     */
+    public $expiresAt = 1440;
+
+    /**
+     * Indicates if the command should run in background.
+     *
+     * @var bool
+     */
+    public $runInBackground = false;
+
+    /**
      * The filter callback.
      *
      * @var \Closure
@@ -116,15 +132,24 @@ class Event
      */
     public $description;
 
+    /**
+     * The mutex implementation.
+     *
+     * @var \Nova\Console\Scheduling\MutexInterface
+     */
+    public $mutex;
+
 
     /**
      * Create a new event instance.
      *
+     * @param  \Nova\Console\Scheduling\MutexInterface  $mutex
      * @param  string  $command
      * @return void
      */
-    public function __construct($command)
+    public function __construct(Mutex $mutex, $command)
     {
+        $this->mutex = $mutex;
         $this->command = $command;
 
         $this->output = $this->getDefaultOutput();
@@ -137,7 +162,7 @@ class Event
      */
     protected function getDefaultOutput()
     {
-        return (DIRECTORY_SEPARATOR === '\\') ? 'NUL' : '/dev/null';
+        return windows_os() ? 'NUL' : '/dev/null';
     }
 
     /**
@@ -148,25 +173,32 @@ class Event
      */
     public function run(Container $container)
     {
-        if ((count($this->afterCallbacks) > 0) || (count($this->beforeCallbacks) > 0)) {
-            $this->runCommandInForeground($container);
+        if ($this->withoutOverlapping && ! $this->mutex->create($this)) {
+            return;
+        }
+
+        if ($this->runInBackground) {
+            $this->runCommandInBackground($container);
         } else {
-            $this->runCommandInBackground();
+            $this->runCommandInForeground($container);
         }
     }
 
     /**
-     * Run the command in the background using exec.
+     * Run the command in the background.
      *
+     * @param  \Nova\Container\Container  $container
      * @return void
      */
-    protected function runCommandInBackground()
+    protected function runCommandInBackground(Container $container)
     {
-        chdir(base_path());
+        $this->callBeforeCallbacks($container);
 
-        $command = $this->buildCommand();
+        $process = new Process($this->buildCommand(), base_path(), null, null, null);
 
-        exec($command);
+        $process->disableOutput();
+
+        $process->run();
     }
 
     /**
@@ -179,10 +211,7 @@ class Event
     {
         $this->callBeforeCallbacks($container);
 
-        $command = $this->buildCommand();
-
-        //
-        $process = new Process(trim($command, '& '), base_path(), null, null, null);
+        $process = new Process($this->buildCommand(), base_path(), null, null, null);
 
         $process->run();
 
@@ -195,7 +224,7 @@ class Event
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    protected function callBeforeCallbacks(Container $container)
+    public function callBeforeCallbacks(Container $container)
     {
         foreach ($this->beforeCallbacks as $callback) {
             $container->call($callback);
@@ -208,7 +237,7 @@ class Event
      * @param  \Nova\Container\Container  $container
      * @return void
      */
-    protected function callAfterCallbacks(Container $container)
+    public function callAfterCallbacks(Container $container)
     {
         foreach ($this->afterCallbacks as $callback) {
             $container->call($callback);
@@ -238,21 +267,26 @@ class Event
      */
     protected function compileCommand()
     {
-        $output = ProcessUtils::escapeArgument($this->output);
+        $output = Utils::escapeArgument($this->output);
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
-        if (! $this->withoutOverlapping) {
-            return $this->command .$redirect .$output .' 2>&1 &';
+        if (! $this->runInBackground) {
+            return $this->command .$redirect .$output .' 2>&1';
         }
 
-        $mutexPath = $this->mutexPath();
+        $delimiter = windows_os() ? '&' : ';';
 
-        if (! windows_os()) {
-            return '(touch ' .$mutexPath .'; ' .$this->command .'; rm ' .$mutexPath .')' .$redirect .$output .' 2>&1 &';
-        } else {
-            return '(echo \'\' > "' .$mutexPath .'" & ' .$this->command .' & del "'.$mutexPath .'")' .$redirect .$output .' 2>&1 &';
-        }
+        $phpBinary = Utils::escapeArgument(
+            with(new PhpExecutableFinder)->find(false)
+        );
+
+        $forgeBinary = defined('FORGE_BINARY') ? Utils::escapeArgument(FORGE_BINARY) : 'forge';
+
+        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish ' .Utils::escapeArgument($this->mutexName());
+
+        return '(' .$this->command .$redirect .$output .' 2>&1 ' .$delimiter .' ' .$finished .') > '
+            .Utils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
     }
 
     /**
@@ -260,9 +294,9 @@ class Event
      *
      * @return string
      */
-    protected function mutexPath()
+    public function mutexName()
     {
-        return storage_path('schedule-' .md5($this->expression .$this->command));
+        return storage_path('schedule-' .sha1($this->expression .$this->command));
     }
 
     /**
@@ -519,6 +553,18 @@ class Event
     }
 
     /**
+     * State that the command should run in background.
+     *
+     * @return $this
+     */
+    public function runInBackground()
+    {
+        $this->runInBackground = true;
+
+        return $this;
+    }
+
+    /**
      * Set which user the command should run as.
      *
      * @param  string  $user
@@ -559,15 +605,22 @@ class Event
     /**
      * Do not allow the event to overlap each other.
      *
+     * @param  int  $expiresAt
      * @return $this
      */
-    public function withoutOverlapping()
+    public function withoutOverlapping($expiresAt = 1440)
     {
         $this->withoutOverlapping = true;
 
-        return $this->skip(function ()
+        $this->expiresAt = $expiresAt;
+
+        return $this->then(function ()
         {
-            return file_exists($this->mutexPath());
+            $this->mutex->forget($this);
+
+        })->skip(function ()
+        {
+            return $this->mutex->exists($this);
         });
     }
 
@@ -628,22 +681,50 @@ class Event
      * E-mail the results of the scheduled operation.
      *
      * @param  array|mixed  $addresses
+     * @param  bool  $onlyIfOutputExists
      * @return $this
      *
      * @throws \LogicException
      */
-    public function emailOutputTo($addresses)
+    public function emailOutputTo($addresses, $onlyIfOutputExists = false)
     {
-        if (is_null($this->output) || ($this->output == $this->getDefaultOutput())) {
-            throw new LogicException('Must direct output to a file in order to e-mail results.');
+        $this->ensureOutputIsBeingCapturedForEmail();
+
+        if (! is_array($addresses)) {
+            $addresses = array($addresses);
         }
 
-        $addresses = is_array($addresses) ? $addresses : func_get_args();
-
-        return $this->then(function (Mailer $mailer) use ($addresses)
+        return $this->then(function (Mailer $mailer) use ($addresses, $onlyIfOutputExists)
         {
-            $this->emailOutput($mailer, $addresses);
+            $this->emailOutput($mailer, $addresses, $onlyIfOutputExists);
         });
+    }
+
+    /**
+     * E-mail the results of the scheduled operation if it produces output.
+     *
+     * @param  array|mixed  $addresses
+     * @return $this
+     *
+     * @throws \LogicException
+     */
+    public function emailWrittenOutputTo($addresses)
+    {
+        return $this->emailOutputTo($addresses, true);
+    }
+
+    /**
+     * Ensure that output is being captured for email.
+     *
+     * @return void
+     */
+    protected function ensureOutputIsBeingCapturedForEmail()
+    {
+        if (is_null($this->output) || ($this->output == $this->getDefaultOutput())) {
+            $output = storage_path('logs/schedule-' .sha1($this->mutexName()) .'.log');
+
+            $this->sendOutputTo($output);
+        }
     }
 
     /**
@@ -651,11 +732,18 @@ class Event
      *
      * @param  \Nova\Contracts\Mail\Mailer  $mailer
      * @param  array  $addresses
+     * @param  bool  $onlyIfOutputExists
      * @return void
      */
-    protected function emailOutput(Mailer $mailer, $addresses)
+    protected function emailOutput(Mailer $mailer, $addresses, $onlyIfOutputExists = false)
     {
-        $mailer->raw(file_get_contents($this->output), function ($message) use ($addresses)
+        $text = file_exists($this->output) ? file_get_contents($this->output) : '';
+
+        if ($onlyIfOutputExists && empty($text)) {
+            return;
+        }
+
+        $mailer->raw($text, function ($message) use ($addresses)
         {
             $message->subject($this->getEmailSubject());
 
@@ -672,7 +760,7 @@ class Event
      */
     protected function getEmailSubject()
     {
-        if ($this->description) {
+        if (isset($this->description)) {
             return __d('nova', 'Scheduled Job Output ({0})', $this->description);
         }
 
@@ -781,5 +869,18 @@ class Event
     public function getExpression()
     {
         return $this->expression;
+    }
+
+    /**
+     * Set the mutex implementation to be used.
+     *
+     * @param  \Nova\Console\Scheduling\MutexInterface  $mutex
+     * @return $this
+     */
+    public function preventOverlapsUsing(Mutex $mutex)
+    {
+        $this->mutex = $mutex;
+
+        return $this;
     }
 }

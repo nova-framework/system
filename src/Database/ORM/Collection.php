@@ -228,8 +228,7 @@ class Collection extends BaseCollection
 
         $dictionary = array();
 
-        foreach ($items as $value)
-        {
+        foreach ($items as $value) {
             $dictionary[$value->getKey()] = $value;
         }
 

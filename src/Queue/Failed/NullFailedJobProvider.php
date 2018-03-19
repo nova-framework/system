@@ -2,7 +2,7 @@
 
 namespace Nova\Queue\Failed;
 
-use Nova\Queue\Contracts\FailedJobProviderInterface;
+use Nova\Queue\Failed\FailedJobProviderInterface;
 
 
 
@@ -28,7 +28,7 @@ class NullFailedJobProvider implements FailedJobProviderInterface
      */
     public function all()
     {
-        return [];
+        return array();
     }
 
     /**

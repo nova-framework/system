@@ -1,0 +1,566 @@
+<?php
+
+namespace Nova\Package;
+
+use Nova\Config\Repository as Config;
+use Nova\Filesystem\FileNotFoundException;
+use Nova\Filesystem\Filesystem;
+use Nova\Support\Collection;
+use Nova\Support\Arr;
+use Nova\Support\Str;
+
+
+class Repository
+{
+    /**
+     * @var \Nova\Config\Repository
+     */
+    protected $config;
+
+    /**
+     * @var \Nova\Filesystem\Filesystem
+     */
+    protected $files;
+
+    /**
+     * @var \Nova\Support\Collection|null
+     */
+    protected static $packages;
+
+
+    /**
+     * Create a new Package Manager instance.
+     *
+     * @param Application $app
+     */
+    public function __construct(Config $config, Filesystem $files)
+    {
+        $this->config = $config;
+
+        $this->files = $files;
+    }
+
+    /**
+     * Get all module slugs.
+     *
+     * @return Collection
+     */
+    public function slugs()
+    {
+        $slugs = collect();
+
+        $this->all()->each(function ($item) use ($slugs)
+        {
+            $slugs->push($item['slug']);
+        });
+
+        return $slugs;
+    }
+
+    public function all()
+    {
+        return $this->getCached()->sortBy('order');
+    }
+
+    /**
+     * Get Packages based on where clause.
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return Collection
+     */
+    public function where($key, $value)
+    {
+        return collect($this->all()->where($key, $value)->first());
+    }
+
+    /**
+     * Sort modules by given key in ascending order.
+     *
+     * @param string $key
+     *
+     * @return Collection
+     */
+    public function sortBy($key)
+    {
+        $collection = $this->all();
+
+        return $collection->sortBy($key);
+    }
+
+    /**
+     * Sort modules by given key in ascending order.
+     *
+     * @param string $key
+     *
+     * @return Collection
+     */
+    public function sortByDesc($key)
+    {
+        $collection = $this->all();
+
+        return $collection->sortByDesc($key);
+    }
+
+    /**
+     * Determines if the given module exists.
+     *
+     * @param string $slug
+     *
+     * @return bool
+     */
+    public function exists($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $slug = Str::snake($slug);
+        } else {
+            $slug = Str::lower($slug);
+        }
+
+        $slugs = $this->slugs()->toArray();
+
+        return in_array($slug, $slugs);
+    }
+
+    /**
+     * Returns count of all modules.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return $this->all()->count();
+    }
+
+    /**
+     * Get all enabled modules.
+     *
+     * @return Collection
+     */
+    public function enabled()
+    {
+        return $this->all()->where('enabled', true);
+    }
+
+    /**
+     * Get all disabled modules.
+     *
+     * @return Collection
+     */
+    public function disabled()
+    {
+        return $this->all()->where('enabled', false);
+    }
+
+    /**
+     * Check if specified module is enabled.
+     *
+     * @param string $slug
+     *
+     * @return bool
+     */
+    public function isEnabled($slug)
+    {
+        $package = $this->where('slug', $slug);
+
+        return ($package['enabled'] === true);
+    }
+
+    /**
+     * Check if specified module is disabled.
+     *
+     * @param string $slug
+     *
+     * @return bool
+     */
+    public function isDisabled($slug)
+    {
+        $package = $this->where('slug', $slug);
+
+        return ($package['enabled'] === false);
+    }
+
+    /**
+     * Get local path for the specified Package.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getPackagePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $package = Str::studly($slug);
+        } else {
+            $package = Str::upper($slug);
+        }
+
+        return $this->getPackagesPath() .DS .$package .DS;
+    }
+
+    /**
+     * Get (local) Packages path.
+     *
+     * @return string
+     */
+    public function getPackagesPath()
+    {
+        return base_path('packages');
+    }
+
+    /**
+     * Get Packages namespace.
+     *
+     * @return string
+     */
+    public function getPackagesNamespace()
+    {
+        return '';
+    }
+
+    /**
+     * Get path for the specified Module.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getModulePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $module = Str::studly($slug);
+        } else {
+            $module = Str::upper($slug);
+        }
+
+        return $this->getModulesPath() .DS .$module .DS;
+    }
+
+    /**
+     * Get modules path.
+     *
+     * @return string
+     */
+    public function getModulesPath()
+    {
+        $path = $this->config->get('packages.modules.path', BASEPATH .'modules');
+
+        return str_replace('/', DS, realpath($path));
+    }
+
+    /**
+     * Get modules namespace.
+     *
+     * @return string
+     */
+    public function getModulesNamespace()
+    {
+        $namespace = $this->config->get('packages.modules.namespace', 'Modules\\');
+
+        return rtrim($namespace, '/\\');
+    }
+
+    /**
+     * Get path for the specified Theme.
+     *
+     * @param string $slug
+     *
+     * @return string
+     */
+    public function getThemePath($slug)
+    {
+        if (Str::length($slug) > 3) {
+            $module = Str::studly($slug);
+        } else {
+            $module = Str::upper($slug);
+        }
+
+        return $this->getThemesPath() .DS .$module .DS;
+    }
+
+    /**
+     * Get modules path.
+     *
+     * @return string
+     */
+    public function getThemesPath()
+    {
+        $path = $this->config->get('packages.themes.path', BASEPATH .'themes');
+
+        return str_replace('/', DS, realpath($path));
+    }
+
+    /**
+     * Get modules namespace.
+     *
+     * @return string
+     */
+    public function getThemesNamespace()
+    {
+        $namespace = $this->config->get('packages.themes.namespace', 'Themes\\');
+
+        return rtrim($namespace, '/\\');
+    }
+
+    /**
+     * Update cached repository of packages information.
+     *
+     * @return bool
+     */
+    public function optimize()
+    {
+        $path = $this->getCachePath();
+
+        $packages = $this->getPackages();
+
+        $this->writeCache($path, $packages);
+    }
+
+    protected function getPackages()
+    {
+        $packagesPath = base_path('vendor/nova-packages.php');
+
+        try {
+            $data = $this->files->getRequire($packagesPath);
+
+        } catch (FileNotFoundException $e) {
+            $data = array();
+        }
+
+        $items = Arr::get($data, 'packages', array());
+
+        // Process the Packages data.
+        $path = $this->getPackagesPath();
+
+        $packages = collect();
+
+        foreach ($items as $name => $packagePath) {
+            $packagePath = Str::finish($packagePath, DS);
+
+            $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
+
+            $packages->put($name, array(
+                'path'     => $packagePath,
+                'location' => $location,
+                'type'     => 'package',
+            ));
+        }
+
+        //
+        // Process for the local Modules.
+
+        $path = $this->getModulesPath();
+
+        try {
+            $paths = collect(
+                $this->files->directories($path)
+            );
+        }
+        catch (InvalidArgumentException $e) {
+            $paths = collect();
+        }
+
+        $namespace = $this->getModulesNamespace();
+
+        $vendor = class_basename($namespace);
+
+        $paths->each(function ($path) use ($packages, $vendor)
+        {
+            $name = $vendor .'/' .basename($path);
+
+            $path = Str::finish($path, DS);
+
+            $packages->put($name, array(
+                'path'     => $path,
+                'location' => 'local',
+                'type'     => 'module',
+            ));
+        });
+
+        //
+        // Process for the local Modules.
+
+        $path = $this->getThemesPath();
+
+        try {
+            $paths = collect(
+                $this->files->directories($path)
+            );
+        }
+        catch (InvalidArgumentException $e) {
+            $paths = collect();
+        }
+
+        $namespace = $this->getThemesNamespace();
+
+        $vendor = class_basename($namespace);
+
+        $paths->each(function ($path) use ($packages, $vendor)
+        {
+            $name = $vendor .'/' .basename($path);
+
+            $path = Str::finish($path, DS);
+
+            $packages->put($name, array(
+                'path'     => $path,
+                'location' => 'local',
+                'type'     => 'theme',
+            ));
+        });
+
+        //
+        // Process the retrieved information to generate their records.
+
+        $items = $packages->map(function ($properties, $name)
+        {
+            $basename = $this->getPackageName($name);
+
+            if (Str::length($basename) > 3) {
+                $slug =  Str::snake($basename);
+            } else {
+                $slug = Str::lower($basename);
+            }
+
+            $properties['name'] = $name;
+            $properties['slug'] = $slug;
+
+            $properties['namespace'] = str_replace('/', '\\', $name);
+
+            $properties['basename'] = $basename;
+
+            // Get the Package options from configuration.
+            $options = $this->config->get('packages.options.' .$slug, array());
+
+            $properties['enabled'] = Arr::get($options, 'enabled', true);
+
+            $properties['order'] = Arr::get($options, 'order', 9001);
+
+            return $properties;
+        });
+
+        return $items->sortBy('basename');
+    }
+
+    /**
+     * Get the contents of the cache file.
+     *
+     * The cache file lists all Packages slugs and their enabled or disabled status.
+     * This can be used to filter out Packages depending on their status.
+     *
+     * @return Collection
+     */
+    public function getCached()
+    {
+        if (isset(static::$packages)) {
+            return static::$packages;
+        }
+
+        $path = $this->getCachePath();
+
+        $configPath = app_path('Config/Packages.php');
+
+        $packagesPath = base_path('vendor/nova-packages.php');
+
+        if ($this->isCacheExpired($path, $packagesPath) || $this->isCacheExpired($path, $configPath)) {
+            $packages = $this->getPackages();
+
+            $this->writeCache($path, $packages);
+        }
+
+        // The packages cache is valid.
+        else {
+            $packages = collect(
+                $this->files->getRequire($path)
+            );
+        }
+
+        return static::$packages = $packages;
+    }
+
+    /**
+     * Write the service cache file to disk.
+     *
+     * @param  string $path
+     * @param  array  $packages
+     * @return void
+     */
+    public function writeCache($path, $packages)
+    {
+        $data = array();
+
+        foreach ($packages->all() as $key => $package) {
+            $properties = ($package instanceof Collection) ? $package->all() : $package;
+
+            // Normalize to *nix paths.
+            $properties['path'] = str_replace('\\', '/', $properties['path']);
+
+            //
+            ksort($properties);
+
+            $data[] = $properties;
+        }
+
+        //
+        $data = var_export($data, true);
+
+        $content = <<<PHP
+<?php
+
+return $data;
+
+PHP;
+
+        $this->files->put($path, $content);
+    }
+
+    /**
+    * Determine if the cache file is expired.
+    *
+    * @param  string  $cachePath
+    * @param  string  $path
+    * @return bool
+    */
+    public function isCacheExpired($cachePath, $path)
+    {
+        if (! $this->files->exists($cachePath)) {
+            return true;
+        }
+
+        $lastModified = $this->files->lastModified($path);
+
+        if ($lastModified >= $this->files->lastModified($cachePath)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get packages cache path.
+     *
+     * @return string
+     */
+    public function getCachePath()
+    {
+        return $this->config->get('packages.cache', STORAGE_PATH .'framework' .DS .'packages.php');
+    }
+
+    /**
+     * Get the name for a Package.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @return string
+     */
+    protected function getPackageName($package)
+    {
+        if (strpos($package, '/') === false) {
+            return $package;
+        }
+
+        list($vendor, $namespace) = explode('/', $package);
+
+        return $namespace;
+    }
+}

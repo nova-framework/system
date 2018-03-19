@@ -4,7 +4,7 @@ namespace Nova\Filesystem;
 
 use Symfony\Component\Finder\Finder;
 
-use FilesystemIterator;
+use \FilesystemIterator;
 
 
 class Filesystem
@@ -59,7 +59,8 @@ class Filesystem
 
                     flock($handle, LOCK_UN);
                 }
-            } finally {
+            }
+            finally {
                 fclose($handle);
             }
         }

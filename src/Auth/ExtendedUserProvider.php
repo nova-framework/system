@@ -2,9 +2,8 @@
 
 namespace Nova\Auth;
 
-use Nova\Auth\Contracts\UserInterface;
-use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Hashing\HasherInterface;
+use Nova\Support\Str;
 
 
 class ExtendedUserProvider implements UserProviderInterface
@@ -26,7 +25,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Create a new database user provider.
      *
-     * @param  \Nova\Hashing\HasherInterface  $hasher
+     * @param  \Hashing\HasherInterface  $hasher
      * @param  string  $model
      * @return void
      */
@@ -40,7 +39,7 @@ class ExtendedUserProvider implements UserProviderInterface
      * Retrieve a user by their unique identifier.
      *
      * @param  mixed  $identifier
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveById($identifier)
     {
@@ -52,7 +51,7 @@ class ExtendedUserProvider implements UserProviderInterface
      *
      * @param  mixed  $identifier
      * @param  string  $token
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveByToken($identifier, $token)
     {
@@ -67,7 +66,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  string  $token
      * @return void
      */
@@ -82,7 +81,7 @@ class ExtendedUserProvider implements UserProviderInterface
      * Retrieve a user by the given credentials.
      *
      * @param  array  $credentials
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function retrieveByCredentials(array $credentials)
     {
@@ -92,7 +91,9 @@ class ExtendedUserProvider implements UserProviderInterface
         $query = $this->createModel()->newQuery();
 
         foreach ($credentials as $key => $value) {
-            if (! str_contains($key, 'password')) $query->where($key, $value);
+            if (! Str::contains($key, 'password')) {
+                $query->where($key, $value);
+            }
         }
 
         return $query->first();
@@ -101,7 +102,7 @@ class ExtendedUserProvider implements UserProviderInterface
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Auth\UserInterface  $user
      * @param  array  $credentials
      * @return bool
      */
@@ -119,7 +120,7 @@ class ExtendedUserProvider implements UserProviderInterface
      */
     public function createModel()
     {
-        $className = '\\'.ltrim($this->model, '\\');
+        $className = '\\' .ltrim($this->model, '\\');
 
         return new $className;
     }

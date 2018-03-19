@@ -2,6 +2,10 @@
 
 namespace Nova\Console;
 
+use Nova\Console\Scheduling\Schedule;
+use Nova\Console\Scheduling\ScheduleRunCommand;
+use Nova\Console\Scheduling\ScheduleFinishCommand;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -22,7 +26,43 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->commands('Nova\Console\Scheduling\ScheduleRunCommand');
+        $this->app->bindShared('schedule', function ($app)
+        {
+            return new Schedule($app);
+        });
+
+        $this->registerScheduleRunCommand();
+        $this->registerScheduleFinishCommand();
+    }
+
+    /**
+     * Register the schedule run command.
+     *
+     * @return void
+     */
+    protected function registerScheduleRunCommand()
+    {
+        $this->app->bindShared('command.schedule.run', function ($app)
+        {
+            return new ScheduleRunCommand($app['schedule']);
+        });
+
+        $this->commands('command.schedule.run');
+    }
+
+    /**
+     * Register the schedule run command.
+     *
+     * @return void
+     */
+    protected function registerScheduleFinishCommand()
+    {
+        $this->app->bindShared('command.schedule.finish', function ($app)
+        {
+            return new ScheduleFinishCommand($app['schedule']);
+        });
+
+        $this->commands('command.schedule.finish');
     }
 
     /**
@@ -33,7 +73,7 @@ class ScheduleServiceProvider extends ServiceProvider
     public function provides()
     {
         return array(
-            'Nova\Console\Scheduling\ScheduleRunCommand',
+            'command.schedule.run', 'command.schedule.finish'
         );
     }
 }

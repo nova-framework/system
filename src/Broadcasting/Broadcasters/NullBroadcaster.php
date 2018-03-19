@@ -3,6 +3,7 @@
 namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
+use Nova\Http\Request;
 
 
 class NullBroadcaster extends Broadcaster
@@ -11,7 +12,7 @@ class NullBroadcaster extends Broadcaster
     /**
      * {@inheritdoc}
      */
-    public function authenticate($request)
+    public function authenticate(Request $request)
     {
         //
     }
@@ -19,7 +20,7 @@ class NullBroadcaster extends Broadcaster
     /**
      * {@inheritdoc}
      */
-    public function validAuthenticationResponse($request, $result)
+    public function validAuthenticationResponse(Request $request, $result)
     {
         //
     }

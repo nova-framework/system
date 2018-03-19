@@ -3,11 +3,13 @@
 namespace Nova\Foundation\Validation;
 
 use Nova\Http\Exception\HttpResponseException;
-use Nova\Http\Request;
 use Nova\Http\JsonResponse;
-use Nova\Routing\UrlGenerator;
+use Nova\Http\Request;
+
 use Nova\Validation\Factory;
 use Nova\Validation\Validator;
+
+use Nova\Support\Facades\App;
 use Nova\Support\Facades\Redirect;
 
 
@@ -27,20 +29,21 @@ trait ValidatesRequestsTrait
      * @param  \Nova\Http\Request  $request
      * @param  array  $rules
      * @param  array  $messages
-     * @param  array  $customAttributes
+     * @param  array  $attributes
      * @return void
      *
      * @throws \Nova\Http\Exception\HttpResponseException
      */
-    public function validate(Request $request, array $rules, array $messages = array(), array $customAttributes = array())
+    public function validate(Request $request, array $rules, array $messages = array(), array $attributes = array())
     {
-        $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
+        $input = $request->all();
+
+        $validator = $this->getValidationFactory()
+            ->make($input, $rules, $messages, $attributes);
 
         if ($validator->fails()) {
             $this->throwValidationException($request, $validator);
         }
-
-        return $request->only(array_keys($rules));
     }
 
     /**
@@ -50,19 +53,17 @@ trait ValidatesRequestsTrait
      * @param  \Nova\Http\Request  $request
      * @param  array  $rules
      * @param  array  $messages
-     * @param  array  $customAttributes
+     * @param  array  $attributes
      * @return void
      *
      * @throws \Nova\Http\Exception\HttpResponseException
      */
-    public function validateWithBag($errorBag, Request $request, array $rules, array $messages = array(), array $customAttributes = array())
+    public function validateWithBag($errorBag, Request $request, array $rules, array $messages = array(), array $attributes = array())
     {
-        $this->withErrorBag($errorBag, function () use ($request, $rules, $messages, $customAttributes)
+        $this->withErrorBag($errorBag, function () use ($request, $rules, $messages, $attributes)
         {
-            $this->validate($request, $rules, $messages, $customAttributes);
+            $this->validate($request, $rules, $messages, $attributes);
         });
-
-        return $request->only(array_keys($rules));
     }
 
     /**
@@ -76,9 +77,11 @@ trait ValidatesRequestsTrait
      */
     protected function throwValidationException(Request $request, $validator)
     {
-        throw new HttpResponseException($this->buildFailedValidationResponse(
+        $response = $this->buildFailedValidationResponse(
             $request, $this->formatValidationErrors($validator)
-        ));
+        );
+
+        throw new HttpResponseException($response);
     }
 
     /**
@@ -119,7 +122,7 @@ trait ValidatesRequestsTrait
      */
     protected function getRedirectUrl()
     {
-        return app(UrlGenerator::class)->previous();
+        return App::make('url')->previous();
     }
 
     /**
@@ -129,7 +132,7 @@ trait ValidatesRequestsTrait
      */
     protected function getValidationFactory()
     {
-        return app(Factory::class);
+        return App::make('validator');
     }
 
     /**

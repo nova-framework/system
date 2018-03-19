@@ -15,6 +15,8 @@ trait DispatchableTrait
      */
     public static function dispatch()
     {
-        return new PendingDispatch(new static(...func_get_args()));
+        $args = func_get_args();
+
+        return new PendingDispatch(new static(...$args));
     }
 }

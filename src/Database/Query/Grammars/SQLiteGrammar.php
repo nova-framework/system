@@ -1,4 +1,10 @@
 <?php
+/**
+ * SQLiteGrammar - A simple SQLite Grammar for the QueryBuilder.
+ *
+ * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
+ * @version 3.0
+ */
 
 namespace Nova\Database\Query\Grammars;
 
@@ -28,18 +34,12 @@ class SQLiteGrammar extends Grammar
      */
     public function compileInsert(Builder $query, array $values)
     {
-        // Essentially we will force every insert to be treated as a batch insert which
-        // simply makes creating the SQL easier for us since we can utilize the same
-        // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
 
         if (! is_array(reset($values))) {
             $values = array($values);
         }
 
-        // If there is only one record being inserted, we will just use the usual query
-        // grammar insert builder because no special syntax is needed for the single
-        // row inserts in SQLite. However, if there are multiples, we'll continue.
         if (count($values) == 1) {
             return parent::compileInsert($query, reset($values));
         }
@@ -48,9 +48,6 @@ class SQLiteGrammar extends Grammar
 
         $columns = array();
 
-        // SQLite requires us to build the multi-row insert as a listing of select with
-        // unions joining them together. So we'll build out this list of columns and
-        // then join them all together with select unions to complete the queries.
         foreach (array_keys(reset($values)) as $column) {
             $columns[] = '? as '.$this->wrap($column);
         }
@@ -68,9 +65,10 @@ class SQLiteGrammar extends Grammar
      */
     public function compileTruncate(Builder $query)
     {
-        $sql = array('delete from sqlite_sequence where name = ?' => array($query->from));
-
-        $sql['delete from '.$this->wrapTable($query->from)] = array();
+        $sql = array(
+            'delete from sqlite_sequence where name = ?'  => array($query->from),
+            'delete from ' .$this->wrapTable($query->from) => array()
+        );
 
         return $sql;
     }
@@ -125,7 +123,6 @@ class SQLiteGrammar extends Grammar
 
         $value = $this->parameter($value);
 
-        return 'strftime(\''.$type.'\', '.$this->wrap($where['column']).') '.$where['operator'].' '.$value;
+        return 'strftime(\'' .$type .'\', ' .$this->wrap($where['column']).') ' .$where['operator'] .' ' .$value;
     }
-
 }

@@ -3,6 +3,7 @@
 namespace Nova\Database\Connections;
 
 use Nova\Database\Connection;
+
 use Nova\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
 use Nova\Database\Query\Processors\SQLiteProcessor as QueryProcessor;
 use Nova\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
@@ -12,6 +13,7 @@ use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
 
 class SQLiteConnection extends Connection
 {
+
     /**
      * Get the default query grammar instance.
      *
@@ -19,7 +21,7 @@ class SQLiteConnection extends Connection
      */
     protected function getDefaultQueryGrammar()
     {
-        return $this->withTablePrefix(new QueryGrammar);
+        return $this->withTablePrefix(new QueryGrammar());
     }
 
     /**
@@ -39,7 +41,7 @@ class SQLiteConnection extends Connection
      */
     protected function getDefaultPostProcessor()
     {
-        return new QueryProcessor;
+        return new QueryProcessor();
     }
 
     /**
@@ -51,5 +53,4 @@ class SQLiteConnection extends Connection
     {
         return new DoctrineDriver;
     }
-
 }

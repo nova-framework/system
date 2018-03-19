@@ -2,10 +2,9 @@
 
 namespace Nova\Broadcasting;
 
-
+use Nova\Broadcasting\BroadcasterInterface;
 use Nova\Queue\Job;
 use Nova\Support\Contracts\ArrayableInterface;
-use Nova\Broadcasting\Contracts\BroadcasterInterface;
 
 use ReflectionClass;
 use ReflectionProperty;
@@ -16,7 +15,7 @@ class BroadcastEvent
     /**
      * The broadcaster implementation.
      *
-     * @var \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @var \Nova\Broadcasting\BroadcasterInterface
      */
     protected $broadcaster;
 
@@ -24,10 +23,10 @@ class BroadcastEvent
     /**
      * Create a new job handler instance.
      *
-     * @param  \Nova\Broadcasting\Contracts\BroadcasterInterface  $broadcaster
+     * @param  \Nova\Broadcasting\BroadcasterInterface  $broadcaster
      * @return void
      */
-    public function __construct(Broadcaster $broadcaster)
+    public function __construct(BroadcasterInterface $broadcaster)
     {
         $this->broadcaster = $broadcaster;
     }
@@ -39,14 +38,22 @@ class BroadcastEvent
      * @param  array  $data
      * @return void
      */
-    public function fire(Job $job, array $data)
+    public function handle(Job $job, array $data)
     {
         $event = unserialize($data['event']);
 
-        $name = method_exists($event, 'broadcastAs') ? $event->broadcastAs() : get_class($event);
+        if (method_exists($event, 'broadcastAs')) {
+            $name = $event->broadcastAs();
+        } else {
+            $name = get_class($event);
+        }
+
+        if (! is_array($channels = $event->broadcastOn())) {
+            $channels = array($channels);
+        }
 
         $this->broadcaster->broadcast(
-            $event->broadcastOn(), $name, $this->getPayloadFromEvent($event)
+            $channels, $name, $this->getPayloadFromEvent($event)
         );
 
         $job->delete();
@@ -67,12 +74,14 @@ class BroadcastEvent
         $payload = array();
 
         //
-        $properties = with(new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC);
+        $reflection = new ReflectionClass($event);
 
-        foreach ($properties as $property) {
-            $name = $property->getName();
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $key = $property->getName();
 
-            $payload[$name] = $this->formatProperty($property->getValue($event));
+            $value = $property->getValue($event);
+
+            $payload[$key] = $this->formatProperty($value);
         }
 
         return $payload;
@@ -86,7 +95,7 @@ class BroadcastEvent
      */
     protected function formatProperty($value)
     {
-        if ($value instanceof Arrayable) {
+        if ($value instanceof ArrayableInterface) {
             return $value->toArray();
         }
 

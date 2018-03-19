@@ -4,6 +4,7 @@ namespace Nova\Queue;
 
 use Nova\Container\Container;
 use Nova\Encryption\Encrypter;
+use Nova\Queue\QueueableEntityInterface;
 
 use SuperClosure\Serializer;
 
@@ -13,13 +14,13 @@ use DateTime;
 
 abstract class Queue
 {
-
     /**
      * The IoC container instance.
      *
      * @var \Nova\Container\Container
      */
     protected $container;
+
 
     /**
      * Push a new job onto the queue.
@@ -47,7 +48,7 @@ abstract class Queue
     {
         return $this->later($delay, $job, $data, $queue);
     }
-    
+
     /**
      * Marshal a push queue request and fire the job.
      *
@@ -84,10 +85,79 @@ abstract class Queue
     protected function createPayload($job, $data = '', $queue = null)
     {
         if ($job instanceof Closure) {
-            return json_encode($this->createClosurePayload($job, $data));
+            $payload = $this->createClosurePayload($job, $data);
+        } else if (is_object($job)) {
+            $payload = $this->createObjectPayload($job, $data);
+        } else {
+            $payload = array(
+                'job'  => $job,
+                'data' => $this->prepareQueueableEntities($data),
+            );
         }
 
-        return json_encode(array('job' => $job, 'data' => $data));
+        return json_encode($payload);
+    }
+
+    /**
+     * Prepare any queueable entities for storage in the queue.
+     *
+     * @param  mixed  $data
+     * @return mixed
+     */
+    protected function prepareQueueableEntities($data)
+    {
+        if ($data instanceof QueueableEntityInterface) {
+            return $this->prepareQueueableEntity($data);
+        }
+
+        if (is_array($data)) {
+            $data = array_map(function ($d)
+            {
+                if (is_array($d)) {
+                    return $this->prepareQueueableEntities($d);
+                }
+
+                return $this->prepareQueueableEntity($d);
+
+            }, $data);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Prepare a single queueable entity for storage on the queue.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function prepareQueueableEntity($value)
+    {
+        if ($value instanceof QueueableEntityInterface) {
+            return '::entity::|' .get_class($value) .'|' .$value->getQueueableId();
+        }
+
+        return $value;
+    }
+
+    /**
+     * Create a payload string for the given Closure job.
+     *
+     * @param  object  $job
+     * @param  mixed   $data
+     * @return string
+     */
+    protected function createObjectPayload($job, $data)
+    {
+        $commandName = get_class($job);
+
+        $command = serialize(clone $job);
+
+        return array(
+            'job'  => 'Nova\Queue\CallQueuedHandler@call',
+
+            'data' => compact('commandName', 'command'),
+        );
     }
 
     /**
@@ -99,9 +169,15 @@ abstract class Queue
      */
     protected function createClosurePayload($job, $data)
     {
-        $closure = $this->crypt->encrypt((new Serializer)->serialize($job));
+        $closure = $this->crypt->encrypt(
+            with(new Serializer)->serialize($job)
+        );
 
-        return array('job' => 'QueueClosure', 'data' => compact('closure'));
+        return array(
+            'job'  => 'Nova\Queue\CallQueuedClosure@call',
+
+            'data' => compact('closure')
+        );
     }
 
     /**

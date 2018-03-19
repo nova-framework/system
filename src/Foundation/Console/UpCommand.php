@@ -19,7 +19,7 @@ class UpCommand extends Command
      *
      * @var string
      */
-    protected $description = "Bring the application out of maintenance mode";
+    protected $description = "Bring the Application out of Maintenance Mode";
 
     /**
      * Execute the console command.

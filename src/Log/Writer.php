@@ -2,7 +2,7 @@
 
 namespace Nova\Log;
 
-use Nova\Events\Contracts\DispatcherInterface;
+use Nova\Events\DispatcherInterface as EventsDispatcher;
 use Nova\Support\Contracts\JsonableInterface as Jsonable;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 
@@ -32,9 +32,9 @@ class Writer implements PsrLoggerInterface
     /**
      * The event dispatcher instance.
      *
-     * @var \Nova\Events\Contracts\DispatcherInterface
+     * @var \Nova\Events\DispatcherInterface
      */
-    protected $dispatcher;
+    protected $events;
 
     /**
      * The Log levels.
@@ -57,15 +57,15 @@ class Writer implements PsrLoggerInterface
      * Create a new log writer instance.
      *
      * @param  \Monolog\Logger  $monolog
-     * @param  \Nova\Events\Contracts\DispatcherInterface  $dispatcher
+     * @param  \Nova\Events\DispatcherInterface  $dispatcher
      * @return void
      */
-    public function __construct(MonologLogger $monolog, DispatcherInterface $dispatcher = null)
+    public function __construct(MonologLogger $monolog, EventsDispatcher $events = null)
     {
         $this->monolog = $monolog;
 
-        if (isset($dispatcher)) {
-            $this->dispatcher = $dispatcher;
+        if (! is_null($events)) {
+            $this->events = $events;
         }
     }
 
@@ -275,11 +275,11 @@ class Writer implements PsrLoggerInterface
      */
     public function listen(Closure $callback)
     {
-        if (! isset($this->dispatcher)) {
+        if (! isset($this->events)) {
             throw new RuntimeException('Events dispatcher has not been set.');
         }
 
-        $this->dispatcher->listen('framework.log', $callback);
+        $this->events->listen('framework.log', $callback);
     }
 
     /**
@@ -292,8 +292,8 @@ class Writer implements PsrLoggerInterface
      */
     protected function fireLogEvent($level, $message, array $context = array())
     {
-        if (isset($this->dispatcher)) {
-            $this->dispatcher->fire('framework.log', compact('level', 'message', 'context'));
+        if (isset($this->events)) {
+            $this->events->dispatch('framework.log', compact('level', 'message', 'context'));
         }
     }
 
@@ -356,21 +356,21 @@ class Writer implements PsrLoggerInterface
     /**
      * Get the event dispatcher instance.
      *
-     * @return \Nova\Events\Contracts\DispatcherInterface
+     * @return \Nova\Events\DispatcherInterface
      */
     public function getEventDispatcher()
     {
-        return $this->dispatcher;
+        return $this->events;
     }
 
     /**
      * Set the event dispatcher instance.
      *
-     * @param  \Nova\Events\Contracts\DispatcherInterface  $dispatcher
+     * @param  \Nova\Events\DispatcherInterface  $events
      * @return void
      */
-    public function setEventDispatcher(DispatcherInterface $dispatcher)
+    public function setEventDispatcher(EventsDispatcher $events)
     {
-        $this->dispatcher = $dispatcher;
+        $this->events = $events;
     }
 }

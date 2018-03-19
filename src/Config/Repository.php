@@ -2,7 +2,6 @@
 
 namespace Nova\Config;
 
-use Nova\Config\Contracts\LoaderInterface;
 use Nova\Support\NamespacedItemResolver;
 
 use Closure;

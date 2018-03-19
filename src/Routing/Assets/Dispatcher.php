@@ -4,6 +4,8 @@ namespace Nova\Routing\Assets;
 
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
+use Nova\Foundation\Application;
+use Nova\Http\JsonResponse;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Support\Arr;
@@ -23,11 +25,24 @@ use LogicException;
 class Dispatcher
 {
     /**
+     * The Application instance.
+     *
+     * @var \Nova\Foundation\Application
+     */
+    protected $app;
+
+    /**
      * All of the registered Asset Routes.
      *
      * @var array
      */
     protected $routes = array();
+
+    /**
+     * The valid Vendor paths.
+     * @var array
+     */
+    protected $paths;
 
     /**
      * All of the named path hints.
@@ -36,6 +51,16 @@ class Dispatcher
      */
     protected $hints = array();
 
+
+    /**
+     * Create a new Default Dispatcher instance.
+     *
+     * @return void
+     */
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+    }
 
     /**
      * Register a new Asset Route with the manager.
@@ -78,7 +103,7 @@ class Dispatcher
      */
     protected function findRoute(Request $request)
     {
-        if (! in_array($request->method(), array('GET', 'HEAD'))) {
+        if (! in_array($request->method(), array('GET', 'HEAD', 'OPTIONS'))) {
             return;
         }
 
@@ -94,37 +119,86 @@ class Dispatcher
     /**
      * Serve a File.
      *
-     * @param string $path
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  string  $path
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  string  $disposition
+     * @param  string|null  $fileName
+     * @param  bool  $prepared
+     *
+     * @return  \Symfony\Component\HttpFoundation\Response
      */
-    public function serve($path, SymfonyRequest $request)
+    public function serve($path, SymfonyRequest $request, $disposition = 'inline', $fileName = null, $prepared = true)
     {
-        if (! is_file($path) || ! is_readable($path)) {
+        if (! file_exists($path)) {
             return new Response('File Not Found', 404);
+        } else if (! is_readable($path)) {
+            return new Response('Unauthorized Access', 403);
         }
 
         // Create a Binary File Response instance.
         $headers = array(
-            'Content-Type' => $this->getMimeType($path)
+            'Access-Control-Allow-Origin' => '*',
         );
 
-        $response = new BinaryFileResponse(
-            $path, 200, $headers, true, 'inline', true, false
-        );
+        $mimeType = $this->guessMimeType($path);
 
-        // Setup the (browser) Cache Control.
-        $response->setTtl(600);
-        $response->setMaxAge(10800);
-        $response->setSharedMaxAge(600);
+        if ($request->getMethod() == 'OPTIONS') {
+            $headers = array_merge($headers, array(
+                'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type, X-Auth-Token, Origin',
+            ));
 
-        // Prepare the Response against the Request instance.
-        $response->isNotModified($request);
+            return new Response('OK', 200, $headers);
+        }
 
-        return $response->prepare($request);
+        // Not an OPTIONS request.
+        else {
+            $headers['Content-Type'] = $mimeType;
+        }
+
+        if ($mimeType !== 'application/json') {
+            $response = new BinaryFileResponse($path, 200, $headers, true, $disposition, true, false);
+
+            // Set the Content Disposition.
+            $response->setContentDisposition($disposition, $fileName ?: basename($path));
+
+            // Setup the (browser) Cache Control.
+            $this->setupCacheControl($response);
+
+            // Setup the Not Modified since...
+            $response->isNotModified($request);
+        } else {
+            // We will do a special processing for the JSON files.
+            $response = new JsonResponse(
+                json_decode(file_get_contents($path), true), 200, $headers
+            );
+        }
+
+        // Prepare the Response against the Request instance, if is requested.
+        if ($prepared) {
+            return $response->prepare($request);
+        }
+
+        return $response;
     }
 
-    protected function getMimeType($path)
+    protected function setupCacheControl(SymfonyResponse $response)
+    {
+        $options = $this->app['config']->get('routing.assets.cache', array());
+
+        //
+        $ttl    = array_get($options, 'ttl', 600);
+        $maxAge = array_get($options, 'maxAge', 10800);
+
+        $sharedMaxAge = array_get($options, 'sharedMaxAge', 600);
+
+        //
+        $response->setTtl($ttl);
+        $response->setMaxAge($maxAge);
+        $response->setSharedMaxAge($sharedMaxAge);
+    }
+
+    protected function guessMimeType($path)
     {
         // Even the Symfony's HTTP Foundation have troubles with the CSS and JS files?
         //
@@ -136,6 +210,9 @@ class Dispatcher
 
             case 'js':
                 return 'application/javascript';
+
+            case 'json':
+                return 'application/json';
 
             case 'svg':
                 return 'image/svg+xml';
@@ -150,15 +227,50 @@ class Dispatcher
         return $guesser->guess($path);
     }
 
-    /**
-     * Get the path for a registered namespace.
-     *
-     * @param  string  $namespace
-     * @return string|null
-     */
-    public function findNamedPath($namespace)
+    public function getVendorPaths()
     {
-        return Arr::get($this->hints, $namespace);
+        if (isset($this->paths)) {
+            return $this->paths;
+        }
+
+        $files = $this->app['files'];
+
+        // The cache file path.
+        $path = STORAGE_PATH .'assets.php';
+
+        // The config path for checking againts the cache file.
+        $configPath = APPPATH .'Config' .DS .'Routing.php';
+
+        $lastModified = $files->lastModified($configPath);
+
+        if ($files->exists($path) && ! ($lastModified < $files->lastModified($path))) {
+            return $this->paths = $files->getRequire($path);
+        }
+
+        $paths = array();
+
+        $options = $this->app['config']->get('routing.assets.paths', array());
+
+        foreach ($options as $vendor => $value) {
+            $values = is_array($value) ? $value : array($value);
+
+            $values = array_map(function($value) use ($vendor)
+            {
+                return $vendor .'/' .$value .'/';
+
+            }, $values);
+
+            $paths = array_merge($paths, $values);
+        }
+
+        $paths = array_unique($paths);
+
+        // Save to the cache.
+        $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
+
+        $files->put($path, $content);
+
+        return $this->paths = $paths;
     }
 
     /**
@@ -174,6 +286,33 @@ class Dispatcher
         $namespace = $this->getPackageNamespace($package, $namespace);
 
         $this->addNamespace(str_replace('_', '-', $namespace), $hint);
+    }
+
+    /**
+     * Return true if has the specified namespace hint on the router.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function hasNamespace($namespace)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        return isset($this->hints[$namespace]);
+    }
+
+    /**
+     * Add a new namespace to the loader.
+     *
+     * @param  string  $namespace
+     * @param  string  $hint
+     * @return void
+     */
+    public function addNamespace($namespace, $hint)
+    {
+        $namespace = str_replace('_', '-', $namespace);
+
+        $this->hints[$namespace] = rtrim($hint, DS) .DS;
     }
 
     /**
@@ -195,41 +334,16 @@ class Dispatcher
     }
 
     /**
-     * Add a new namespace to the loader.
+     * Get the path for a registered namespace.
      *
      * @param  string  $namespace
-     * @param  string  $hint
-     * @return void
+     * @return string|null
      */
-    public function addNamespace($namespace, $hint)
+    public function getPackagePath($namespace)
     {
         $namespace = str_replace('_', '-', $namespace);
 
-        $this->hints[$namespace] = rtrim($hint, DS) .DS;
-    }
-
-    /**
-     * Return true if has the specified namespace hint on the router.
-     *
-     * @param  string  $namespace
-     * @return void
-     */
-    public function hasNamespace($namespace)
-    {
-        $namespace = str_replace('_', '-', $namespace);
-
-        return isset($this->hints[$namespace]);
-    }
-
-    /**
-     * Get a namespace hint from the router.
-     *
-     * @param  string  $namespace
-     * @return void
-     */
-    public function getNamespace($namespace)
-    {
-        return $this->findNamedPath($namespace);
+        return Arr::get($this->hints, $namespace);
     }
 
     /**
@@ -237,7 +351,7 @@ class Dispatcher
      *
      * @return array
      */
-    public function getNamespaces()
+    public function getHints()
     {
         return $this->hints;
     }

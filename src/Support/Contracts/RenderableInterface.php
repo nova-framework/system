@@ -6,7 +6,7 @@ namespace Nova\Support\Contracts;
 interface RenderableInterface
 {
     /**
-     * Show the evaluated contents of the object.
+     * Get the evaluated contents of the object.
      *
      * @return string
      */

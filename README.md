@@ -1,4 +1,4 @@
-![Nova Framework](https://novaframework.com/themes/nova/assets/images/nova.png)
+![Nova Framework](https://novaframework.com/templates/nova4/assets/img/nova.png)
 
 # Nova Framework 4.0 (Kernel)
 
@@ -8,15 +8,13 @@
 [![GitHub stars](https://img.shields.io/github/stars/nova-framework/system.svg)](https://github.com/nova-framework/system/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/nova-framework/system.svg)](https://github.com/nova-framework/system)
 
-[![Join the chat at https://gitter.im/nova-framework/framework](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/nova-framework/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/nova-framework/framework/novausers](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/nova-framework/framework/novausers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-> **Note:** This repository contains the core code of the Nova framework. If you want to build an application using Nova 4, visit the main [Nova repository](https://github.com/nova-framework/bare-app).
+> **Note:** This repository contains the core code of the Nova framework. If you want to build an application using Nova 4, visit the main [Nova repository](https://github.com/nova-framework/framework).
 
 ## What is the Nova Framework?
 
-Nova Framework is a PHP 5.5 MVC system. It's designed to be lightweight and modular, allowing developers to build better and easy to maintain code with PHP.
-
-The base framework comes with a range of [helper classes](https://github.com/nova-framework/system/tree/master/src/Helpers).
+Nova Framework is a PHP 5.6 MVC system. It's designed to be lightweight and modular, allowing developers to build better and easy to maintain code with PHP.
 
 ## Requirements
 
@@ -41,22 +39,15 @@ This framework was designed and is **strongly recommended** to be installed abov
 Additionally, installing in a sub-directory, on a production server, will introduce severe security issues.
 
 #### Recommended
-The framework is located on [Packagist](https://packagist.org/packages/nova-framework/bare-app).
+The framework is located on [Packagist](https://packagist.org/packages/nova-framework/framework).
 
 You can install the framework from a terminal by using:
 
 ```
-composer create-project nova-framework/bare-app foldername -s dev
+composer create-project nova-framework/framework foldername 4.* -s dev
 ```
 
 The foldername is the desired folder to be created.
-
-
-> **Note:** You can install the full application variant from a terminal by using:
-
-```
-composer create-project nova-framework/app foldername -s dev
-```
 
 ## Documentation
 

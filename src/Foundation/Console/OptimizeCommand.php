@@ -7,6 +7,9 @@ use Nova\Support\Composer;
 
 use Symfony\Component\Console\Input\InputOption;
 
+use ClassPreloader\Factory;
+use ClassPreloader\Exceptions\VisitorExceptionInterface;
+
 
 class OptimizeCommand extends Command
 {

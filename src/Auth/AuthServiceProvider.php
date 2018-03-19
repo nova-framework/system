@@ -32,7 +32,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerAuthenticator()
     {
-        $this->app->singleton('auth', function ($app)
+        $this->app->bindShared('auth', function($app)
         {
             // Once the authentication service has actually been requested by the developer
             // we will set a variable in the application indicating such. This helps us
@@ -55,7 +55,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerUserResolver()
     {
-        $this->app->bind('Nova\Auth\Contracts\UserInterface', function ($app)
+        $this->app->bind('Nova\Auth\UserInterface', function ($app)
         {
             $callback = $app['auth']->userResolver();
 
@@ -70,7 +70,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerAccessGate()
     {
-        $this->app->singleton('Nova\Auth\Contracts\Access\GateInterface', function ($app)
+        $this->app->singleton('Nova\Auth\Access\GateInterface', function ($app)
         {
             return new Gate($app, function() use ($app)
             {

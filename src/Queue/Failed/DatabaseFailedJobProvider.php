@@ -2,8 +2,8 @@
 
 namespace Nova\Queue\Failed;
 
-use Nova\Database\Contracts\ConnectionResolverInterface;
-use Nova\Queue\Contracts\FailedJobProviderInterface;
+use Nova\Database\ConnectionResolverInterface;
+use Nova\Queue\Failed\FailedJobProviderInterface;
 
 use Carbon\Carbon;
 
@@ -92,7 +92,9 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
      */
     public function forget($id)
     {
-        return $this->getTable()->where('id', $id)->delete() > 0;
+        $result = $this->getTable()->where('id', $id)->delete();
+
+        return $result > 0;
     }
 
     /**

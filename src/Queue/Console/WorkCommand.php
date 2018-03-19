@@ -2,12 +2,14 @@
 
 namespace Nova\Queue\Console;
 
+use Nova\Queue\Job;
 use Nova\Queue\Worker;
-use Nova\Queue\Jobs\Job;
 use Nova\Console\Command;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+
+use Carbon\Carbon;
 
 
 class WorkCommand extends Command
@@ -54,32 +56,65 @@ class WorkCommand extends Command
      */
     public function handle()
     {
-        if ($this->downForMaintenance() && ! $this->option('daemon')) {
+        $daemon = $this->option('daemon');
+
+        if ($this->downForMaintenance() && ! $daemon) {
             return;
         }
 
-        $queue = $this->option('queue');
+        // We'll listen to the processed and failed events so we can write information
+        // to the console as jobs are processed, which will let the developer watch
+        // which jobs are coming through a queue and be informed on its progress.
+
+        $this->listenForEvents();
+
+        // Get the Config Repository instance.
+        $config = $this->container['config'];
+
+        $connection = $this->argument('connection') ?: $config->get('queue.default');
 
         $delay = $this->option('delay');
 
         // The memory limit is the amount of memory we will allow the script to occupy
         // before killing it and letting a process manager restart it for us, which
         // is to protect us against any memory leaks that will be in the scripts.
+
         $memory = $this->option('memory');
 
-        $connection = $this->argument('connection');
+        // We need to get the right queue for the connection which is set in the queue
+        // configuration file for the application. We will pull it based on the set
+        // connection being run for the queue operation currently being executed.
 
-        $response = $this->runWorker(
-            $connection, $queue, $delay, $memory, $this->option('daemon')
+        $queue = $this->option('queue') ?: $config->get(
+            "queue.connections.{$connection}.queue", 'default'
         );
 
-        // If a job was fired by the worker, we'll write the output out to the console
-        // so that the developer can watch live while the queue runs in the console
-        // window, which will also of get logged if stdout is logged out to disk.
-        if ( ! is_null($response['job']))
+        $this->runWorker($connection, $queue, $delay, $memory, $daemon);
+    }
+
+    /**
+     * Listen for the queue events in order to update the console output.
+     *
+     * @return void
+     */
+    protected function listenForEvents()
+    {
+        $events = $this->container['events'];
+
+        $events->listen('nova.queue.processing', function ($connection, $job)
         {
-            $this->writeOutput($response['job'], $response['failed']);
-        }
+            $this->writeOutput($job, 'starting');
+        });
+
+        $events->listen('nova.queue.processed', function ($connection, $job)
+        {
+            $this->writeOutput($job, 'success');
+        });
+
+        $events->listen('nova.queue.failed', function ($connection, $job)
+        {
+            $this->writeOutput($job, 'failed');
+        });
     }
 
     /**
@@ -98,35 +133,54 @@ class WorkCommand extends Command
             $this->container['Nova\Foundation\Contracts\ExceptionHandlerInterface']
         );
 
-        if ($daemon) {
-            $this->worker->setCache($this->container['cache']->driver());
+        $sleep = $this->option('sleep');
+        $tries = $this->option('tries');
 
-            return $this->worker->daemon(
-                $connection, $queue, $delay, $memory,
-                $this->option('sleep'), $this->option('tries')
-            );
+        if (! $daemon) {
+            return $this->worker->runNextJob($connection, $queue, $delay, $sleep, $tries);
         }
 
-        return $this->worker->pop(
-            $connection, $queue, $delay,
-            $this->option('sleep'), $this->option('tries')
+        $this->worker->setCache(
+            $this->container['cache']->driver()
         );
+
+        return $this->worker->daemon($connection, $queue, $delay, $memory, $sleep, $tries);
     }
 
     /**
      * Write the status output for the queue worker.
      *
      * @param  \Nova\Queue\Jobs\Job  $job
-     * @param  bool  $failed
+     * @param  string  $status
      * @return void
      */
-    protected function writeOutput(Job $job, $failed)
+    protected function writeOutput(Job $job, $status)
     {
-        if ($failed) {
-            $this->output->writeln('<error>Failed:</error> '.$job->getName());
-        } else {
-            $this->output->writeln('<info>Processed:</info> '.$job->getName());
+        switch ($status) {
+            case 'starting':
+                return $this->writeStatus($job, 'Processing', 'comment');
+            case 'success':
+                return $this->writeStatus($job, 'Processed', 'info');
+            case 'failed':
+                return $this->writeStatus($job, 'Failed', 'error');
         }
+    }
+
+    /**
+     * Format the status output for the queue worker.
+     *
+     * @param  \Illuminate\Contracts\Queue\Job  $job
+     * @param  string  $status
+     * @param  string  $type
+     * @return void
+     */
+    protected function writeStatus(Job $job, $status, $type)
+    {
+        $date = Carbon::now()->format('Y-m-d H:i:s');
+
+        $message = sprintf("<{$type}>[%s] %s</{$type}> %s", $date, str_pad("{$status}:", 11), $job->resolveName());
+
+        $this->output->writeln($message);
     }
 
     /**

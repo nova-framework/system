@@ -3,7 +3,7 @@
 namespace Nova\View\Compilers;
 
 use Nova\View\Compilers\Compiler;
-use Nova\View\Contracts\CompilerInterface;
+use Nova\View\Compilers\CompilerInterface;
 
 use Parsedown;
 

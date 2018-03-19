@@ -4,14 +4,13 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\SqsJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 use Aws\Sqs\SqsClient;
 
 
 class SqsQueue extends Queue implements QueueInterface
 {
-
     /**
      * The Amazon SQS instance.
      *
@@ -36,9 +35,10 @@ class SqsQueue extends Queue implements QueueInterface
     public function __construct(SqsClient $sqs, $default)
     {
         $this->sqs = $sqs;
-        
+
         $this->default = $default;
     }
+
 
     /**
      * Push a new job onto the queue.

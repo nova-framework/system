@@ -4,9 +4,8 @@ namespace Nova\Database\Console\Seeds;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Nova\Database\Contracts\ConnectionResolverInterface as Resolver;
-
 use Symfony\Component\Console\Input\InputOption;
+use Nova\Database\ConnectionResolverInterface as Resolver;
 
 
 class SeedCommand extends Command

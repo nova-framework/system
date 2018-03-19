@@ -3,7 +3,7 @@
 namespace Nova\Session;
 
 use Nova\Database\Connection;
-use Nova\Session\Contracts\ExistenceAwareInterface;
+use Nova\Session\ExistenceAwareInterface;
 
 
 class DatabaseSessionHandler implements \SessionHandlerInterface, ExistenceAwareInterface

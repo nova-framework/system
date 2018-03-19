@@ -105,11 +105,28 @@ abstract class ServiceProvider
             $views->addNamespace($package, $viewPath);
         }
 
-        // Register the Package Assets path.
-        $webroot = dirname($path) .DS .'webroot';
+        // Finally, register the Package Assets path.
+        $this->registerPackageAssets($package, $namespace, $path);
+    }
 
-        if ($files->isDirectory($webroot)) {
-            $this->app['assets.dispatcher']->package($package, $webroot, $namespace);
+    /**
+     * Register the package's assets.
+     *
+     * @param  string  $package
+     * @param  string  $namespace
+     * @param  string  $path
+     * @return void
+     */
+    protected function registerPackageAssets($package, $namespace, $path)
+    {
+        $assets = dirname($path) .DS .'assets';
+
+        if ($this->app['files']->isDirectory($assets)) {
+            list ($vendor) = explode('/', $package);
+
+            $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
+
+            $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }
     }
 
@@ -137,7 +154,7 @@ abstract class ServiceProvider
     protected function getPackageNamespace($package, $namespace)
     {
         if (is_null($namespace)) {
-            list($vendor, $namespace) = explode('/', $package);
+            list ($vendor, $namespace) = explode('/', $package);
 
             return Str::snake($namespace);
         }

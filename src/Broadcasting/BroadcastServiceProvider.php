@@ -3,6 +3,7 @@
 namespace Nova\Broadcasting;
 
 use Nova\Broadcasting\BroadcastManager;
+
 use Nova\Support\ServiceProvider;
 
 
@@ -13,7 +14,7 @@ class BroadcastServiceProvider extends ServiceProvider
      *
      * @var bool
      */
-    protected $defer = true;
+    protected $defer = false;
 
 
     /**
@@ -23,15 +24,19 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('broadcast', function ($app)
+        $this->app->singleton('Nova\Broadcasting\BroadcastManager', function ($app)
         {
             return new BroadcastManager($app);
         });
 
-        $this->app->singleton('Nova\Broadcasting\Contracts\BroadcasterInterface', function ($app)
+        $this->app->singleton('Nova\Broadcasting\BroadcasterInterface', function ($app)
         {
-            return $app->make('broadcast')->connection();
+            return $app->make('Nova\Broadcasting\BroadcastManager')->connection();
         });
+
+        $this->app->alias(
+            'Nova\Broadcasting\BroadcastManager', 'Nova\Broadcasting\FactoryInterface'
+        );
     }
 
     /**
@@ -41,6 +46,10 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('broadcast', 'Nova\Broadcasting\Contracts\BroadcasterInterface');
+        return array(
+            'Nova\Broadcasting\BroadcastManager',
+            'Nova\Broadcasting\FactoryInterface',
+            'Nova\Broadcasting\BroadcasterInterface',
+        );
     }
 }

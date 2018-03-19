@@ -14,6 +14,6 @@ class Gate extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Nova\Auth\Contracts\Access\GateInterface';
+        return 'Nova\Auth\Access\GateInterface';
     }
 }

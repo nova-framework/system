@@ -16,6 +16,7 @@ use Nova\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
 {
+
     /**
      * Bootstrap the Application events.
      *
@@ -50,5 +51,4 @@ class DatabaseServiceProvider extends ServiceProvider
             return new DatabaseManager($app, $app['db.factory']);
         });
     }
-
 }

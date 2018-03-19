@@ -14,6 +14,7 @@ trait InteractsWithSocketsTrait
      */
     public $socket;
 
+
     /**
      * Exclude the current user from receiving the broadcast.
      *

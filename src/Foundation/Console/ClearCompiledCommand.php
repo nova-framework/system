@@ -28,9 +28,13 @@ class ClearCompiledCommand extends Command
      */
     public function handle()
     {
-        if (file_exists($path = $this->container['config']['app.manifest'] .DS .'services.php')) {
+        $config = $this->container['config'];
+
+        if (file_exists($path = $config->get('app.manifest') .DS .'services.php')) {
             @unlink($path);
         }
+
+        //$this->info('Compiled class file removed successfully!');
     }
 
 }

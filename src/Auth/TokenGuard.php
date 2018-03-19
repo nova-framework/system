@@ -3,8 +3,8 @@
 namespace Nova\Auth;
 
 use Nova\Auth\GuardHelpersTrait;
-use Nova\Auth\Contracts\GuardInterface;
-use Nova\Auth\Contracts\UserProviderInterface;
+use Nova\Auth\GuardInterface;
+use Nova\Auth\UserProviderInterface;
 use Nova\Http\Request;
 
 
@@ -53,7 +53,7 @@ class TokenGuard implements GuardInterface
     /**
      * Get the currently authenticated user.
      *
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function user()
     {
@@ -66,10 +66,12 @@ class TokenGuard implements GuardInterface
 
         $user = null;
 
-        if (! empty($token = $this->getTokenForRequest())) {
-            $user = $this->provider->retrieveByCredentials(array(
-                $this->storageKey => $token
-            ));
+        $token = $this->getTokenForRequest();
+
+        if (! empty($token)) {
+            $user = $this->provider->retrieveByCredentials(
+                array($this->storageKey => $token)
+            );
         }
 
         return $this->user = $user;

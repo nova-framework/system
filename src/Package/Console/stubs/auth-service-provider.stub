@@ -1,0 +1,33 @@
+<?php
+
+namespace {{namespace}}\Providers;
+
+use Nova\Auth\Access\GateInterface as Gate;
+use Nova\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
+
+class AuthServiceProvider extends ServiceProvider
+{
+    /**
+     * The policy mappings for the {{lower_type}}.
+     *
+     * @var array
+     */
+    protected $policies = array(
+        '{{namespace}}\Models\SomeModel' => '{{namespace}}\Policies\ModelPolicy',
+    );
+
+
+    /**
+     * Register any {{lower_type}} authentication / authorization services.
+     *
+     * @param  \Nova\Auth\Access\GateInterface  $gate
+     * @return void
+     */
+    public function boot(Gate $gate)
+    {
+        $this->registerPolicies($gate);
+
+        //
+    }
+}

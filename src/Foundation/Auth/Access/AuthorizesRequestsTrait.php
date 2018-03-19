@@ -2,8 +2,8 @@
 
 namespace Nova\Foundation\Auth\Access;
 
-use Nova\Auth\Access\GateInterface as Gate;
-use Nova\Auth\Access\AuthorizationException;
+use Nova\Auth\Access\GateInterface;
+use Nova\Auth\Access\UnauthorizedException;
 use Nova\Support\Facades\App;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -24,7 +24,7 @@ trait AuthorizesRequestsTrait
     {
         list($ability, $arguments) = $this->parseAbilityAndArguments($ability, $arguments);
 
-        $gate = App::make(Gate::class);
+        $gate = App::make('Nova\Auth\Access\GateInterface');
 
         return $this->authorizeAtGate($gate, $ability, $arguments);
     }
@@ -32,7 +32,7 @@ trait AuthorizesRequestsTrait
     /**
      * Authorize a given action for a user.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface|mixed  $user
+     * @param  \Nova\Auth\UserInterface|mixed  $user
      * @param  mixed  $ability
      * @param  mixed|array  $arguments
      * @return \Nova\Auth\Access\Response
@@ -43,7 +43,7 @@ trait AuthorizesRequestsTrait
     {
         list($ability, $arguments) = $this->parseAbilityAndArguments($ability, $arguments);
 
-        $gate = App::make(Gate::class)->forUser($user);
+        $gate = App::make('Nova\Auth\Access\GateInterface')->forUser($user);
 
         return $this->authorizeAtGate($gate, $ability, $arguments);
     }
@@ -58,13 +58,13 @@ trait AuthorizesRequestsTrait
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
-    public function authorizeAtGate(Gate $gate, $ability, $arguments)
+    public function authorizeAtGate(GateInterface $gate, $ability, $arguments)
     {
         try {
             return $gate->authorize($ability, $arguments);
         }
-        catch (AuthorizationException $e) {
-            $exception = $this->createGateAuthorizationException($ability, $arguments, $e->getMessage(), $e);
+        catch (UnauthorizedException $e) {
+            $exception = $this->createGateUnauthorizedException($ability, $arguments, $e->getMessage(), $e);
 
             throw $exception;
         }
@@ -120,7 +120,7 @@ trait AuthorizesRequestsTrait
     }
 
     /**
-     * Throw an authorization exception based on gate results.
+     * Throw an unauthorized exception based on gate results.
      *
      * @param  string  $ability
      * @param  mixed|array  $arguments
@@ -128,7 +128,7 @@ trait AuthorizesRequestsTrait
      * @param  \Exception  $previousException
      * @return \Symfony\Component\HttpKernel\Exception\HttpException
      */
-    protected function createGateAuthorizationException($ability, $arguments, $message = null, $previousException = null)
+    protected function createGateUnauthorizedException($ability, $arguments, $message = null, $previousException = null)
     {
         $message = $message ?: __d('nova', 'This action is unauthorized.');
 

@@ -2,11 +2,11 @@
 
 namespace Nova\Support\Facades;
 
-use Nova\Broadcasting\Contracts\FactoryInterface as BroadcastingFactory;
+use Nova\Broadcasting\FactoryInterface as BroadcastingFactory;
 
 
 /**
- * @see \Nova\Broadcasting\Contracts\FactoryInterface
+ * @see \Nova\Broadcasting\FactoryInterface
  */
 class Broadcast extends Facade
 {

@@ -2,15 +2,22 @@
 
 namespace Nova\Broadcasting;
 
-use Nova\Broadcasting\Contracts\BroadcasterInterface;
+use Nova\Broadcasting\BroadcasterInterface;
+use Nova\Broadcasting\Channel;
+use Nova\Container\Container;
+use Nova\Http\Request;
+use Nova\Support\Str;
 
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
-use ReflectionFunction;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 
 abstract class Broadcaster implements BroadcasterInterface
 {
+    /**
+     * @var \Nova\Container\Container
+     */
+    protected $container;
+
     /**
      * The registered channel authenticators.
      *
@@ -18,6 +25,17 @@ abstract class Broadcaster implements BroadcasterInterface
      */
     protected $channels = array();
 
+
+    /**
+     * Create a new broadcaster instance.
+     *
+     * @param  \Nova\Container\Container  $container
+     * @return void
+     */
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
 
     /**
      * Register a channel authenticator.
@@ -40,61 +58,58 @@ abstract class Broadcaster implements BroadcasterInterface
      * @param  string  $channel
      * @return mixed
      */
-    protected function verifyUserCanAccessChannel($request, $channel)
+    protected function verifyUserCanAccessChannel(Request $request, $channel)
     {
-        $user = $request->user();
-
         foreach ($this->channels as $pattern => $callback) {
-            $parameters = array();
+            $regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern);
 
-            if (! $this->channelMatches($pattern, $channel, $parameters)) {
+            if (preg_match('/^' .$regexp .'$/', $channel, $matches) !== 1) {
                 continue;
             }
 
-            $result = call_user_func_array(
-                $callback, array_merge(array($user), $parameters)
-            );
+            $parameters = array_filter($matches, function ($key)
+            {
+                return ! is_numeric($key);
 
-            if (! is_null($result)) {
+            }, ARRAY_FILTER_USE_KEY);
+
+            if (is_string($callback)) {
+                $callback = $this->createClassHandler($callback);
+            }
+
+            array_unshift($parameters, $request->user());
+
+            if ($result = call_user_func_array($callback, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
 
-        throw new HttpException(403);
+        throw new AccessDeniedHttpException;
     }
 
     /**
-     * Matches the given pattern and channel, with parameters extraction.
+     * Create a class based handler using the IoC container.
      *
-     * @param  string  $channel
-     * @param  string  $pattern
-     * @return array|null
+     * @param  mixed    $handler
+     * @return \Closure
      */
-    protected function channelMatches($pattern, $channel, array &$parameters)
+    public function createClassHandler($handler)
     {
-        if ($pattern === $channel) {
-            // Direct match of channel and pattern, with no parameters.
-            return true;
-        }
-
-        $count = 0;
-
-        $regexp = preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern, -1, $count);
-
-        if ($count === 0) {
-            // No named parameters in pattern, then the matching always fail.
-            return false;
-        } else if (! preg_match('/^'. $regexp .'$/', $channel, $matches)) {
-            return false;
-        }
-
-        $parameters = array_filter($matches, function ($key)
+        return function () use ($handler)
         {
-            return ! is_numeric($key);
+            // We will make a callable of the handler instance and a method that should
+            // be called on that instance, then we will pass in the arguments that we
+            // received in this method into this handler class instance's methods.
 
-        }, ARRAY_FILTER_USE_KEY);
+            $parameters = func_get_args();
 
-        return true;
+            //
+            list($className, $method) = Str::parseCallback($handler, 'join');
+
+            $instance = $this->container->make($className);
+
+            return call_user_func_array($instance, $parameters);
+        };
     }
 
     /**
@@ -107,7 +122,11 @@ abstract class Broadcaster implements BroadcasterInterface
     {
         return array_map(function ($channel)
         {
-            return $channel->getName();
+            if ($channel instanceof Channel) {
+                return $channel->getName();
+            }
+
+            return $channel;
 
         }, $channels);
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Contracts\Support;
+namespace Nova\Support\Contracts;
 
 
 interface HtmlableInterface

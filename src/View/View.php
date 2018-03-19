@@ -13,7 +13,7 @@ use Nova\Support\Contracts\RenderableInterface as Renderable;
 use Nova\Support\Contracts\MessageProviderInterface as MessageProvider;
 use Nova\Support\MessageBag;
 use Nova\Support\Str;
-use Nova\View\Contracts\EngineInterface;
+use Nova\View\Engines\EngineInterface;
 use Nova\View\Factory;
 
 use ArrayAccess;

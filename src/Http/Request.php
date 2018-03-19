@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 use ArrayAccess;
 use Closure;
-use SplFileInfo;
 use RuntimeException;
+use SplFileInfo;
 
 
 class Request extends SymfonyRequest implements ArrayAccess
@@ -50,20 +50,6 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     protected $sessionStore;
 
-
-    /**
-     * Create a new Nova HTTP request from server variables.
-     *
-     * @return static
-     */
-    public static function capture()
-    {
-        static::enableHttpMethodParameterOverride();
-
-        $request = SymfonyRequest::createFromGlobals();
-
-        return static::createFromBase($request);
-    }
 
     /**
      * Return the Request instance.

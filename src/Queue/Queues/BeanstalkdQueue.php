@@ -4,7 +4,7 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\BeanstalkdJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 use Pheanstalk_Job;
 use Pheanstalk_Pheanstalk as Pheanstalk;
@@ -33,6 +33,7 @@ class BeanstalkdQueue extends Queue implements QueueInterface
      * @var int
      */
     protected $timeToRun;
+
 
     /**
      * Create a new Beanstalkd queue instance.
@@ -107,8 +108,7 @@ class BeanstalkdQueue extends Queue implements QueueInterface
 
         $job = $this->pheanstalk->watchOnly($queue)->reserve(0);
 
-        if ($job instanceof Pheanstalk_Job)
-        {
+        if ($job instanceof Pheanstalk_Job) {
             return new BeanstalkdJob($this->container, $this->pheanstalk, $job, $queue);
         }
     }

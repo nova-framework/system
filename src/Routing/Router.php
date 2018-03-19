@@ -6,6 +6,7 @@ use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Events\Dispatcher;
 use Nova\Container\Container;
+use Nova\Routing\Pipeline;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
 use Nova\Support\Str;
@@ -610,7 +611,7 @@ class Router
             return $route;
         });
 
-        $this->events->fire('router.matched', array($route, $request));
+        $this->events->dispatch('router.matched', array($route, $request));
 
         $response = $this->runRouteWithinStack($route, $request);
 
@@ -1233,7 +1234,7 @@ class Router
      */
     public function __call($method, $parameters)
     {
-        if (isset($this->macros[$name])) {
+        if (isset($this->macros[$method])) {
             $callback = $this->macros[$method];
 
             return call_user_func_array($callback, $parameters);

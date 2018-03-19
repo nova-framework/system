@@ -287,7 +287,7 @@ class Arr
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
             // received from the developer. Then we'll return the final array form.
-            if (is_null($key))  {
+            if (is_null($key)) {
                 $results[] = $itemValue;
             } else {
                 $itemKey = is_object($item) ? $item->{$key} : $item[$key];
@@ -371,19 +371,16 @@ class Arr
      * @param  \Closure  $callback
      * @return array
      */
-    public static function where($array, callable $callback)
+    public static function where($array, Closure $callback)
     {
-        return array_filter($array, $callback, ARRAY_FILTER_USE_BOTH);
+        $filtered = array();
+
+        foreach ($array as $key => $value)
+        {
+            if (call_user_func($callback, $key, $value)) $filtered[$key] = $value;
+        }
+
+        return $filtered;
     }
 
-    /**
-     * If the given value is not an array, wrap it in one.
-     *
-     * @param  mixed  $value
-     * @return array
-     */
-    public static function wrap($value)
-    {
-        return ! is_array($value) ? array($value) : $value;
-    }
 }

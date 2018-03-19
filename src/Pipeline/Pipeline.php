@@ -3,7 +3,7 @@
 namespace Nova\Pipeline;
 
 use Nova\Container\Container;
-use Nova\Pipeline\Contracts\PipelineInterface;
+use Nova\Pipeline\PipelineInterface;
 
 use Closure;
 use RuntimeException;

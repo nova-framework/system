@@ -2,6 +2,9 @@
 
 namespace Nova\Console\Scheduling;
 
+use Nova\Container\Container;
+use Nova\Console\Scheduling\CacheMutex;
+use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
 
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -17,6 +20,25 @@ class Schedule
      */
     protected $events = array();
 
+    /**
+     * The mutex implementation.
+     *
+     * @var \Nova\Console\Scheduling\MutexInterface
+     */
+    protected $mutex;
+
+
+    /**
+     * Create a new schedule instance.
+     *
+     * @return void
+     */
+    public function __construct(Container $container)
+    {
+        $class = $container->bound(Mutex::class) ? Mutex::class : CacheMutex::class;
+
+        $this->mutex = $container->make($class);
+    }
 
     /**
      * Add a new callback event to the schedule.
@@ -27,7 +49,7 @@ class Schedule
      */
     public function call($callback, array $parameters = array())
     {
-        $this->events[] = $event = new CallbackEvent($callback, $parameters);
+        $this->events[] = $event = new CallbackEvent($this->mutex, $callback, $parameters);
 
         return $event;
     }
@@ -69,7 +91,7 @@ class Schedule
             $command .= ' ' .$this->compileParameters($parameters);
         }
 
-        $this->events[] = $event = new Event($command);
+        $this->events[] = $event = new Event($this->mutex, $command);
 
         return $event;
     }

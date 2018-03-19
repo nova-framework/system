@@ -66,11 +66,11 @@ trait ThrottlesLoginsTrait
 
         $seconds = $rateLimiter->availableIn($this->getThrottleKey($request));
 
-        $errors = array($this->loginUsername() => $this->getLockoutErrorMessage($seconds));
-
         return Redirect::back()
             ->withInput($request->only($this->loginUsername(), 'remember'))
-            ->withErrors($errors);
+            ->withErrors(array(
+                $this->loginUsername() => $this->getLockoutErrorMessage($seconds),
+            ));
     }
 
     /**
@@ -105,7 +105,7 @@ trait ThrottlesLoginsTrait
      */
     protected function getThrottleKey(Request $request)
     {
-        return mb_strtolower($request->input($this->username())) .'|' .$request->ip();
+        return mb_strtolower($request->input($this->loginUsername())) .'|' .$request->ip();
     }
 
     /**
@@ -126,5 +126,15 @@ trait ThrottlesLoginsTrait
     protected function lockoutTime()
     {
         return property_exists($this, 'lockoutTime') ? $this->lockoutTime : 60;
+    }
+
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function loginUsername()
+    {
+        return property_exists($this, 'username') ? $this->username : 'email';
     }
 }

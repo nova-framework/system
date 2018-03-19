@@ -3,6 +3,7 @@
 namespace Nova\Foundation\Console;
 
 use Nova\Console\GeneratorCommand;
+
 use Symfony\Component\Console\Input\InputOption;
 
 

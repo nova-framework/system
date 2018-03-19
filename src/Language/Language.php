@@ -40,12 +40,11 @@ class Language
     /**
      * The current Language information.
      */
-    private $code        = 'en';
-    private $info        = 'English';
-    private $name        = 'English';
-    private $locale        = 'en-US';
-    private $direction    = 'ltr';
-    private $flag        = 'gb';
+    private $code      = 'en';
+    private $info      = 'English';
+    private $name      = 'English';
+    private $locale    = 'en-US';
+    private $direction = 'ltr';
 
 
     /**
@@ -65,11 +64,12 @@ class Language
             $this->code = $code;
 
             //
-            $this->info              = $info['info'];
-            $this->name              = $info['name'];
-            $this->locale        = $info['locale'];
-            $this->direction    = $info['dir'];
-            $this->flag            = $info['flag'];
+            $this->info      = $info['info'];
+            $this->name      = $info['name'];
+            $this->locale    = $info['locale'];
+            $this->direction = $info['dir'];
+        } else {
+            $code = 'en';
         }
 
         $this->domain = $domain;
@@ -167,15 +167,6 @@ class Language
     public function locale()
     {
         return $this->locale;
-    }
-
-    /**
-     * Get current flag
-     * @return string
-     */
-    public function flag()
-    {
-        return $this->flag;
     }
 
     /**

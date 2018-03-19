@@ -9,6 +9,7 @@
 namespace Nova\Pagination;
 
 use Nova\Pagination\Factory;
+use Nova\Pagination\BootstrapPresenter;
 use Nova\Pagination\Presenter;
 use Nova\Support\Collection;
 use Nova\Support\Contracts\JsonableInterface;
@@ -467,7 +468,7 @@ class Paginator implements ArrayableInterface, ArrayAccess, Countable, IteratorA
             return $this->presenter;
         }
 
-        return $this->presenter = new Presenter($this);
+        return $this->presenter = new BootstrapPresenter($this);
     }
 
     /**

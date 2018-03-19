@@ -68,10 +68,6 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
         $results = array();
 
         foreach ($this->items as $values) {
-            if ($values instanceof Collection) {
-                $values = $values->all();
-            }
-
             $results = array_merge($results, $values);
         }
 
@@ -136,11 +132,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     {
         return $this->filter(function ($item) use ($key, $value, $strict)
         {
-            if ($strict) {
-                return (data_get($item, $key) === $value);
-            }
-
-            return (data_get($item, $key) == $value);
+            return ($strict ? (data_get($item, $key) === $value) : (data_get($item, $key) == $value));
         });
     }
 
@@ -300,6 +292,49 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     }
 
     /**
+     * Run a grouping map over the items.
+     *
+     * The callback should return an associative array with a single key/value pair.
+     *
+     * @param  callable  $callback
+     * @return static
+     */
+    public function mapToGroups(callable $callback)
+    {
+        $groups = $this->map($callback)->reduce(function ($groups, $pair) {
+            $groups[key($pair)][] = reset($pair);
+
+            return $groups;
+
+        }, array());
+
+        return with(new static($groups))->map(array($this, 'make'));
+    }
+
+    /**
+     * Run an associative map over each of the items.
+     *
+     * The callback should return an associative array with a single key/value pair.
+     *
+     * @param  callable  $callback
+     * @return static
+     */
+    public function mapWithKeys(callable $callback)
+    {
+        $result = array();
+
+        foreach ($this->items as $key => $value) {
+            $assoc = $callback($value, $key);
+
+            foreach ($assoc as $mapKey => $mapValue) {
+                $result[$mapKey] = $mapValue;
+            }
+        }
+
+        return new static($result);
+    }
+
+    /**
      * Merge the collection with the given items.
      *
      * @param  \Nova\Support\Collection|\Support\Contracts\ArrayableInterface|array  $items
@@ -446,12 +481,12 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
     /**
      * Sort through each item with a callback.
      *
-     * @param  Closure|null  $callback
+     * @param  Closure  $callback
      * @return \Nova\Support\Collection
      */
-    public function sort(Closure $callback = null)
+    public function sort(Closure $callback)
     {
-        $callback ? uasort($this->items, $callback) : asort($this->items);
+        uasort($this->items, $callback);
 
         return $this;
     }

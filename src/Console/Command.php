@@ -2,7 +2,6 @@
 
 namespace Nova\Console;
 
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
@@ -13,12 +12,12 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 
-class Command extends SymfonyCommand
+class Command extends \Symfony\Component\Console\Command\Command
 {
     /**
      * The Nova application instance.
      *
-     * @var \Nova\Container\Container
+     * @var \Nova\Foundation\Application
      */
     protected $container;
 
@@ -50,7 +49,6 @@ class Command extends SymfonyCommand
      */
     protected $description;
 
-
     /**
      * Create a new console command instance.
      *
@@ -60,6 +58,9 @@ class Command extends SymfonyCommand
     {
         parent::__construct($this->name);
 
+        // We will go ahead and set the name, description, and parameters on console
+        // commands just to make things a little easier on the developer. This is
+        // so they don't have to all be manually specified in the constructors.
         $this->setDescription($this->description);
 
         $this->specifyParameters();
@@ -72,6 +73,9 @@ class Command extends SymfonyCommand
      */
     protected function specifyParameters()
     {
+        // We will loop through all of the arguments and options for the command and
+        // set them all on the base command instance. This specifies what can get
+        // passed into these commands as "parameters" to control the execution.
         foreach ($this->getArguments() as $arguments) {
             call_user_func_array(array($this, 'addArgument'), $arguments);
         }
@@ -362,24 +366,24 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * Get the Mini-Nova application instance.
+     * Get the Nova application instance.
      *
      * @return \Nova\Foundation\Application
      */
-    public function getContainer()
+    public function getNova()
     {
         return $this->container;
     }
 
     /**
-     * Set the Mini-Nova application instance.
+     * Set the Nova application instance.
      *
-     * @param  \Nova\Foundation\Application  $container
+     * @param  \Nova\Foundation\Application  $nova
      * @return void
      */
-    public function setContainer($container)
+    public function setContainer($nova)
     {
-        $this->container = $container;
+        $this->container = $nova;
     }
 
 }

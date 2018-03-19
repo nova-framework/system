@@ -6,15 +6,14 @@ use Nova\Broadcasting\Broadcasters\LogBroadcaster;
 use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
-use Nova\Broadcasting\Contracts\FactoryInterface;
-use Nova\Broadcasting\Contracts\ShouldBroadcastNowInterface;
+use Nova\Broadcasting\FactoryInterface;
 use Nova\Broadcasting\PendingBroadcast;
 use Nova\Support\Arr;
 
-use Pusher;
-
 use Closure;
 use InvalidArgumentException;
+
+use Pusher;
 
 
 class BroadcastManager implements FactoryInterface
@@ -39,7 +38,6 @@ class BroadcastManager implements FactoryInterface
      * @var array
      */
     protected $customCreators = array();
-
 
     /**
      * Create a new manager instance.
@@ -83,33 +81,6 @@ class BroadcastManager implements FactoryInterface
     }
 
     /**
-     * Queue the given event for broadcast.
-     *
-     * @param  mixed  $event
-     * @return void
-     */
-    public function queue($event)
-    {
-        $connection = ($event instanceof ShouldBroadcastNowInterface) ? 'sync' : null;
-
-        if (is_null($connection) && isset($event->connection)) {
-            $connection = $event->connection;
-        }
-
-        $queue = null;
-
-        if (isset($event->broadcastQueue)) {
-            $queue = $event->broadcastQueue;
-        } else if (isset($event->queue)) {
-            $queue = $event->queue;
-        }
-
-        $this->app->make('queue')->connection($connection)->pushOn(
-            $queue, 'Nova\Broadcasting\BroadcastEvent', array('event' => serialize(clone $event))
-        );
-    }
-
-    /**
      * Get a driver instance.
      *
      * @param  string  $driver
@@ -130,25 +101,18 @@ class BroadcastManager implements FactoryInterface
     {
         $name = $name ?: $this->getDefaultDriver();
 
-        return $this->drivers[$name] = $this->get($name);
-    }
+        if (isset($this->drivers[$name])) {
+            return $this->drivers[$name];
+        }
 
-    /**
-     * Attempt to get the connection from the local cache.
-     *
-     * @param  string  $name
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
-     */
-    protected function get($name)
-    {
-        return isset($this->drivers[$name]) ? $this->drivers[$name] : $this->resolve($name);
+        return $this->drivers[$name] = $this->resolve($name);
     }
 
     /**
      * Resolve the given store.
      *
      * @param  string  $name
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @return \Nova\Broadcasting\BroadcasterInterface
      *
      * @throws \InvalidArgumentException
      */
@@ -164,15 +128,15 @@ class BroadcastManager implements FactoryInterface
 
         if (isset($this->customCreators[$driver])) {
             return $this->callCustomCreator($config);
-        } else {
-            $driverMethod = 'create'.ucfirst($driver) .'Driver';
-
-            if (method_exists($this, $driverMethod)) {
-                return call_user_func(array($this, $driverMethod), $config);
-            } else {
-                throw new InvalidArgumentException("Driver [{$driver}] not supported.");
-            }
         }
+
+        $method = 'create' .ucfirst($driver) .'Driver';
+
+        if (method_exists($this, $method)) {
+            return call_user_func(array($this, $method), $config);
+        }
+
+        throw new InvalidArgumentException("Driver [{$driver}] is not supported.");
     }
 
     /**
@@ -192,50 +156,56 @@ class BroadcastManager implements FactoryInterface
      * Create an instance of the driver.
      *
      * @param  array  $config
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @return \Nova\Broadcasting\BroadcasterInterface
      */
     protected function createPusherDriver(array $config)
     {
-        return new PusherBroadcaster(
-            new Pusher($config['key'], $config['secret'], $config['app_id'], Arr::get($config, 'options', array()))
-        );
+        $options = Arr::get($config, 'options', array());
+
+        // Create a Pusher instance.
+        $pusher = new Pusher($config['key'], $config['secret'], $config['app_id'], $options);
+
+        return new PusherBroadcaster($this->app, $pusher);
     }
 
     /**
      * Create an instance of the driver.
      *
      * @param  array  $config
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @return \Nova\Broadcasting\BroadcasterInterface
      */
     protected function createRedisDriver(array $config)
     {
-        return new RedisBroadcaster(
-            $this->app->make('redis'), Arr::get($config, 'connection')
-        );
+        $connection = Arr::get($config, 'connection');
+
+        // Create a Redis Database instance.
+        $redis = $this->app->make('redis');
+
+        return new RedisBroadcaster($this->app, $redis, $connection);
     }
 
     /**
      * Create an instance of the driver.
      *
      * @param  array  $config
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @return \Nova\Broadcasting\BroadcasterInterface
      */
     protected function createLogDriver(array $config)
     {
-        return new LogBroadcaster(
-            $this->app->make('Psr\Log\LoggerInterface')
-        );
+        $logger = $this->app->make('Psr\Log\LoggerInterface');
+
+        return new LogBroadcaster($this->app, $logger);
     }
 
     /**
      * Create an instance of the driver.
      *
      * @param  array  $config
-     * @return \Nova\Broadcasting\Contracts\BroadcasterInterface
+     * @return \Nova\Broadcasting\BroadcasterInterface
      */
     protected function createNullDriver(array $config)
     {
-        return new NullBroadcaster();
+        return new NullBroadcaster($this->app);
     }
 
     /**
@@ -293,8 +263,6 @@ class BroadcastManager implements FactoryInterface
      */
     public function __call($method, $parameters)
     {
-        $instance = $this->driver();
-
-        return call_user_func_array(array($instance, $method), $parameters);
+        return call_user_func_array([$this->driver(), $method], $parameters);
     }
 }

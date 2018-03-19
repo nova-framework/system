@@ -4,7 +4,8 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\ViewPublisher;
-use Nova\Plugins\PluginManager;
+use Nova\Package\PackageManager;
+use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,12 +25,12 @@ class ViewPublishCommand extends Command
      *
      * @var string
      */
-    protected $description = "Publish a package's views to the application";
+    protected $description = "Publish a Package views to the application";
 
     /**
      * The plugins manager instance.
      *
-     * @var \Nova\Plugins\PluginManager
+     * @var \Nova\Package\PackageManager
      */
     protected $plugins;
 
@@ -47,7 +48,7 @@ class ViewPublishCommand extends Command
      * @param  \Nova\Foundation\ViewPublisher  $view
      * @return void
      */
-    public function __construct(PluginManager $plugins, ViewPublisher $publisher)
+    public function __construct(PackageManager $plugins, ViewPublisher $publisher)
     {
         parent::__construct();
 
@@ -83,7 +84,11 @@ class ViewPublishCommand extends Command
             //
             $package = $properties['name'];
 
-            $path = $properties['path'] .str_replace('/', DS, '/src/Views');
+            if ($properties['type'] == 'package') {
+                $path = $properties['path'] .str_replace('/', DS, '/src/Views');
+            } else {
+                $path = $properties['path'] .DS . 'Views';
+            }
 
             $this->publisher->publish($package, $path);
         }

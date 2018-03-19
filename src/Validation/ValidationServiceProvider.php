@@ -8,9 +8,9 @@
 
 namespace Nova\Validation;
 
+use Nova\Support\ServiceProvider;
 use Nova\Validation\DatabasePresenceVerifier;
 use Nova\Validation\Factory;
-use Nova\Support\ServiceProvider;
 
 
 class ValidationServiceProvider extends ServiceProvider

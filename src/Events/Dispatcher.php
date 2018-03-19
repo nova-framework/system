@@ -2,10 +2,10 @@
 
 namespace Nova\Events;
 
-use Nova\Broadcasting\Contracts\ShouldBroadcastInterface as ShouldBroadcast;
-use Nova\Broadcasting\Contracts\ShouldBroadcastNowInterface as ShouldBroadcastNow;
+use Nova\Broadcasting\ShouldBroadcastInterface;
+use Nova\Broadcasting\ShouldBroadcastNowInterface;
 use Nova\Container\Container;
-use Nova\Events\Contracts\DispatcherInterface;
+use Nova\Events\DispatcherInterface;
 use Nova\Support\Str;
 
 use Exception;
@@ -43,11 +43,11 @@ class Dispatcher implements DispatcherInterface
     protected $sorted = array();
 
     /**
-     * The event firing stack.
+     * The event dispatching stack.
      *
      * @var array
      */
-    protected $firing = array();
+    protected $dispatching = array();
 
     /**
      * The queue resolver instance.
@@ -123,7 +123,7 @@ class Dispatcher implements DispatcherInterface
     {
         $this->listen($event .'_pushed', function() use ($event, $payload)
         {
-            $this->fire($event, $payload);
+            $this->dispatch($event, $payload);
         });
     }
 
@@ -164,7 +164,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function until($event, $payload = array())
     {
-        return $this->fire($event, $payload, true);
+        return $this->dispatch($event, $payload, true);
     }
 
     /**
@@ -175,28 +175,28 @@ class Dispatcher implements DispatcherInterface
      */
     public function flush($event)
     {
-        $this->fire($event .'_pushed');
+        $this->dispatch($event .'_pushed');
     }
 
     /**
-     * Get the event that is currently firing.
+     * Get the event that is currently dispatching.
      *
      * @return string
      */
-    public function firing()
+    public function dispatching()
     {
-        return last($this->firing);
+        return last($this->dispatching);
     }
 
     /**
-     * Fire an event and call the listeners.
+     * Dispatch an event and call the listeners.
      *
      * @param  string  $event
      * @param  mixed   $payload
      * @param  bool    $halt
      * @return array|null
      */
-    public function fire($event, $payload = array(), $halt = false)
+    public function dispatch($event, $payload = array(), $halt = false)
     {
         $responses = array();
 
@@ -214,10 +214,10 @@ class Dispatcher implements DispatcherInterface
             $payload = array($payload);
         }
 
-        $this->firing[] = $event;
+        $this->dispatching[] = $event;
 
-        if (isset($payload[0]) && (($instance = $payload[0]) instanceof ShouldBroadcast)) {
-            $this->broadcastEvent($instance);
+        if (isset($payload[0]) && ($payload[0] instanceof ShouldBroadcastInterface)) {
+            $this->broadcastEvent($payload[0]);
         }
 
         foreach ($this->getListeners($event) as $listener) {
@@ -227,14 +227,14 @@ class Dispatcher implements DispatcherInterface
             // we will just return this response, and not call the rest of the event
             // listeners. Otherwise we will add the response on the response list.
             if (! is_null($response) && $halt) {
-                array_pop($this->firing);
+                array_pop($this->dispatching);
 
                 return $response;
             }
 
             // If a boolean false is returned from a listener, we will stop propagating
             // the event to any further listeners down in the chain, else we keep on
-            // looping through the listeners and firing every one in our sequence.
+            // looping through the listeners and dispatching every one in our sequence.
             if ($response === false) {
                 break;
             }
@@ -242,24 +242,22 @@ class Dispatcher implements DispatcherInterface
             $responses[] = $response;
         }
 
-        array_pop($this->firing);
+        array_pop($this->dispatching);
 
-        return $halt ? null : $responses;
+        if (! $halt) {
+            return $responses;
+        }
     }
 
     /**
      * Broadcast the given event class.
      *
-     * @param  \Nova\Broadcasting\Contracts\ShouldBroadcastInterface  $event
+     * @param  \Nova\Broadcasting\ShouldBroadcastInterface  $event
      * @return void
      */
     protected function broadcastEvent($event)
     {
-        if (! issset($this->queueResolver)) {
-            return;
-        }
-
-        $connection = ($event instanceof ShouldBroadcastNow) ? 'sync' : null;
+        $connection = ($event instanceof ShouldBroadcastNowInterface) ? 'sync' : null;
 
         $queue = method_exists($event, 'onQueue') ? $event->onQueue() : null;
 
@@ -404,7 +402,7 @@ class Dispatcher implements DispatcherInterface
     protected function handlerShouldBeQueued($className)
     {
         try {
-            return with(new ReflectionClass($className))->implementsInterface('Nova\Queue\Contracts\ShouldQueueInterface');
+            return with(new ReflectionClass($className))->implementsInterface('Nova\Queue\ShouldQueueInterface');
         }
         catch (Exception $e) {
             return false;
@@ -422,31 +420,23 @@ class Dispatcher implements DispatcherInterface
     {
         return function () use ($className, $method)
         {
-            $arguments = $this->cloneArgumentsForQueueing(func_get_args());
+            // Clone the given arguments for queueing.
+            $arguments = array_map(function ($a)
+            {
+                return is_object($a) ? clone $a : $a;
+
+            }, func_get_args());
 
             if (method_exists($className, 'queue')) {
                 $this->callQueueMethodOnHandler($className, $method, $arguments);
             } else {
                 $this->resolveQueue()->push('Nova\Events\CallQueuedHandler@call', array(
-                    'class' => $className, 'method' => $method, 'data' => serialize($arguments),
+                    'class'  => $className,
+                    'method' => $method,
+                    'data'   => serialize($arguments),
                 ));
             }
         };
-    }
-
-    /**
-     * Clone the given arguments for queueing.
-     *
-     * @param  array  $arguments
-     * @return array
-     */
-    protected function cloneArgumentsForQueueing(array $arguments)
-    {
-        return array_map(function ($a)
-        {
-            return is_object($a) ? clone $a : $a;
-
-        }, $arguments);
     }
 
     /**
@@ -459,7 +449,7 @@ class Dispatcher implements DispatcherInterface
      */
     protected function callQueueMethodOnHandler($className, $method, $arguments)
     {
-        $handler = with(new ReflectionClass($class))->newInstanceWithoutConstructor();
+        $handler = with(new ReflectionClass($className))->newInstanceWithoutConstructor();
 
         $handler->queue($this->resolveQueue(), 'Nova\Events\CallQueuedHandler@call', array(
             'class'  => $className,

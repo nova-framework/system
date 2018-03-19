@@ -4,14 +4,13 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\RedisJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 use Nova\Redis\Database;
 
 
 class RedisQueue extends Queue implements QueueInterface
 {
-
     /**
     * The Redis database instance.
     *
@@ -39,6 +38,7 @@ class RedisQueue extends Queue implements QueueInterface
      * @var int|null
      */
     protected $expire = 60;
+
 
     /**
      * Create a new Redis queue instance.

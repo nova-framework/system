@@ -2,98 +2,119 @@
 
 namespace Nova\Console;
 
-use Nova\Container\Container;
-use Nova\Console\Command;
-use Nova\Events\Dispatcher;
-
-use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 use Closure;
 use Exception;
+use Throwable;
 
 
-class Application extends SymfonyApplication
+class Application extends \Symfony\Component\Console\Application
 {
     /**
      * The Nova application instance.
      *
-     * @var \Nova\Container\Container
+     * @var \Nova\Foundation\Application
      */
     protected $container;
 
-    /**
-     * The output from the previous command.
-     *
-     * @var \Symfony\Component\Console\Output\BufferedOutput
-     */
-    protected $lastOutput;
 
     /**
-     * The console application bootstrappers.
+     * Create and boot a new Console application.
      *
-     * @var array
+     * @param  \Nova\Foundation\Application  $app
+     * @return \Nova\Console\Application
      */
-    protected static $bootstrappers = array();
-
-
-    /**
-     * Create a new Artisan console application.
-     *
-     * @param  \Nova\Container\Container  $container
-     * @param  \Nova\Events\Dispatcher  $events
-     * @param  string  $version
-     * @return void
-     */
-    public function __construct(Container $container, Dispatcher $events, $version)
+    public static function start($app)
     {
-        parent::__construct('Nova Framework', $version);
-
-        $this->container = $container;
-
-        $this->setAutoExit(false);
-        $this->setCatchExceptions(false);
-
-        $events->fire('forge.start', array($this));
-
-        $this->bootstrap();
+        return static::make($app)->boot();
     }
 
     /**
-     * Register a console "starting" bootstrapper.
+     * Create a new Console application.
      *
-     * @param  \Closure  $callback
-     * @return void
+     * @param  \Nova\Foundation\Application  $app
+     * @return \Nova\Console\Application
      */
-    public static function starting(Closure $callback)
+    public static function make($app)
     {
-        static::$bootstrappers[] = $callback;
+        $app->boot();
+
+        $console = with($console = new static('Nova Framework', $app::VERSION))
+            ->setContainer($app)
+            ->setAutoExit(false);
+
+        $app->instance('forge', $console);
+
+        return $console;
     }
 
     /**
-     * Bootstrap the console application.
+     * Boot the Console application.
      *
-     * @return void
+     * @return $this
      */
-    protected function bootstrap()
+    public function boot()
     {
-        foreach (static::$bootstrappers as $bootstrapper) {
-            call_user_func($bootstrapper, $this);
+        $path = $this->container['path'] .DS .'Console' .DS .'Bootstrap.php';
+
+        if (is_readable($path)) require $path;
+
+        // If the event dispatcher is set on the application, we will fire an event
+        // with the Nova instance to provide each listener the opportunity to
+        // register their commands on this application before it gets started.
+        if (isset($this->container['events'])) {
+            $events = $this->container['events'];
+
+            $events->dispatch('forge.start', array($this));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Run the console application.
+     *
+     * @param  \Symfony\Component\Console\Input\InputInterface  $input
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @return int
+     */
+    public function handle($input, $output = null)
+    {
+        try {
+            return $this->run($input, $output);
+        }
+        catch (Exception $e) {
+            $this->manageException($output, $e);
+
+            return 1;
+        }
+        catch (Throwable $e) {
+            $this->manageException($output, new FatalThrowableError($e));
+
+            return 1;
         }
     }
 
-    /*
-     * Clear the console application bootstrappers.
+    /**
+     * Report and render the given exception.
      *
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @param  \Exception  $e
      * @return void
      */
-    public static function forgetBootstrappers()
+    protected function manageException(OutputInterface $output, Exception $e)
     {
-        static::$bootstrappers = array();
+        $handler = $this->getExceptionHandler();
+
+        $handler->report($e);
+
+        $handler->renderForConsole($output, $e);
     }
 
     /**
@@ -108,26 +129,14 @@ class Application extends SymfonyApplication
     {
         $parameters['command'] = $command;
 
-        //
-        $this->lastOutput = new BufferedOutput;
+        // Unless an output interface implementation was specifically passed to us we
+        // will use the "NullOutput" implementation by default to keep any writing
+        // suppressed so it doesn't leak out to the browser or any other source.
+        $output = $output ?: new NullOutput;
 
-        $this->setCatchExceptions(false);
+        $input = new ArrayInput($parameters);
 
-        $result = $this->run(new ArrayInput($parameters), $this->lastOutput);
-
-        $this->setCatchExceptions(true);
-
-        return $result;
-    }
-
-    /**
-     * Get the output for the last run command.
-     *
-     * @return string
-     */
-    public function output()
-    {
-        return $this->lastOutput ? $this->lastOutput->fetch() : '';
+        return $this->find($command)->run($input, $output);
     }
 
     /**
@@ -142,6 +151,17 @@ class Application extends SymfonyApplication
             $command->setContainer($this->container);
         }
 
+        return $this->addToParent($command);
+    }
+
+    /**
+     * Add the command to the parent instance.
+     *
+     * @param  \Symfony\Component\Console\Command\Command  $command
+     * @return \Symfony\Component\Console\Command\Command
+     */
+    protected function addToParent(SymfonyCommand $command)
+    {
         return parent::add($command);
     }
 
@@ -169,6 +189,20 @@ class Application extends SymfonyApplication
         foreach ($commands as $command)  {
             $this->resolve($command);
         }
+    }
+
+    /**
+     * Register a Closure based command with the application.
+     *
+     * @param  string  $signature
+     * @param  Closure  $callback
+     * @return \Nova\Console\ClosureCommand
+     */
+    public function command($signature, Closure $callback)
+    {
+        $command = new ClosureCommand($signature, $callback);
+
+        return $this->add($command);
     }
 
     /**
@@ -223,4 +257,13 @@ class Application extends SymfonyApplication
         return $this;
     }
 
+    /**
+     * Get the Exception Handler instance.
+     *
+     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     */
+    public function getExceptionHandler()
+    {
+        return $this->container->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+    }
 }

@@ -12,7 +12,7 @@ class Pluralizer
      *
      * @var array
      */
-    public static $uncountable = [
+    public static $uncountable = array(
         'audio',
         'bison',
         'chassis',
@@ -40,7 +40,7 @@ class Pluralizer
         'species',
         'swine',
         'traffic',
-    ];
+    );
 
     /**
      * Get the plural form of an English word.
@@ -93,7 +93,7 @@ class Pluralizer
      */
     protected static function matchCase($value, $comparison)
     {
-        $functions = ['mb_strtolower', 'mb_strtoupper', 'ucfirst', 'ucwords'];
+        $functions = array('mb_strtolower', 'mb_strtoupper', 'ucfirst', 'ucwords');
 
         foreach ($functions as $function) {
             if (call_user_func($function, $comparison) === $comparison) {

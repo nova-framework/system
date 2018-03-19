@@ -7,7 +7,7 @@ use Nova\Events\Dispatcher;
 use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\View;
-use Nova\View\Contracts\ViewFinderInterface;
+use Nova\View\ViewFinderInterface;
 
 use Closure;
 use InvalidArgumentException;
@@ -507,7 +507,7 @@ class Factory
      */
     public function callComposer(View $view)
     {
-        $this->events->fire('composing: ' .$view->getName(), array($view));
+        $this->events->dispatch('composing: ' .$view->getName(), array($view));
     }
 
     /**
@@ -518,7 +518,7 @@ class Factory
      */
     public function callCreator(View $view)
     {
-        $this->events->fire('creating: ' .$view->getName(), array($view));
+        $this->events->dispatch('creating: ' .$view->getName(), array($view));
     }
 
     /**
@@ -728,6 +728,17 @@ class Factory
         unset($this->extensions[$extension]);
 
         $this->extensions = array_merge(array($extension => $engine), $this->extensions);
+    }
+
+    /**
+     * Setup the paths for Views overriding.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function overridesFrom($namespace)
+    {
+        $this->finder->overridesFrom($namespace);
     }
 
     /**

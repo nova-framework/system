@@ -7,7 +7,6 @@ use Closure;
 
 class QueueManager
 {
-
     /**
      * The application instance.
      *
@@ -34,6 +33,7 @@ class QueueManager
         $this->app = $app;
     }
 
+
     /**
      * Register an event listener for the daemon queue loop.
      *
@@ -43,6 +43,28 @@ class QueueManager
     public function looping($callback)
     {
         $this->app['events']->listen('nova.queue.looping', $callback);
+    }
+
+    /**
+     * Register an event listener for the processing job event.
+     *
+     * @param  mixed  $callback
+     * @return void
+     */
+    public function processing($callback)
+    {
+        $this->app['events']->listen('nova.queue.processing', $callback);
+    }
+
+    /**
+     * Register an event listener for the processed job event.
+     *
+     * @param  mixed  $callback
+     * @return void
+     */
+    public function processed($callback)
+    {
+        $this->app['events']->listen('nova.queue.processed', $callback);
     }
 
     /**

@@ -4,7 +4,7 @@ namespace Nova\Session\Middleware;
 
 use Nova\Http\Request;
 use Nova\Session\SessionManager;
-use Nova\Session\Contracts\SessionInterface;
+use Nova\Session\SessionInterface;
 use Nova\Session\CookieSessionHandler;
 use Nova\Support\Arr;
 
@@ -55,9 +55,6 @@ class StartSession
     {
         $this->sessionHandled = true;
 
-        // If a session driver has been configured, we will need to start the session here
-        // so that the data is ready for an application. Note that the Nova sessions
-        // do not make use of PHP "native" sessions in any way since they are crappy.
         if ($this->sessionConfigured()) {
             $session = $this->startSession($request);
 
@@ -66,9 +63,6 @@ class StartSession
 
         $response = $next($request);
 
-        // Again, if the session has been configured we will need to close out the session
-        // so that the attributes may be persisted to some storage medium. We will also
-        // add the session identifier cookie to the application response headers now.
         if ($this->sessionConfigured()) {
             $this->storeCurrentUrl($request, $session);
 
@@ -98,7 +92,7 @@ class StartSession
      * Start the session for the given request.
      *
      * @param  \Nova\Http\Request  $request
-     * @return \Nova\Session\Contracts\SessionInterface
+     * @return \Nova\Session\SessionInterface
      */
     protected function startSession(Request $request)
     {
@@ -113,7 +107,7 @@ class StartSession
      * Get the session implementation from the manager.
      *
      * @param  \Nova\Http\Request  $request
-     * @return \Nova\Session\Contracts\SessionInterface
+     * @return \Nova\Session\SessionInterface
      */
     public function getSession(Request $request)
     {
@@ -128,7 +122,7 @@ class StartSession
      * Store the current URL for the request if necessary.
      *
      * @param  \Nova\Http\Request  $request
-     * @param  \Nova\Session\Contracts\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function storeCurrentUrl(Request $request, $session)
@@ -141,16 +135,13 @@ class StartSession
     /**
      * Remove the garbage from the session if necessary.
      *
-     * @param  \Nova\Session\Contracts\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function collectGarbage(SessionInterface $session)
     {
         $config = $this->manager->getSessionConfig();
 
-        // Here we will see if this request hits the garbage collection lottery by hitting
-        // the odds needed to perform garbage collection on any given request. If we do
-        // hit it, we'll call this handler to let it delete all the expired sessions.
         if ($this->configHitsLottery($config)) {
             $session->getHandler()->gc($this->getSessionLifetimeInSeconds());
         }
@@ -171,7 +162,7 @@ class StartSession
      * Add the session cookie to the application response.
      *
      * @param  \Symfony\Component\HttpFoundation\Response  $response
-     * @param  \Nova\Session\Contracts\SessionInterface  $session
+     * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
     protected function addCookieToResponse(Response $response, SessionInterface $session)

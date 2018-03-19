@@ -3,16 +3,19 @@
 namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
+use Nova\Container\Container;
+use Nova\Http\Request;
 use Nova\Redis\Database as RedisDatabase;
-use Nova\Support\Arr;
+
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 
-class RedisBroadcaster extends Broadcaster
+class RedisBroadcaster implements Broadcaster
 {
     /**
      * The Redis instance.
      *
-     * @var \Nova\Redis\Database
+     * @var \Nova\Contracts\Redis\Database
      */
     protected $redis;
 
@@ -31,8 +34,11 @@ class RedisBroadcaster extends Broadcaster
      * @param  string  $connection
      * @return void
      */
-    public function __construct(RedisDatabase $redis, $connection = null)
+    public function __construct(Container $container, RedisDatabase $redis, $connection = null)
     {
+        parent::__construct($container);
+
+        //
         $this->redis = $redis;
 
         $this->connection = $connection;
@@ -44,17 +50,14 @@ class RedisBroadcaster extends Broadcaster
      * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    public function authenticate($request)
+    public function authenticate(Request $request)
     {
         $channelName = $request->input('channel_name');
 
-        //
-        $count = 0;
+        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
 
-        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, -1, $count);
-
-        if (($count > 0) && is_null($user = $request->user())) {
-            throw new HttpException(403);
+        if (($count == 1) && is_null($request->user())) {
+            throw new AccessDeniedHttpException;
         }
 
         return $this->verifyUserCanAccessChannel($request, $channel);
@@ -67,53 +70,36 @@ class RedisBroadcaster extends Broadcaster
      * @param  mixed  $result
      * @return mixed
      */
-    public function validAuthenticationResponse($request, $result)
+    public function validAuthenticationResponse(Request $request, $result)
     {
         if (is_bool($result)) {
             return json_encode($result);
         }
 
+        $user = $request->user();
+
         return json_encode(array(
             'channel_data' => array(
-                'user_id'   => $request->user()->getAuthIdentifier(),
+                'user_id'   => $user->getAuthIdentifier(),
                 'user_info' => $result,
             ),
         ));
     }
 
     /**
-     * Broadcast the given event.
-     *
-     * @param  array  $channels
-     * @param  string  $event
-     * @param  array  $payload
-     * @return void
+     * {@inheritdoc}
      */
     public function broadcast(array $channels, $event, array $payload = array())
     {
-        $connection = $this->getConnection();
-
-        //
-        $socket = Arr::pull($payload, 'socket');
+        $connection = $this->redis->connection($this->connection);
 
         $payload = json_encode(array(
-            'event'  => $event,
-            'data'   => $payload,
-            'socket' => $socket,
+            'event' => $event,
+            'data'  => $payload
         ));
 
         foreach ($this->formatChannels($channels) as $channel) {
             $connection->publish($channel, $payload);
         }
     }
-
-    /**
-     * Get the Redis single connection implementation.
-     *
-     * @return \Predis\Connection\SingleConnectionInterface
-     */
-    public function getConnection()
-    {
-        return $this->redis->connection($this->connection);
-    }
-}
+ }

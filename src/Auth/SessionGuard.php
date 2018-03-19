@@ -2,10 +2,8 @@
 
 namespace Nova\Auth;
 
-use Nova\Auth\Contracts\StatefulGuardInterface;
-use Nova\Auth\Contracts\UserInterface;
-use Nova\Auth\Contracts\UserProviderInterface;
 use Nova\Auth\GuardHelpersTrait;
+use Nova\Auth\GuardInterface;
 use Nova\Cookie\CookieJar;
 use Nova\Events\Dispatcher;
 use Nova\Session\Store as SessionStore;
@@ -14,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class SessionGuard implements StatefulGuardInterface
+class SessionGuard implements GuardInterface
 {
     use GuardHelpersTrait;
 
@@ -30,7 +28,7 @@ class SessionGuard implements StatefulGuardInterface
     /**
      * The user we last attempted to retrieve.
      *
-     * @var \Nova\Auth\Contracts\UserInterface
+     * @var \Nova\Auth\UserInterface
      */
     protected $lastAttempted;
 
@@ -107,7 +105,7 @@ class SessionGuard implements StatefulGuardInterface
     /**
      * Get the currently authenticated user.
      *
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function user()
     {
@@ -389,7 +387,7 @@ class SessionGuard implements StatefulGuardInterface
         if ($this->events) {
             $payload = array($credentials, $remember, $login);
 
-            $this->events->fire('auth.attempt', $payload);
+            $this->events->dispatch('auth.attempt', $payload);
         }
     }
 
@@ -430,7 +428,7 @@ class SessionGuard implements StatefulGuardInterface
         // any listeners will hook into the authentication events and run actions
         // based on the login and logout events fired from the guard instances.
         if (isset($this->events)) {
-            $this->events->fire('auth.login', array($user, $remember));
+            $this->events->dispatch('auth.login', array($user, $remember));
         }
 
         $this->setUser($user);
@@ -454,7 +452,7 @@ class SessionGuard implements StatefulGuardInterface
      *
      * @param  mixed  $id
      * @param  bool   $remember
-     * @return \Nova\Auth\Contracts\UserInterface
+     * @return \Nova\Auth\UserInterface
      */
     public function loginUsingId($id, $remember = false)
     {
@@ -529,7 +527,7 @@ class SessionGuard implements StatefulGuardInterface
         }
 
         if (isset($this->events)) {
-            $this->events->fire('auth.logout', array($user));
+            $this->events->dispatch('auth.logout', array($user));
         }
 
         // Once we have fired the logout event we will clear the users out of memory
@@ -664,7 +662,7 @@ class SessionGuard implements StatefulGuardInterface
     /**
      * Return the currently cached user of the application.
      *
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function getUser()
     {
@@ -712,7 +710,7 @@ class SessionGuard implements StatefulGuardInterface
     /**
      * Get the last user we attempted to authenticate.
      *
-     * @return \Nova\Auth\Contracts\UserInterface
+     * @return \Nova\Auth\UserInterface
      */
     public function getLastAttempted()
     {

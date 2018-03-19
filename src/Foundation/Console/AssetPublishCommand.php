@@ -85,7 +85,7 @@ class AssetPublishCommand extends Command
         if ( ! is_null($path = $this->getPath())) {
             $this->publisher->publish($package, $path);
         } else {
-            $path = $this->dispatcher->getNamespace($package);
+            $path = $this->dispatcher->getPackagePath($package);
 
             $this->publisher->publishPackage($package, $path);
         }
@@ -123,7 +123,7 @@ class AssetPublishCommand extends Command
         $packages = array();
 
         //
-        $namespaces = $this->dispatcher->getNamespaces();
+        $namespaces = $this->dispatcher->getHints();
 
         foreach ($namespaces as $name => $hint) {
             $packages[] = $name;

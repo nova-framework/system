@@ -2,8 +2,6 @@
 
 namespace Nova\Cache;
 
-use Nova\Cache\Contracts\StoreInterface;
-
 
 class WinCacheStore extends TaggableStore implements StoreInterface
 {

@@ -7,14 +7,13 @@ use Nova\Http\Response;
 
 use Nova\Queue\Jobs\IronJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 use IronMQ;
 
 
 class IronQueue extends Queue implements QueueInterface
 {
-
     /**
      * The IronMQ instance.
      *
@@ -42,6 +41,7 @@ class IronQueue extends Queue implements QueueInterface
      * @var bool
      */
     protected $shouldEncrypt;
+
 
     /**
      * Create a new IronMQ queue instance.

@@ -1,92 +1,117 @@
 <?php
 
-use Nova\Broadcasting\Contracts\FactoryInterface as BroadcastFactory;
+use Nova\Broadcasting\FactoryInterface as BroadcastFactory;
 use Bova\Bus\Contracts\DispatcherInterface as BusDispatcher;
-use Nova\Container\Container;
 use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
 use Nova\Support\Collection;
-use Nova\Support\Facades\Plugin;
 use Nova\Support\Str;
 use Nova\View\Expression;
 
 
-if (! function_exists('site_url')) {
+if (! function_exists('site_url'))
+{
     /**
-     * Generate a url for the application.
+     * Site URL helper
      *
-     * @param  string  $path
-     * @param  mixed   $parameters
-     * @param  bool    $secure
      * @return string
      */
-    function site_url($path = null, $parameters = array(), $secure = null)
+    function site_url()
     {
-        return app('url')->to($path, $parameters, $secure);
+        if (empty($parameters = func_get_args())) {
+            return url('/');
+        }
+
+        $path = array_shift($parameters);
+
+        $result = preg_replace_callback('#\{(\d+)\}#', function ($matches) use ($parameters)
+        {
+            list ($value, $key) = $matches;
+
+            return isset($parameters[$key]) ? $parameters[$key] : $value;
+
+        }, $path);
+
+        return url($result);
     }
 }
 
-if (! function_exists('resource_url')) {
+if (! function_exists('resource_url'))
+{
     /**
      * Resource URL helper
-     *
      * @param string $path
-     * @param string|null $package
-     *
+     * @param string|null $module
      * @return string
      */
-    function resource_url($path, $package = null)
+    function resource_url($path, $module = null)
     {
-        if (is_null($package)) {
-            $path = 'assets/' .ltrim($path, '/');
-
-            return asset($path);
-        }
-
-        // We process for a package resource.
-        else if (Str::length($package) > 3) {
-            $package = Str::snake($package, '-');
+        if (is_null($module)) {
+            $basePath = 'assets';
         } else {
-            $package = Str::lower($package);
+            $module = str_replace('_', '-', $module);
+
+            $basePath = 'modules/' .$module;
         }
 
-        $path = 'packages/' .$package .'/' .ltrim($path, '/');
+        $path = $basePath .'/' .ltrim($path, '/');
 
-        return asset($path);
+        return url($path);
     }
 }
 
-if (! function_exists('plugin_path')) {
+if (! function_exists('theme_url'))
+{
     /**
-     * Return the path to the given module file.
-     *
-     * @param string $plugin
+     * Theme URL helper
      * @param string $path
-     *
+     * @param string $theme
      * @return string
      */
-    function plugin_path($plugin, $path = '')
+    function theme_url($path, $theme)
     {
-        $plugins = app('plugins');
+        $theme = str_replace('_', '-', $theme);
 
-        //
-        $properties = $plugins->where('basename', $plugin);
+        $path = sprintf('themes/%s/%s', $theme, ltrim($path, '/'));
 
-        if (! $properties->isEmpty()) {
-            $result = $plugins->resolveClassPath($properties);
-        } else {
-            return false;
-        }
-
-        if (! empty($path)) {
-            $result .= str_replace('/', DS, $path);
-        }
-
-        return realpath($result);
+        return url($path);
     }
 }
 
-if (! function_exists('__')) {
+if (! function_exists('package_url'))
+{
+    /**
+     * Package URL helper
+     * @param string $path
+     * @param string $package
+     * @return string
+     */
+    function package_url($path, $package)
+    {
+        $path = sprintf('packages/%s/%s', $package, ltrim($path, '/'));
+
+        return url($path);
+    }
+}
+
+if (! function_exists('vendor_url'))
+{
+    /**
+     * Vendor URL helper
+     * @param string $path
+     * @param string $vendor
+     * @return string
+     */
+    function vendor_url($path, $vendor)
+    {
+        $path = sprintf('vendor/%s/%s', $vendor, $path);
+
+        return url($path);
+    }
+}
+
+if (! function_exists('__'))
+{
     /**
      * Get the formatted and translated message back.
      *
@@ -105,7 +130,8 @@ if (! function_exists('__')) {
     }
 }
 
-if (! function_exists('__d')) {
+if (! function_exists('__d'))
+{
     /**
      * Get the formatted and translated message back with Domain.
      *
@@ -125,38 +151,8 @@ if (! function_exists('__d')) {
     }
 }
 
-if (! function_exists('collect')) {
-    /**
-     * Create a collection from the given value.
-     *
-     * @param  mixed  $value
-     * @return \Nova\Support\Collection
-     */
-    function collect($value = null)
-    {
-        return Collection::make($value);
-    }
-}
-
-if (! function_exists('abort')) {
-    /**
-     * Throw an HttpException with the given data.
-     *
-     * @param  int     $code
-     * @param  string  $message
-     * @param  array   $headers
-     * @return void
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-     */
-    function abort($code, $message = '', array $headers = array())
-    {
-        return app()->abort($code, $message, $headers);
-    }
-}
-
-if (! function_exists('action')) {
+if (! function_exists('action'))
+{
     /**
      * Generate a URL to a controller action.
      *
@@ -170,7 +166,8 @@ if (! function_exists('action')) {
     }
 }
 
-if (! function_exists('app')) {
+if (! function_exists('app'))
+{
     /**
      * Get the root Facade application instance.
      *
@@ -179,17 +176,17 @@ if (! function_exists('app')) {
      */
     function app($make = null)
     {
-        $instance = Container::getInstance();
-
-        if (! is_null($make)) {
-            return $instance->make($make);
+        if (! is_null($make))
+        {
+            return app()->make($make);
         }
 
-        return $instance;
+        return Nova\Support\Facades\Facade::getFacadeApplication();
     }
 }
 
-if (! function_exists('app_path')) {
+if (! function_exists('app_path'))
+{
     /**
      * Get the path to the application folder.
      *
@@ -202,20 +199,22 @@ if (! function_exists('app_path')) {
     }
 }
 
-if (! function_exists('base_path')) {
-    /**
-     * Get the path to the base of the install.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function base_path($path = '')
-    {
-        return app('path.base') .(! empty($path) ? DS .$path : $path);
-    }
+if (! function_exists('base_path'))
+{
+        /**
+         * Get the path to the base of the install.
+         *
+         * @param  string  $path
+         * @return string
+         */
+        function base_path($path = '')
+        {
+                return app()->make('path.base') .(! empty($path) ? DS .$path : $path);
+        }
 }
 
-if (! function_exists('storage_path')) {
+if (! function_exists('storage_path'))
+{
     /**
      * Get the path to the storage folder.
      *
@@ -228,7 +227,8 @@ if (! function_exists('storage_path')) {
     }
 }
 
-if (! function_exists('public_path')) {
+if (! function_exists('public_path'))
+{
     /**
      * Get the path to the public folder.
      *
@@ -237,11 +237,12 @@ if (! function_exists('public_path')) {
      */
     function public_path($path = '')
     {
-        return app('path.public') .(! empty($path) ? DS .$path : $path);
+        return app()->make('path.public') .(! empty($path) ? DS .$path : $path);
     }
 }
 
-if (! function_exists('append_config')) {
+if (! function_exists('append_config'))
+{
     /**
      * Assign high numeric IDs to a config item to force appending.
      *
@@ -264,7 +265,8 @@ if (! function_exists('append_config')) {
     }
 }
 
-if (! function_exists('array_add')) {
+if (! function_exists('array_add'))
+{
     /**
      * Add an element to an array using "dot" notation if it doesn't exist.
      *
@@ -279,7 +281,8 @@ if (! function_exists('array_add')) {
     }
 }
 
-if (! function_exists('array_build')) {
+if (! function_exists('array_build'))
+{
     /**
      * Build a new array using a callback.
      *
@@ -293,7 +296,8 @@ if (! function_exists('array_build')) {
     }
 }
 
-if (! function_exists('array_divide')) {
+if (! function_exists('array_divide'))
+{
     /**
      * Divide an array into two arrays. One with keys and the other with values.
      *
@@ -306,7 +310,8 @@ if (! function_exists('array_divide')) {
     }
 }
 
-if (! function_exists('array_dot')) {
+if (! function_exists('array_dot'))
+{
     /**
      * Flatten a multi-dimensional associative array with dots.
      *
@@ -320,7 +325,8 @@ if (! function_exists('array_dot')) {
     }
 }
 
-if (! function_exists('array_except')) {
+if (! function_exists('array_except'))
+{
     /**
      * Get all of the given array except for a specified array of items.
      *
@@ -334,7 +340,8 @@ if (! function_exists('array_except')) {
     }
 }
 
-if (! function_exists('array_fetch')) {
+if (! function_exists('array_fetch'))
+{
     /**
      * Fetch a flattened array of a nested array element.
      *
@@ -348,7 +355,8 @@ if (! function_exists('array_fetch')) {
     }
 }
 
-if (! function_exists('array_first')) {
+if (! function_exists('array_first'))
+{
     /**
      * Return the first element in an array passing a given truth test.
      *
@@ -363,7 +371,8 @@ if (! function_exists('array_first')) {
     }
 }
 
-if (! function_exists('array_last')) {
+if (! function_exists('array_last'))
+{
     /**
      * Return the last element in an array passing a given truth test.
      *
@@ -378,7 +387,8 @@ if (! function_exists('array_last')) {
     }
 }
 
-if (! function_exists('array_flatten')) {
+if (! function_exists('array_flatten'))
+{
     /**
      * Flatten a multi-dimensional array into a single level.
      *
@@ -391,7 +401,8 @@ if (! function_exists('array_flatten')) {
     }
 }
 
-if (! function_exists('array_forget')) {
+if (! function_exists('array_forget'))
+{
     /**
      * Remove one or many array items from a given array using "dot" notation.
      *
@@ -405,7 +416,8 @@ if (! function_exists('array_forget')) {
     }
 }
 
-if (! function_exists('array_get')) {
+if (! function_exists('array_get'))
+{
     /**
      * Get an item from an array using "dot" notation.
      *
@@ -420,7 +432,8 @@ if (! function_exists('array_get')) {
     }
 }
 
-if (! function_exists('array_has')) {
+if (! function_exists('array_has'))
+{
     /**
      * Check if an item exists in an array using "dot" notation.
      *
@@ -434,7 +447,8 @@ if (! function_exists('array_has')) {
     }
 }
 
-if (! function_exists('array_only')) {
+if (! function_exists('array_only'))
+{
     /**
      * Get a subset of the items from the given array.
      *
@@ -448,7 +462,8 @@ if (! function_exists('array_only')) {
     }
 }
 
-if (! function_exists('array_pluck')) {
+if (! function_exists('array_pluck'))
+{
     /**
      * Pluck an array of values from an array.
      *
@@ -463,7 +478,8 @@ if (! function_exists('array_pluck')) {
     }
 }
 
-if (! function_exists('array_pull')) {
+if (! function_exists('array_pull'))
+{
     /**
      * Get a value from the array, and remove it.
      *
@@ -478,7 +494,8 @@ if (! function_exists('array_pull')) {
     }
 }
 
-if (! function_exists('array_set')) {
+if (! function_exists('array_set'))
+{
     /**
      * Set an array item to a given value using "dot" notation.
      *
@@ -495,7 +512,8 @@ if (! function_exists('array_set')) {
     }
 }
 
-if (! function_exists('array_sort')) {
+if (! function_exists('array_sort'))
+{
     /**
      * Sort the array using the given Closure.
      *
@@ -509,7 +527,8 @@ if (! function_exists('array_sort')) {
     }
 }
 
-if (! function_exists('array_where')) {
+if (! function_exists('array_where'))
+{
     /**
      * Filter the array using the given Closure.
      *
@@ -523,7 +542,8 @@ if (! function_exists('array_where')) {
     }
 }
 
-if (! function_exists('asset')) {
+if (! function_exists('asset'))
+{
     /**
      * Generate an asset path for the application.
      *
@@ -537,7 +557,8 @@ if (! function_exists('asset')) {
     }
 }
 
-if (! function_exists('bcrypt')) {
+if (! function_exists('bcrypt'))
+{
     /**
      * Hash the given value.
      *
@@ -551,7 +572,8 @@ if (! function_exists('bcrypt')) {
     }
 }
 
-if (! function_exists('broadcast')) {
+if (! function_exists('broadcast'))
+{
     /**
      * Begin broadcasting an event.
      *
@@ -564,7 +586,8 @@ if (! function_exists('broadcast')) {
     }
 }
 
-if (! function_exists('camel_case')) {
+if (! function_exists('camel_case'))
+{
     /**
      * Convert a value to camel case.
      *
@@ -577,7 +600,8 @@ if (! function_exists('camel_case')) {
     }
 }
 
-if (! function_exists('class_basename')) {
+if (! function_exists('class_basename'))
+{
     /**
      * Get the class "basename" of the given object / class.
      *
@@ -586,13 +610,16 @@ if (! function_exists('class_basename')) {
      */
     function class_basename($class)
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        $className = is_object($class) ? get_class($class) : $class;
 
-        return basename(str_replace('\\', '/', $class));
+        return basename(
+            str_replace('\\', '/', $className)
+        );
     }
 }
 
-if (! function_exists('class_uses_recursive')) {
+if (! function_exists('class_uses_recursive'))
+{
     /**
      * Returns all traits used by a class, it's subclasses and trait of their traits
      *
@@ -601,13 +628,27 @@ if (! function_exists('class_uses_recursive')) {
      */
     function class_uses_recursive($class)
     {
-        $results = [];
+        $results = array();
 
-        foreach (array_merge([$class => $class], class_parents($class)) as $class) {
+        foreach (array_merge(array($class => $class), class_parents($class)) as $class) {
             $results += trait_uses_recursive($class);
         }
 
         return array_unique($results);
+    }
+}
+
+if (! function_exists('collect'))
+{
+    /**
+     * Create a collection from the given value.
+     *
+     * @param  mixed  $value
+     * @return \Nova\Support\Collection
+     */
+    function collect($value = null)
+    {
+        return Collection::make($value);
     }
 }
 
@@ -667,11 +708,12 @@ if (! function_exists('csrf_field')) {
      */
     function csrf_field()
     {
-        return new Expression('<input type="hidden" name="_token" value="' .csrf_token() .'">');
+        return new Expression('<input type="hidden" name="_token" value="' .csrf_token() .'" />');
     }
 }
 
-if (! function_exists('csrf_token')) {
+if (! function_exists('csrf_token'))
+{
     /**
      * Get the CSRF token value.
      *
@@ -691,7 +733,8 @@ if (! function_exists('csrf_token')) {
     }
 }
 
-if (! function_exists('data_get')) {
+if (! function_exists('data_get'))
+{
     /**
      * Get an item from an array or object using "dot" notation.
      *
@@ -726,7 +769,8 @@ if (! function_exists('data_get')) {
     }
 }
 
-if (! function_exists('dd')) {
+if (! function_exists('dd'))
+{
     /**
      * Dump the passed variables and end the script.
      *
@@ -745,7 +789,8 @@ if (! function_exists('dd')) {
     }
 }
 
-if (! function_exists('decrypt')) {
+if (! function_exists('decrypt'))
+{
     /**
      * Decrypt the given value.
      *
@@ -758,7 +803,8 @@ if (! function_exists('decrypt')) {
     }
 }
 
-if (! function_exists('dispatch')) {
+if (! function_exists('dispatch'))
+{
     /**
      * Dispatch a job to its appropriate handler.
      *
@@ -771,7 +817,8 @@ if (! function_exists('dispatch')) {
     }
 }
 
-if (! function_exists('e')) {
+if (! function_exists('e'))
+{
     /**
      * Escape HTML entities in a string.
      *
@@ -784,7 +831,8 @@ if (! function_exists('e')) {
     }
 }
 
-if (! function_exists('encrypt')) {
+if (! function_exists('encrypt'))
+{
     /**
      * Encrypt the given value.
      *
@@ -797,7 +845,8 @@ if (! function_exists('encrypt')) {
     }
 }
 
-if (! function_exists('ends_with')) {
+if (! function_exists('ends_with'))
+{
     /**
      * Determine if a given string ends with a given substring.
      *
@@ -864,11 +913,12 @@ if (! function_exists('event')) {
      */
     function event($event, $payload = array(), $halt = false)
     {
-        return app('events')->fire($event, $payload, $halt);
+        return app('events')->dispatch($event, $payload, $halt);
     }
 }
 
-if (! function_exists('head')) {
+if (! function_exists('head'))
+{
     /**
      * Get the first element of an array. Useful for method chaining.
      *
@@ -881,7 +931,25 @@ if (! function_exists('head')) {
     }
 }
 
-if (! function_exists('last')) {
+if (! function_exists('link_to'))
+{
+    /**
+     * Generate a HTML link.
+     *
+     * @param  string  $url
+     * @param  string  $title
+     * @param  array   $attributes
+     * @param  bool    $secure
+     * @return string
+     */
+    function link_to($url, $title = null, $attributes = array(), $secure = null)
+    {
+        return app('html')->link($url, $title, $attributes, $secure);
+    }
+}
+
+if (! function_exists('last'))
+{
     /**
      * Get the last element from an array.
      *
@@ -894,12 +962,63 @@ if (! function_exists('last')) {
     }
 }
 
+if (! function_exists('link_to_asset'))
+{
+    /**
+     * Generate a HTML link to an asset.
+     *
+     * @param  string  $url
+     * @param  string  $title
+     * @param  array   $attributes
+     * @param  bool    $secure
+     * @return string
+     */
+    function link_to_asset($url, $title = null, $attributes = array(), $secure = null)
+    {
+        return app('html')->linkAsset($url, $title, $attributes, $secure);
+    }
+}
+
+if (! function_exists('link_to_route'))
+{
+    /**
+     * Generate a HTML link to a named route.
+     *
+     * @param  string  $name
+     * @param  string  $title
+     * @param  array   $parameters
+     * @param  array   $attributes
+     * @return string
+     */
+    function link_to_route($name, $title = null, $parameters = array(), $attributes = array())
+    {
+        return app('html')->linkRoute($name, $title, $parameters, $attributes);
+    }
+}
+
+if (! function_exists('link_to_action'))
+{
+    /**
+     * Generate a HTML link to a controller action.
+     *
+     * @param  string  $action
+     * @param  string  $title
+     * @param  array   $parameters
+     * @param  array   $attributes
+     * @return string
+     */
+    function link_to_action($action, $title = null, $parameters = array(), $attributes = array())
+    {
+        return app('html')->linkAction($action, $title, $parameters, $attributes);
+    }
+}
+
 if (! function_exists('method_field')) {
     /**
      * Generate a form field to spoof the HTTP verb used by forms.
      *
      * @param  string  $method
-     * @return string
+     * @return \Nova\View\Expression
      */
     function method_field($method)
     {
@@ -907,7 +1026,8 @@ if (! function_exists('method_field')) {
     }
 }
 
-if (! function_exists('object_get')) {
+if (! function_exists('object_get'))
+{
     /**
      * Get an item from an object using "dot" notation.
      *
@@ -932,7 +1052,8 @@ if (! function_exists('object_get')) {
     }
 }
 
-if (! function_exists('preg_replace_sub')) {
+if (! function_exists('preg_replace_sub'))
+{
     /**
      * Replace a given pattern with each value in the array in sequentially.
      *
@@ -951,7 +1072,8 @@ if (! function_exists('preg_replace_sub')) {
     }
 }
 
-if (! function_exists('route')) {
+if (! function_exists('route'))
+{
     /**
      * Generate a URL to a named route.
      *
@@ -967,7 +1089,8 @@ if (! function_exists('route')) {
     }
 }
 
-if (! function_exists('secure_asset')) {
+if (! function_exists('secure_asset'))
+{
     /**
      * Generate an asset path for the application.
      *
@@ -980,7 +1103,8 @@ if (! function_exists('secure_asset')) {
     }
 }
 
-if (! function_exists('secure_url')) {
+if (! function_exists('secure_url'))
+{
     /**
      * Generate a HTTPS url for the application.
      *
@@ -994,7 +1118,8 @@ if (! function_exists('secure_url')) {
     }
 }
 
-if (! function_exists('snake_case')) {
+if (! function_exists('snake_case'))
+{
     /**
      * Convert a string to snake case.
      *
@@ -1008,7 +1133,8 @@ if (! function_exists('snake_case')) {
     }
 }
 
-if (! function_exists('starts_with')) {
+if (! function_exists('starts_with'))
+{
     /**
      * Determine if a given string starts with a given substring.
      *
@@ -1022,7 +1148,8 @@ if (! function_exists('starts_with')) {
     }
 }
 
-if (! function_exists('str_contains')) {
+if (! function_exists('str_contains'))
+{
     /**
      * Determine if a given string contains a given substring.
      *
@@ -1036,7 +1163,8 @@ if (! function_exists('str_contains')) {
     }
 }
 
-if (! function_exists('str_finish')) {
+if (! function_exists('str_finish'))
+{
     /**
      * Cap a string with a single instance of a given value.
      *
@@ -1050,7 +1178,8 @@ if (! function_exists('str_finish')) {
     }
 }
 
-if (! function_exists('str_is')) {
+if (! function_exists('str_is'))
+{
     /**
      * Determine if a given string matches a given pattern.
      *
@@ -1064,7 +1193,8 @@ if (! function_exists('str_is')) {
     }
 }
 
-if (! function_exists('str_limit')) {
+if (! function_exists('str_limit'))
+{
     /**
      * Limit the number of characters in a string.
      *
@@ -1079,7 +1209,8 @@ if (! function_exists('str_limit')) {
     }
 }
 
-if (! function_exists('str_plural')) {
+if (! function_exists('str_plural'))
+{
     /**
      * Get the plural form of an English word.
      *
@@ -1093,7 +1224,8 @@ if (! function_exists('str_plural')) {
     }
 }
 
-if (! function_exists('str_random')) {
+if (! function_exists('str_random'))
+{
     /**
      * Generate a more truly "random" alpha-numeric string.
      *
@@ -1108,7 +1240,8 @@ if (! function_exists('str_random')) {
     }
 }
 
-if (! function_exists('str_replace_array')) {
+if (! function_exists('str_replace_array'))
+{
     /**
      * Replace a given value in the string sequentially with an array.
      *
@@ -1128,7 +1261,8 @@ if (! function_exists('str_replace_array')) {
     }
 }
 
-if (! function_exists('str_singular')) {
+if (! function_exists('str_singular'))
+{
     /**
      * Get the singular form of an English word.
      *
@@ -1141,7 +1275,8 @@ if (! function_exists('str_singular')) {
     }
 }
 
-if (! function_exists('studly_case')) {
+if (! function_exists('studly_case'))
+{
     /**
      * Convert a value to studly caps case.
      *
@@ -1154,7 +1289,8 @@ if (! function_exists('studly_case')) {
     }
 }
 
-if (! function_exists('trait_uses_recursive')) {
+if (! function_exists('trait_uses_recursive'))
+{
     /**
      * Returns all traits used by a trait and its traits
      *
@@ -1165,7 +1301,8 @@ if (! function_exists('trait_uses_recursive')) {
     {
         $traits = class_uses($trait);
 
-        foreach ($traits as $trait)    {
+        foreach ($traits as $trait)
+        {
             $traits += trait_uses_recursive($trait);
         }
 
@@ -1173,7 +1310,8 @@ if (! function_exists('trait_uses_recursive')) {
     }
 }
 
-if (! function_exists('url')) {
+if (! function_exists('url'))
+{
     /**
      * Generate a url for the application.
      *
@@ -1188,7 +1326,8 @@ if (! function_exists('url')) {
     }
 }
 
-if (! function_exists('value')) {
+if (! function_exists('value'))
+{
     /**
      * Return the default value of the given value.
      *
@@ -1198,28 +1337,6 @@ if (! function_exists('value')) {
     function value($value)
     {
         return $value instanceof Closure ? $value() : $value;
-    }
-}
-
-if (! function_exists('view')) {
-    /**
-     * Get the evaluated view contents for the given view.
-     *
-     * @param  string  $view
-     * @param  array   $data
-     * @param  string  $module
-     * @param  string  $theme
-     * @return \Nova\View\View|\Nova\View\Factory
-     */
-    function view($view = null, $data = array(), $module = null, $theme = null)
-    {
-        $factory = app('view');
-
-        if (func_num_args() === 0) {
-            return $factory;
-        }
-
-        return $factory->make($view, $data, $module, $theme);
     }
 }
 
@@ -1235,7 +1352,8 @@ if (! function_exists('windows_os')) {
     }
 }
 
-if (! function_exists('with')) {
+if (! function_exists('with'))
+{
     /**
      * Return the given object. Useful for chaining.
      *

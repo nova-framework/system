@@ -3,7 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Http\Request;
-use Nova\Foundation\Contracts\ExceptionHandlerInterface as ExceptionHandler;
 use Nova\Pipeline\Pipeline as BasePipeline;
 
 use Symfony\Component\Debug\Exception\FatalThrowableError;

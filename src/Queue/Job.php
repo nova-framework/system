@@ -2,12 +2,14 @@
 
 namespace Nova\Queue;
 
+use Nova\Support\Arr;
+use Nova\Support\Str;
+
 use DateTime;
 
 
 abstract class Job
 {
-
     /**
      * The job handler instance.
      *
@@ -35,6 +37,7 @@ abstract class Job
      * @var bool
      */
     protected $deleted = false;
+
 
     /**
      * Fire the job.
@@ -93,11 +96,11 @@ abstract class Job
      */
     protected function resolveAndHandle(array $payload)
     {
-        list($class, $method) = $this->parseJob($payload['job']);
+        list($class, $method) = Str::parseCallback($payload['job'], 'handle');
 
         $this->instance = $this->resolve($class);
 
-        $this->instance->{$method}($this, $payload['data']);
+        call_user_func(array($this->instance, $method), $this, $payload['data']);
     }
 
     /**
@@ -109,19 +112,6 @@ abstract class Job
     protected function resolve($class)
     {
         return $this->container->make($class);
-    }
-
-    /**
-     * Parse the job declaration into class and method.
-     *
-     * @param  string  $job
-     * @return array
-     */
-    protected function parseJob($job)
-    {
-        $segments = explode('@', $job);
-
-        return (count($segments) > 1) ? $segments : array($segments[0], 'fire');
     }
 
     /**
@@ -166,7 +156,43 @@ abstract class Job
      */
     public function getName()
     {
-        return json_decode($this->getRawBody(), true)['job'];
+        $payload = json_decode($this->getRawBody(), true);
+
+        return $payload['job'];
+    }
+
+    /**
+     * Get the resolved name of the queued job class.
+     *
+     * @return string
+     */
+    public function resolveName()
+    {
+        $payload = json_decode($this->getRawBody(), true);
+
+        //
+        $name = $payload['job'];
+
+        // When the job is a Closure.
+        if ($name == 'Nova\Queue\CallQueuedClosure@call') {
+            return 'Closure';
+        }
+
+        // When the job is a Handler.
+        else if ($name == 'Nova\Queue\CallQueuedHandler@call') {
+            return Arr::get($payload, 'data.commandName', $name);
+        }
+
+        // When the job is an Event.
+        else if ($name == 'Nova\Events\CallQueuedHandler@call') {
+            $className = Arr::get($payload, 'data.class');
+
+            $method = Arr::get($payload, 'data.method');
+
+            return $className .'@' .$method;
+        }
+
+        return $name;
     }
 
     /**

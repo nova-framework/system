@@ -3,7 +3,7 @@
 namespace Nova\Auth;
 
 use Nova\Auth\GuardHelpersTrait;
-use Nova\Auth\Contracts\GuardInterface;
+use Nova\Auth\GuardInterface;
 use Nova\Http\Request;
 
 
@@ -42,7 +42,7 @@ class RequestGuard implements GuardInterface
     /**
      * Get the currently authenticated user.
      *
-     * @return \Nova\Auth\Contracts\UserInterface|null
+     * @return \Nova\Auth\UserInterface|null
      */
     public function user()
     {

@@ -6,7 +6,6 @@ use Nova\Database\Migrations\Migration;
 
 class {{class}} extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -28,6 +27,7 @@ class {{class}} extends Migration
      */
     public function down()
     {
-        Schema::drop('{{table}}');
+        Schema::dropIfExists('{{table}}');
     }
+
 }

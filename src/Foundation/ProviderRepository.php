@@ -9,13 +9,6 @@ class ProviderRepository
     /**
      * The filesystem instance.
      *
-     * @var \Nova\Foundation\Application
-     */
-    protected $app;
-
-    /**
-     * The filesystem instance.
-     *
      * @var \Nova\Filesystem\Filesystem
      */
     protected $files;
@@ -31,15 +24,12 @@ class ProviderRepository
     /**
      * Create a new service repository instance.
      *
-     * @param  \Nova\Foundation\Application  $app
      * @param  \Nova\Filesystem\Filesystem  $files
      * @param  string  $manifestPath
      * @return void
      */
-    public function __construct(Application $app, Filesystem $files, $manifestPath)
+    public function __construct(Filesystem $files, $manifestPath)
     {
-        $this->app = $app;
-
         $this->files = $files;
 
         $this->manifestPath = $manifestPath .DS .'services.php';
@@ -52,7 +42,7 @@ class ProviderRepository
      * @param  array  $providers
      * @return void
      */
-    public function load(array $providers)
+    public function load(Application $app, array $providers)
     {
         $manifest = $this->loadManifest();
 
@@ -60,13 +50,13 @@ class ProviderRepository
         // service providers registered with the application and which services it
         // provides. This is used to know which services are "deferred" loaders.
         if ($this->shouldRecompile($manifest, $providers)) {
-            $manifest = $this->compileManifest($this->app, $providers);
+            $manifest = $this->compileManifest($app, $providers);
         }
 
         // If the application is running in the console, we will not lazy load any of
         // the service providers. This is mainly because it's not as necessary for
         // performance and also so any provided Artisan commands get registered.
-        if ($this->app->runningInConsole()) {
+        if ($app->runningInConsole()) {
             $manifest['eager'] = $manifest['providers'];
         }
 
@@ -74,17 +64,17 @@ class ProviderRepository
         // that it has requested. This allows the service provider to defer itself
         // while still getting automatically loaded when a certain event occurs.
         foreach ($manifest['when'] as $provider => $events) {
-            $this->registerLoadEvents($this->app, $provider, $events);
+            $this->registerLoadEvents($app, $provider, $events);
         }
 
         // We will go ahead and register all of the eagerly loaded providers with the
         // application so their services can be registered with the application as
         // a provided service. Then we will set the deferred service list on it.
         foreach ($manifest['eager'] as $provider) {
-            $this->app->register($this->createProvider($this->app, $provider));
+            $app->register($this->createProvider($app, $provider));
         }
 
-        $this->app->setDeferredServices($manifest['deferred']);
+        $app->setDeferredServices($manifest['deferred']);
     }
 
     /**
@@ -119,7 +109,8 @@ class ProviderRepository
         // and determine if the manifest should be recompiled or is current.
         $manifest = $this->freshManifest($providers);
 
-        foreach ($providers as $provider) {
+        foreach ($providers as $provider)
+        {
             $instance = $this->createProvider($app, $provider);
 
             // When recompiling the service manifest, we will spin through each of the

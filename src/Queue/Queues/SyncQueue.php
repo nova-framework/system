@@ -4,12 +4,11 @@ namespace Nova\Queue\Queues;
 
 use Nova\Queue\Jobs\SyncJob;
 use Nova\Queue\Queue;
-use Nova\Queue\Contracts\QueueInterface;
+use Nova\Queue\QueueInterface;
 
 
 class SyncQueue extends Queue implements QueueInterface
 {
-
     /**
      * Push a new job onto the queue.
      *
@@ -37,6 +36,7 @@ class SyncQueue extends Queue implements QueueInterface
     {
         //
     }
+
 
     /**
      * Push a new job onto the queue after a delay.

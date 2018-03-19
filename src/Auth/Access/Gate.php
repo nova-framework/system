@@ -2,7 +2,7 @@
 
 namespace Nova\Auth\Access;
 
-use Nova\Auth\Contracts\Access\GateInterface;
+use Nova\Auth\Access\GateInterface;
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 use Nova\Auth\Access\Response;
 use Nova\Auth\Access\AuthorizationException;
@@ -266,7 +266,7 @@ class Gate implements GateInterface
     /**
      * Resolve and call the appropriate authorization callback.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $ability
      * @param  array  $arguments
      * @return bool
@@ -281,7 +281,7 @@ class Gate implements GateInterface
     /**
      * Call all of the before callbacks and return if a result is given.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $ability
      * @param  array  $arguments
      * @return bool|null
@@ -300,7 +300,7 @@ class Gate implements GateInterface
     /**
      * Call all of the after callbacks with check result.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $ability
      * @param  array  $arguments
      * @param  bool  $result
@@ -318,7 +318,7 @@ class Gate implements GateInterface
     /**
      * Resolve the callable for the given ability and arguments.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $ability
      * @param  array  $arguments
      * @return callable
@@ -363,7 +363,7 @@ class Gate implements GateInterface
     /**
      * Resolve the callback for a policy check.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @param  string  $ability
      * @param  array  $arguments
      * @return callable
@@ -435,7 +435,7 @@ class Gate implements GateInterface
     /**
      * Get a guard instance for the given user.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface|mixed  $user
+     * @param  \Nova\Auth\UserInterface|mixed  $user
      * @return static
      */
     public function forUser($user)

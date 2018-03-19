@@ -74,7 +74,7 @@ class Encrypter
      * @param  string $value
      * @return string
      *
-     * @throws \Nova\Encryption\EncryptException
+     * @throws \Encryption\EncryptException
      */
     public function encrypt($value)
     {
@@ -97,7 +97,7 @@ class Encrypter
      * @param  string $payload
      * @return string
      *
-     * @throws \Nova\Encryption\DecryptException
+     * @throws \Encryption\DecryptException
      */
     public function decrypt($payload)
     {
@@ -142,7 +142,7 @@ class Encrypter
      * @param  string $payload
      * @return array
      *
-     * @throws \Nova\Encryption\DecryptException
+     * @throws \Encryption\DecryptException
      */
     protected function getJsonPayload($payload)
     {

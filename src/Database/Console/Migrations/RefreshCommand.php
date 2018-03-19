@@ -6,6 +6,7 @@ use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
 use Symfony\Component\Console\Input\InputOption;
 
+
 class RefreshCommand extends Command
 {
     use ConfirmableTrait;

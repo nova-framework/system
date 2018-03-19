@@ -3,9 +3,10 @@
 namespace Nova\Routing\Console;
 
 use Nova\Console\Command;
+use Nova\Routing\Generators\MiddlewareGenerator;
+
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Nova\Routing\Generators\MiddlewareGenerator;
 
 
 class MiddlewareMakeCommand extends Command
@@ -61,6 +62,6 @@ class MiddlewareMakeCommand extends Command
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace .'\Http\Middleware';
+        return $rootNamespace .'\Middleware';
     }
 }

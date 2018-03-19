@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Encryption\Encrypter
+ * @see \Nova\Encryption\Encrypter
  */
 class Crypt extends Facade
 {

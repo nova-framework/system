@@ -101,6 +101,30 @@ class Redirector
     }
 
     /**
+     * Create a new redirect response from the given path and arguments.
+     *
+     * @return \Nova\Http\RedirectResponse
+     */
+    public function url()
+    {
+        if (empty($parameters = func_get_args())) {
+            return $this->to('/');
+        }
+
+        $path = array_shift($parameters);
+
+        $result = preg_replace_callback('#\{(\d+)\}#', function ($matches) use ($parameters)
+        {
+            list ($value, $key) = $matches;
+
+            return isset($parameters[$key]) ? $parameters[$key] : $value;
+
+        }, $path);
+
+        return $this->to($path);
+    }
+
+    /**
      * Create a new redirect response to the given path.
      *
      * @param  string  $path

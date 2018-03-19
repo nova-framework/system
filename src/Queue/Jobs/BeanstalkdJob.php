@@ -53,7 +53,9 @@ class BeanstalkdJob extends Job
      */
     public function handle()
     {
-        $this->resolveAndHandle(json_decode($this->getRawBody(), true));
+        $payload = json_decode($this->getRawBody(), true);
+
+        $this->resolveAndHandle($payload);
     }
 
     /**

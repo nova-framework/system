@@ -2,9 +2,6 @@
 
 namespace Nova\Cache;
 
-use Nova\Cache\Contracts\StoreInterface;
-
-
 class ApcStore extends TaggableStore implements StoreInterface
 {
     /**

@@ -4,10 +4,11 @@ namespace Nova\Broadcasting\Broadcasters;
 
 use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
-use Nova\Support\Arr;
+use Nova\Container\Container;
+use Nova\Http\Request;
 use Nova\Support\Str;
 
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 use Pusher;
 
@@ -21,14 +22,19 @@ class PusherBroadcaster extends Broadcaster
      */
     protected $pusher;
 
+
     /**
      * Create a new broadcaster instance.
      *
+     * @param  \Nova\Container\Container  $container
      * @param  \Pusher  $pusher
      * @return void
      */
-    public function __construct(Pusher $pusher)
+    public function __construct(Container $container, Pusher $pusher)
     {
+        parent::__construct($container);
+
+        //
         $this->pusher = $pusher;
     }
 
@@ -38,17 +44,14 @@ class PusherBroadcaster extends Broadcaster
      * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    public function authenticate($request)
+    public function authenticate(Request $request)
     {
         $channelName = $request->input('channel_name');
 
-        //
-        $count = 0;
+        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
 
-        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, -1, $count);
-
-        if (($count === 1) && is_null($user = $request->user())) {
-            throw new HttpException(403);
+        if (($count == 1) && is_null($request->user())) {
+            throw new AccessDeniedHttpException;
         }
 
         return $this->verifyUserCanAccessChannel($request, $channel);
@@ -61,43 +64,27 @@ class PusherBroadcaster extends Broadcaster
      * @param  mixed  $result
      * @return mixed
      */
-    public function validAuthenticationResponse($request, $result)
+    public function validAuthenticationResponse(Request $request, $result)
     {
         $channel = $request->input('channel_name');
 
         $socketId = $request->input('socket_id');
 
         if (Str::startsWith($channel, 'private')) {
-            return $this->decodePusherResponse(
-                $this->pusher->socket_auth($channel, $socketId)
+            $result = $this->pusher->socket_auth($channel, $socketId);
+        } else {
+            $user = $request->user();
+
+            $result = $this->pusher->presence_auth(
+                $channel, $socketId, $user->getAuthIndentifier(), $result
             );
         }
 
-        $authId = $request->user()->getKey();
-
-        return $this->decodePusherResponse(
-            $this->pusher->presence_auth($channel, $socketId, $authId, $result)
-        );
+        return json_decode($result, true);
     }
 
     /**
-     * Decode the given Pusher response.
-     *
-     * @param  mixed  $response
-     * @return array
-     */
-    protected function decodePusherResponse($response)
-    {
-        return json_decode($response, true);
-    }
-
-    /**
-     * Broadcast the given event.
-     *
-     * @param  array  $channels
-     * @param  string  $event
-     * @param  array  $payload
-     * @return void
+     * {@inheritdoc}
      */
     public function broadcast(array $channels, $event, array $payload = array())
     {
@@ -105,16 +92,11 @@ class PusherBroadcaster extends Broadcaster
 
         $response = $this->pusher->trigger($this->formatChannels($channels), $event, $payload, $socket, true);
 
-        //
-        $status = is_array($response) ? $response['status'] : 0;
-
-        if ((($status >= 200) && ($status <= 299)) || ($response === true)) {
+        if (($response['status'] >= 200) && ($response['status'] <= 299)) {
             return;
         }
 
-        throw new BroadcastException(
-            is_array($response) ? $response['body'] : 'Failed to connect to Pusher.'
-        );
+        throw new BroadcastException($response['body']);
     }
 
     /**

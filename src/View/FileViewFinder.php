@@ -3,7 +3,9 @@
 namespace Nova\View;
 
 use Nova\Filesystem\Filesystem;
-use Nova\View\Contracts\ViewFinderInterface;
+use Nova\Support\Arr;
+use Nova\Support\Str;
+use Nova\View\ViewFinderInterface;
 
 
 class FileViewFinder implements ViewFinderInterface
@@ -89,7 +91,6 @@ class FileViewFinder implements ViewFinderInterface
         return $this->views[$name] = $this->findInPaths($name, $this->paths);
     }
 
-
     /**
      * Get the path to a template with a named path.
      *
@@ -100,7 +101,17 @@ class FileViewFinder implements ViewFinderInterface
     {
         list($namespace, $view) = $this->getNamespaceSegments($name);
 
-        return $this->findInPaths($view, $this->hints[$namespace]);
+        $paths = $this->hints[$namespace];
+
+        if (Str::endsWith($path = head($this->paths), 'Overrides')) {
+            $path = $path .DS .'Packages' .DS .$namespace;
+
+            if (! in_array($path, $paths) && $this->files->isDirectory($path)) {
+                array_unshift($paths, $path);
+            }
+        }
+
+        return $this->findInPaths($view, $paths);
     }
 
     /**
@@ -135,11 +146,13 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @throws \InvalidArgumentException
      */
-    protected function findInPaths($name, $paths)
+    protected function findInPaths($name, array $paths)
     {
-        foreach ((array) $paths as $path) {
-            foreach ($this->getPossibleViewFiles($name) as $file) {
-                if ($this->files->exists($viewPath = $path .DS .$file)) {
+        foreach ($paths as $path) {
+            foreach ($this->getPossibleViewFiles($name) as $fileName) {
+                $viewPath = $path .DS .$fileName;
+
+                if ($this->files->exists($viewPath)) {
                     return $viewPath;
                 }
             }
@@ -172,6 +185,17 @@ class FileViewFinder implements ViewFinderInterface
     public function addLocation($location)
     {
         $this->paths[] = $location;
+    }
+
+    /**
+     * Add a location to the finder.
+     *
+     * @param  string  $location
+     * @return void
+     */
+    public function prependLocation($location)
+    {
+        array_unshift($this->paths, $location);
     }
 
     /**
@@ -234,6 +258,34 @@ class FileViewFinder implements ViewFinderInterface
     public function hasHintInformation($name)
     {
         return strpos($name, static::HINT_PATH_DELIMITER) > 0;
+    }
+
+    /**
+     * Prepend a path specified by its namespace.
+     *
+     * @param  string  $namespace
+     * @return void
+     */
+    public function overridesFrom($namespace)
+    {
+        if (! isset($this->hints[$namespace])) {
+            return;
+        }
+
+        $paths = $this->hints[$namespace];
+
+        // Compute the path for the Views overrides.
+        $path = head($paths) .DS .'Overrides';
+
+        if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
+            $firstPath = head($this->paths);
+
+            if (Str::endsWith($firstPath, 'Overrides')) {
+                array_shift($this->paths);
+            }
+
+            array_unshift($this->paths, $path);
+        }
     }
 
     /**

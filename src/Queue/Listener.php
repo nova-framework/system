@@ -9,7 +9,6 @@ use Closure;
 
 class Listener
 {
-
     /**
      * The command working path.
      *

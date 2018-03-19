@@ -2,8 +2,8 @@
 
 namespace Nova\Session;
 
-use Nova\Session\Contracts\ExistenceAwareInterface;
-use Nova\Session\Contracts\SessionInterface;
+use Nova\Session\ExistenceAwareInterface;
+use Nova\Session\SessionInterface;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionBagInterface;

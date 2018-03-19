@@ -5,7 +5,7 @@ namespace Nova\View\Compilers;
 use Nova\Support\Arr;
 use Nova\Support\Str;
 use Nova\View\Compilers\Compiler;
-use Nova\View\Contracts\CompilerInterface;
+use Nova\View\Compilers\CompilerInterface;
 
 use Closure;
 
@@ -757,6 +757,19 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected function compileEndpush($expression)
     {
         return "<?php \$__env->appendSection(); ?>";
+    }
+
+    /**
+     * Compile the assets statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileAssets($expression)
+    {
+        $expression = $this->stripParentheses($expression);
+
+        return "<?php echo Assets::fetch($expression); ?>";
     }
 
     /**

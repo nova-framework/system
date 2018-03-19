@@ -30,11 +30,11 @@ class BusServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(
-            'Nova\Bus\Dispatcher', 'Nova\Bus\Contracts\DispatcherInterface'
+            'Nova\Bus\Dispatcher', 'Nova\Bus\DispatcherInterface'
         );
 
         $this->app->alias(
-            'Nova\Bus\Dispatcher', 'Nova\Bus\Contracts\QueueingDispatcherInterface'
+            'Nova\Bus\Dispatcher', 'Nova\Bus\QueueingDispatcherInterface'
         );
     }
 
@@ -47,8 +47,8 @@ class BusServiceProvider extends ServiceProvider
     {
         return [
             'Nova\Bus\Dispatcher',
-            'Nova\Bus\Contracts\DispatcherInterface',
-            'Nova\Bus\Contracts\QueueingDispatcherInterface',
+            'Nova\Bus\DispatcherInterface',
+            'Nova\Bus\QueueingDispatcherInterface',
         ];
     }
 }

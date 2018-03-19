@@ -2,7 +2,6 @@
 
 namespace Nova\Cache;
 
-use Nova\Cache\Contracts\StoreInterface;
 use Nova\Support\Traits\MacroableTrait;
 
 use Carbon\Carbon;
@@ -21,7 +20,7 @@ class Repository implements ArrayAccess
     /**
      * The cache store implementation.
      *
-     * @var \Nova\Cache\Contracts\StoreInterface
+     * @var \Nova\Cache\StoreInterface
      */
     protected $store;
 
@@ -35,7 +34,7 @@ class Repository implements ArrayAccess
     /**
      * Create a new cache repository instance.
      *
-     * @param  \Nova\Cache\Contracts\StoreInterface  $store
+     * @param  \Nova\Cache\StoreInterface  $store
      */
     public function __construct(StoreInterface $store)
     {
@@ -64,7 +63,11 @@ class Repository implements ArrayAccess
     {
         $value = $this->store->get($key);
 
-        return ! is_null($value) ? $value : value($default);
+        if (! is_null($value)) {
+            return $value;
+        }
+
+        return value($default);
     }
 
     /**
@@ -110,11 +113,13 @@ class Repository implements ArrayAccess
      */
     public function add($key, $value, $minutes)
     {
-        if (is_null($this->get($key))) {
-            $this->put($key, $value, $minutes); return true;
+        if (! is_null($this->get($key))) {
+            return false;
         }
 
-        return false;
+        $this->put($key, $value, $minutes);
+
+        return true;
     }
 
     /**
@@ -196,7 +201,7 @@ class Repository implements ArrayAccess
     /**
      * Get the cache store implementation.
      *
-     * @return \Nova\Cache\Contracts\StoreInterface
+     * @return \Nova\Cache\StoreInterface
      */
     public function getStore()
     {

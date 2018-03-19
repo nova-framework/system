@@ -2,7 +2,6 @@
 
 namespace Nova\Cache;
 
-use Nova\Cache\Contracts\StoreInterface;
 use Nova\Redis\Database as Redis;
 
 
@@ -32,7 +31,7 @@ class RedisStore extends TaggableStore implements StoreInterface
     /**
      * Create a new Redis store.
      *
-     * @param  \Nova\Redis\Database  $redis
+     * @param  \Redis\Database  $redis
      * @param  string  $prefix
      * @param  string  $connection
      * @return void
@@ -170,7 +169,7 @@ class RedisStore extends TaggableStore implements StoreInterface
     /**
      * Get the Redis database instance.
      *
-     * @return \Nova\Redis\Database
+     * @return \Redis\Database
      */
     public function getRedis()
     {

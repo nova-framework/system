@@ -3,7 +3,8 @@
 use Nova\Database\Schema\Blueprint;
 use Nova\Database\Migrations\Migration;
 
-class CreateCacheTable extends Migration 
+
+class CreateCacheTable extends Migration
 {
 
     /**
@@ -30,5 +31,4 @@ class CreateCacheTable extends Migration
     {
         Schema::dropIfExists('cache');
     }
-
 }

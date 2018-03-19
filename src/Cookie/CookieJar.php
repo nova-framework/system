@@ -115,7 +115,9 @@ class CookieJar
             $cookie = call_user_func_array(array($this, 'make'), func_get_args());
         }
 
-        $this->queued[$cookie->getName()] = $cookie;
+        $name = $cookie->getName();
+
+        $this->queued[$name] = $cookie;
     }
 
     /**

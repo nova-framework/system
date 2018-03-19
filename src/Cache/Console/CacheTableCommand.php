@@ -29,6 +29,7 @@ class CacheTableCommand extends Command
      */
     protected $files;
 
+
     /**
      * Create a new session table command instance.
      *
@@ -57,7 +58,7 @@ class CacheTableCommand extends Command
 
         $this->info('Migration created successfully!');
 
-        $this->call('dump-autoload');
+        $this->call('optimize');
     }
 
     /**

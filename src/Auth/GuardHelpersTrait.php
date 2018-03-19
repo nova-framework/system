@@ -2,8 +2,8 @@
 
 namespace Nova\Auth;
 
-use Nova\Auth\Contracts\UserInterface;
 use Nova\Auth\AuthenticationException;
+use Nova\Auth\UserInterface;
 
 
 /**
@@ -14,14 +14,14 @@ trait GuardHelpersTrait
     /**
      * The currently authenticated user.
      *
-     * @var \Nova\Auth\Contracts\UserInterface
+     * @var \Nova\Auth\UserInterface
      */
     protected $user;
 
     /**
      * The user provider implementation.
      *
-     * @var \Nova\Auth\Contracts\UserProviderInterface
+     * @var \Nova\Auth\UserProviderInterface
      */
     protected $provider;
 
@@ -77,7 +77,7 @@ trait GuardHelpersTrait
     /**
      * Set the current user.
      *
-     * @param  \Nova\Auth\Contracts\UserInterface  $user
+     * @param  \Nova\Auth\UserInterface  $user
      * @return $this
      */
     public function setUser(UserInterface $user)
