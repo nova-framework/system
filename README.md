@@ -50,7 +50,7 @@ composer create-project nova-framework/framework foldername 4.* -s dev
 
 ```
 composer create-project nova-framework/app foldername 4.* -s dev
-
+```
 The foldername is the desired folder to be created.
 
 ## Documentation
