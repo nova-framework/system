@@ -46,6 +46,10 @@ You can install the framework from a terminal by using:
 ```
 composer create-project nova-framework/framework foldername 4.* -s dev
 ```
+> **Note:** You can install the bare application variant from a terminal by using:
+
+```
+composer create-project nova-framework/app foldername 4.* -s dev
 
 The foldername is the desired folder to be created.
 
