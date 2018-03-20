@@ -1,7 +1,7 @@
 <?php
 
 use Nova\Broadcasting\FactoryInterface as BroadcastFactory;
-use Bova\Bus\Contracts\DispatcherInterface as BusDispatcher;
+use Nova\Bus\Contracts\DispatcherInterface as BusDispatcher;
 use Nova\Support\Debug\Dumper;
 use Nova\Support\Arr;
 use Nova\Support\Collection;

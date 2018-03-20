@@ -155,7 +155,7 @@ class CacheManager extends Manager
      * @param  \Nova\Cache\StoreInterface  $store
      * @return \Nova\Cache\Repository
      */
-    protected function repository(StoreInterface $store)
+    public function repository(StoreInterface $store)
     {
         return new Repository($store);
     }
