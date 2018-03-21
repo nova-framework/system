@@ -2,8 +2,10 @@
 
 namespace Nova\Cache;
 
-use Closure;
 use Nova\Support\Manager;
+
+use Closure;
+
 
 class CacheManager extends Manager
 {
