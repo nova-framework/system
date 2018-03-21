@@ -7,6 +7,7 @@ use Memcached;
 
 class MemcachedConnector
 {
+
     /**
      * Create a new Memcached connection.
      *
@@ -46,5 +47,4 @@ class MemcachedConnector
     {
         return new Memcached;
     }
-
 }

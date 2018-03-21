@@ -19,6 +19,7 @@ class TagSet
      */
     protected $names = array();
 
+
     /**
      * Create a new TagSet instance.
      *

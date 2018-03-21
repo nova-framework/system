@@ -5,6 +5,7 @@ namespace Nova\Cache;
 
 class MemcachedStore extends TaggableStore implements StoreInterface
 {
+
     /**
      * The Memcached instance.
      *
@@ -137,5 +138,4 @@ class MemcachedStore extends TaggableStore implements StoreInterface
     {
         return $this->prefix;
     }
-
 }

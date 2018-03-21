@@ -24,6 +24,7 @@ class ArrayStore extends TaggableStore implements StoreInterface
         }
     }
 
+
     /**
      * Store an item in the cache for a given number of minutes.
      *

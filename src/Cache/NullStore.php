@@ -12,6 +12,7 @@ class NullStore extends TaggableStore implements StoreInterface
      */
     protected $storage = array();
 
+
     /**
      * Retrieve an item from the cache by key.
      *
@@ -102,5 +103,4 @@ class NullStore extends TaggableStore implements StoreInterface
     {
         return '';
     }
-
 }

@@ -23,6 +23,7 @@ class TaggedCache implements StoreInterface
      */
     protected $tags;
 
+
     /**
      * Create a new tagged cache instance.
      *
@@ -240,5 +241,4 @@ class TaggedCache implements StoreInterface
 
         return is_string($duration) ? (int) $duration : $duration;
     }
-
 }

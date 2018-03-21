@@ -31,6 +31,7 @@ class Repository implements ArrayAccess
      */
     protected $default = 60;
 
+
     /**
      * Create a new cache repository instance.
      *
@@ -285,5 +286,4 @@ class Repository implements ArrayAccess
 
         return call_user_func_array(array($this->store, $method), $parameters);
     }
-
 }

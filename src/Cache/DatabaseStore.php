@@ -36,6 +36,7 @@ class DatabaseStore implements StoreInterface
      */
     protected $prefix;
 
+
     /**
      * Create a new database store.
      *

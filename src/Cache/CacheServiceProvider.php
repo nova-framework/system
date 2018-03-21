@@ -14,6 +14,7 @@ class CacheServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
+
     /**
      * Register the service provider.
      *

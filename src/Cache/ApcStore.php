@@ -18,6 +18,7 @@ class ApcStore extends TaggableStore implements StoreInterface
      */
     protected $prefix;
 
+
     /**
      * Create a new APC store.
      *

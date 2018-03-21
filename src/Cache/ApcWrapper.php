@@ -12,6 +12,7 @@ class ApcWrapper
      */
     protected $apcu = false;
 
+
     /**
      * Create a new APC wrapper instance.
      *

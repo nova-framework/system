@@ -4,6 +4,7 @@ namespace Nova\Cache;
 
 class RedisTaggedCache extends TaggedCache
 {
+
     /**
      * Store an item in the cache indefinitely.
      *
@@ -85,5 +86,4 @@ class RedisTaggedCache extends TaggedCache
     {
         return $this->getPrefix().$segment.':forever';
     }
-
 }

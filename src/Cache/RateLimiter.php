@@ -14,6 +14,7 @@ class RateLimiter
      */
     protected $cache;
 
+
     /**
      * Create a new rate limiter instance.
      *

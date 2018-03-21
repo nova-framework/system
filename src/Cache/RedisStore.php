@@ -28,6 +28,7 @@ class RedisStore extends TaggableStore implements StoreInterface
      */
     protected $connection;
 
+
     /**
      * Create a new Redis store.
      *
@@ -185,5 +186,4 @@ class RedisStore extends TaggableStore implements StoreInterface
     {
         return $this->prefix;
     }
-
 }

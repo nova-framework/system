@@ -21,6 +21,7 @@ class FileStore implements StoreInterface
      */
     protected $directory;
 
+
     /**
      * Create a new file cache store instance.
      *

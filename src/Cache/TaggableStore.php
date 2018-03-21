@@ -5,6 +5,7 @@ namespace Nova\Cache;
 
 abstract class TaggableStore
 {
+
     /**
      * Begin executing a new tags operation.
      *
@@ -26,5 +27,4 @@ abstract class TaggableStore
     {
         return new TaggedCache($this, new TagSet($this, is_array($names) ? $names : func_get_args()));
     }
-
 }
