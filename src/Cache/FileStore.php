@@ -208,7 +208,7 @@ class FileStore implements StoreInterface
     {
         $parts = array_slice(str_split($hash = sha1($key), 2), 0, 2);
 
-        return $this->directory .DS .join(DS, $parts) .DS .$hash;
+        return $this->directory .DS .implode(DS, $parts) .DS .$hash .'.cache';
     }
 
     /**
