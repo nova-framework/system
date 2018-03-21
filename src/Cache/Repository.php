@@ -136,11 +136,14 @@ class Repository implements ArrayAccess
         // If the item exists in the cache we will just return this immediately
         // otherwise we will execute the given Closure and cache the result
         // of that execution for the given number of minutes in storage.
+
         if (! is_null($value = $this->get($key))) {
             return $value;
         }
 
-        $this->put($key, $value = $callback(), $minutes);
+        $value = call_user_func($callback);
+
+        $this->put($key, $value, $minutes);
 
         return $value;
     }
@@ -169,11 +172,12 @@ class Repository implements ArrayAccess
         // If the item exists in the cache we will just return this immediately
         // otherwise we will execute the given Closure and cache the result
         // of that execution for the given number of minutes. It's easy.
+
         if (! is_null($value = $this->get($key))) {
             return $value;
         }
 
-        $this->forever($key, $value = $callback());
+        $this->forever($key, $value = call_user_func($callback));
 
         return $value;
     }

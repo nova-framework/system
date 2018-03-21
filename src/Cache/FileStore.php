@@ -101,7 +101,7 @@ class FileStore implements StoreInterface
      */
     public function put($key, $value, $minutes)
     {
-        $value = $this->expiration($minutes).serialize($value);
+        $value = $this->expiration($minutes) .serialize($value);
 
         $this->createCacheDirectory($path = $this->path($key));
 
@@ -189,10 +189,12 @@ class FileStore implements StoreInterface
      */
     public function flush()
     {
-        if ($this->files->isDirectory($this->directory)) {
-            foreach ($this->files->directories($this->directory) as $directory) {
-                $this->files->deleteDirectory($directory);
-            }
+        if (! $this->files->isDirectory($this->directory)) {
+            return;
+        }
+
+        foreach ($this->files->directories($this->directory) as $directory) {
+            $this->files->deleteDirectory($directory);
         }
     }
 
