@@ -64,26 +64,6 @@ class CacheManager extends Manager
     }
 
     /**
-     * Create an instance of the WinCache cache driver.
-     *
-     * @return \Nova\Cache\WinCacheStore
-     */
-    protected function createWincacheDriver()
-    {
-        return $this->repository(new WinCacheStore($this->getPrefix()));
-    }
-
-    /**
-     * Create an instance of the XCache cache driver.
-     *
-     * @return \Nova\Cache\WinCacheStore
-     */
-    protected function createXcacheDriver()
-    {
-        return $this->repository(new XCacheStore($this->getPrefix()));
-    }
-
-    /**
      * Create an instance of the Redis cache driver.
      *
      * @return \Nova\Cache\RedisStore
