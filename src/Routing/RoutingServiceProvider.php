@@ -139,17 +139,23 @@ class RoutingServiceProvider extends ServiceProvider
             $dispatcher = new AssetDispatcher($app);
 
             // Register the route for assets from Vendor or main assets folder.
-            $dispatcher->route('(assets|vendor)/(.*)', function (Request $request, $type, $path) use ($dispatcher)
+            $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
             {
-                if ($type == 'vendor') {
-                    $paths = $dispatcher->getVendorPaths();
+                $path = STORAGE_PATH .'assets' .DS .str_replace('/', DS, $path);
 
-                    if (! Str::startsWith($path, $paths)) {
-                        return new Response('File Not Found', 404);
-                    }
+                return $dispatcher->serve($path, $request);
+            });
+
+            // Register the route for assets from Vendor or main assets folder.
+            $dispatcher->route('vendor/(.*)', function (Request $request, $path) use ($dispatcher)
+            {
+                $paths = $dispatcher->getVendorPaths();
+
+                if (! Str::startsWith($path, $paths)) {
+                    return new Response('File Not Found', 404);
                 }
 
-                $path = BASEPATH .$type .DS .str_replace('/', DS, $path);
+                $path = BASEPATH .'vendor' .DS .str_replace('/', DS, $path);
 
                 return $dispatcher->serve($path, $request);
             });
