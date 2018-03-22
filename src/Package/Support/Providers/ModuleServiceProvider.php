@@ -21,7 +21,7 @@ class ModuleServiceProvider extends ServiceProvider
         $assets = $path .DS .'Assets';
 
         if ($this->app['files']->isDirectory($assets)) {
-            $namespace = 'modules/' .$namespace;
+            $namespace = 'modules/' .str_replace('_', '-', $namespace);
 
             $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }

@@ -21,7 +21,7 @@ class ThemeServiceProvider extends ServiceProvider
         $assets = $path .DS .'Assets';
 
         if ($this->app['files']->isDirectory($assets)) {
-            $namespace = 'themes/' .$namespace;
+            $namespace = 'themes/' .str_replace('_', '-', $namespace);
 
             $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }

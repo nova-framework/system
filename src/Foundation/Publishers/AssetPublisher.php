@@ -54,7 +54,9 @@ class AssetPublisher
      */
     public function publish($name, $source)
     {
-        $destination = $this->publishPath .str_replace('/', DS, "/packages/{$name}");
+        $package = str_replace('_', '-', $name);
+
+        $destination = $this->publishPath .str_replace('/', DS, "/packages/{$package}");
 
         if (! $this->files->isDirectory($destination)) {
             $this->files->makeDirectory($destination, 0777, true);

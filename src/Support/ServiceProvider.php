@@ -124,7 +124,7 @@ abstract class ServiceProvider
         if ($this->app['files']->isDirectory($assets)) {
             list ($vendor) = explode('/', $package);
 
-            $namespace = sprintf('packages/%s/%s', Str::snake($vendor), $namespace);
+            $namespace = Str::snake($vendor, '-') .'/' .str_replace('_', '-', $namespace);
 
             $this->app['assets.dispatcher']->package($package, $assets, $namespace);
         }
