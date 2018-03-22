@@ -236,7 +236,7 @@ class Dispatcher
         $files = $this->app['files'];
 
         // The cache file path.
-        $path = STORAGE_PATH .'framework' .DS .'vendors.php';
+        $path = STORAGE_PATH .'framework' .DS .'assets' .DS .'vendor_paths.php';
 
         // The config path for checking againts the cache file.
         $configPath = APPPATH .'Config' .DS .'Routing.php';
@@ -266,6 +266,8 @@ class Dispatcher
         $paths = array_unique($paths);
 
         // Save to the cache.
+        $files->makeDirectory(dirname($path), 0755, true, true);
+
         $content = "<?php\n\nreturn " .var_export($paths, true) .";\n";
 
         $files->put($path, $content);

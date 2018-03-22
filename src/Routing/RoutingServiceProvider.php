@@ -138,7 +138,7 @@ class RoutingServiceProvider extends ServiceProvider
         {
             $dispatcher = new AssetDispatcher($app);
 
-            // Register the route for assets from Vendor or main assets folder.
+            // Register the route for assets from main assets folder.
             $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
             {
                 $path = STORAGE_PATH .'assets' .DS .str_replace('/', DS, $path);
@@ -146,7 +146,21 @@ class RoutingServiceProvider extends ServiceProvider
                 return $dispatcher->serve($path, $request);
             });
 
-            // Register the route for assets from Vendor or main assets folder.
+            // Register the route for assets from Packages, Modules and Themes.
+            $dispatcher->route('packages/([^/]+)/([^/]+)/(.*)', function (Request $request, $vendor, $package, $path) use ($dispatcher)
+            {
+                $namespace = $vendor .'/' .$package;
+
+                if (is_null($packagePath = $dispatcher->getPackagePath($namespace))) {
+                    return new Response('File Not Found', 404);
+                }
+
+                $path = $packagePath .str_replace('/', DS, $path);
+
+                return $dispatcher->serve($path, $request);
+            });
+
+            // Register the route for assets from Vendor.
             $dispatcher->route('vendor/(.*)', function (Request $request, $path) use ($dispatcher)
             {
                 $paths = $dispatcher->getVendorPaths();
@@ -156,20 +170,6 @@ class RoutingServiceProvider extends ServiceProvider
                 }
 
                 $path = BASEPATH .'vendor' .DS .str_replace('/', DS, $path);
-
-                return $dispatcher->serve($path, $request);
-            });
-
-            // Register the route for assets from Packages, Modules and Themes.
-            $dispatcher->route('(themes|modules|packages)/([^/]+)/(.*)', function (Request $request, $type, $package, $path) use ($dispatcher)
-            {
-                $namespace = $type .'/' .$package;
-
-                if (is_null($packagePath = $dispatcher->getPackagePath($namespace))) {
-                    return new Response('File Not Found', 404);
-                }
-
-                $path = $packagePath .str_replace('/', DS, $path);
 
                 return $dispatcher->serve($path, $request);
             });

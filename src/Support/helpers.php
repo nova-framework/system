@@ -36,59 +36,23 @@ if (! function_exists('site_url'))
     }
 }
 
-if (! function_exists('resource_url'))
+if (! function_exists('asset_url'))
 {
     /**
-     * Resource URL helper
+     * Asset URL helper
      * @param string $path
-     * @param string|null $module
+     * @param string|null $package
      * @return string
      */
-    function resource_url($path, $module = null)
+    function asset_url($path, $package = null)
     {
-        if (is_null($module)) {
-            $basePath = 'assets';
-        } else {
-            $module = str_replace('_', '-', $module);
+        $path = ltrim($path, '/');
 
-            $basePath = 'modules/' .$module;
+        if (is_null($package)) {
+            return url('assets/' .$path);
         }
 
-        $path = $basePath .'/' .ltrim($path, '/');
-
-        return url($path);
-    }
-}
-
-if (! function_exists('theme_url'))
-{
-    /**
-     * Theme URL helper
-     * @param string $path
-     * @param string $theme
-     * @return string
-     */
-    function theme_url($path, $theme)
-    {
-        $theme = str_replace('_', '-', $theme);
-
-        $path = sprintf('themes/%s/%s', $theme, ltrim($path, '/'));
-
-        return url($path);
-    }
-}
-
-if (! function_exists('package_url'))
-{
-    /**
-     * Package URL helper
-     * @param string $path
-     * @param string $package
-     * @return string
-     */
-    function package_url($path, $package)
-    {
-        $path = sprintf('packages/%s/%s', $package, ltrim($path, '/'));
+        $path = sprintf('packages/%s/%s', str_replace('_', '-', $package), $path);
 
         return url($path);
     }
