@@ -19,6 +19,27 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
+     * Define the routes for the module.
+     *
+     * @param  \Nova\Routing\Router $router
+     * @return void
+     */
+    public function map(Router $router)
+    {
+        $path = $this->guessPackagePath();
+
+        $router->group(array('prefix' => 'api', 'middleware' => 'api', 'namespace' => $this->namespace), function ($router) use ($path)
+        {
+            require $path .str_replace('/', DS, '/Routes/Api.php');
+        });
+
+        $router->group(array('middleware' => 'web', 'namespace' => $this->namespace), function ($router) use ($path)
+        {
+            require $path .str_replace('/', DS, '/Routes/Api.php');
+        });
+    }
+
+    /**
      * Add middleware to the router.
      *
      * @param array $routeMiddleware
