@@ -3,6 +3,7 @@
 namespace Nova\Package\Support\Providers;
 
 use Nova\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Nova\Routing\Router;
 
 
 class RouteServiceProvider extends ServiceProvider
@@ -26,17 +27,36 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(Router $router)
     {
+        $router->group(array('namespace' => $this->namespace), function ($router)
+        {
+            $basePath = $this->guessPackageRoutesPath();
+
+            if (is_readable($path = $basePath .DS .'Api.php')) {
+                $router->group(array('prefix' => 'api', 'middleware' => 'api'), function ($router) use ($path)
+                {
+                    require $path;
+                });
+            }
+
+            if (is_readable($path = $basePath .DS .'Web.php')) {
+                $router->group(array('middleware' => 'web'), function ($router) use ($path)
+                {
+                    require $path;
+                });
+            }
+        });
+    }
+
+    /**
+     * Guess the package path for the provider.
+     *
+     * @return string
+     */
+    public function guessPackageRoutesPath()
+    {
         $path = $this->guessPackagePath();
 
-        $router->group(array('prefix' => 'api', 'middleware' => 'api', 'namespace' => $this->namespace), function ($router) use ($path)
-        {
-            require $path .str_replace('/', DS, '/Routes/Api.php');
-        });
-
-        $router->group(array('middleware' => 'web', 'namespace' => $this->namespace), function ($router) use ($path)
-        {
-            require $path .str_replace('/', DS, '/Routes/Api.php');
-        });
+        return $path .DS .'Routes';
     }
 
     /**

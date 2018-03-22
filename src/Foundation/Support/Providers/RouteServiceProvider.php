@@ -33,11 +33,11 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function loadRoutes()
     {
-        if (! method_exists($this, 'map')) return;
+        if (method_exists($this, 'map')) {
+            $router = $this->app['router'];
 
-        $router = $this->app['router'];
-
-        call_user_func_array(array($this, 'map'), array($router));
+            call_user_func(array($this, 'map'), $router);
+        }
     }
 
     /**
