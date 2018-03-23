@@ -274,15 +274,15 @@ class FileViewFinder implements ViewFinderInterface
 
         $paths = $this->hints[$namespace];
 
-        // Compute the path for the Views overrides.
-        $firstPath = head($paths);
+        // The folder of Views Override should be located in the same directory with the Views one.
+        // For example: <BASEPATH>/themes/Bootstrap/Views -> <BASEPATH>/themes/Bootstrap/Override
 
-        $path = dirname($firstPath) .DS .'Override';
+        $path = dirname(head($paths)) .DS .'Override';
 
         if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
-            $firstPath = head($this->paths);
+            // If there was previously added another Views overriding path, we will remove it.
 
-            if (Str::endsWith($firstPath, DS .'Override')) {
+            if (Str::endsWith(head($this->paths), DS .'Override')) {
                 array_shift($this->paths);
             }
 
