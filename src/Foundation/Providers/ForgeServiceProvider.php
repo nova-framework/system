@@ -21,6 +21,7 @@ use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ClearLogCommand;
 use Nova\Foundation\Console\ViewClearCommand;
 use Nova\Foundation\Console\StorageLinkCommand;
+use Nova\Foundation\Console\SharedMakeCommand;
 
 use Nova\Foundation\Console\AssetPublishCommand;
 use Nova\Foundation\Console\ConfigPublishCommand;
@@ -67,6 +68,7 @@ class ForgeServiceProvider extends ServiceProvider
         'ProviderMake'     => 'command.provider.make',
         'RouteList'        => 'command.route.list',
         'Serve'            => 'command.serve',
+        'SharedMake'       => 'command.shared.make',
         'StorageLink'      => 'command.storage-link',
         'Up'               => 'command.up',
         'VendorPublish'    => 'command.vendor.publish',
@@ -359,6 +361,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.serve', function ()
         {
             return new ServeCommand;
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerSharedMakeCommand()
+    {
+        $this->app->singleton('command.shared.make', function ($app)
+        {
+            return new SharedMakeCommand($app['files']);
         });
     }
 
