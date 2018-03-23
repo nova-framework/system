@@ -272,15 +272,15 @@ class FileViewFinder implements ViewFinderInterface
             return;
         }
 
-        $paths = $this->hints[$namespace];
+        $views = head($this->hints[$namespace]);
 
         // Compute the path for the Views overrides.
-        $path = head($paths) .DS .'Overrides';
+        $path = dirname($views) .DS .'Override';
 
         if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
             $firstPath = head($this->paths);
 
-            if (Str::endsWith($firstPath, 'Overrides')) {
+            if (Str::endsWith($firstPath, 'Override')) {
                 array_shift($this->paths);
             }
 

@@ -87,12 +87,12 @@ class PackageMakeCommand extends Command
             'Assets/js/',
             'Config/',
             'Language/',
+            'Override/',
+            'Override/Packages/',
             'Providers/',
             'Views/',
             'Views/Layouts/',
             'Views/Layouts/RTL/',
-            'Views/Overrides/',
-            'Views/Overrides/Packages/',
         ),
     );
 
