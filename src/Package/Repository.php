@@ -244,9 +244,7 @@ class Repository
      */
     public function getModulesPath()
     {
-        $path = $this->config->get('packages.modules.path', BASEPATH .'modules');
-
-        return str_replace('/', DS, realpath($path));
+        return $this->config->get('packages.modules.path', BASEPATH .'modules');
     }
 
     /**
@@ -271,12 +269,12 @@ class Repository
     public function getThemePath($slug)
     {
         if (Str::length($slug) > 3) {
-            $module = Str::studly($slug);
+            $theme = Str::studly($slug);
         } else {
-            $module = Str::upper($slug);
+            $theme = Str::upper($slug);
         }
 
-        return $this->getThemesPath() .DS .$module .DS;
+        return $this->getThemesPath() .DS .$theme .DS;
     }
 
     /**
@@ -286,9 +284,7 @@ class Repository
      */
     public function getThemesPath()
     {
-        $path = $this->config->get('packages.themes.path', BASEPATH .'themes');
-
-        return str_replace('/', DS, realpath($path));
+        return $this->config->get('packages.themes.path', BASEPATH .'themes');
     }
 
     /**
@@ -352,62 +348,66 @@ class Repository
 
         $path = $this->getModulesPath();
 
-        try {
-            $paths = collect(
-                $this->files->directories($path)
-            );
+        if ($this->files->isDirectory($path)) {
+            try {
+                $paths = collect(
+                    $this->files->directories($path)
+                );
+            }
+            catch (InvalidArgumentException $e) {
+                $paths = collect();
+            }
+
+            $namespace = $this->getModulesNamespace();
+
+            $vendor = class_basename($namespace);
+
+            $paths->each(function ($path) use ($packages, $vendor)
+            {
+                $name = $vendor .'/' .basename($path);
+
+                $path = Str::finish($path, DS);
+
+                $packages->put($name, array(
+                    'path'     => $path,
+                    'location' => 'local',
+                    'type'     => 'module',
+                ));
+            });
         }
-        catch (InvalidArgumentException $e) {
-            $paths = collect();
-        }
-
-        $namespace = $this->getModulesNamespace();
-
-        $vendor = class_basename($namespace);
-
-        $paths->each(function ($path) use ($packages, $vendor)
-        {
-            $name = $vendor .'/' .basename($path);
-
-            $path = Str::finish($path, DS);
-
-            $packages->put($name, array(
-                'path'     => $path,
-                'location' => 'local',
-                'type'     => 'module',
-            ));
-        });
 
         //
-        // Process for the local Modules.
+        // Process for the local Themes.
 
         $path = $this->getThemesPath();
 
-        try {
-            $paths = collect(
-                $this->files->directories($path)
-            );
+        if ($this->files->isDirectory($path)) {
+            try {
+                $paths = collect(
+                    $this->files->directories($path)
+                );
+            }
+            catch (InvalidArgumentException $e) {
+                $paths = collect();
+            }
+
+            $namespace = $this->getThemesNamespace();
+
+            $vendor = class_basename($namespace);
+
+            $paths->each(function ($path) use ($packages, $vendor)
+            {
+                $name = $vendor .'/' .basename($path);
+
+                $path = Str::finish($path, DS);
+
+                $packages->put($name, array(
+                    'path'     => $path,
+                    'location' => 'local',
+                    'type'     => 'theme',
+                ));
+            });
         }
-        catch (InvalidArgumentException $e) {
-            $paths = collect();
-        }
-
-        $namespace = $this->getThemesNamespace();
-
-        $vendor = class_basename($namespace);
-
-        $paths->each(function ($path) use ($packages, $vendor)
-        {
-            $name = $vendor .'/' .basename($path);
-
-            $path = Str::finish($path, DS);
-
-            $packages->put($name, array(
-                'path'     => $path,
-                'location' => 'local',
-                'type'     => 'theme',
-            ));
-        });
 
         //
         // Process the retrieved information to generate their records.

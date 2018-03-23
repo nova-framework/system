@@ -5,6 +5,7 @@ namespace Nova\Package\Console;
 use Nova\Console\Command;
 use Nova\Filesystem\Filesystem;
 use Nova\Package\PackageManager;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -260,6 +261,10 @@ class PackageMakeCommand extends Command
             $namespace = $this->packages->getModulesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
+        } else if ($type == 'theme') {
+            $namespace = $this->packages->getThemesNamespace();
+
+            $vendor = basename(str_replace('\\', '/',  $namespace));
         }
 
         if (Str::length($name) > 3) {
@@ -457,7 +462,7 @@ class PackageMakeCommand extends Command
         }
 
         if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path);
+            $this->files->makeDirectory($path, 0755, true, true);
         }
 
         $this->files->makeDirectory($packagePath);
@@ -590,22 +595,41 @@ return array (
      */
     protected function updateComposerJson($type)
     {
-        if ($type != 'package') {
-            // No need to modify the composer.json for a Module.
-            return;
+        // If the generated package is a Module.
+        if ($type == 'module') {
+            $namespace = 'Modules\\';
+
+            $directory = 'modules/';
+        }
+
+        // If the generated package is a Theme.
+        else if ($type == 'theme') {
+            $namespace = 'Themes\\';
+
+            $directory = 'themes/';
+        }
+
+        // Standard processing for the Packages.
+        else {
+            $namespace = $this->data['namespace'] .'\\';
+
+            $directory = 'packages/' . $this->data['name'] . "/src/";
         }
 
         $composerJson = getenv('COMPOSER') ?: 'composer.json';
 
         $path = base_path($composerJson);
 
-        //
+        // Get the composer.json contents in a decoded form.
         $config = json_decode(file_get_contents($path), true);
 
-        if (is_array($config) && isset($config['autoload'])) {
-            $namespace = $this->data['namespace'] .'\\';
+        if (! is_array($config)) {
+            return;
+        }
 
-            $config['autoload']['psr-4'][$namespace] = 'packages/' . $this->data['name'] . "/src/";
+        // Update the composer.json
+        else if (! Arr::has($config, "autoload.psr-4.$namespace")) {
+            Arr::set($config, "autoload.psr-4.$namespace", $directory);
 
             $output = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
 
