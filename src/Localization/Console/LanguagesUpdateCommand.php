@@ -247,7 +247,7 @@ class LanguagesUpdateCommand extends Command
 
         $this->files->put($path, $output);
 
-        $this->line('Written the Language file: "'.str_replace(BASEPATH, '', $path).'"');
+        $this->line('Written the Language file: "' .str_replace(BASEPATH, '', $path) .'"');
     }
 
     protected function fileGrep($pattern, $path) {
@@ -255,19 +255,24 @@ class LanguagesUpdateCommand extends Command
 
         $fp = opendir($path);
 
-        while($f = readdir($fp)) {
-            if (preg_match("#^\.+$#", $f) === 1) continue; // ignore symbolic links
+        while ($fileName = readdir($fp)) {
+            if (preg_match("#^\.+$#", $fileName) === 1) {
+                // Ignore symbolic links.
+                continue;
+            }
 
-            $fullPath = $path .DS .$f;
+            $fullPath = $path .DS .$fileName;
 
             if ($this->files->isDirectory($fullPath)) {
-                $result = array_unique(array_merge($result, $this->fileGrep($pattern, $fullPath)));
+                $result = array_merge($result, $this->fileGrep($pattern, $fullPath));
             }
-            else if(stristr(file_get_contents($fullPath), $pattern)) {
+
+            // The current path is not a directory.
+            else if (stristr(file_get_contents($fullPath), $pattern)) {
                 $result[] = $fullPath;
             }
         }
 
-        return $result;
+        return array_unique($result);
     }
 }
