@@ -10,6 +10,8 @@ use Nova\Localization\LanguageManager;
 use Nova\Support\Arr;
 use Nova\Support\Str;
 
+use Symfony\Component\Console\Input\InputOption;
+
 use Exception;
 use Throwable;
 
@@ -84,7 +86,20 @@ class LanguagesUpdateCommand extends Command
             $config->get('languages', array())
         );
 
-        $paths = $this->scanWorkPaths($config);
+        if ($this->option('path')) {
+            $path = $this->option('path');
+
+            if (! $this->files->isDirectory($path)) {
+                return $this->error('Not a directory: "' .$path .'"');
+            }
+
+            return $this->updateLanguageFiles($path, $languages);
+        }
+
+        // Was not specified a custom directory.
+        else {
+            $paths = $this->scanWorkPaths($config);
+        }
 
         // Update the Language files in the available Domains.
         foreach ($paths as $path) {
@@ -289,5 +304,17 @@ class LanguagesUpdateCommand extends Command
         //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
 
         $this->files->put($path, $output);
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return array(
+            array('path', null, InputOption::VALUE_REQUIRED, 'Indicates the path from where translation strings are processed.'),
+        );
     }
 }
