@@ -19,7 +19,7 @@ class StorageLinkCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a symbolic link from "webroot/assets" to "storage/assets"';
+    protected $description = 'Create a symbolic link from "webroot/assets" to "assets"';
 
     /**
      * Execute the console command.
@@ -28,12 +28,14 @@ class StorageLinkCommand extends Command
      */
     public function handle()
     {
-        if (file_exists($path = public_path('assets'))) {
+        if (file_exists($publicPath = public_path('assets'))) {
             return $this->error('The "webroot/assets" directory already exists.');
         }
 
+        $assetsPath = $this->container['config']->get('routing.assets.path', base_path('assets'));
+
         $this->container->make('files')->link(
-            storage_path('assets'), $path
+            $assetsPath, $publicPath
         );
 
         $this->info('The [webroot/assets] directory has been linked.');
