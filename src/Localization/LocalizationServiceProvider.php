@@ -1,12 +1,12 @@
 <?php
 
-namespace Nova\Language;
+namespace Nova\Localization;
 
-use Nova\Language\LanguageManager;
+use Nova\Localization\LanguageManager;
 use Nova\Support\ServiceProvider;
 
 
-class LanguageServiceProvider extends ServiceProvider
+class LocalizationServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the Provider is deferred.

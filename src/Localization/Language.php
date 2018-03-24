@@ -1,14 +1,8 @@
 <?php
-/**
- * Language - simple language handler.
- *
- * @author Bartek Kuśmierczuk - contact@qsma.pl - http://qsma.pl
- * @version 3.0
- */
 
-namespace Nova\Language;
+namespace Nova\Localization;
 
-use Nova\Language\LanguageManager;
+use Nova\Localization\LanguageManager;
 
 use MessageFormatter;
 
@@ -21,7 +15,7 @@ class Language
     /**
      * The Language Manager Instance.
      *
-     * @var \Nova\Language\LanguageManager
+     * @var \Nova\Localization\LanguageManager
      */
     protected $manager;
 

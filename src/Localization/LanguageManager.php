@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Language;
+namespace Nova\Localization;
 
 use Nova\Foundation\Application;
-use Nova\Language\Language;
+use Nova\Localization\Language;
 use Nova\Support\Str;
 
 use Carbon\Carbon;
