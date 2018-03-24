@@ -2,6 +2,7 @@
 
 namespace Nova\Localization\Console;
 
+use Nova\Config\Repository as Config;
 use Nova\Console\Command;
 use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
@@ -43,6 +44,16 @@ class LanguagesUpdateCommand extends Command
      */
     protected $files;
 
+    /**
+     * @var string
+     */
+    protected static $appPattern = '#__\(\'(.*)\'(?:,.*)?\)#smU';
+
+    /**
+     * @var string
+     */
+    protected static $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
+
 
     /**
      * Create a new command instance.
@@ -73,7 +84,19 @@ class LanguagesUpdateCommand extends Command
             $config->get('languages', array())
         );
 
-        $workPaths = array(
+        $paths = $this->scanWorkPaths($config);
+
+        // Update the Language files in the available Domains.
+        foreach ($paths as $path) {
+            if ($this->files->isDirectory($path)) {
+                $this->updateLanguageFiles($path, $languages);
+            }
+        }
+    }
+
+    protected function scanWorkPaths(Config $config)
+    {
+        $result = array(
             app_path(),
             base_path('shared')
         );
@@ -89,8 +112,8 @@ class LanguagesUpdateCommand extends Command
                 continue;
             }
 
-            $workPaths = array_merge(
-                $workPaths, $this->files->glob($path .'/*', GLOB_ONLYDIR)
+            $result = array_merge(
+                $result, $this->files->glob($path .'/*', GLOB_ONLYDIR)
             );
         }
 
@@ -98,19 +121,14 @@ class LanguagesUpdateCommand extends Command
         $path = BASEPATH .'packages';
 
         if ($this->files->isDirectory($path)) {
-            $workPaths = array_merge($workPaths, array_map(function ($path)
+            $result = array_merge($result, array_map(function ($path)
             {
                 return $path .DS .'src';
 
             }, $this->files->glob($path .'/*', GLOB_ONLYDIR)));
         }
 
-        // Update the Language files in the available Domains.
-        foreach($workPaths as $path) {
-            if ($this->files->isDirectory($path)) {
-                $this->updateLanguageFiles($path, $languages);
-            }
-        }
+        return $result;
     }
 
     protected function updateLanguageFiles($path, $languages)
@@ -128,12 +146,14 @@ class LanguagesUpdateCommand extends Command
         // Extract the messages from files.
         $messages = $this->extractMessages($paths, $withoutDomain);
 
-        if (! empty($messages)) {
-            $this->info(PHP_EOL .'Processing the messages found in path: "' .$path .'"');
+        if (empty($messages)) {
+            return;
+        }
 
-            foreach ($languages as $language) {
-                $this->updateLanguageFile($language, $path, $messages);
-            }
+        $this->info(PHP_EOL .'Processing the messages found in path: "' .$path .'"');
+
+        foreach ($languages as $language) {
+            $this->updateLanguageFile($language, $path, $messages);
         }
     }
 
@@ -154,13 +174,15 @@ class LanguagesUpdateCommand extends Command
             $content = $this->getFileContents($path);
 
             if (preg_match_all($pattern, $content, $matches) !== false) {
-                $messages = $matches[1];
+                if (empty($messages = $matches[1])) {
+                    continue;
+                }
 
                 foreach ($messages as $message) {
                     //$message = trim($message);
 
                     if ($message == '$msg, $args = null') {
-                        // We will skip the functions definition.
+                        // We will skip the translation functions definition.
                         continue;
                     }
 
@@ -178,11 +200,13 @@ class LanguagesUpdateCommand extends Command
             return $this->files->get($path);
         }
         catch (Exception $e) {
-            return '';
+            //
         }
         catch (Throwable $e) {
-            return '';
+            //
         }
+
+        return '';
     }
 
     protected function updateLanguageFile($language, $path, array $messages)
@@ -191,6 +215,10 @@ class LanguagesUpdateCommand extends Command
 
         try {
             $data = $this->files->getRequire($path);
+
+            if (! is_array($data)) {
+                $data = array($data);
+            }
         }
         catch (Exception $e) {
             $data = array();
@@ -199,11 +227,7 @@ class LanguagesUpdateCommand extends Command
             $data = array();
         }
 
-        if (! is_array($data)) {
-            $data = array($data);
-        }
-
-        foreach($messages as $message) {
+        foreach ($messages as $message) {
             $value = Arr::get($data, $message, '');
 
             if (is_string($value) && ! empty($value)) {
