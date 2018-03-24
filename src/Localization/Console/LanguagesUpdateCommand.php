@@ -88,9 +88,11 @@ class LanguagesUpdateCommand extends Command
 
         // Update the Language files in the available Domains.
         foreach ($paths as $path) {
-            if ($this->files->isDirectory($path)) {
-                $this->updateLanguageFiles($path, $languages);
+            if (! $this->files->isDirectory($path)) {
+                continue;
             }
+
+            $this->updateLanguageFiles($path, $languages);
         }
     }
 
