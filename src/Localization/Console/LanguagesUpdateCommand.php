@@ -3,10 +3,14 @@
 namespace Nova\Localization\Console;
 
 use Nova\Console\Command;
+use Nova\Filesystem\FileNotFoundException;
 use Nova\Filesystem\Filesystem;
 use Nova\Localization\LanguageManager;
 use Nova\Support\Arr;
 use Nova\Support\Str;
+
+use Exception;
+use Throwable;
 
 
 class LanguagesUpdateCommand extends Command
@@ -64,78 +68,78 @@ class LanguagesUpdateCommand extends Command
     {
         $config = $this->container['config'];
 
-        //
+        // Get the Language codes.
         $languages = array_keys(
             $config->get('languages', array())
         );
 
-        $workPaths = array_map(function ($path)
-        {
-            return str_replace(BASEPATH, '', $path);
+        $workPaths = array(
+            app_path(),
+            base_path('shared')
+        );
 
-        }, array(app_path(), base_path('shared')));
+        // Search for the Modules and Themes.
+        $paths = array(
+            $config->get('packages.modules.path', BASEPATH .'modules'),
+            $config->get('packages.themes.path', BASEPATH .'themes')
+        );
 
-        // Search for Modules.
-        $path = $config->get('packages.modules.path', BASEPATH .'modules');
-
-        if ($this->files->isDirectory($path)) {
-            $paths = $this->files->glob($path .'/*', GLOB_ONLYDIR);
-
-            $workPaths = array_merge($workPaths, array_map(function ($path)
-            {
-                return str_replace(BASEPATH, '', $path);
-
-            }, $paths));
-        }
-
-        // Search for Themes.
-        $path = $config->get('packages.themes.path', BASEPATH .'themes');
-
-        if ($this->files->isDirectory($path)) {
-            $paths = $this->files->glob($path .'/*', GLOB_ONLYDIR);
-
-            $workPaths = array_merge($workPaths, array_map(function ($path)
-            {
-                return str_replace(BASEPATH, '', $path);
-
-            }, $paths));
-        }
-
-        // Search for Packages.
-        $path = BASEPATH .'packages';
-
-        if ($this->files->isDirectory($path)) {
-            $paths = $this->files->glob($path .'/*', GLOB_ONLYDIR);
-
-            $workPaths = array_merge($workPaths, array_map(function ($path)
-            {
-                return str_replace(BASEPATH, '', $path .DS .'src');
-
-            }, $paths));
-        }
-
-        foreach($workPaths as $workPath) {
-            $path = base_path($workPath);
-
+        foreach ($paths as $path) {
             if (! $this->files->isDirectory($path)) {
                 continue;
             }
 
-            $this->updateLanguageFiles($path, $languages);
+            $workPaths = array_merge(
+                $workPaths, $this->files->glob($path .'/*', GLOB_ONLYDIR)
+            );
+        }
+
+        // Search for the local Packages.
+        $path = BASEPATH .'packages';
+
+        if ($this->files->isDirectory($path)) {
+            $workPaths = array_merge($workPaths, array_map(function ($path)
+            {
+                return $path .DS .'src';
+
+            }, $this->files->glob($path .'/*', GLOB_ONLYDIR)));
+        }
+
+        // Update the Language files in the available Domains.
+        foreach($workPaths as $path) {
+            if ($this->files->isDirectory($path)) {
+                $this->updateLanguageFiles($path, $languages);
+            }
         }
     }
 
-    protected function updateLanguageFiles($workPath, $languages)
+    protected function updateLanguageFiles($path, $languages)
     {
-        $default = ($workPath == app_path());
+        $insideApp = ($path == app_path());
 
-        $pattern = $default ? "__('" : "__d('";
+        $pattern = $insideApp ? "__('" : "__d('";
 
-        if (empty($results = $this->fileGrep($pattern, $workPath))) {
+        if (empty($paths = $this->fileGrep($pattern, $path))) {
+            $this->comment(PHP_EOL .'No messages found in path: "' .$path .'"');
+
             return;
         }
 
-        if ($default) {
+        // Extract the messages from files.
+        $messages = $this->extractMessages($paths, $insideApp);
+
+        if (! empty($messages)) {
+            $this->info(PHP_EOL .'Processing the messages found in path: "' .$path .'"');
+
+            foreach($languages as $language) {
+                $this->updateLanguage($language, $path, $messages);
+            }
+        }
+    }
+
+    protected function extractMessages(array $paths, $insideApp)
+    {
+        if ($insideApp) {
             $pattern = '#__\(\'(.*)\'(?:,.*)?\)#smU';
         } else {
             $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
@@ -143,69 +147,89 @@ class LanguagesUpdateCommand extends Command
 
         //$this->comment("Using PATERN: '" .$pattern."'");
 
-        // Process the messages.
-        $messages = array();
+        // Extract the messages from files and return them.
+        $result = array();
 
-        foreach($results as $key => $filePath) {
-            $content = file_get_contents($filePath);
+        foreach($paths as $path) {
+            $content = $this->getFileContents($path);
 
-            if (preg_match_all($pattern, $content, $matches)) {
-                foreach($matches[1] as $message) {
+            if (preg_match_all($pattern, $content, $matches) !== false) {
+                $messages = $matches[1];
+
+                foreach ($messages as $message) {
                     //$message = trim($message);
 
                     if ($message == '$msg, $args = null') {
-                        // This is the function
+                        // We will skip the functions definition.
                         continue;
                     }
 
-                    $messages[] = str_replace("\\'", "'", $message);
+                    $key = str_replace("\\'", "'", $message);
+
+                    $result[$key] = '';
                 }
             }
         }
 
-        if (! empty($messages)) {
-            $this->info(PHP_EOL .'Messages found on path "'.$workPath.'". Processing...');
+        return $result;
+    }
 
-            $messages = array_flip($messages);
+    protected function getFileContents($path)
+    {
+        try {
+            return $this->files->get($path);
+        }
+        catch (Exception $e) {
+            //
+        }
+        catch (Throwable $e) {
+            //
+        }
 
-            foreach($languages as $language) {
-                $langFile = $workPath .'/Language/'.strtoupper($language).'/messages.php';
+        return '';
+    }
 
-                if (is_readable($langFile)) {
-                    $oldData = include($langFile);
+    protected function updateLanguage($language, $path, array $messages)
+    {
+        $path = str_replace('/', DS, $path .'/Language/' .strtoupper($language) .'/messages.php');
 
-                    $oldData = is_array($oldData) ? $oldData : array();
-                } else {
-                    $oldData = array();
-                }
+        try {
+            $data = $this->files->getRequire($path);
+        }
+        catch (Exception $e) {
+            $data = array();
+        }
+        catch (Throwable $e) {
+            $data = array();
+        }
 
-                foreach($messages as $message => $value) {
-                    if (! array_key_exists($message, $oldData)) {
-                        $messages[$message] = '';
-                    } else {
-                        $value = $oldData[$message];
+        if (! is_array($data)) {
+            $data = array($data);
+        }
 
-                        if (!empty($value) && is_string($value)) {
-                            $messages[$message] = $value;
-                        } else {
-                            $messages[$message] = '';
-                        }
-                    }
-                }
+        foreach($messages as $key => $value) {
+            $value = Arr::get($data, $key, '');
 
-                ksort($messages);
-
-                $output = "<?php
-
-return " .var_export($messages, true).";\n";
-
-                //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
-
-                file_put_contents($langFile, $output);
-
-                $this->line('Written the Language file: "'.str_replace(BASEPATH, '', $langFile).'"');
+            if (is_string($value) && ! empty($value)) {
+                $messages[$key] = $value;
+            } else {
+                $messages[$key] = '';
             }
         }
+
+        ksort($messages);
+
+        $output = "<?php
+
+return " .var_export($messages, true) .";\n";
+
+        //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
+
+        $this->files->makeDirectory(dirname($path), 0755, true, true);
+
+        $this->files->put($path, $output);
+
+        $this->line('Written the Language file: "'.str_replace(BASEPATH, '', $path).'"');
     }
 
     protected function fileGrep($pattern, $path) {
