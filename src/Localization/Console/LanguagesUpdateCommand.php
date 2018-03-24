@@ -115,9 +115,9 @@ class LanguagesUpdateCommand extends Command
 
     protected function updateLanguageFiles($path, $languages)
     {
-        $insideApp = ($path == app_path());
+        $withoutDomain = ($path == app_path());
 
-        $pattern = $insideApp ? "__('" : "__d('";
+        $pattern = $withoutDomain ? "__('" : "__d('";
 
         if (empty($paths = $this->fileGrep($pattern, $path))) {
             $this->comment(PHP_EOL .'No messages found in path: "' .$path .'"');
@@ -126,20 +126,20 @@ class LanguagesUpdateCommand extends Command
         }
 
         // Extract the messages from files.
-        $messages = $this->extractMessages($paths, $insideApp);
+        $messages = $this->extractMessages($paths, $withoutDomain);
 
         if (! empty($messages)) {
             $this->info(PHP_EOL .'Processing the messages found in path: "' .$path .'"');
 
-            foreach($languages as $language) {
-                $this->updateLanguage($language, $path, $messages);
+            foreach ($languages as $language) {
+                $this->updateLanguageFile($language, $path, $messages);
             }
         }
     }
 
-    protected function extractMessages(array $paths, $insideApp)
+    protected function extractMessages(array $paths, $withoutDomain)
     {
-        if ($insideApp) {
+        if ($withoutDomain) {
             $pattern = '#__\(\'(.*)\'(?:,.*)?\)#smU';
         } else {
             $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
@@ -150,7 +150,7 @@ class LanguagesUpdateCommand extends Command
         // Extract the messages from files and return them.
         $result = array();
 
-        foreach($paths as $path) {
+        foreach ($paths as $path) {
             $content = $this->getFileContents($path);
 
             if (preg_match_all($pattern, $content, $matches) !== false) {
@@ -164,9 +164,7 @@ class LanguagesUpdateCommand extends Command
                         continue;
                     }
 
-                    $key = str_replace("\\'", "'", $message);
-
-                    $result[$key] = '';
+                    $result[] = str_replace("\\'", "'", $message);
                 }
             }
         }
@@ -180,18 +178,16 @@ class LanguagesUpdateCommand extends Command
             return $this->files->get($path);
         }
         catch (Exception $e) {
-            //
+            return '';
         }
         catch (Throwable $e) {
-            //
+            return '';
         }
-
-        return '';
     }
 
-    protected function updateLanguage($language, $path, array $messages)
+    protected function updateLanguageFile($language, $path, array $messages)
     {
-        $path = str_replace('/', DS, $path .'/Language/' .strtoupper($language) .'/messages.php');
+        $path = $path .str_replace('/', DS, '/Language/' .strtoupper($language) .'/messages.php');
 
         try {
             $data = $this->files->getRequire($path);
@@ -207,21 +203,19 @@ class LanguagesUpdateCommand extends Command
             $data = array($data);
         }
 
-        foreach($messages as $key => $value) {
-            $value = Arr::get($data, $key, '');
+        foreach($messages as $message) {
+            $value = Arr::get($data, $message, '');
 
             if (is_string($value) && ! empty($value)) {
-                $messages[$key] = $value;
+                // The current message has already a translation set.
             } else {
-                $messages[$key] = '';
+                $data[$message] = '';
             }
         }
 
-        ksort($messages);
+        ksort($data);
 
-        $output = "<?php
-
-return " .var_export($messages, true) .";\n";
+        $output = "<?php\n\nreturn " .var_export($data, true) .";\n";
 
         //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
 
