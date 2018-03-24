@@ -19,7 +19,7 @@ class StorageLinkCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a symbolic link from "webroot/assets" to "assets"';
+    protected $description = 'Create a symbolic link from "webroot/assets" to the "assets" folder';
 
     /**
      * Execute the console command.

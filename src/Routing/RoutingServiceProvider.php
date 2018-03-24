@@ -139,9 +139,9 @@ class RoutingServiceProvider extends ServiceProvider
             $dispatcher = new AssetDispatcher($app);
 
             // Register the route for assets from main assets folder.
-            $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($app, $dispatcher)
+            $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
             {
-                $basePath = $app['config']->get('routing.assets.path', base_path('assets'));
+                $basePath = $this->app['config']->get('routing.assets.path', base_path('assets'));
 
                 $path = $basePath .DS .str_replace('/', DS, $path);
 
