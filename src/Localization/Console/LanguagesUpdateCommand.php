@@ -157,6 +157,33 @@ class LanguagesUpdateCommand extends Command
         }
     }
 
+    protected function fileGrep($pattern, $path)
+    {
+        $result = array();
+
+        $fp = opendir($path);
+
+        while ($fileName = readdir($fp)) {
+            if (preg_match("#^\.+$#", $fileName) === 1) {
+                // Ignore symbolic links.
+                continue;
+            }
+
+            $fullPath = $path .DS .$fileName;
+
+            if ($this->files->isDirectory($fullPath)) {
+                $result = array_merge($result, $this->fileGrep($pattern, $fullPath));
+            }
+
+            // The current path is not a directory.
+            else if (stristr(file_get_contents($fullPath), $pattern)) {
+                $result[] = $fullPath;
+            }
+        }
+
+        return array_unique($result);
+    }
+
     protected function extractMessages(array $paths, $withoutDomain)
     {
         if ($withoutDomain) {
@@ -260,31 +287,5 @@ class LanguagesUpdateCommand extends Command
         //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
 
         $this->files->put($path, $output);
-    }
-
-    protected function fileGrep($pattern, $path) {
-        $result = array();
-
-        $fp = opendir($path);
-
-        while ($fileName = readdir($fp)) {
-            if (preg_match("#^\.+$#", $fileName) === 1) {
-                // Ignore symbolic links.
-                continue;
-            }
-
-            $fullPath = $path .DS .$fileName;
-
-            if ($this->files->isDirectory($fullPath)) {
-                $result = array_merge($result, $this->fileGrep($pattern, $fullPath));
-            }
-
-            // The current path is not a directory.
-            else if (stristr(file_get_contents($fullPath), $pattern)) {
-                $result[] = $fullPath;
-            }
-        }
-
-        return array_unique($result);
     }
 }
