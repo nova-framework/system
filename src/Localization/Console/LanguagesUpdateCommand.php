@@ -213,19 +213,7 @@ class LanguagesUpdateCommand extends Command
     {
         $path = $path .str_replace('/', DS, '/Language/' .strtoupper($language) .'/messages.php');
 
-        try {
-            $data = $this->files->getRequire($path);
-
-            if (! is_array($data)) {
-                $data = array($data);
-            }
-        }
-        catch (Exception $e) {
-            $data = array();
-        }
-        catch (Throwable $e) {
-            $data = array();
-        }
+        $data = $this->getMessagesFromFile($path);
 
         foreach ($messages as $message) {
             $value = Arr::get($data, $message, '');
@@ -237,17 +225,41 @@ class LanguagesUpdateCommand extends Command
             }
         }
 
+        $this->writeLanguageFile($path, $data);
+
+        $this->line('Written the Language file: "' .str_replace(BASEPATH, '', $path) .'"');
+    }
+
+    protected function getMessagesFromFile($path)
+    {
+        $data = array();
+
+        try {
+            $data = $this->files->getRequire($path);
+        }
+        catch (Exception $e) {
+            //
+        }
+        catch (Throwable $e) {
+            //
+        }
+
+        return is_array($data) ? $data : array();
+    }
+
+    protected function writeLanguageFile($path, array $data)
+    {
         ksort($data);
 
+        // Make sure that the directory exists.
+        $this->files->makeDirectory(dirname($path), 0755, true, true);
+
+        // Prepare the Language file contents.
         $output = "<?php\n\nreturn " .var_export($data, true) .";\n";
 
         //$output = preg_replace("/^ {2}(.*)$/m","    $1", $output);
 
-        $this->files->makeDirectory(dirname($path), 0755, true, true);
-
         $this->files->put($path, $output);
-
-        $this->line('Written the Language file: "' .str_replace(BASEPATH, '', $path) .'"');
     }
 
     protected function fileGrep($pattern, $path) {
