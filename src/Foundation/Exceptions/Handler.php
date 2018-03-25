@@ -9,7 +9,7 @@ use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Http\Exception\HttpResponseException;
 use Nova\Http\Request;
 use Nova\Http\Response as HttpResponse;
-use Nova\Foundation\Contracts\ExceptionHandlerInterface;
+use Nova\Foundation\Exceptions\HandlerInterface;
 use Nova\Support\Facades\Config;
 use Nova\Support\Facades\Redirect;
 use Nova\Support\Facades\Response;
@@ -28,7 +28,7 @@ use Exception;
 use Throwable;
 
 
-class Handler implements ExceptionHandlerInterface
+class Handler implements HandlerInterface
 {
     /**
      * The container implementation.

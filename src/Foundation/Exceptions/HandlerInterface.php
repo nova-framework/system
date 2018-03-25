@@ -1,13 +1,13 @@
 <?php
 
-namespace Nova\Foundation\Contracts;
+namespace Nova\Foundation\Exceptions;
 
 use Nova\Http\Request;
 
 use Exception;
 
 
-interface ExceptionHandlerInterface
+interface HandlerInterface
 {
 
     /**
