@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Foundation\Http\Middleware;
+namespace Nova\Localization\Middleware;
 
 use Nova\Foundation\Application;
 
