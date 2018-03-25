@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.0.25';
+    const VERSION = '4.0.26';
 
     /**
      * Indicates if the application has "booted".
@@ -751,11 +751,11 @@ class Application extends Container implements ResponsePreparerInterface
     /**
      * Get the Nova application instance.
      *
-     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     * @return \Nova\Foundation\Exceptions\HandlerInterface
      */
     public function getExceptionHandler()
     {
-        return $this->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+        return $this->make('Nova\Foundation\Exceptions\HandlerInterface');
     }
 
     /**

@@ -183,10 +183,10 @@ class Handler
     /**
      * Get an instance of the exception handler.
      *
-     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     * @return \Nova\Foundation\Exceptions\HandlerInterface
      */
     protected function getExceptionHandler()
     {
-        return $this->app->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+        return $this->app->make('Nova\Foundation\Exceptions\HandlerInterface');
     }
 }

@@ -260,10 +260,10 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Get the Exception Handler instance.
      *
-     * @return \Nova\Foundation\Contracts\ExceptionHandlerInterface
+     * @return \Nova\Foundation\Exceptions\HandlerInterface
      */
     public function getExceptionHandler()
     {
-        return $this->container->make('Nova\Foundation\Contracts\ExceptionHandlerInterface');
+        return $this->container->make('Nova\Foundation\Exceptions\HandlerInterface');
     }
 }
