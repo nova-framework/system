@@ -107,6 +107,10 @@ class LanguagesUpdateCommand extends Command
         foreach ($paths as $path) {
             if (! $this->files->isDirectory($path)) {
                 continue;
+            } else if (! $this->files->isDirectory($path .DS .'Language')) {
+                $this->comment('Not a translatable path: "' .$path .'"');
+
+                continue;
             }
 
             $this->updateLanguageFiles($path, $languages);
@@ -128,10 +132,6 @@ class LanguagesUpdateCommand extends Command
 
         foreach ($paths as $path) {
             if (! $this->files->isDirectory($path)) {
-                continue;
-            } else if (! $this->files->isDirectory($path .DS .'Language')) {
-                $this->comment('Not a translatable path: "' .$path .'"');
-
                 continue;
             }
 
