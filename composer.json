@@ -39,7 +39,7 @@
         "predis/predis": "1.1.*",
         "ramsey/uuid": "~3.0",
         "erusev/parsedown": "~1.6",
-        "guzzlehttp/guzzle": "^5.0",
+        "guzzlehttp/guzzle": "^5.0"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
