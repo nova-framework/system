@@ -61,8 +61,7 @@ class QuasarBroadcaster extends Broadcaster
         $this->appId     = Arr::get($config, 'appId');
         $this->secretKey = Arr::get($config, 'secret');
 
-        $this->host = Arr::get($config, 'host', site_url());
-
+        $this->host = Arr::get($config, 'host', '127.0.0.1');
         $this->port = Arr::get($config, 'port', 2121);
     }
 
