@@ -158,6 +158,17 @@ class BroadcastManager implements FactoryInterface
      * @param  array  $config
      * @return \Nova\Broadcasting\BroadcasterInterface
      */
+    protected function createQuasarDriver(array $config)
+    {
+        return new QuasarBroadcaster($this->app, $config);
+    }
+    
+    /**
+     * Create an instance of the driver.
+     *
+     * @param  array  $config
+     * @return \Nova\Broadcasting\BroadcasterInterface
+     */
     protected function createPusherDriver(array $config)
     {
         $options = Arr::get($config, 'options', array());
