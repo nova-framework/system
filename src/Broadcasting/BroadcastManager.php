@@ -6,6 +6,7 @@ use Nova\Broadcasting\Broadcasters\LogBroadcaster;
 use Nova\Broadcasting\Broadcasters\NullBroadcaster;
 use Nova\Broadcasting\Broadcasters\RedisBroadcaster;
 use Nova\Broadcasting\Broadcasters\PusherBroadcaster;
+use Nova\Broadcasting\Broadcasters\QuasarBroadcaster;
 use Nova\Broadcasting\FactoryInterface;
 use Nova\Broadcasting\PendingBroadcast;
 use Nova\Support\Arr;
@@ -162,7 +163,7 @@ class BroadcastManager implements FactoryInterface
     {
         return new QuasarBroadcaster($this->app, $config);
     }
-    
+
     /**
      * Create an instance of the driver.
      *
