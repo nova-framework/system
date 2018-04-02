@@ -139,13 +139,13 @@ class QuasarBroadcaster extends Broadcaster
             'socketId' => $socketId ?: '',
         );
 
-        $path = '/apps/' .$this->appId .'/events';
+        $path = 'apps/' .$this->appId .'/events';
 
         //
         $hash = hash_hmac('sha256', "POST\n" .$path .':' .json_encode($payload), $this->secretKey, false);
 
         // Compute the server URL.
-        $url = $this->host .':' .$this->port .$path;
+        $url = $this->host .':' .$this->port .'/' .$path;
 
         // Create a Guzzle Http Client instance.
         $client = new HttpClient();

@@ -20,7 +20,7 @@ use Nova\Foundation\Console\NotificationMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ClearLogCommand;
 use Nova\Foundation\Console\ViewClearCommand;
-use Nova\Foundation\Console\StorageLinkCommand;
+use Nova\Foundation\Console\AssetLinkCommand;
 use Nova\Foundation\Console\SharedMakeCommand;
 
 use Nova\Foundation\Console\AssetPublishCommand;
@@ -69,7 +69,7 @@ class ForgeServiceProvider extends ServiceProvider
         'RouteList'        => 'command.route.list',
         'Serve'            => 'command.serve',
         'SharedMake'       => 'command.shared.make',
-        'StorageLink'      => 'command.storage-link',
+        'AssetLink'        => 'command.asset-link',
         'Up'               => 'command.up',
         'VendorPublish'    => 'command.vendor.publish',
         'ViewClear'        => 'command.view.clear',
@@ -382,11 +382,11 @@ class ForgeServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerStorageLinkCommand()
+    protected function registerAssetLinkCommand()
     {
         $this->app->singleton('command.storage-link', function ()
         {
-            return new StorageLinkCommand;
+            return new AssetLinkCommand;
         });
     }
 

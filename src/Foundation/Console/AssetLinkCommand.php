@@ -5,14 +5,14 @@ namespace Nova\Foundation\Console;
 use Nova\Console\Command;
 
 
-class StorageLinkCommand extends Command
+class AssetLinkCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'storage:link';
+    protected $name = 'asset:link';
 
     /**
      * The console command description.
