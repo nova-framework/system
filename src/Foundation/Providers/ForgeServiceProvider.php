@@ -69,7 +69,7 @@ class ForgeServiceProvider extends ServiceProvider
         'RouteList'        => 'command.route.list',
         'Serve'            => 'command.serve',
         'SharedMake'       => 'command.shared.make',
-        'AssetLink'        => 'command.asset-link',
+        'AssetLink'        => 'command.assets-link',
         'Up'               => 'command.up',
         'VendorPublish'    => 'command.vendor.publish',
         'ViewClear'        => 'command.view.clear',
@@ -140,6 +140,19 @@ class ForgeServiceProvider extends ServiceProvider
             $configPublisher = $app['config.publisher'];
 
             return new ConfigPublishCommand($configPublisher);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerAssetLinkCommand()
+    {
+        $this->app->singleton('command.assets-link', function ()
+        {
+            return new AssetLinkCommand;
         });
     }
 
@@ -374,19 +387,6 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.shared.make', function ($app)
         {
             return new SharedMakeCommand($app['files']);
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerAssetLinkCommand()
-    {
-        $this->app->singleton('command.storage-link', function ()
-        {
-            return new AssetLinkCommand;
         });
     }
 
