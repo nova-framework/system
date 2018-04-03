@@ -110,11 +110,11 @@ class Language
         // Standard Message formatting, using the standard PHP Intl and its MessageFormatter.
         // The message string should be formatted using the standard ICU commands.
 
-        if (class_exists('MessageFormatter')) {
-            return MessageFormatter::formatMessage($this->locale, $message, $params);
+        if (! class_exists('MessageFormatter')) {
+                return $this->fallbackFormat($message, $params);
         }
 
-        return $this->fallbackFormat($message, $params);
+        return MessageFormatter::formatMessage($this->locale, $message, $params);
 
         // The VSPRINTF alternative for Message formatting, for those die-hard against ICU.
         // The message string should be formatted using the standard PRINTF commands.
