@@ -109,7 +109,9 @@ class Language
             return $message;
         }
 
-        return with(new MessageFormatter())->format($message, $params, $this->locale);
+        $formatter = new MessageFormatter();
+
+        return $formatter->format($message, $params, $this->locale);
     }
 
     // Public Getters

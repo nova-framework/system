@@ -50,9 +50,12 @@ class MessageFormatter
                 continue;
             }
 
-            if (($tokens[$key] = $this->parseToken($token, $parameters, $locale)) === false) {
+            // The token is an ICU command.
+            else if (($value = $this->parseToken($token, $parameters, $locale)) === false) {
                 throw new LogicException('Message pattern is invalid.');
             }
+
+            $tokens[$key] = $value;
         }
 
         return implode('', $tokens);
@@ -100,60 +103,18 @@ class MessageFormatter
                 return $parameter;
         };
 
+        // Both the "select" and "plural" commands needs the third field.
+
         if (! isset($token[2])) {
             return false;
         }
 
-        $message = false;
-
         $tokens = static::tokenizePattern($token[2]);
 
-        $count = count($tokens);
-
-        // Process for the "select" type.
         if ($type == 'select') {
-            for ($i = 0; ($i + 1) < $count; $i++) {
-                if (is_array($tokens[$i]) || ! is_array($tokens[$i + 1])) {
-                    return false;
-                }
-
-                $selector = trim($tokens[$i]);
-
-                $i++;
-
-                if ((($message === false) && ($selector == 'other')) || ($selector == $parameter)) {
-                    $message = implode(',', $tokens[$i]);
-                }
-            }
-        }
-
-        // Process for the "plural" type.
-        else if ($type == 'plural') {
-            $offset = 0;
-
-            for ($i = 0; ($i + 1) < $count; $i++) {
-                if (is_array($tokens[$i]) || ! is_array($tokens[$i + 1])) {
-                    return false;
-                }
-
-                $selector = trim($tokens[$i]);
-
-                $i++;
-
-                if (($i == 1) && (strncmp($selector, 'offset:', 7) === 0)) {
-                    $pos = mb_strpos(str_replace(array("\n", "\r", "\t"), ' ', $selector), ' ', 7);
-
-                    $offset = (int) trim(mb_substr($selector, 7, $pos - 7));
-
-                    $selector = trim(mb_substr($selector, $pos + 1));
-                }
-
-                if ((($message === false) && ($selector == 'other'))
-                    || (($selector[0] == '=') && ((int) mb_substr($selector, 1) == $parameter))
-                    || (($selector == 'one') && (($parameter - $offset) == 1))) {
-                    $message = implode(',', str_replace('#', $parameter - $offset, $tokens[$i]));
-                }
-            }
+            $message = $this->parseSelect($tokens, $parameter);
+        } else if ($type == 'plural') {
+            $message = $this->parsePlural($tokens, $parameter);
         }
 
         if ($message !== false) {
@@ -163,13 +124,70 @@ class MessageFormatter
         return false;
     }
 
+    protected function parseSelect(array $tokens, $parameter)
+    {
+        $message = false;
+
+        $count = count($tokens);
+
+        for ($i = 0; ($i + 1) < $count; $i++) {
+            if (is_array($tokens[$i]) || ! is_array($tokens[$i + 1])) {
+                return false;
+            }
+
+            $selector = trim($tokens[$i]);
+
+            $i++;
+
+            if ((($message === false) && ($selector == 'other')) || ($selector == $parameter)) {
+                $message = implode(',', $tokens[$i]);
+            }
+        }
+
+        return $message;
+    }
+
+    protected function parsePlural(array $tokens, $parameter)
+    {
+        $message = false;
+
+        $count = count($tokens);
+
+        $offset = 0;
+
+        for ($i = 0; ($i + 1) < $count; $i++) {
+            if (is_array($tokens[$i]) || ! is_array($tokens[$i + 1])) {
+                return false;
+            }
+
+            $selector = trim($tokens[$i]);
+
+            $i++;
+
+            if (($i == 1) && (strncmp($selector, 'offset:', 7) === 0)) {
+                $pos = mb_strpos(str_replace(array("\n", "\r", "\t"), ' ', $selector), ' ', 7);
+
+                $offset = (int) trim(mb_substr($selector, 7, $pos - 7));
+
+                $selector = trim(mb_substr($selector, $pos + 1));
+            }
+
+            if ((($message === false) && ($selector == 'other'))
+                || (($selector[0] == '=') && ((int) mb_substr($selector, 1) == $parameter))
+                || (($selector == 'one') && (($parameter - $offset) == 1))) {
+                $message = implode(',', str_replace('#', $parameter - $offset, $tokens[$i]));
+            }
+        }
+
+        return $message;
+    }
 
     /**
      * Tokenizes a pattern by separating normal text from replaceable patterns
      *
-     * @param string $pattern patter to tokenize
-     * @return array array of tokens
-     * @throws \LogicException when unsupported formatting is used.
+     * @param string $pattern
+     * @return array
+     * @throws \LogicException
      */
     private static function tokenizePattern($pattern)
     {
