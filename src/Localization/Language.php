@@ -109,11 +109,33 @@ class Language
 
         // Standard Message formatting, using the standard PHP Intl and its MessageFormatter.
         // The message string should be formatted using the standard ICU commands.
-        return MessageFormatter::formatMessage($this->locale, $message, $params);
+
+        if (class_exists('MessageFormatter')) {
+            return MessageFormatter::formatMessage($this->locale, $message, $params);
+        }
+
+        return $this->fallbackFormat($message, $params);
 
         // The VSPRINTF alternative for Message formatting, for those die-hard against ICU.
         // The message string should be formatted using the standard PRINTF commands.
         //return vsprintf($message, $arguments);
+    }
+
+    protected function fallbackFormat($message, array $parameters)
+    {
+        return preg_replace_callback('#\{(\d+)(?:, (plural), one\{(.*)\} other\{(.*)\})?\}#', function ($matches) use ($parameters)
+        {
+            @list ($value, $key, $type, $one, $other) = $matches;
+
+            if (empty($type)) {
+                return isset($parameters[$key]) ? $parameters[$key] : $value;
+            }
+
+            $count = isset($parameters[$key]) ? (int) $parameters[$key] : 1;
+
+            return str_replace('#', (string) $count, ($count == 1) ? $one : $other);
+
+        }, $message);
     }
 
     // Public Getters
