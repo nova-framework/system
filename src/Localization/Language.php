@@ -110,7 +110,7 @@ class Language
         // Standard Message formatting, using the standard PHP Intl and its MessageFormatter.
         // The message string should be formatted using the standard ICU commands.
 
-        if (! class_exists('MessageFormatter')) {
+        if (! class_exists('MessageFormatter', false)) {
                 return $this->fallbackFormat($message, $params);
         }
 
