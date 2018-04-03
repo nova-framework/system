@@ -43,7 +43,7 @@ class MessageFormatter
      */
     protected function fallbackFormat($pattern, $parameters, $locale)
     {
-        $tokens = static::tokenizePattern($pattern);
+        $tokens = $this->tokenizePattern($pattern);
 
         foreach ($tokens as $key => $token) {
             if (! is_array($token)) {
@@ -77,12 +77,23 @@ class MessageFormatter
         if (isset($parameters[$key])) {
             $parameter = $parameters[$key];
         } else {
-            return '{' . implode(',', $token) . '}';
+            return '{' .implode(',', $token) .'}';
         }
 
         $type = isset($token[1]) ? trim($token[1]) : 'none';
 
         switch ($type) {
+            case 'none':
+                return $parameter;
+
+            case 'number':
+                if (is_integer($parameter) && (! isset($token[2]) || (trim($token[2]) == 'integer'))) {
+                    return $parameter;
+                }
+
+                throw new LogicException("Message format [number] is only supported for integer values.");
+
+                break;
             case 'date':
             case 'time':
             case 'spellout':
@@ -90,26 +101,14 @@ class MessageFormatter
             case 'duration':
             case 'choice':
             case 'selectordinal':
-                throw new LogicException("Message format '$type' is not supported.");
-
-            case 'number':
-                if (is_integer($parameter) && (! isset($token[2]) || (trim($token[2]) == 'integer'))) {
-                    return $parameter;
-                }
-
-                throw new LogicException("Message format 'number' is only supported for integer values.");
-
-            case 'none':
-                return $parameter;
+                throw new LogicException("Message format [$type] is not supported.");
         };
-
-        // Both the "select" and "plural" commands needs the third field.
 
         if (! isset($token[2])) {
             return false;
         }
 
-        $tokens = static::tokenizePattern($token[2]);
+        $tokens = $this->tokenizePattern($token[2]);
 
         if ($type == 'select') {
             $message = $this->parseSelect($tokens, $parameter);
@@ -189,7 +188,7 @@ class MessageFormatter
      * @return array
      * @throws \LogicException
      */
-    private static function tokenizePattern($pattern)
+    protected function tokenizePattern($pattern)
     {
         $depth = 1;
 
