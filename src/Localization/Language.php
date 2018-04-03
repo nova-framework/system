@@ -3,8 +3,10 @@
 namespace Nova\Localization;
 
 use Nova\Localization\LanguageManager;
+use Nova\Localization\MessageFormatter;
+use Nova\Support\Facades\Log;
 
-use MessageFormatter;
+use Exception;
 
 
 /**
@@ -107,35 +109,7 @@ class Language
             return $message;
         }
 
-        // Standard Message formatting, using the standard PHP Intl and its MessageFormatter.
-        // The message string should be formatted using the standard ICU commands.
-
-        if (! class_exists('MessageFormatter', false)) {
-                return $this->fallbackFormat($message, $params);
-        }
-
-        return MessageFormatter::formatMessage($this->locale, $message, $params);
-
-        // The VSPRINTF alternative for Message formatting, for those die-hard against ICU.
-        // The message string should be formatted using the standard PRINTF commands.
-        //return vsprintf($message, $arguments);
-    }
-
-    protected function fallbackFormat($message, array $parameters)
-    {
-        return preg_replace_callback('#\{(\d+)(?:, (plural), one\{(.*)\} other\{(.*)\})?\}#', function ($matches) use ($parameters)
-        {
-            @list ($value, $key, $type, $one, $other) = $matches;
-
-            if (empty($type)) {
-                return isset($parameters[$key]) ? $parameters[$key] : $value;
-            }
-
-            $count = isset($parameters[$key]) ? (int) $parameters[$key] : 1;
-
-            return str_replace('#', (string) $count, ($count == 1) ? $one : $other);
-
-        }, $message);
+        return with(new MessageFormatter())->format($message, $params, $this->locale);
     }
 
     // Public Getters
