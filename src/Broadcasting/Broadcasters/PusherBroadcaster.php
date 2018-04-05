@@ -6,6 +6,7 @@ use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
 use Nova\Container\Container;
 use Nova\Http\Request;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
