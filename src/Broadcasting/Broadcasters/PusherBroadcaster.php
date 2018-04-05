@@ -10,7 +10,7 @@ use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-use Pusher;
+use Pusher\Pusher;
 
 
 class PusherBroadcaster extends Broadcaster

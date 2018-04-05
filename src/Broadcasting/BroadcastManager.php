@@ -14,7 +14,7 @@ use Nova\Support\Arr;
 use Closure;
 use InvalidArgumentException;
 
-use Pusher;
+use Pusher\Pusher;
 
 
 class BroadcastManager implements FactoryInterface
