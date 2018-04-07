@@ -23,7 +23,7 @@ class QuasarBroadcaster extends Broadcaster
      *
      * @var string
      */
-    protected $appId;
+    protected $publicKey;
 
 
     /**
@@ -58,7 +58,7 @@ class QuasarBroadcaster extends Broadcaster
         parent::__construct($container);
 
         //
-        $this->appId     = Arr::get($config, 'appId');
+        $this->publicKey = Arr::get($config, 'key');
         $this->secretKey = Arr::get($config, 'secret');
 
         $this->host = Arr::get($config, 'host', '127.0.0.1');
@@ -139,7 +139,7 @@ class QuasarBroadcaster extends Broadcaster
             'socketId' => $socketId ?: '',
         );
 
-        $path = 'apps/' .$this->appId .'/events';
+        $path = 'apps/' .$this->publicKey .'/events';
 
         //
         $hash = hash_hmac('sha256', "POST\n" .$path .':' .json_encode($payload), $this->secretKey, false);
