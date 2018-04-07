@@ -34,11 +34,11 @@ class QuasarBroadcaster extends Broadcaster
     protected $secretKey;
 
     /**
-     * The server host of where is the Push Server.
+     * The options for connnecting to the Push Server.
      *
-     * @var string
+     * @var array
      */
-    protected $host;
+    protected $options = array();
 
     /**
      * The server port of where is the Push Server.
@@ -61,8 +61,7 @@ class QuasarBroadcaster extends Broadcaster
         $this->publicKey = Arr::get($config, 'key');
         $this->secretKey = Arr::get($config, 'secret');
 
-        $this->host = Arr::get($config, 'host', '127.0.0.1');
-        $this->port = Arr::get($config, 'port', 2121);
+        $this->options = Arr::get($config, 'options');
     }
 
     /**
@@ -145,7 +144,10 @@ class QuasarBroadcaster extends Broadcaster
         $hash = hash_hmac('sha256', "POST\n" .$path .':' .json_encode($payload), $this->secretKey, false);
 
         // Compute the server URL.
-        $url = $this->host .':' .$this->port .'/' .$path;
+        $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
+        $port = Arr::get($this->options, 'httpPort', 2121);
+
+        $url = $host .':' .$port .'/' .$path;
 
         // Create a Guzzle Http Client instance.
         $client = new HttpClient();
