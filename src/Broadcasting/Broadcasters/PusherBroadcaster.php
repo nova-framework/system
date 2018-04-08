@@ -71,14 +71,14 @@ class PusherBroadcaster extends Broadcaster
 
         $socketId = $request->input('socket_id');
 
-        if (Str::startsWith($channel, 'private')) {
-            $result = $this->pusher->socket_auth($channel, $socketId);
-        } else {
+        if (Str::startsWith($channel, 'presence-')) {
             $user = $request->user();
 
             $result = $this->pusher->presence_auth(
                 $channel, $socketId, $user->getAuthIdentifier(), $result
             );
+        } else {
+            $result = $this->pusher->socket_auth($channel, $socketId);
         }
 
         return json_decode($result, true);

@@ -40,12 +40,6 @@ class QuasarBroadcaster extends Broadcaster
      */
     protected $options = array();
 
-    /**
-     * The server port of where is the Push Server.
-     *
-     * @var string
-     */
-    protected $port;
 
     /**
      * Create a new broadcaster instance.
@@ -96,15 +90,16 @@ class QuasarBroadcaster extends Broadcaster
 
         $socketId = $request->input('socket_id');
 
-        if (Str::startsWith($channel, 'private')) {
-            return $this->socketAuth($channel, $socketId);
+        if (Str::startsWith($channel, 'presence-')) {
+            $user = $request->user();
+
+            return $this->presenceAuth(
+                $channel, $socketId, $user->getAuthIdentifier(), $result
+            );
         }
 
-        $user = $request->user();
+        return $this->socketAuth($channel, $socketId);
 
-        return $this->presenceAuth(
-            $channel, $socketId, $user->getAuthIdentifier(), $result
-        );
     }
 
     /**
