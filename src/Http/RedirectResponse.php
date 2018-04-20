@@ -157,7 +157,9 @@ class RedirectResponse extends SymfonyRedirectResponse
      */
     protected function parseErrors($provider)
     {
-        if ($provider instanceof MessageProviderInterface) {
+        if ($provider instanceof MessageBag) {
+            return $provider;
+        } else if ($provider instanceof MessageProviderInterface) {
             return $provider->getMessageBag();
         }
 

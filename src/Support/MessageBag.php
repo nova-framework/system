@@ -1,16 +1,12 @@
 <?php
-/**
- * MessageBag - Implements a Bag for Messages.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Support;
 
+use Nova\Support\Contracts\ArrayableInterface;
 
-class MessageBag {
 
+class MessageBag Implements ArrayableInterface
+{
     /**
      * All of the registered messages.
      *
@@ -151,17 +147,13 @@ class MessageBag {
      * @param  string  $messageKey
      * @return array
      */
-    protected function transform($messages, $format, $messageKey)
+    protected function transform($messages, $format, $key)
     {
-        $messages = (array) $messages;
+        return array_map(function ($message) use ($format, $key)
+        {
+            return str_replace(array(':message', ':key'), array($message, $key), $format);
 
-        foreach ($messages as $key => &$message) {
-            $replace = array(':message', ':key');
-
-            $message = str_replace($replace, array($message, $messageKey), $format);
-        }
-
-        return $messages;
+        }, (array) $messages);
     }
 
     /**
@@ -172,7 +164,7 @@ class MessageBag {
      */
     protected function checkFormat($format)
     {
-        return ($format === null) ? $this->format : $format;
+        return $format ?: $this->format;
     }
 
     /**

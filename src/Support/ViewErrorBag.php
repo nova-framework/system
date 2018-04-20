@@ -12,7 +12,8 @@ class ViewErrorBag implements Countable
      *
      * @var array
      */
-    protected $bags = [];
+    protected $bags = array();
+
 
     /**
      * Checks if a named MessageBag exists in the bags.
