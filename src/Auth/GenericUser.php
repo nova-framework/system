@@ -4,8 +4,10 @@ namespace Nova\Auth;
 
 use Nova\Support\Contracts\ArrayableInterface;
 
+use JsonSerializable;
 
-class GenericUser implements UserInterface, ArrayableInterface
+
+class GenericUser implements UserInterface, ArrayableInterface, JsonSerializable
 {
     /**
      * All of the user's attributes.
@@ -34,6 +36,16 @@ class GenericUser implements UserInterface, ArrayableInterface
     public function toArray()
     {
         return $this->attributes;
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
     /**

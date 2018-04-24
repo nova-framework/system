@@ -2,6 +2,7 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
+use Nova\Auth\UserInterface;
 use Nova\Broadcasting\Broadcaster;
 use Nova\Container\Container;
 use Nova\Http\Request;
@@ -76,12 +77,12 @@ class RedisBroadcaster implements Broadcaster
             return json_encode($result);
         }
 
-        $user = $request->user();
+        $user = ($result instanceof UserInferface) ? $result : $request->user();
 
         return json_encode(array(
-            'channel_data' => array(
-                'user_id'   => $user->getAuthIdentifier(),
-                'user_info' => $result,
+            'payload' => array(
+                'userId'   => $user->getAuthIdentifier(),
+                'userInfo' => $result,
             ),
         ));
     }

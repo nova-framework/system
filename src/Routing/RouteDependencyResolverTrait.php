@@ -41,15 +41,22 @@ trait RouteDependencyResolverTrait
      */
     public function resolveMethodDependencies(array $parameters, ReflectionFunctionAbstract $reflector)
     {
-        $originalParameters = $parameters;
+        $instanceCount = 0;
+
+        $values = array_values($parameters);
 
         foreach ($reflector->getParameters() as $key => $parameter) {
-            $instance = $this->transformDependency(
-                $parameter, $parameters, $originalParameters
-            );
+            $instance = $this->transformDependency($parameter, $parameters);
 
             if (! is_null($instance)) {
+                $instanceCount++;
+
                 $this->spliceIntoParameters($parameters, $key, $instance);
+            }
+
+            // If the parameter is not defined and it have a default value.
+            else if (! isset($values[$key - $instanceCount]) && $parameter->isDefaultValueAvailable()) {
+                $this->spliceIntoParameters($parameters, $key, $parameter->getDefaultValue());
             }
         }
 
@@ -64,15 +71,17 @@ trait RouteDependencyResolverTrait
      * @param  array  $originalParameters
      * @return mixed
      */
-    protected function transformDependency(ReflectionParameter $parameter, $parameters, $originalParameters)
+    protected function transformDependency(ReflectionParameter $parameter, $parameters)
     {
         $class = $parameter->getClass();
 
         // If the parameter has a type-hinted class, we will check to see if it is already in
         // the list of parameters. If it is we will just skip it as it is probably a model
         // binding and we do not want to mess with those; otherwise, we resolve it here.
-        if (! is_null($class) && ! $this->alreadyInParameters($class->name, $parameters)) {
-            return $this->container->make($class->name);
+        if (! is_null($class) && ! $this->alreadyInParameters($className = $class->name, $parameters)) {
+            return $parameter->isDefaultValueAvailable()
+                ? $parameter->getDefaultValue()
+                : $this->container->make($className);
         }
     }
 

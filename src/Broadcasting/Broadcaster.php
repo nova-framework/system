@@ -5,10 +5,18 @@ namespace Nova\Broadcasting;
 use Nova\Broadcasting\BroadcasterInterface;
 use Nova\Broadcasting\Channel;
 use Nova\Container\Container;
+use Nova\Database\ORM\Model;
+use Nova\Database\ORM\ModelNotFoundException;
 use Nova\Http\Request;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
+use ReflectionParameter;
 
 
 abstract class Broadcaster implements BroadcasterInterface
@@ -67,19 +75,16 @@ abstract class Broadcaster implements BroadcasterInterface
                 continue;
             }
 
-            $parameters = array_filter($matches, function ($key)
+            $parameters = array_filter($matches, function ($value, $key)
             {
-                return ! is_numeric($key);
+                return is_string($key) && ! empty($value);
 
-            }, ARRAY_FILTER_USE_KEY);
+            }, ARRAY_FILTER_USE_BOTH);
 
-            if (is_string($callback)) {
-                $callback = $this->createClassHandler($callback);
-            }
-
+            // The first parameter is always the Auth User instance.
             array_unshift($parameters, $request->user());
 
-            if ($result = call_user_func_array($callback, $parameters)) {
+            if ($result = $this->callChannelHandler($callback, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
@@ -88,28 +93,85 @@ abstract class Broadcaster implements BroadcasterInterface
     }
 
     /**
-     * Create a class based handler using the IoC container.
+     * Call a channel callback with the dependencies.
      *
-     * @param  mixed    $handler
-     * @return \Closure
+     * @param  mixed  $callback
+     * @param  array  $parameters
+     * @return mixed
      */
-    public function createClassHandler($handler)
+    protected function callChannelHandler($callback, $parameters)
     {
-        return function () use ($handler)
+        if (is_string($callback)) {
+            list($className, $method) = Str::parseCallback($callback, 'join');
+
+            $callback = array(
+                $instance = $this->container->make($className), $method
+            );
+
+            $reflector = new ReflectionMethod($instance, $method);
+        } else {
+            $reflector = new ReflectionFunction($callback);
+        }
+
+        return call_user_func_array(
+            $callback, $this->resolveCallDependencies($parameters, $reflector)
+        );
+    }
+
+    /**
+     * Resolve the given method's type-hinted dependencies.
+     *
+     * @param  array  $parameters
+     * @param  \ReflectionFunctionAbstract  $reflector
+     * @return array
+     */
+    public function resolveCallDependencies(array $parameters, ReflectionFunctionAbstract $reflector)
+    {
+        foreach ($reflector->getParameters() as $key => $parameter) {
+            if ($key === 0) {
+                // The first parameter is always the Auth User instance.
+                continue;
+            }
+
+            $instance = $this->transformDependency($parameter, $parameters);
+
+            if (! is_null($instance)) {
+                array_splice($parameters, $key, 0, array($instance));
+            }
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * Attempt to transform the given parameter into a class instance.
+     *
+     * @param  \ReflectionParameter  $parameter
+     * @param  string  $name
+     * @param  array  $parameters
+     * @return mixed
+     */
+    protected function transformDependency(ReflectionParameter $parameter, $parameters)
+    {
+        if (is_null($class = $parameter->getClass())) {
+            return;
+        }
+
+        // The parameter references a class.
+        else if (! $class->isSubclassOf(Model::class)) {
+            return $this->container->make($class->name);
+        }
+
+        $identifier = Arr::first($parameters, function ($parameterKey) use ($parameter)
         {
-            // We will make a callable of the handler instance and a method that should
-            // be called on that instance, then we will pass in the arguments that we
-            // received in this method into this handler class instance's methods.
+            return $parameterKey === $parameter->name;
+        });
 
-            $parameters = func_get_args();
+        if (! is_null($identifier)) {
+            $instance = $class->newInstance();
 
-            //
-            list($className, $method) = Str::parseCallback($handler, 'join');
-
-            $instance = $this->container->make($className);
-
-            return call_user_func_array($instance, $parameters);
-        };
+            return call_user_func(array($instance, 'find'), $identifier);
+        }
     }
 
     /**

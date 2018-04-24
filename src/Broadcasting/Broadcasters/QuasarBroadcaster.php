@@ -2,6 +2,7 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
+use Nova\Auth\UserInterface;
 use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
 use Nova\Container\Container;
@@ -91,7 +92,7 @@ class QuasarBroadcaster extends Broadcaster
         $socketId = $request->input('socket_id');
 
         if (Str::startsWith($channel, 'presence-')) {
-            $user = $request->user();
+            $user = ($result instanceof UserInferface) ? $result : $request->user();
 
             return $this->presenceAuth(
                 $channel, $socketId, $user->getAuthIdentifier(), $result
