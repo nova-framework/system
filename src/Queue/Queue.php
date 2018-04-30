@@ -110,19 +110,19 @@ abstract class Queue
             return $this->prepareQueueableEntity($data);
         }
 
-        if (is_array($data)) {
-            $data = array_map(function ($d)
-            {
-                if (is_array($d)) {
-                    return $this->prepareQueueableEntities($d);
-                }
-
-                return $this->prepareQueueableEntity($d);
-
-            }, $data);
+        if (! is_array($data)) {
+            return $data;
         }
 
-        return $data;
+        return array_map(function ($d)
+        {
+            if (is_array($d)) {
+                return $this->prepareQueueableEntities($d);
+            }
+
+            return $this->prepareQueueableEntity($d);
+
+        }, $data);
     }
 
     /**
