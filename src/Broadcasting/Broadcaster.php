@@ -2,8 +2,9 @@
 
 namespace Nova\Broadcasting;
 
+use Nova\Broadcasting\Auth\Guest;
 use Nova\Broadcasting\BroadcasterInterface;
-use Nova\Broadcasting\Channel;
+use Nova\Broadcasting\Channels\PublicChannel as Channel;
 use Nova\Container\Container;
 use Nova\Database\ORM\Model;
 use Nova\Database\ORM\ModelNotFoundException;
@@ -32,6 +33,13 @@ abstract class Broadcaster implements BroadcasterInterface
      * @var array
      */
     protected $channels = array();
+
+    /**
+     * The cached Guest instance, if any.
+     *
+     * @var \Nova\Broadcasting\Auth\Guest|null
+     */
+    protected $guest;
 
 
     /**
@@ -63,6 +71,54 @@ abstract class Broadcaster implements BroadcasterInterface
      * Authenticate the incoming request for a given channel.
      *
      * @param  \Nova\Http\Request  $request
+     * @return mixed
+     */
+    public function authenticate(Request $request)
+    {
+        $channelName = $request->input('channel_name');
+
+        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
+
+        if (($count == 1) && is_null($user = $request->user())) {
+            // For the private and presence channels, the Broadcasting needs a valid User instance,
+            // but it is not available for the non authenticated users (guests) within Auth System.
+            // For the guests, we will use a cached Guest User instance, with an unique hash as ID.
+
+            $request->setUserResolver(function () use ($request)
+            {
+                return $this->resolveAuthGuest($request);
+            });
+        }
+
+        return $this->verifyUserCanAccessChannel($request, $channel);
+    }
+
+    /**
+     * Resolve a Auth Guest instance with an unique hash as ID.
+     *
+     * @return \Closure
+     */
+    protected function resolveAuthGuest(Request $request)
+    {
+        if (isset($this->guest)) {
+            return $this->guest;
+        }
+
+        $session = $this->container['session'];
+
+        if (is_null($id = $session->get('broadcasting.guest.id'))) {
+            $id = hash('sha256', time() . Str::random(16));
+
+            $session->set('broadcasting.guest.id', $id);
+        }
+
+        return $this->guest = new Guest($id, $request->ip());
+    }
+
+    /**
+     * Authenticate the incoming request for a given channel.
+     *
+     * @param  \Nova\Http\Request  $request
      * @param  string  $channel
      * @return mixed
      */
@@ -81,10 +137,10 @@ abstract class Broadcaster implements BroadcasterInterface
 
             }, ARRAY_FILTER_USE_BOTH);
 
-            // The first parameter is always the Auth User instance.
+            // The first parameter is always the authenticated User instance.
             array_unshift($parameters, $request->user());
 
-            if ($result = $this->callChannelHandler($callback, $parameters)) {
+            if ($result = $this->callChannelCallback($callback, $parameters)) {
                 return $this->validAuthenticationResponse($request, $result);
             }
         }
@@ -99,7 +155,7 @@ abstract class Broadcaster implements BroadcasterInterface
      * @param  array  $parameters
      * @return mixed
      */
-    protected function callChannelHandler($callback, $parameters)
+    protected function callChannelCallback($callback, $parameters)
     {
         if (is_string($callback)) {
             list($className, $method) = Str::parseCallback($callback, 'join');
@@ -129,7 +185,7 @@ abstract class Broadcaster implements BroadcasterInterface
     {
         foreach ($reflector->getParameters() as $key => $parameter) {
             if ($key === 0) {
-                // The first parameter is always the Auth User instance.
+                // The first parameter is always the authenticated User instance.
                 continue;
             }
 

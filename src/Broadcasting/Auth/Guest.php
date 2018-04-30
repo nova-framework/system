@@ -1,39 +1,57 @@
 <?php
 
-namespace Nova\Auth;
+namespace Nova\Broadcasting\Auth;
 
+use Nova\Auth\UserInterface;
 use Nova\Support\Contracts\ArrayableInterface;
 
+use JsonSerializable;
 
-class GenericUser implements UserInterface, ArrayableInterface
+
+class Guest implements UserInterface, ArrayableInterface, JsonSerializable
 {
     /**
      * All of the user's attributes.
      *
      * @var array
      */
-    protected $attributes;
+    protected $attributes = array();
 
 
     /**
-     * Create a new generic User object.
+     * Create a new Guest User object.
      *
-     * @param  array  $attributes
+     * @param  string  $id
+     * @param  string  $remoteIp
      * @return void
      */
-    public function __construct(array $attributes)
+    public function __construct($id, $remoteIp = null)
     {
-        $this->attributes = $attributes;
+        $this->attributes = array(
+            'id'        => $id,
+            'username'  => 'guest',
+            'remote_ip' => $remoteIp,
+        );
     }
 
     /**
-     * Convert the Model instance to an array.
+     * Convert the object instance to an array.
      *
      * @return array
      */
     public function toArray()
     {
         return $this->attributes;
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
     /**
@@ -53,7 +71,7 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     public function getAuthPassword()
     {
-        return $this->attributes['password'];
+        // The guest Users has no password.
     }
 
     /**
@@ -63,9 +81,7 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     public function getRememberToken()
     {
-        $key = $this->getRememberTokenName();
-
-        return $this->attributes[$key];
+        // The guest Users has no "remember me" token.
     }
 
     /**
@@ -76,9 +92,7 @@ class GenericUser implements UserInterface, ArrayableInterface
      */
     public function setRememberToken($value)
     {
-        $key = $this->getRememberTokenName();
-
-        $this->attributes[$key] = $value;
+        // The guest Users has no "remember me" token.
     }
 
     /**
@@ -105,18 +119,6 @@ class GenericUser implements UserInterface, ArrayableInterface
     }
 
     /**
-     * Dynamically set an attribute on the user.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
-     */
-    public function __set($key, $value)
-    {
-        $this->attributes[$key] = $value;
-    }
-
-    /**
      * Dynamically check if a value is set on the user.
      *
      * @param  string  $key
@@ -126,16 +128,4 @@ class GenericUser implements UserInterface, ArrayableInterface
     {
         return isset($this->attributes[$key]);
     }
-
-    /**
-     * Dynamically unset a value on the user.
-     *
-     * @param  string  $key
-     * @return void
-     */
-    public function __unset($key)
-    {
-        unset($this->attributes[$key]);
-    }
-
 }

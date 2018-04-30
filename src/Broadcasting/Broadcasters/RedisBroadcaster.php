@@ -2,13 +2,10 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Auth\UserInterface;
 use Nova\Broadcasting\Broadcaster;
 use Nova\Container\Container;
 use Nova\Http\Request;
 use Nova\Redis\Database as RedisDatabase;
-
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 
 class RedisBroadcaster implements Broadcaster
@@ -46,25 +43,6 @@ class RedisBroadcaster implements Broadcaster
     }
 
     /**
-     * Authenticate the incoming request for a given channel.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function authenticate(Request $request)
-    {
-        $channelName = $request->input('channel_name');
-
-        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
-
-        if (($count == 1) && is_null($request->user())) {
-            throw new AccessDeniedHttpException;
-        }
-
-        return $this->verifyUserCanAccessChannel($request, $channel);
-    }
-
-    /**
      * Return the valid authentication response.
      *
      * @param  \Nova\Http\Request  $request
@@ -77,7 +55,7 @@ class RedisBroadcaster implements Broadcaster
             return json_encode($result);
         }
 
-        $user = ($result instanceof UserInferface) ? $result : $request->user();
+        $user = $request->user();
 
         return json_encode(array(
             'payload' => array(

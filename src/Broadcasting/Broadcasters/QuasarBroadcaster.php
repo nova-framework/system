@@ -2,7 +2,6 @@
 
 namespace Nova\Broadcasting\Broadcasters;
 
-use Nova\Auth\UserInterface;
 use Nova\Broadcasting\Broadcaster;
 use Nova\Broadcasting\BroadcastException;
 use Nova\Container\Container;
@@ -10,8 +9,6 @@ use Nova\Http\Request;
 use Nova\Support\Facades\Config;
 use Nova\Support\Arr;
 use Nova\Support\Str;
-
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client as HttpClient;
@@ -60,25 +57,6 @@ class QuasarBroadcaster extends Broadcaster
     }
 
     /**
-     * Authenticate the incoming request for a given channel.
-     *
-     * @param  \Nova\Http\Request  $request
-     * @return mixed
-     */
-    public function authenticate(Request $request)
-    {
-        $channelName = $request->input('channel_name');
-
-        $channel = preg_replace('/^(private|presence)\-/', '', $channelName, 1, $count);
-
-        if (($count == 1) && is_null($user = $request->user())) {
-            throw new AccessDeniedHttpException;
-        }
-
-        return $this->verifyUserCanAccessChannel($request, $channel);
-    }
-
-    /**
      * Return the valid authentication response.
      *
      * @param  \Nova\Http\Request  $request
@@ -92,7 +70,7 @@ class QuasarBroadcaster extends Broadcaster
         $socketId = $request->input('socket_id');
 
         if (Str::startsWith($channel, 'presence-')) {
-            $user = ($result instanceof UserInferface) ? $result : $request->user();
+            $user = $request->user();
 
             return $this->presenceAuth(
                 $channel, $socketId, $user->getAuthIdentifier(), $result
@@ -100,7 +78,6 @@ class QuasarBroadcaster extends Broadcaster
         }
 
         return $this->socketAuth($channel, $socketId);
-
     }
 
     /**
