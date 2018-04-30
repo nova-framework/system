@@ -4,7 +4,7 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\AssetPublisher;
-use Nova\Routing\Assets\Dispatcher as AssetDispatcher;
+use Nova\Routing\AssetDispatcher;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;

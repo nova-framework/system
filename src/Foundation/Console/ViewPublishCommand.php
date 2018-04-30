@@ -4,7 +4,7 @@ namespace Nova\Foundation\Console;
 
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\ViewPublisher;
-use Nova\Package\PackageManager;
+use Nova\Packages\PackageManager;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -30,7 +30,7 @@ class ViewPublishCommand extends Command
     /**
      * The plugins manager instance.
      *
-     * @var \Nova\Package\PackageManager
+     * @var \Nova\Packages\PackageManager
      */
     protected $plugins;
 

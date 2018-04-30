@@ -6,7 +6,7 @@ use Nova\Support\Facades\Facade;
 
 
 /**
- * @see \Nova\Package\PackageManager
+ * @see \Nova\Packages\PackageManager
  */
 class Package extends Facade
 {
