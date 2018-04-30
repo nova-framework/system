@@ -19,7 +19,9 @@ class SyncQueue extends Queue implements QueueInterface
      */
     public function push($job, $data = '', $queue = null)
     {
-        $this->resolveJob($job, json_encode($data))->handle();
+        $queueJob = $this->resolveJob($this->createPayload($job, $data, $queue), $queue);
+
+        $queueJob->handle();
 
         return 0;
     }
@@ -58,18 +60,21 @@ class SyncQueue extends Queue implements QueueInterface
      * @param  string  $queue
      * @return \Nova\Queue\Jobs\Job|null
      */
-    public function pop($queue = null) {}
+    public function pop($queue = null)
+    {
+        //
+    }
 
     /**
      * Resolve a Sync job instance.
      *
-     * @param  string  $job
-     * @param  string  $data
+     * @param  string  $payload
+     * @param  string  $queues
      * @return \Nova\Queue\Jobs\SyncJob
      */
-    protected function resolveJob($job, $data)
+    protected function resolveJob($payload, $queue)
     {
-        return new SyncJob($this->container, $job, $data);
+        return new SyncJob($this->container, $payload, $queue);
     }
 
 }

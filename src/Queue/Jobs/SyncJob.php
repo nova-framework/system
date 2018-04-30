@@ -23,7 +23,8 @@ class SyncJob extends Job
      *
      * @var string
      */
-    protected $data;
+    protected $payload;
+
 
     /**
      * Create a new job instance.
@@ -33,10 +34,10 @@ class SyncJob extends Job
      * @param  string  $data
      * @return void
      */
-    public function __construct(Container $container, $job, $data = '')
+    public function __construct(Container $container, $payload, $queue = '')
     {
-        $this->job = $job;
-        $this->data = $data;
+        $this->payload = $payload;
+        $this->queue = $queue;
         $this->container = $container;
     }
 
@@ -47,16 +48,9 @@ class SyncJob extends Job
      */
     public function handle()
     {
-        $data = json_decode($this->data, true);
+        $payload = json_decode($this->getRawBody(), true);
 
-        if ($this->job instanceof Closure) {
-            call_user_func($this->job, $this, $data);
-        } else {
-            $this->resolveAndHandle(array(
-                'job'  => $this->job,
-                'data' => $data
-            ));
-        }
+        $this->resolveAndHandle($payload);
     }
 
     /**
@@ -66,7 +60,7 @@ class SyncJob extends Job
      */
     public function getRawBody()
     {
-        //
+        return $this->payload;
     }
 
     /**
