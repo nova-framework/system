@@ -17,6 +17,7 @@ use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
 use Nova\Foundation\Console\NotificationMakeCommand;
+use Nova\Foundation\Console\RequestMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ClearLogCommand;
 use Nova\Foundation\Console\ViewClearCommand;
@@ -66,6 +67,7 @@ class ForgeServiceProvider extends ServiceProvider
         'Optimize'         => 'command.optimize',
         'PolicyMake'       => 'command.policy.make',
         'ProviderMake'     => 'command.provider.make',
+        'RequestMake'      => 'command.request.make',
         'RouteList'        => 'command.route.list',
         'Serve'            => 'command.serve',
         'SharedMake'       => 'command.shared.make',
@@ -348,6 +350,19 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.provider.make', function ($app)
         {
             return new ProviderMakeCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerRequestMakeCommand()
+    {
+        $this->app->singleton('command.request.make', function ($app)
+        {
+            return new RequestMakeCommand($app['files']);
         });
     }
 

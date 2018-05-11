@@ -23,6 +23,7 @@ use Nova\Packages\Console\ModelMakeCommand;
 use Nova\Packages\Console\NotificationMakeCommand;
 use Nova\Packages\Console\PolicyMakeCommand;
 use Nova\Packages\Console\ProviderMakeCommand;
+use Nova\Packages\Console\RequestMakeCommand;
 use Nova\Packages\Console\SeederMakeCommand;
 
 use Nova\Support\ServiceProvider;
@@ -59,6 +60,7 @@ class ConsoleServiceProvider extends ServiceProvider
             'PolicyMake',
             'ProviderMake',
             'MigrationMake',
+            'RequestMake',
             'SeederMake',
         );
 
@@ -327,6 +329,19 @@ class ConsoleServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.make.package.migration');
+    }
+
+    /**
+     * Register the make:module:provider command.
+     */
+    private function registerRequestMakeCommand()
+    {
+        $this->app->bindShared('command.make.package.request', function ($app)
+        {
+            return new RequestMakeCommand($app['files'], $app['packages']);
+        });
+
+        $this->commands('command.make.package.request');
     }
 
     /**

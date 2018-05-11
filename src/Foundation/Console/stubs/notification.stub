@@ -9,7 +9,7 @@ use Nova\Notification\Messages\MailMessage;
 use Nova\Notification\Notification;
 
 
-class {{className}} extends Notification
+class {{className}} extends Notification implements ShouldQueueInterface
 {
     use QueueableTrait;
 
