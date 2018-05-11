@@ -166,11 +166,17 @@ class ChannelManager extends Manager implements DispatcherInterface
     protected function queueToNotifiable($notifiable, $id, $notification, $channel)
     {
         $notification->id = $id;
+        
+        $connection = isset($notification->connection) ? $notification->connection : null;
+
+        $queue = isset($notification->queue) ? $notification->queue : null;
+
+        $delay = isset($notification->delay) ? $notification->delay : null;
 
         $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
-            ->onConnection($notification->connection)
-            ->onQueue($notification->queue)
-            ->delay($notification->delay);
+            ->onConnection($connection)
+            ->onQueue($queue)
+            ->delay($delay);
 
         $this->bus->dispatch($job);
     }
