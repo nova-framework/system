@@ -151,6 +151,8 @@ class Mailer
      */
     public function send($view, array $data, $callback)
     {
+        $this->forceReconnection();
+
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
@@ -168,6 +170,18 @@ class Mailer
         $message = $message->getSwiftMessage();
 
         $this->sendSwiftMessage($message);
+    }
+
+    /**
+     * Force the transport to re-connect.
+     *
+     * This will prevent errors in daemon queue situations.
+     *
+     * @return void
+     */
+    protected function forceReconnection()
+    {
+        $this->getSwiftMailer()->getTransport()->stop();
     }
 
     /**
