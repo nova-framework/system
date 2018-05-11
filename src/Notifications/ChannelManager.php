@@ -167,16 +167,10 @@ class ChannelManager extends Manager implements DispatcherInterface
     {
         $notification->id = $id;
         
-        $connection = isset($notification->connection) ? $notification->connection : null;
-
-        $queue = isset($notification->queue) ? $notification->queue : null;
-
-        $delay = isset($notification->delay) ? $notification->delay : null;
-
         $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
-            ->onConnection($connection)
-            ->onQueue($queue)
-            ->delay($delay);
+            ->onConnection($notification->connection)
+            ->onQueue($notification->queue)
+            ->delay($notification->delay);
 
         $this->bus->dispatch($job);
     }
