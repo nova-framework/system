@@ -348,23 +348,18 @@ class Mailer
             $this->events->dispatch('mailer.sending', array($message));
         }
 
-        if ($this->pretending) {
-            // In pretending mode we will log the message if the logger is available.
-
-            if (isset($this->logger)) {
-                $this->logMessage($message);
+        if (! $this->pretending) {
+            try {
+                $this->swift->send($message, $this->failedRecipients);
             }
-
-            return;
+            finally {
+                $this->swift->getTransport()->stop();
+            }
         }
 
-        try {
-            $this->swift->send($message, $this->failedRecipients);
-        }
-        finally {
-            $transport = $this->swift->getTransport();
-
-            $transport->stop();
+        // In the pretending mode.
+        else if (isset($this->logger)) {
+            $this->logMessage($message);
         }
     }
 
