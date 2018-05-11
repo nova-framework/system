@@ -3,7 +3,7 @@
 namespace Nova\Notifications;
 
 use Nova\Support\Facades\Config;
-use Nova\Support\Facades\Notification;
+use Nova\Support\Facades\Notification as NotificationFacade;
 use Nova\Support\Str;
 
 
@@ -42,7 +42,7 @@ trait NotifiableTrait
      */
     public function notify($instance)
     {
-        return Notification::send(array($this), $instance);
+        return NotificationFacade::send(array($this), $instance);
     }
 
     /**
