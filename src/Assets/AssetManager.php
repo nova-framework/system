@@ -3,6 +3,7 @@
 namespace Nova\Assets;
 
 use Nova\Support\Arr;
+use Nova\View\Factory as ViewFactory;
 
 use BadMethodCallException;
 use InvalidArgumentException;
@@ -40,6 +41,17 @@ class AssetManager
         'js'  => '<script type="text/javascript">%s</script>',
     );
 
+
+    /**
+     * Create a new Assets Manager instance.
+     *
+     * @return void
+     */
+    public function __construct(ViewFactory $views)
+    {
+        $this->views = $views;
+    }
+
     /**
      * Register new Assets.
      *
@@ -56,12 +68,12 @@ class AssetManager
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
-        } else if (! in_array($mode, array('default', 'inline'))) {
+        } else if (! in_array($mode, array('default', 'inline', 'view'))) {
             throw new InvalidArgumentException("Invalid assets mode [${mode}]");
         }
 
         // The assets type and mode are valid.
-        else if (empty($items = $this->parseAssets($assets))) {
+        else if (empty($assets = $this->parseAssets($assets))) {
             return;
         }
 
@@ -70,8 +82,8 @@ class AssetManager
             $this->positions[$type][$position] = array();
         }
 
-        foreach ($items as $content) {
-            $this->positions[$type][$position][] = compact('content', 'order', 'mode');
+        foreach ($assets as $asset) {
+            $this->positions[$type][$position][] = compact('asset', 'order', 'mode');
         }
     }
 
@@ -106,13 +118,19 @@ class AssetManager
         {
             $mode = Arr::get($item, 'mode');
 
-            if ($mode === 'inline') {
-                $template = Arr::get(static::$inlineTemplates, $type);
-            } else {
+            if ($mode === 'default') {
                 $template = Arr::get(static::$templates, $type);
+            } else {
+                $template = Arr::get(static::$inlineTemplates, $type);
             }
 
-            return sprintf($template, Arr::get($item, 'content'));
+            $asset = Arr::get($item, 'asset');
+
+            if ($mode === 'view') {
+                return sprintf($template, $this->views->fetch($asset));
+            }
+
+            return sprintf($template, $asset);
 
         }, $items));
     }
@@ -133,17 +151,17 @@ class AssetManager
         }
 
         // The assets type is valid.
-        else if (empty($items = $this->parseAssets($assets))) {
+        else if (empty($assets = $this->parseAssets($assets))) {
             return;
         }
 
         $template = Arr::get(static::$templates, $type);
 
-        return implode("\n", array_map(function ($content) use ($template)
+        return implode("\n", array_map(function ($asset) use ($template)
         {
-            return sprintf($template, $content);
+            return sprintf($template, $asset);
 
-        }, $items));
+        }, $assets));
     }
 
     /**

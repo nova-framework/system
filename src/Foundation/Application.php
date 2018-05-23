@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.0.59';
+    const VERSION = '4.0.60';
 
     /**
      * Indicates if the application has "booted".
@@ -1095,6 +1095,7 @@ class Application extends Container implements ResponsePreparerInterface
             'url'            => 'Nova\Routing\UrlGenerator',
             'validator'      => 'Nova\Validation\Factory',
             'view'           => 'Nova\View\Factory',
+            'assets'         => 'Nova\Assets\AssetManager',
         );
 
         foreach ($aliases as $key => $value) {

@@ -34,7 +34,7 @@ class AssetServiceProvider extends ServiceProvider
     {
         $this->app->singleton('assets', function ($app)
         {
-            return new AssetManager();
+            return new AssetManager($app['view']);
         });
     }
 

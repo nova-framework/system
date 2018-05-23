@@ -43,7 +43,7 @@ class FileViewFinder implements ViewFinderInterface
      *
      * @var array
      */
-    protected $extensions = array('tpl', 'php', 'css', 'md');
+    protected $extensions = array('tpl', 'php', 'css', 'js', 'md');
 
     /**
      * Hint path delimiter value.

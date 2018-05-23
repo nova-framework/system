@@ -71,6 +71,7 @@ class Factory
         'tpl' => 'template',
         'php' => 'php',
         'css' => 'file',
+        'js'  => 'file',
         'md'  => 'markdown',
     );
 
