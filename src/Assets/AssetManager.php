@@ -64,7 +64,7 @@ class AssetManager
      * @return void
      * @throws \InvalidArgumentException
      */
-    public function register($type, $assets, $position = 'header', $order = 0, $mode = 'default')
+    public function register($type, $assets, $position, $order = 0, $mode = 'default')
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
@@ -90,13 +90,13 @@ class AssetManager
     /**
      * Render the Assets for implicit or a specified position.
      *
-     * @param  string $type
      * @param  string $position
+     * @param  string $type
      *
      * @return string
      * @throws \InvalidArgumentException
      */
-    public function render($type, $position = 'header')
+    public function position($position, $type)
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
@@ -144,7 +144,7 @@ class AssetManager
      * @return string|null
      * @throws \InvalidArgumentException
      */
-    public function build($type, $assets)
+    public function render($type, $assets)
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
