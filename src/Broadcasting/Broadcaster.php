@@ -2,7 +2,7 @@
 
 namespace Nova\Broadcasting;
 
-use Nova\Broadcasting\Auth\Guest;
+use Nova\Broadcasting\Auth\Guest as GuestUser;
 use Nova\Broadcasting\BroadcasterInterface;
 use Nova\Broadcasting\Channels\PublicChannel as Channel;
 use Nova\Container\Container;
@@ -39,7 +39,7 @@ abstract class Broadcaster implements BroadcasterInterface
      *
      * @var \Nova\Broadcasting\Auth\Guest|null
      */
-    protected $guest;
+    protected $authGuest;
 
 
     /**
@@ -82,37 +82,25 @@ abstract class Broadcaster implements BroadcasterInterface
         if (($count == 1) && is_null($user = $request->user())) {
             // For the private and presence channels, the Broadcasting needs a valid User instance,
             // but it is not available for the non authenticated users (guests) within Auth System.
-            // For the guests, we will use a cached Guest User instance, with an unique hash as ID.
+            // For the guests, we will use a cached GuestUser instance, with a random string as ID.
 
-            $request->setUserResolver(function () use ($request)
+            $request->setUserResolver(function ()
             {
-                return $this->resolveAuthGuest($request);
+                if (! isset($this->authGuest)) {
+                    $session = $this->container['session'];
+
+                    if (empty($id = $session->get('broadcasting.guest'))) {
+                        $session->set('broadcasting.guest', $id = dechex(time()) . Str::random(16));
+                    }
+
+                    return $this->authGuest = new GuestUser($id);
+                }
+
+                return $this->authGuest;
             });
         }
 
         return $this->verifyUserCanAccessChannel($request, $channel);
-    }
-
-    /**
-     * Resolve a Auth Guest instance with an unique hash as ID.
-     *
-     * @return \Closure
-     */
-    protected function resolveAuthGuest(Request $request)
-    {
-        if (isset($this->guest)) {
-            return $this->guest;
-        }
-
-        $session = $this->container['session'];
-
-        if (is_null($id = $session->get('broadcasting.guest.id'))) {
-            $id = hash('sha256', time() . Str::random(16));
-
-            $session->set('broadcasting.guest.id', $id);
-        }
-
-        return $this->guest = new Guest($id, $request->ip());
     }
 
     /**

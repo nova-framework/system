@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Routing;
+namespace Nova\Assets;
 
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;

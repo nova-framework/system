@@ -2,17 +2,13 @@
 
 namespace Nova\Routing;
 
-use Nova\Http\Request;
-use Nova\Http\Response;
 use Nova\Filesystem\Filesystem;
-use Nova\Routing\AssetDispatcher;
 use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
 use Nova\Routing\UrlGenerator;
 use Nova\Support\ServiceProvider;
-use Nova\Support\Str;
 
 
 class RoutingServiceProvider extends ServiceProvider
@@ -34,8 +30,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerResponseFactory();
 
         $this->registerControllerDispatcher();
-
-        $this->registerAssetDispatcher();
     }
 
     /**
@@ -124,59 +118,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app->singleton('routing.controller.dispatcher', function ($app)
         {
             return new ControllerDispatcher($app);
-        });
-    }
-
-    /**
-     * Register the Assets Dispatcher.
-     *
-     * @return void
-     */
-    protected function registerAssetDispatcher()
-    {
-        $this->app->bindShared('assets.dispatcher', function ($app)
-        {
-            $dispatcher = new AssetDispatcher($app);
-
-            // Register the route for assets from main assets folder.
-            $dispatcher->route('assets/(.*)', function (Request $request, $path) use ($dispatcher)
-            {
-                $basePath = $this->app['config']->get('routing.assets.path', base_path('assets'));
-
-                $path = $basePath .DS .str_replace('/', DS, $path);
-
-                return $dispatcher->serve($path, $request);
-            });
-
-            // Register the route for assets from Packages, Modules and Themes.
-            $dispatcher->route('packages/([^/]+)/([^/]+)/(.*)', function (Request $request, $vendor, $package, $path) use ($dispatcher)
-            {
-                $namespace = $vendor .'/' .$package;
-
-                if (is_null($packagePath = $dispatcher->getPackagePath($namespace))) {
-                    return new Response('File Not Found', 404);
-                }
-
-                $path = $packagePath .str_replace('/', DS, $path);
-
-                return $dispatcher->serve($path, $request);
-            });
-
-            // Register the route for assets from Vendor.
-            $dispatcher->route('vendor/(.*)', function (Request $request, $path) use ($dispatcher)
-            {
-                $paths = $dispatcher->getVendorPaths();
-
-                if (! Str::startsWith($path, $paths)) {
-                    return new Response('File Not Found', 404);
-                }
-
-                $path = BASEPATH .'vendor' .DS .str_replace('/', DS, $path);
-
-                return $dispatcher->serve($path, $request);
-            });
-
-            return $dispatcher;
         });
     }
 }

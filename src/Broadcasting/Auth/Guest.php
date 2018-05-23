@@ -11,11 +11,14 @@ use JsonSerializable;
 class Guest implements UserInterface, ArrayableInterface, JsonSerializable
 {
     /**
-     * All of the user's attributes.
-     *
-     * @var array
+     * @var string
      */
-    protected $attributes = array();
+    public $id;
+
+    /**
+     * @var string
+     */
+    public $username = 'guest';
 
 
     /**
@@ -25,13 +28,9 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
      * @param  string  $remoteIp
      * @return void
      */
-    public function __construct($id, $remoteIp = null)
+    public function __construct($id)
     {
-        $this->attributes = array(
-            'id'        => $id,
-            'username'  => 'guest',
-            'remote_ip' => $remoteIp,
-        );
+        $this->id = $id;
     }
 
     /**
@@ -41,7 +40,10 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
      */
     public function toArray()
     {
-        return $this->attributes;
+        return array(
+            'id'       => $this->id,
+            'username' => $this->username,
+        );
     }
 
     /**
@@ -61,7 +63,7 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
      */
     public function getAuthIdentifier()
     {
-        return $this->attributes['id'];
+        return $this->id;
     }
 
     /**
@@ -81,7 +83,7 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
      */
     public function getRememberToken()
     {
-        // The guest Users has no "remember me" token.
+        //
     }
 
     /**
@@ -92,7 +94,7 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
      */
     public function setRememberToken($value)
     {
-        // The guest Users has no "remember me" token.
+        //
     }
 
     /**
@@ -103,29 +105,5 @@ class Guest implements UserInterface, ArrayableInterface, JsonSerializable
     public function getRememberTokenName()
     {
         return 'remember_token';
-    }
-
-    /**
-     * Dynamically access the user's attributes.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        if (isset($this->attributes[$key])) {
-            return $this->attributes[$key];
-        }
-    }
-
-    /**
-     * Dynamically check if a value is set on the user.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return isset($this->attributes[$key]);
     }
 }
