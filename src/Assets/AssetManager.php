@@ -88,7 +88,7 @@ class AssetManager
     }
 
     /**
-     * Render the Assets for implicit or a specified position.
+     * Render the Assets for a specified position.
      *
      * @param  string $position
      * @param  string $type
