@@ -21,7 +21,7 @@ class AssetManager
     );
 
     /**
-     *  The Asset Templates
+     *  The standard Asset Templates
      *
      * @var array
      */
@@ -30,6 +30,15 @@ class AssetManager
         'js'  => '<script src="%s" type="text/javascript"></script>',
     );
 
+    /**
+     *  The inline Asset Templates
+     *
+     * @var array
+     */
+    protected static $inlineTemplates = array(
+        'css' => '<style>%s</style>',
+        'js'  => '<script type="text/javascript">%s</script>',
+    );
 
     /**
      * Register new Assets.
@@ -38,18 +47,21 @@ class AssetManager
      * @param  string|array $assets
      * @param  string|null $position
      * @param  int $order
+     * @param  string $mode
      *
      * @return void
      * @throws \InvalidArgumentException
      */
-    public function register($type, $assets, $position = 'header', $order = 0)
+    public function register($type, $assets, $position = 'header', $order = 0, $mode = 'default')
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
+        } else if (! in_array($mode, array('default', 'inline'))) {
+            throw new InvalidArgumentException("Invalid assets mode [${mode}]");
         }
 
-        // The assets type is valid.
-        else if (empty($assets = $this->parseAssets($assets))) {
+        // The assets type and mode are valid.
+        else if (empty($items = $this->parseAssets($assets))) {
             return;
         }
 
@@ -58,8 +70,8 @@ class AssetManager
             $this->positions[$type][$position] = array();
         }
 
-        foreach ($assets as $asset) {
-            $this->positions[$type][$position][] = compact('asset', 'order');
+        foreach ($items as $content) {
+            $this->positions[$type][$position][] = compact('content', 'order', 'mode');
         }
     }
 
@@ -90,11 +102,17 @@ class AssetManager
             return ($a['order'] > $b['order']) ? 1 : -1;
         });
 
-        $template = $this->getTemplate($type);
-
-        return implode("\n", array_map(function ($item) use ($template)
+        return implode("\n", array_map(function ($item) use ($type)
         {
-            return sprintf($template, Arr::get($item, 'asset'));
+            $mode = Arr::get($item, 'mode');
+
+            if ($mode === 'inline') {
+                $template = Arr::get(static::$inlineTemplates, $type);
+            } else {
+                $template = Arr::get(static::$templates, $type);
+            }
+
+            return sprintf($template, Arr::get($item, 'content'));
 
         }, $items));
     }
@@ -115,17 +133,17 @@ class AssetManager
         }
 
         // The assets type is valid.
-        else if (empty($assets = $this->parseAssets($assets))) {
+        else if (empty($items = $this->parseAssets($assets))) {
             return;
         }
 
-        $template = $this->getTemplate($type);
+        $template = Arr::get(static::$templates, $type);
 
-        return implode("\n", array_map(function ($asset) use ($template)
+        return implode("\n", array_map(function ($content) use ($template)
         {
-            return sprintf($template, $asset);
+            return sprintf($template, $content);
 
-        }, $assets));
+        }, $items));
     }
 
     /**
@@ -147,17 +165,6 @@ class AssetManager
         {
             return ! empty($value);
         });
-    }
-
-    /**
-     * Returns an Assets Template.
-     *
-     * @param  string  $type
-     * @return string
-     */
-    protected function getTemplate($type)
-    {
-        return Arr::get(static::$templates, $type);
     }
 
     /**
