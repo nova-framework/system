@@ -5,13 +5,23 @@
     <title><?= isset($title) ? $title : __d('{{slug}}', 'Page'); ?> - <?= Config::get('app.name'); ?></title>
 <?php
 
-Assets::css(array(
+echo Asset::build('css', array(
     'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
     'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
     theme_url('css/style.css', '{{slug}}'),
 ));
 
+echo Asset::render('css', 'header');
+
+echo Asset::render('js', 'header');
+
 ?>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 </head>
 <body>
 
@@ -33,10 +43,12 @@ Assets::css(array(
 
 <?php
 
-Assets::js(array(
+echo Asset::build('js', array(
     'https://code.jquery.com/jquery-1.12.4.min.js',
     'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'
 ));
+
+echo Asset::render('js', 'footer');
 
 ?>
 
