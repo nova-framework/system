@@ -36,12 +36,12 @@ class AssetManager
     );
 
     /**
-     *  The standard Asset Templates
+     *  The Asset Templates
      *
      * @var array
      */
-    protected $templates = array(
-        'standard' => array(
+    protected static $templates = array(
+        'default' => array(
             'css' => '<link href="%s" rel="stylesheet" type="text/css">',
             'js'  => '<script src="%s" type="text/javascript"></script>',
         ),
@@ -134,7 +134,7 @@ class AssetManager
                 $asset = $this->views->fetch($asset);
             }
 
-            $template = Arr::get($this->templates, "${mode}.${type}");
+            $template = Arr::get(static::$templates, "${mode}.${type}");
 
             return sprintf($template, $asset);
 
@@ -161,7 +161,7 @@ class AssetManager
             return;
         }
 
-        $template = Arr::get($this->templates, "standard.${type}");
+        $template = Arr::get(static::$templates, "default.${type}");
 
         return implode("\n", array_map(function ($asset) use ($template)
         {
