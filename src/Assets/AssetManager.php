@@ -12,6 +12,20 @@ use InvalidArgumentException;
 class AssetManager
 {
     /**
+     * The View Factory instance.
+     *
+     * @var \Nova\View\Factory
+     */
+     protected $views;
+
+    /**
+     * The Assets Types
+     *
+     * @var array
+     */
+    protected $types = array('css', 'js');
+
+    /**
      * The Assets Positions
      *
      * @var array
@@ -26,19 +40,15 @@ class AssetManager
      *
      * @var array
      */
-    protected static $templates = array(
-        'css' => '<link href="%s" rel="stylesheet" type="text/css">',
-        'js'  => '<script src="%s" type="text/javascript"></script>',
-    );
-
-    /**
-     *  The inline Asset Templates
-     *
-     * @var array
-     */
-    protected static $inlineTemplates = array(
-        'css' => '<style>%s</style>',
-        'js'  => '<script type="text/javascript">%s</script>',
+    protected $templates = array(
+        'standard' => array(
+            'css' => '<link href="%s" rel="stylesheet" type="text/css">',
+            'js'  => '<script src="%s" type="text/javascript"></script>',
+        ),
+        'inline' => array(
+            'css' => '<style>%s</style>',
+            'js'  => '<script type="text/javascript">%s</script>',
+        ),
     );
 
 
@@ -66,7 +76,7 @@ class AssetManager
      */
     public function register($assets, $type, $position, $order = 0, $mode = 'default')
     {
-        if (! in_array($type, $this->getTypes())) {
+        if (! in_array($type, $this->types)) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
         } else if (! in_array($mode, array('default', 'inline', 'view'))) {
             throw new InvalidArgumentException("Invalid assets mode [${mode}]");
@@ -98,7 +108,7 @@ class AssetManager
      */
     public function position($position, $type)
     {
-        if (! in_array($type, $this->getTypes())) {
+        if (! in_array($type, $this->types)) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
         }
 
@@ -116,19 +126,15 @@ class AssetManager
 
         return implode("\n", array_map(function ($item) use ($type)
         {
-            $mode = Arr::get($item, 'mode');
-
-            if ($mode === 'default') {
-                $template = Arr::get(static::$templates, $type);
-            } else {
-                $template = Arr::get(static::$inlineTemplates, $type);
-            }
-
             $asset = Arr::get($item, 'asset');
 
-            if ($mode === 'view') {
-                return sprintf($template, $this->views->fetch($asset));
+            if (($mode = Arr::get($item, 'mode')) === 'view') {
+                $mode = 'inline'; // The 'view' mode is a specialized 'inline'
+
+                $asset = $this->views->fetch($asset);
             }
+
+            $template = Arr::get($this->templates, "${mode}.${type}");
 
             return sprintf($template, $asset);
 
@@ -136,17 +142,17 @@ class AssetManager
     }
 
     /**
-     * Build the CSS or JS scripts.
+     * Render the CSS or JS scripts.
      *
      * @param string       $type
-     * @param string|array $files
+     * @param string|array $assets
      *
      * @return string|null
      * @throws \InvalidArgumentException
      */
     public function render($type, $assets)
     {
-        if (! in_array($type, $this->getTypes())) {
+        if (! in_array($type, $this->types)) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
         }
 
@@ -155,7 +161,7 @@ class AssetManager
             return;
         }
 
-        $template = Arr::get(static::$templates, $type);
+        $template = Arr::get($this->templates, "standard.${type}");
 
         return implode("\n", array_map(function ($asset) use ($template)
         {
