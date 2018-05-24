@@ -190,14 +190,4 @@ class AssetManager
             return ! empty($value);
         });
     }
-
-    /**
-     * Returns the known Asset Types.
-     *
-     * @return array
-     */
-    protected function getTypes()
-    {
-        return array_keys(static::$templates);
-    }
 }
