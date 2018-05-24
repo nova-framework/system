@@ -55,16 +55,16 @@ class AssetManager
     /**
      * Register new Assets.
      *
+     * @param  string|array $assets
      * @param  string $position
      * @param  string $type
-     * @param  string|array $assets
      * @param  int $order
      * @param  string $mode
      *
      * @return void
      * @throws \InvalidArgumentException
      */
-    public function register($position, $type, $assets, $order = 0, $mode = 'default')
+    public function register($assets, $position, $type, $order = 0, $mode = 'default')
     {
         if (! in_array($type, $this->getTypes())) {
             throw new InvalidArgumentException("Invalid assets type [${type}]");
