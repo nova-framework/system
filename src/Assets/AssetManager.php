@@ -63,6 +63,27 @@ class AssetManager
     }
 
     /**
+     * Render the CSS or JS scripts.
+     *
+     * @param string       $type
+     * @param string|array $assets
+     *
+     * @return string|null
+     * @throws \InvalidArgumentException
+     */
+    public function render($type, $assets)
+    {
+        if (! in_array($type, $this->types)) {
+            throw new InvalidArgumentException("Invalid assets type [${type}]");
+        }
+
+        // The assets type is valid.
+        else if (! empty($items = $this->parseAssets($assets))) {
+            return implode("\n", $this->renderItems($items, $type));
+        }
+    }
+
+    /**
      * Register new Assets.
      *
      * @param  string|array $assets
@@ -83,24 +104,19 @@ class AssetManager
         }
 
         // The assets type and mode are valid.
-        else if (empty($assets = $this->parseAssets($assets))) {
-            return;
-        }
+        else if (! empty($items = $this->parseAssets($assets, $order, $mode))) {
+            // We will merge the items for the specified type and position.
 
-        // Check the assets position setup.
-        else if (! Arr::has($this->positions[$type], $position)) {
-            $this->positions[$type][$position] = array();
-        }
-
-        foreach ($assets as $asset) {
-            $this->positions[$type][$position][] = compact('asset', 'order', 'mode');
+            Arr::set($this->positions, $key = "${type}.${position}", array_merge(
+                Arr::get($this->positions, $key, array()), $items
+            ));
         }
     }
 
     /**
-     * Render the Assets for a specified position.
+     * Render the Assets for specified position(s)
      *
-     * @param  string $position
+     * @param  string|array $position
      * @param  string $type
      *
      * @return string
@@ -112,11 +128,32 @@ class AssetManager
             throw new InvalidArgumentException("Invalid assets type [${type}]");
         }
 
-        // The assets type is valid.
-        else if (empty($items = Arr::get($this->positions[$type], $position, array()))) {
-            return;
+        $positions = is_array($position) ? $position : array($position);
+
+        //
+        $result = array();
+
+        foreach ($positions as $position) {
+            $items = Arr::get($this->positions, "${type}.${position}", array());
+
+            if (! empty($items)) {
+                $result = array_merge($result, $this->renderItems($items, $type));
+            }
         }
 
+        return implode("\n", array_unique($result));
+    }
+
+    /**
+     * Render the given position items to an array of assets.
+     *
+     * @param  array $items
+     * @param string $type
+     *
+     * @return array
+     */
+    protected function renderItems(array $items, $type)
+    {
         usort($items, function ($a, $b)
         {
             if ($a['order'] == $b['order']) return 0;
@@ -124,7 +161,7 @@ class AssetManager
             return ($a['order'] > $b['order']) ? 1 : -1;
         });
 
-        return implode("\n", array_map(function ($item) use ($type)
+        return array_map(function ($item) use ($type)
         {
             $asset = Arr::get($item, 'asset');
 
@@ -138,46 +175,19 @@ class AssetManager
 
             return sprintf($template, $asset);
 
-        }, $items));
-    }
-
-    /**
-     * Render the CSS or JS scripts.
-     *
-     * @param string       $type
-     * @param string|array $assets
-     *
-     * @return string|null
-     * @throws \InvalidArgumentException
-     */
-    public function render($type, $assets)
-    {
-        if (! in_array($type, $this->types)) {
-            throw new InvalidArgumentException("Invalid assets type [${type}]");
-        }
-
-        // The assets type is valid.
-        else if (empty($assets = $this->parseAssets($assets))) {
-            return;
-        }
-
-        $template = Arr::get(static::$templates, "default.${type}");
-
-        return implode("\n", array_map(function ($asset) use ($template)
-        {
-            return sprintf($template, $asset);
-
-        }, $assets));
+        }, $items);
     }
 
     /**
      * Parses and returns the given assets.
      *
      * @param  string|array $assets
+     * @param  int $order
+     * @param  string $mode
      *
      * @return array
      */
-    protected function parseAssets($assets)
+    protected function parseAssets($assets, $order = 0, $mode = 'default')
     {
         if (is_string($assets) && ! empty($assets)) {
             $assets = array($assets);
@@ -185,9 +195,13 @@ class AssetManager
             return array();
         }
 
-        return array_filter($assets, function ($value)
+        return array_map(function ($asset) use ($order, $mode)
+        {
+            return compact('asset', 'order', 'mode');
+
+        }, array_filter($assets, function ($value)
         {
             return ! empty($value);
-        });
+        }));
     }
 }
