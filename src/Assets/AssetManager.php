@@ -63,27 +63,6 @@ class AssetManager
     }
 
     /**
-     * Render the CSS or JS scripts.
-     *
-     * @param string       $type
-     * @param string|array $assets
-     *
-     * @return string|null
-     * @throws \InvalidArgumentException
-     */
-    public function render($type, $assets)
-    {
-        if (! in_array($type, $this->types)) {
-            throw new InvalidArgumentException("Invalid assets type [${type}]");
-        }
-
-        // The assets type is valid.
-        else if (! empty($items = $this->parseAssets($assets))) {
-            return implode("\n", $this->renderItems($items, $type));
-        }
-    }
-
-    /**
      * Register new Assets.
      *
      * @param  string|array $assets
@@ -142,6 +121,27 @@ class AssetManager
         }
 
         return implode("\n", array_unique($result));
+    }
+
+    /**
+     * Render the CSS or JS scripts.
+     *
+     * @param string       $type
+     * @param string|array $assets
+     *
+     * @return string|null
+     * @throws \InvalidArgumentException
+     */
+    public function render($type, $assets)
+    {
+        if (! in_array($type, $this->types)) {
+            throw new InvalidArgumentException("Invalid assets type [${type}]");
+        }
+
+        // The assets type is valid.
+        else if (! empty($items = $this->parseAssets($assets))) {
+            return implode("\n", $this->renderItems($items, $type));
+        }
     }
 
     /**
