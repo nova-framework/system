@@ -2,9 +2,9 @@
 
 namespace Nova\Foundation\Console;
 
+use Nova\Assets\AssetDispatcher;
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\AssetPublisher;
-use Nova\Routing\AssetDispatcher;
 use Nova\Support\Str;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -30,7 +30,7 @@ class AssetPublishCommand extends Command
     /**
      * The asset dispatcher instance.
      *
-     * @var \Nova\Routing\Assets\Dispatcher
+     * @var \Nova\Asssets\AssetDispatcher
      */
     protected $dispatcher;
 
@@ -45,7 +45,7 @@ class AssetPublishCommand extends Command
     /**
      * Create a new asset publish command instance.
      *
-     * @param  \Nova\Routing\Assets\Dispatcher $dispatcher
+     * @param  \Nova\Assets\AssetDispatcher $dispatcher
      * @param  \Nova\Foundation\AssetPublisher  $assets
      * @return void
      */
