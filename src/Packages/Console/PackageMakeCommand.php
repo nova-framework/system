@@ -336,11 +336,11 @@ class PackageMakeCommand extends Command
 
         $this->data['slug'] = $slug;
 
-        if ($type = 'module') {
+        if ($type == 'module') {
             $namespace = $this->packages->getModulesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
-        } else if ($type = 'theme') {
+        } else if ($type == 'theme') {
             $namespace = $this->packages->getThemesNamespace();
 
             $vendor = basename(str_replace('\\', '/',  $namespace));
