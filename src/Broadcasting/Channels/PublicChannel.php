@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Broadcasting;
+namespace Nova\Broadcasting\Channels;
 
 
 class PublicChannel
