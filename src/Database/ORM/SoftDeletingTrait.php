@@ -61,9 +61,9 @@ trait SoftDeletingTrait
     {
         $query = $this->newQuery()->where($this->getKeyName(), $this->getKey());
 
-        $this->{$this->getDeletedAtColumn()} = $time = $this->freshTimestamp();
+        $this->setAttribute($column = $this->getDeletedAtColumn(), $time = $this->freshTimestamp());
 
-        $query->update(array($this->getDeletedAtColumn() => $this->fromDateTime($time)));
+        $query->update(array($column => $this->fromDateTime($time)));
     }
 
     /**
@@ -77,7 +77,7 @@ trait SoftDeletingTrait
             return false;
         }
 
-        $this->{$this->getDeletedAtColumn()} = null;
+        $this->setAttribute($this->getDeletedAtColumn(), null);
 
         //
         $this->exists = true;
@@ -96,7 +96,7 @@ trait SoftDeletingTrait
      */
     public function trashed()
     {
-        return ! is_null($this->{$this->getDeletedAtColumn()});
+        return ! is_null($this->getAttribute($this->getDeletedAtColumn()));
     }
 
     /**

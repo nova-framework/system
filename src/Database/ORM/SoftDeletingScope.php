@@ -10,7 +10,8 @@ class SoftDeletingScope implements ScopeInterface
      *
      * @var array
      */
-    protected $extensions = ['ForceDelete', 'Restore', 'WithTrashed', 'OnlyTrashed'];
+    protected $extensions = array('ForceDelete', 'Restore', 'WithTrashed', 'OnlyTrashed');
+
 
     /**
      * Apply the scope to a given ORM query builder.
@@ -158,7 +159,7 @@ class SoftDeletingScope implements ScopeInterface
      */
     protected function isSoftDeleteConstraint(array $where, $column)
     {
-        return $where['type'] == 'Null' && $where['column'] == $column;
+        return ($where['type'] == 'Null') && ($where['column'] == $column);
     }
 
 }

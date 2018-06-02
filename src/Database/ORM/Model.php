@@ -1587,6 +1587,10 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function touch()
     {
+        if (! $this->timestamps) {
+            return false;
+        }
+
         $this->updateTimestamps();
 
         return $this->save();
@@ -1601,12 +1605,12 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         $time = $this->freshTimestamp();
 
-        if (! $this->isDirty(static::UPDATED_AT)) {
-            $this->setUpdatedAt($time);
+        if (! is_null($column = $this->getUpdatedAtColumn()) && ! $this->isDirty($column)) {
+            $this->setAttribute($column, $time);
         }
 
-        if (! $this->exists && ! $this->isDirty(static::CREATED_AT)) {
-            $this->setCreatedAt($time);
+        if (! $this->exists && ! is_null($column = $this->getCreatedAtColumn()) && ! $this->isDirty($column)) {
+            $this->setAttribute($column, $time);
         }
     }
 
@@ -1618,7 +1622,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function setCreatedAt($value)
     {
-        $this->{static::CREATED_AT} = $value;
+        if (! is_null($column = $this->getCreatedAtColumn())) {
+            $this->setAttribute($column, $value);
+        }
     }
 
     /**
@@ -1629,7 +1635,9 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
      */
     public function setUpdatedAt($value)
     {
-        $this->{static::UPDATED_AT} = $value;
+        if (! is_null($column = $this->getUpdatedAtColumn())) {
+            $this->setAttribute($column, $value);
+        }
     }
 
     /**
