@@ -4,8 +4,10 @@ namespace Nova\Database\Console\Seeds;
 
 use Nova\Console\Command;
 use Nova\Console\ConfirmableTrait;
-use Symfony\Component\Console\Input\InputOption;
 use Nova\Database\ConnectionResolverInterface as Resolver;
+use Nova\Support\Str;
+
+use Symfony\Component\Console\Input\InputOption;
 
 
 class SeedCommand extends Command
@@ -70,6 +72,12 @@ class SeedCommand extends Command
     protected function getSeeder()
     {
         $className = $this->input->getOption('class');
+
+        $rootNamespace = $this->container->getNamespace();
+
+        if (! Str::startsWith($className, $rootNamespace)) {
+            $className = $rootNamespace .'Database\Seeds\\' .$className;
+	}
 
         $instance = $this->container->make($className);
 
