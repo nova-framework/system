@@ -32,7 +32,6 @@
         "symfony/process": "3.4.*",
         "symfony/routing": "3.4.*",
         "symfony/var-dumper": "3.4.*",
-        "stack/builder": "^1.0",
         "doctrine/inflector": "1.1.*",
         "swiftmailer/swiftmailer": "^5.4",
         "monolog/monolog": "^1.19",
