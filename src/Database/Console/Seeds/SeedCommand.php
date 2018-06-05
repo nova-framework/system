@@ -71,7 +71,7 @@ class SeedCommand extends Command
      */
     protected function getSeeder()
     {
-        $className = $this->input->getOption('class');
+        $className = str_replace('/', '\\', $this->input->getOption('class'));
 
         $rootNamespace = $this->container->getNamespace();
 
