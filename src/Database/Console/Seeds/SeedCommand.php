@@ -75,7 +75,7 @@ class SeedCommand extends Command
 
         $rootNamespace = $this->container->getNamespace();
 
-        if (! Str::startsWith($className, $rootNamespace)) {
+        if (! Str::startsWith($className, $rootNamespace) && ! Str::contains($className, '\\')) {
             $className = $rootNamespace .'Database\Seeds\\' .$className;
 	}
 
