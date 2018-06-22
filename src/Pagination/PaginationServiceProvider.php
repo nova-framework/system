@@ -37,13 +37,11 @@ class PaginationServiceProvider extends ServiceProvider
             return 1;
         });
 
-        Paginator::pageUrlResolver(function ($page, array $query, $pageName = 'page', $path = '/')
+        Paginator::pageUrlResolver(function ($page, array $query, $path, $pageName = 'page')
         {
             $query = array_merge($query, array($pageName => $page));
 
-            $separator = Str::contains($path, '?') ? '&' : '?';
-
-            return $path .$separator .http_build_query($query, '', '&');
+            return array($path, $query);
         });
     }
 }

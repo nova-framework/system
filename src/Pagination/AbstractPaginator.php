@@ -155,9 +155,15 @@ abstract class AbstractPaginator implements HtmlableInterface
             $page = 1;
         }
 
-        $url = static::resolvePageUrl($page, $this->query, $this->pageName, $this->path);
+        list ($path, $query) = static::resolvePageUrl($page, $this->query, $this->path, $this->pageName);
 
-        return $url .$this->buildFragment();
+        if (! empty($query)) {
+            $path .= Str::contains($path, '?') ? '&' : '?';
+
+            $path .= http_build_query($query, '', '&');
+        }
+
+        return $path .$this->buildFragment();
     }
 
     /**
@@ -180,17 +186,17 @@ abstract class AbstractPaginator implements HtmlableInterface
     /**
      * Add a set of query string values to the paginator.
      *
-     * @param  array|string  $key
+     * @param  array|string  $keys
      * @param  string|null  $value
      * @return $this
      */
-    public function appends($key, $value = null)
+    public function appends($keys, $value = null)
     {
-        if (! is_array($key)) {
+        if (! is_array($keys)) {
             return $this->addQuery($keys, $value);
         }
 
-        foreach ($key as $key => $value) {
+        foreach ($keys as $key => $value) {
             $this->addQuery($key, $value);
         }
 
@@ -206,9 +212,7 @@ abstract class AbstractPaginator implements HtmlableInterface
      */
     protected function addQuery($key, $value)
     {
-        if (($key === $this->pageName) && ! static::$routeMode) {
-            //
-        } else {
+        if ($key !== $this->pageName) {
             $this->query[$key] = $value;
         }
 
@@ -347,16 +351,6 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Get the base path to assign to all URLs.
-     *
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
      * Resolve the current request path or return the default value.
      *
      * @param  string  $pageName
@@ -415,14 +409,14 @@ abstract class AbstractPaginator implements HtmlableInterface
      *
      * @param  int  $page
      * @param  array  $query
-     * @param  string  $pageName
      * @param  string  $path
+     * @param  string  $pageName
      * @return string
      */
-    public static function resolvePageUrl($page, array $query, $pageName = 'page', $path = '/')
+    public static function resolvePageUrl($page, array $query, $path = '/', $pageName = 'page')
     {
         if (isset(static::$pageUrlResolver)) {
-            return call_user_func(static::$pageUrlResolver, $page, $query, $pageName, $path);
+            return call_user_func(static::$pageUrlResolver, $page, $query, $path, $pageName);
         }
     }
 
