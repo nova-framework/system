@@ -41,13 +41,9 @@ class PaginationServiceProvider extends ServiceProvider
         {
             $query = array_merge($query, array($pageName => $page));
 
-            if (count($query) > 0) {
-                $path .= Str::contains($path, '?') ? '&' : '?';
+            $separator = Str::contains($path, '?') ? '&' : '?';
 
-                $path .= http_build_query($query, '', '&');
-            }
-
-            return $path;
+            return $path .$separator .http_build_query($query, '', '&');
         });
     }
 }
