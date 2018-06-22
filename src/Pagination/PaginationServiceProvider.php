@@ -3,6 +3,7 @@
 namespace Nova\Pagination;
 
 use Nova\Support\ServiceProvider;
+use Nova\Support\Str;
 
 
 class PaginationServiceProvider extends ServiceProvider
@@ -34,6 +35,19 @@ class PaginationServiceProvider extends ServiceProvider
             }
 
             return 1;
+        });
+
+        Paginator::pageUrlResolver(function ($page, array $query, $pageName = 'page', $path = '/')
+        {
+            $query = array_merge($query, array($pageName => $page));
+
+            if (count($query) > 0) {
+                $path .= Str::contains($path, '?') ? '&' : '?';
+
+                $path .= http_build_query($query, '', '&');
+            }
+
+            return $path;
         });
     }
 }

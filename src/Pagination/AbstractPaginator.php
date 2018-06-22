@@ -83,11 +83,11 @@ abstract class AbstractPaginator implements HtmlableInterface
     protected static $viewFactoryResolver;
 
     /**
-     * Whether or not are used the pretty URLs.
+     * The page URL resolver callback.
      *
-     * @var bool
+     * @var \Closure
      */
-    protected static $routeMode = false;
+    protected static $pageUrlResolver;
 
     /**
      * The default pagination view.
@@ -155,21 +155,7 @@ abstract class AbstractPaginator implements HtmlableInterface
             $page = 1;
         }
 
-        $path = $this->path;
-
-        $parameters = $this->query;
-
-        if (! static::$routeMode) {
-            $parameters = array_merge($parameters, array($this->pageName => $page));
-        } else {
-            $path .= '/' .$this->pageName .'/' .$page;
-        }
-
-        if (count($parameters) > 0) {
-            $path .= Str::contains($path, '?') ? '&' : '?';
-
-            $path .= http_build_query($parameters, '', '&');
-        }
+        $path = static::resolvePageUrl($page, $this->query, $this->pageName, $this->path);
 
         return $path .$this->buildFragment();
     }
@@ -371,29 +357,9 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Enables the usage of pretty URLs.
-     *
-     * @param  bool  $what
-     * @return void
-     */
-    public static function enableRouteMode($what = true)
-    {
-        static::$routeMode = $what;
-    }
-
-    /**
-     * Whether or not is enabled the usage of pretty URLs.
-     *
-     * @return void
-     */
-    public static function routeModeEnabled()
-    {
-        return static::$routeMode;
-    }
-
-    /**
      * Resolve the current request path or return the default value.
      *
+     * @param  string  $pageName
      * @param  string  $default
      * @return string
      */
@@ -431,6 +397,33 @@ abstract class AbstractPaginator implements HtmlableInterface
         }
 
         return $default;
+    }
+
+    /**
+     * Set the current page resolver callback.
+     *
+     * @param  \Closure  $resolver
+     * @return void
+     */
+    public static function pageUrlResolver(Closure $resolver)
+    {
+        static::$pageUrlResolver = $resolver;
+    }
+
+    /**
+     * Resolve the page URL.
+     *
+     * @param  int  $page
+     * @param  array  $query
+     * @param  string  $pageName
+     * @param  string  $path
+     * @return string
+     */
+    public static function resolvePageUrl($page, array $query, $pageName = 'page', $path = '/')
+    {
+        if (isset(static::$pageUrlResolver)) {
+            return call_user_func(static::$pageUrlResolver, $page, $query, $pageName, $path);
+        }
     }
 
     /**
