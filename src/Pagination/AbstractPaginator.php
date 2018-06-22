@@ -155,9 +155,9 @@ abstract class AbstractPaginator implements HtmlableInterface
             $page = 1;
         }
 
-        $path = static::resolvePageUrl($page, $this->query, $this->pageName, $this->path);
+        $url = static::resolvePageUrl($page, $this->query, $this->pageName, $this->path);
 
-        return $path .$this->buildFragment();
+        return $url .$this->buildFragment();
     }
 
     /**
