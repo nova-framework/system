@@ -270,6 +270,9 @@ class LanguagesUpdateCommand extends Command
 
         $data = $this->getMessagesFromFile($path);
 
+        //
+        $result = array();
+
         foreach ($messages as $key) {
             $result[$key] = Arr::get($data, $key, '');
         }
