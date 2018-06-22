@@ -1,562 +1,293 @@
 <?php
-/**
- * Paginator - Implements a simple but efficient Paginator.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Pagination;
 
-use Nova\Pagination\Factory;
-use Nova\Pagination\BootstrapPresenter;
-use Nova\Pagination\Presenter;
 use Nova\Support\Collection;
+use Nova\Support\HtmlString;
 use Nova\Support\Contracts\JsonableInterface;
 use Nova\Support\Contracts\ArrayableInterface;
 
-use Input;
-use Request;
-
-use Countable;
 use ArrayAccess;
-use ArrayIterator;
+use Countable;
 use IteratorAggregate;
+use JsonSerializable;
 
 
-class Paginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonableInterface
+class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, JsonableInterface
 {
     /**
-     * The pagination factory.
-     *
-     * @var \Nova\Pagination\Factory
-     */
-    protected $factory;
-
-    /**
-     * The Presenter instance.
-     *
-     * @var \Nova\Pagination\Presenter
-     */
-    protected $presenter;
-
-    /**
-     * The results for the current page.
-     *
-     * @var array
-     */
-    protected $items;
-
-
-    /**
-     * The total number of results.
+     * The total number of items before slicing.
      *
      * @var int
      */
     protected $total;
 
     /**
-     * Indicates if a pagination doing "quick" pagination has more items.
-     *
-     * @var bool
-     */
-    protected $hasMore;
-
-    /**
-     * The number of items per page.
+     * The last available page.
      *
      * @var int
-     */
-    protected $perPage;
-
-    /**
-     * Get the current page for the request.
-     *
-     * @var int
-     */
-    protected $currentPage;
-
-    /**
-     * Get the last available page number.
-     *
-     * @return int
      */
     protected $lastPage;
 
-    /**
-     * The number of the first item in this range.
-     *
-     * @var int
-     */
-    protected $from;
 
     /**
-     * The number of the last item in this range.
+     * Create a new paginator instance.
      *
-     * @var int
-     */
-    protected $to;
-
-    /**
-     * The base URL in use by the paginator.
-     *
-     * @var string
-     */
-    protected $baseUrl;
-
-    /**
-     * The input parameter used for the current page.
-     *
-     * @var string
-     */
-    protected $pageName;
-
-    /**
-     * All of the additional query string values.
-     *
-     * @var array
-     */
-    protected $query = array();
-
-    /**
-     * The fragment to be appended to all URLs.
-     *
-     * @var string
-     */
-    protected $fragment;
-
-
-    /**
-     * Create a new Paginator instance.
-     *
-     * @param  \Nova\Pagination\Factory  $factory
-     * @param  array     $items
-     * @param  int       $total
-     * @param  int|null  $perPage
+     * @param  mixed  $items
+     * @param  int  $total
+     * @param  int  $perPage
+     * @param  int|null  $currentPage
+     * @param  array  $options (path, query, fragment, pageName)
      * @return void
      */
-    public function __construct(Factory $factory, $items, $total, $perPage = null)
+    public function __construct($items, $total, $perPage, $currentPage = null, array $options = array())
     {
-        $this->factory = $factory;
-
-        if (is_null($perPage)) {
-            $this->perPage = (int) $total;
-            $this->hasMore = (count($items) > $this->perPage);
-
-            $this->items = array_slice($items, 0, $this->perPage);
-        } else {
-            $this->items = $items;
-            $this->total = (int) $total;
-            $this->perPage = (int) $perPage;
+        if (! $items instanceof Collection) {
+            $items = Collection::make($items);
         }
-    }
 
-    /**
-     * Setup the pagination context (current and last page).
-     *
-     * @return $this
-     */
-    public function setupPaginationContext()
-    {
-        $this->calculateCurrentAndLastPages();
-
-        $this->calculateItemRanges();
-
-        return $this;
-    }
-
-    /**
-     * Calculate the current and last pages for this instance.
-     *
-     * @return void
-     */
-    protected function calculateCurrentAndLastPages()
-    {
-        if ($this->isQuickPaginating()) {
-            $this->currentPage = $this->factory->getCurrentPage();
-
-            $this->lastPage = $this->hasMore ? ($this->currentPage + 1) : $this->currentPage;
-        } else {
-            $this->lastPage = max((int) ceil($this->total / $this->perPage), 1);
-
-            $this->currentPage = $this->calculateCurrentPage($this->lastPage);
+        foreach ($options as $key => $value) {
+            $this->{$key} = $value;
         }
-    }
 
-    /**
-     * Calculate the first and last item number for this instance.
-     *
-     * @return void
-     */
-    protected function calculateItemRanges()
-    {
-        $this->from = $this->total ? (($this->currentPage - 1) * $this->perPage + 1) : 0;
+        $this->total   = $total;
+        $this->perPage = $perPage;
 
-        $this->to = min($this->total, $this->currentPage * $this->perPage);
+        $this->lastPage = (int) ceil($total / $perPage);
+
+        $this->currentPage = $this->setCurrentPage($currentPage, $this->pageName);
+
+        $this->items = $items;
+
+        if ($this->path !== '/') {
+            $this->path = rtrim($this->path, '/');
+        }
     }
 
     /**
      * Get the current page for the request.
      *
-     * @param  int  $lastPage
+     * @param  int  $currentPage
+     * @param  string  $pageName
      * @return int
      */
-    protected function calculateCurrentPage($lastPage)
+    protected function setCurrentPage($currentPage, $pageName)
     {
-        $page = $this->factory->getCurrentPage();
+        $currentPage = $currentPage ?: static::resolveCurrentPage($pageName);
 
-        if (is_numeric($page) && ($page > $lastPage)) {
-            return ($lastPage > 0) ? $lastPage : 1;
-        }
-
-        return $this->isValidPageNumber($page) ? (int) $page : 1;
+        return $this->isValidPageNumber($currentPage) ? (int) $currentPage : 1;
     }
 
     /**
-     * Determine if a given page number is a valid page.
+     * Render the paginator using the given view.
      *
-     * A valid page must be greater than or equal to one and a valid integer.
-     *
-     * @param  int   $page
-     * @return bool
-     */
-    protected function isValidPageNumber($page)
-    {
-        return (($page >= 1) && (filter_var($page, FILTER_VALIDATE_INT) !== false));
-    }
-
-    /**
-     * Create the HTML pagination links.
-     *
+     * @param  string  $view
+     * @param  array  $data
      * @return string
      */
-    public function links()
+    public function links($view = null, $data = array())
     {
-        if ($this->getLastPage() > 1) {
-            $presenter = $this->getPresenter();
-
-            return $presenter->render();
-        }
+        return $this->render($view, $data);
     }
 
     /**
-     * Get a URL for a given page number.
+     * Render the paginator using the given view.
      *
-     * @param  int     $page
+     * @param  string  $view
+     * @param  array  $data
      * @return string
      */
-    public function getUrl($page)
+    public function render($view = null, $data = array())
     {
-        $params = array(
-            $this->factory->getPageName() => $page,
+        if (is_null($view)) {
+            $view = static::$defaultView;
+        }
+
+        $data = array_merge($data, array(
+            'paginator' => $this,
+            'elements'  => $this->elements(),
+        ));
+
+        return new HtmlString(
+            static::viewFactory()->make($view, $data)->render()
         );
-
-        if (count($this->query) > 0) {
-            $params = array_merge($this->query, $params);
-        }
-
-        $fragment = $this->buildFragment();
-
-        return $this->factory->getCurrentUrl() .'?' .http_build_query($params, null, '&') .$fragment;
     }
 
     /**
-     * Get / set the URL fragment to be appended to URLs.
-     *
-     * @param  string|null  $fragment
-     * @return $this|string
-     */
-    public function fragment($fragment = null)
-    {
-        if (is_null($fragment)) return $this->fragment;
-
-        $this->fragment = $fragment;
-
-        return $this;
-    }
-
-    /**
-     * Build the full fragment portion of a URL.
-     *
-     * @return string
-     */
-    protected function buildFragment()
-    {
-        return $this->fragment ? '#' .$this->fragment : '';
-    }
-
-    /**
-     * Add a query string value to the paginator.
-     *
-     * @param  string  $key
-     * @param  string  $value
-     * @return \Nova\Pagination\Paginator
-     */
-    public function appends($key, $value = null)
-    {
-        if (is_array($key)) {
-            return $this->appendArray($key);
-        }
-
-        return $this->addQuery($key, $value);
-    }
-
-    /**
-     * Add an array of query string values.
-     *
-     * @param  array  $keys
-     * @return \Nova\Pagination\Paginator
-     */
-    protected function appendArray(array $keys)
-    {
-        foreach ($keys as $key => $value) {
-            $this->addQuery($key, $value);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add a query string value to the paginator.
-     *
-     * @param  string  $key
-     * @param  string  $value
-     * @return \Nova\Pagination\Paginator
-     */
-    public function addQuery($key, $value)
-    {
-        $this->query[$key] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Determine if the paginator is doing "quick" pagination.
-     *
-     * @return bool
-     */
-    public function isQuickPaginating()
-    {
-        return is_null($this->total);
-    }
-
-    /**
-     * Get the current page for the request.
-     *
-     * @param  int|null  $total
-     * @return int
-     */
-    public function getCurrentPage($total = null)
-    {
-        if (is_null($total)) {
-            return $this->currentPage;
-        }
-
-        return min($this->currentPage, (int) ceil($total / $this->perPage));
-    }
-
-    /**
-     * Get the last page that should be available.
-     *
-     * @return int
-     */
-    public function getLastPage()
-    {
-        return $this->lastPage;
-    }
-
-    /**
-     * Get the number of the first item on the paginator.
-     *
-     * @return int
-     */
-    public function getFrom()
-    {
-        return $this->from;
-    }
-
-    /**
-     * Get the number of the last item on the paginator.
-     *
-     * @return int
-     */
-    public function getTo()
-    {
-        return $this->to;
-    }
-
-    /**
-     * Get the number of Items to be displayed per page.
-     *
-     * @return int
-     */
-    public function getPerPage()
-    {
-        return $this->perPage;
-    }
-
-    /**
-     * Get a collection instance containing the items.
-     *
-     * @return \Nova\Support\Collection
-     */
-    public function getCollection()
-    {
-        return new Collection($this->items);
-    }
-
-    /**
-     * Get the items being paginated.
+     * Get the array of elements to pass to the view.
      *
      * @return array
      */
-    public function getItems()
+    protected function elements()
     {
-        return $this->items;
+        $window = $this->getUrlWindow();
+
+        return array_filter(array(
+            $window['first'],
+            is_array($window['slider']) ? '...' : null,
+            $window['slider'],
+            is_array($window['last']) ? '...' : null,
+            $window['last'],
+        ));
     }
 
     /**
-     * Set the items being paginated.
+     * Get the window of URLs to be shown.
      *
-     * @param  mixed  $items
-     * @return void
+     * @param  int  $onEachSide
+     * @return array
      */
-    public function setItems($items)
+    public function getUrlWindow($onEachSide = 3)
     {
-        $this->items = $items;
+        if (! $this->hasPages()) {
+            return array('first' => null, 'slider' => null, 'last' => null);
+        }
+
+        $window = $onEachSide * 2;
+
+        if ($this->lastPage() < ($window + 6)) {
+            return $this->getSmallSlider();
+        }
+
+        // If the current page is very close to the beginning of the page range, we will
+        // just render the beginning of the page range, followed by the last 2 of the
+        // links in this list, since we will not have room to create a full slider.
+        if ($this->currentPage() <= $window) {
+            return $this->getSliderTooCloseToBeginning($window);
+        }
+
+        // If the current page is close to the ending of the page range we will just get
+        // this first couple pages, followed by a larger window of these ending pages
+        // since we're too close to the end of the list to create a full on slider.
+        else if ($this->currentPage() > ($this->lastPage() - $window)) {
+            return $this->getSliderTooCloseToEnding($window);
+        }
+
+        // If we have enough room on both sides of the current page to build a slider we
+        // will surround it with both the beginning and ending caps, with this window
+        // of pages in the middle providing a Google style sliding paginator setup.
+        return $this->getFullSlider($onEachSide);
     }
 
     /**
-     * Get the total number of items in the collection.
+     * Get the slider of URLs there are not enough pages to slide.
+     *
+     * @return array
+     */
+    protected function getSmallSlider()
+    {
+        return array(
+            'first'  => $this->getUrlRange(1, $this->lastPage()),
+            'slider' => null,
+            'last'   => null,
+        );
+    }
+
+    /**
+     * Get the slider of URLs when too close to beginning of window.
+     *
+     * @param  int  $window
+     * @return array
+     */
+    protected function getSliderTooCloseToBeginning($window)
+    {
+        return array(
+            'first'  => $this->getUrlRange(1, $window + 2),
+            'slider' => null,
+            'last'   => $this->getUrlRange($this->lastPage() - 1, $this->lastPage()),
+        );
+    }
+
+    /**
+     * Get the slider of URLs when too close to ending of window.
+     *
+     * @param  int  $window
+     * @return array
+     */
+    protected function getSliderTooCloseToEnding($window)
+    {
+        $last = $this->getUrlRange(
+            $this->lastPage() - ($window + 2),
+            $this->lastPage()
+        );
+
+        return array(
+            'first'  => $this->getUrlRange(1, 2),
+            'slider' => null,
+            'last'   => $last,
+        );
+    }
+
+    /**
+     * Get the slider of URLs when a full slider can be made.
+     *
+     * @param  int  $onEachSide
+     * @return array
+     */
+    protected function getFullSlider($onEachSide)
+    {
+        $slider = $this->getUrlRange(
+            $this->currentPage() - $onEachSide,
+            $this->currentPage() + $onEachSide
+        );
+
+        return array(
+            'first'  => $this->getUrlRange(1, 2),
+            'slider' => $slider,
+            'last'   => $this->getUrlRange($this->lastPage() - 1, $this->lastPage()),
+        );
+    }
+
+    /**
+     * Get the total number of items being paginated.
      *
      * @return int
      */
-    public function getTotal()
+    public function total()
     {
         return $this->total;
     }
 
     /**
-     * Set the base URL in use by the paginator.
-     *
-     * @param  string  $baseUrl
-     * @return void
-     */
-    public function setBaseUrl($baseUrl)
-    {
-        $this->factory->setBaseUrl($baseUrl);
-    }
-
-    /**
-     * Get the pagination factory.
-     *
-     * @return \Nova\Pagination\Factory
-     */
-    public function getFactory()
-    {
-        return $this->factory;
-    }
-
-    /**
-     * Get a Presenter instance.
-     *
-     * @return \Nova\Pagination\Presenter
-     */
-    public function getPresenter()
-    {
-        if (isset($this->presenter)) {
-            return $this->presenter;
-        }
-
-        return $this->presenter = new BootstrapPresenter($this);
-    }
-
-    /**
-     * Set the Presenter instance.
-     *
-     * @param \Nova\Pagination\Presenter $presenter
-     * @return \Nova\Pagination\Paginator
-     */
-    public function setPresenter(Presenter $presenter)
-    {
-        $this->presenter = $presenter;
-
-        return $this;
-    }
-
-    /**
-     * Get an iterator for the items.
-     *
-     * @return \ArrayIterator
-     */
-    public function getIterator()
-    {
-        return new ArrayIterator($this->items);
-    }
-
-    /**
-     * Determine if the list of items is empty or not.
+     * Determine if there are pages to show.
      *
      * @return bool
      */
-    public function isEmpty()
+    public function hasPages()
     {
-        return empty($this->items);
+        return $this->lastPage() > 1;
     }
 
     /**
-     * Get the number of items for the current page.
+     * Determine if there are more items in the data source.
+     *
+     * @return bool
+     */
+    public function hasMorePages()
+    {
+        return $this->currentPage() < $this->lastPage();
+    }
+
+    /**
+     * Get the URL for the next page.
+     *
+     * @return string|null
+     */
+    public function nextPageUrl()
+    {
+        if ($this->lastPage() > $this->currentPage()) {
+            return $this->url($this->currentPage() + 1);
+        }
+    }
+
+    /**
+     * Get the last page.
      *
      * @return int
      */
-    public function count()
+    public function lastPage()
     {
-        return count($this->items);
-    }
-
-    /**
-     * Determine if the given item exists.
-     *
-     * @param  mixed  $key
-     * @return bool
-     */
-    public function offsetExists($key)
-    {
-        return array_key_exists($key, $this->items);
-    }
-
-    /**
-     * Get the item at the given offset.
-     *
-     * @param  mixed  $key
-     * @return mixed
-     */
-    public function offsetGet($key)
-    {
-        return $this->items[$key];
-    }
-
-    /**
-     * Set the item at the given offset.
-     *
-     * @param  mixed  $key
-     * @param  mixed  $value
-     * @return void
-     */
-    public function offsetSet($key, $value)
-    {
-        $this->items[$key] = $value;
-    }
-
-    /**
-     * Unset the item at the given key.
-     *
-     * @param  mixed  $key
-     * @return void
-     */
-    public function offsetUnset($key)
-    {
-        unset($this->items[$key]);
+        return $this->lastPage;
     }
 
     /**
@@ -567,14 +298,26 @@ class Paginator implements ArrayableInterface, ArrayAccess, Countable, IteratorA
     public function toArray()
     {
         return array(
-            'total'        => $this->total,
-            'per_page'     => $this->perPage,
-            'current_page' => $this->currentPage,
-            'last_page'    => $this->lastPage,
-            'from'         => $this->from,
-            'to'           => $this->to,
-            'data'         => $this->getCollection()->toArray(),
+            'total'         => $this->total(),
+            'per_page'      => $this->perPage(),
+            'current_page'  => $this->currentPage(),
+            'last_page'     => $this->lastPage(),
+            'next_page_url' => $this->nextPageUrl(),
+            'prev_page_url' => $this->previousPageUrl(),
+            'from'          => $this->firstItem(),
+            'to'            => $this->lastItem(),
+            'data'          => $this->items->toArray(),
         );
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
     /**
@@ -585,20 +328,6 @@ class Paginator implements ArrayableInterface, ArrayAccess, Countable, IteratorA
      */
     public function toJson($options = 0)
     {
-        return json_encode($this->toArray(), $options);
-    }
-
-    /**
-     * Call a method on the underlying Collection
-     *
-     * @param  string  $method
-     * @param  array   $arguments
-     * @return mixed
-     */
-    public function __call($method, $arguments)
-    {
-        $collection = $this->getCollection();
-
-        return call_user_func_array(array($collection, $method), $arguments);
+        return json_encode($this->jsonSerialize(), $options);
     }
 }

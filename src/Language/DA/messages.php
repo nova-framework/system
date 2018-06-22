@@ -1,9 +1,6 @@
 <?php
 
 return array (
-  '&laquo; Previous' => '&laquo; Sidste',
-  'Next &raquo;' => 'Næste &raquo;',
-  'Page' => '',
   'Scheduled Job Output' => '',
   'Scheduled Job Output ({0})' => '',
   'This action is unauthorized.' => 'Denne handling er uautoriseret.',

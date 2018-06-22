@@ -3,12 +3,14 @@
 namespace Nova\Database\Query;
 
 use Nova\Support\Collection;
-use Nova\Support\Str;
 use Nova\Database\ConnectionInterface;
 use Nova\Database\Query\Expression;
 use Nova\Database\Query\Grammar;
 use Nova\Database\Query\JoinClause;
 use Nova\Database\Query\Processor;
+use Nova\Pagination\Paginator;
+use Nova\Pagination\SimplePaginator;
+use Nova\Support\Str;
 
 use Closure;
 
@@ -247,7 +249,7 @@ class Builder
     public function selectRaw($expression, array $bindings = array())
     {
         $this->addSelect(new Expression($expression));
-        
+
         if ($bindings) {
             $this->addBinding($bindings, 'select');
         }
@@ -1528,72 +1530,49 @@ class Builder
     }
 
     /**
-     * Get a paginator for the "select" statement.
+     * Get a paginator only supporting simple next and previous links.
      *
-     * @param  int    $perPage
+     * @param  int  $perPage
      * @param  array  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
      * @return \Nova\Pagination\Paginator
      */
-    public function paginate($perPage = 15, $columns = array('*'))
+    public function paginate($perPage = 15, $columns = array('*'), $pageName = 'page', $page = null)
     {
-        $paginator = $this->connection->getPaginator();
+        $page = $page ?: Paginator::resolveCurrentPage($pageName);
 
-        if (isset($this->groups)) {
-            return $this->groupedPaginate($paginator, $perPage, $columns);
-        }
-
-        return $this->ungroupedPaginate($paginator, $perPage, $columns);
-    }
-
-    /**
-     * Create a paginator for a grouped pagination statement.
-     *
-     * @param  \Nova\Pagination\Factory  $paginator
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    protected function groupedPaginate($paginator, $perPage, $columns)
-    {
-        $results = $this->get($columns);
-
-        return $this->buildRawPaginator($paginator, $results, $perPage);
-    }
-
-    /**
-     * Build a paginator instance from a raw result array.
-     *
-     * @param  \Nova\Pagination\Factory  $paginator
-     * @param  array  $results
-     * @param  int    $perPage
-     * @return \Nova\Pagination\Paginator
-     */
-    public function buildRawPaginator($paginator, $results, $perPage)
-    {
-        $start = ($paginator->getCurrentPage() - 1) * $perPage;
-
-        $sliced = array_slice($results, $start, $perPage);
-
-        return $paginator->make($sliced, count($results), $perPage);
-    }
-
-    /**
-     * Create a paginator for an un-grouped pagination statement.
-     *
-     * @param  \Nova\Pagination\Factory  $paginator
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    protected function ungroupedPaginate($paginator, $perPage, $columns)
-    {
         $total = $this->getPaginationCount();
 
-        $page = $paginator->getCurrentPage($total);
+        $results = ($total > 0) ? $this->forPage($page, $perPage)->get($columns) : collect();
 
-        $results = $this->forPage($page, $perPage)->get($columns);
+        return new Paginator($results, $total, $perPage, $page, array(
+            'path'     => Paginator::resolveCurrentPath($pageName),
+            'pageName' => $pageName,
+        ));
+    }
 
-        return $paginator->make($results, $total, $perPage);
+    /**
+     * Paginate the given query into a simple paginator.
+     *
+     * This is more efficient on larger data-sets, etc.
+     *
+     * @param  int  $perPage
+     * @param  array  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
+     * @return \Nova\Pagination\SimplePaginator
+     */
+    public function simplePaginate($perPage = 15, $columns = array('*'), $pageName = 'page', $page = null)
+    {
+        $page = $page ?: Paginator::resolveCurrentPage($pageName);
+
+        $results = $this->skip(($page - 1) * $perPage)->take($perPage + 1)->get($columns);
+
+        return new SimplePaginator($results, $perPage, $page, array(
+            'path'     => Paginator::resolveCurrentPath($pageName),
+            'pageName' => $pageName,
+        ));
     }
 
     /**
@@ -1610,28 +1589,6 @@ class Builder
         $this->restoreFieldsForCount();
 
         return $total;
-    }
-
-    /**
-     * Get a paginator only supporting simple next and previous links.
-     *
-     * This is more efficient on larger data-sets, etc.
-     *
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @return \Nova\Pagination\Paginator
-     */
-    public function simplePaginate($perPage = null, $columns = array('*'))
-    {
-        $paginator = $this->connection->getPaginator();
-
-        $page = $paginator->getCurrentPage();
-
-        $perPage = $perPage ?: $this->model->getPerPage();
-
-        $this->skip(($page - 1) * $perPage)->take($perPage + 1);
-
-        return $paginator->make($this->get($columns), $perPage);
     }
 
     /**

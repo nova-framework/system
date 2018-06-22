@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.0.78';
+    const VERSION = '4.0.79';
 
     /**
      * Indicates if the application has "booted".
@@ -1086,7 +1086,6 @@ class Application extends Container implements ResponsePreparerInterface
             'language'       => 'Nova\Language\LanguageManager',
             'log'            => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
             'mailer'         => 'Nova\Mail\Mailer',
-            'paginator'      => 'Nova\Pagination\Environment',
             'redirect'       => 'Nova\Routing\Redirector',
             'request'        => 'Nova\Http\Request',
             'router'         => 'Nova\Routing\Router',

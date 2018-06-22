@@ -176,7 +176,7 @@ class LanguagesUpdateCommand extends Command
         $this->info(PHP_EOL .'Processing the messages found in path: "' .$path .'"');
 
         foreach ($languages as $language) {
-            $this->updateLanguageFile($language, $path, $messages);
+            $this->updateLanguageFile($language, $path, array_unique($messages));
         }
     }
 
@@ -199,6 +199,11 @@ class LanguagesUpdateCommand extends Command
             }
 
             // The current path is not a directory.
+            else if (preg_match("#^(.*)\.(php|tpl)$#", $fileName) !== 1) {
+                continue;
+            }
+
+            // We found a PHP or TPL file.
             else if (stristr(file_get_contents($fullPath), $pattern)) {
                 $result[] = $fullPath;
             }
@@ -215,7 +220,7 @@ class LanguagesUpdateCommand extends Command
             $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
         }
 
-        //$this->comment("Using PATERN: '" .$pattern."'");
+        $this->comment("Using PATERN: '" .$pattern."'");
 
         // Extract the messages from files and return them.
         $result = array();
@@ -265,17 +270,11 @@ class LanguagesUpdateCommand extends Command
 
         $data = $this->getMessagesFromFile($path);
 
-        foreach ($messages as $message) {
-            $value = Arr::get($data, $message, '');
-
-            if (is_string($value) && ! empty($value)) {
-                // The current message has already a translation set.
-            } else {
-                $data[$message] = '';
-            }
+        foreach ($messages as $key) {
+            $result[$key] = Arr::get($data, $key, '');
         }
 
-        $this->writeLanguageFile($path, $data);
+        $this->writeLanguageFile($path, $result);
 
         $this->line('Written the Language file: "' .str_replace(BASEPATH, '', $path) .'"');
     }

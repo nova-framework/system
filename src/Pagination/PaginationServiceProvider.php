@@ -1,52 +1,39 @@
 <?php
-/**
- * PaginationServiceProvider - Implements a Service Provider for Pagination.
- *
- * @author Virgil-Adrian Teaca - virgil@giulianaeassociati.com
- * @version 3.0
- */
 
 namespace Nova\Pagination;
 
-use Nova\Pagination\Factory;
 use Nova\Support\ServiceProvider;
 
 
 class PaginationServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the Provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
 
     /**
-     * Register the Service Provider.
+     * Register the service provider.
      *
      * @return void
      */
     public function register()
     {
-        $this->app->bindShared('paginator', function($app)
+        Paginator::viewFactoryResolver(function ()
         {
-            $paginator = new Factory($app['request']);
+            return $this->app['view'];
+        });
 
-            $app->refresh('request', $paginator, 'setRequest');
+        Paginator::currentPathResolver(function ()
+        {
+            return $this->app['request']->url();
+        });
 
-            return $paginator;
+        Paginator::currentPageResolver(function ($pageName = 'page')
+        {
+            $page = $this->app['request']->input($pageName);
+
+            if ((filter_var($page, FILTER_VALIDATE_INT) !== false) && ((int) $page >= 1)) {
+                return $page;
+            }
+
+            return 1;
         });
     }
-
-    /**
-     * Get the services provided by the Provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return array('paginator');
-    }
-
 }

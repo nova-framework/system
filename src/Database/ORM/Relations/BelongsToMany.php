@@ -189,19 +189,41 @@ class BelongsToMany extends Relation
     /**
      * Get a paginator for the "select" statement.
      *
-     * @param  int    $perPage
+     * @param  int  $perPage
      * @param  array  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
      * @return \Nova\Pagination\Paginator
      */
-    public function paginate($perPage = null, $columns = array('*'))
+    public function paginate($perPage = null, $columns = array('*'), $pageName = 'page', $page = null)
     {
         $this->query->addSelect($this->getSelectColumns($columns));
 
-        $pager = $this->query->paginate($perPage, $columns);
+        $paginator = $this->query->paginate($perPage, $columns, $pageName, $page);
 
-        $this->hydratePivotRelation($pager->getItems());
+        $this->hydratePivotRelation($paginator->items());
 
-        return $pager;
+        return $paginator;
+    }
+
+    /**
+     * Paginate the given query into a simple paginator.
+     *
+     * @param  int  $perPage
+     * @param  array  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
+     * @return \Nova\Pagination\SimplePaginator
+     */
+    public function simplePaginate($perPage = null, $columns = array('*'), $pageName = 'page', $page = null)
+    {
+        $this->query->addSelect($this->getSelectColumns($columns));
+
+        $paginator = $this->query->simplePaginate($perPage, $columns, $pageName, $page);
+
+        $this->hydratePivotRelation($paginator->items());
+
+        return $paginator;
     }
 
     /**

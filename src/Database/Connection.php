@@ -65,13 +65,6 @@ class Connection implements ConnectionInterface
     protected $events;
 
     /**
-     * The paginator environment instance.
-     *
-     * @var \Nova\Pagination\Paginator
-     */
-    protected $paginator;
-
-    /**
      * The cache manager instance.
      *
      * @var \Nova\Cache\CacheManager
@@ -952,31 +945,6 @@ class Connection implements ConnectionInterface
     public function setEventDispatcher(Dispatcher $events)
     {
         $this->events = $events;
-    }
-
-    /**
-     * Get the paginator environment instance.
-     *
-     * @return \Nova\Pagination\Factory
-     */
-    public function getPaginator()
-    {
-        if ($this->paginator instanceof Closure) {
-            $this->paginator = call_user_func($this->paginator);
-        }
-
-        return $this->paginator;
-    }
-
-    /**
-     * Set the pagination environment instance.
-     *
-     * @param  \Nova\Pagination\Factory|\Closure  $paginator
-     * @return void
-     */
-    public function setPaginator($paginator)
-    {
-        $this->paginator = $paginator;
     }
 
     /**
