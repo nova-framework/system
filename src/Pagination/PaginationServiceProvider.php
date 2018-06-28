@@ -41,7 +41,7 @@ class PaginationServiceProvider extends ServiceProvider
         {
             $query = array_merge($query, array($pageName => $page));
 
-            return array($path, $query);
+            return Paginator::buildPageUrl($path, $query);
         });
     }
 }

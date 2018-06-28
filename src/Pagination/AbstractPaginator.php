@@ -144,6 +144,24 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
+     * Build the full URL for a page.
+     *
+     * @param  string  $path
+     * @param  array  $query
+     * @return string
+     */
+    public static function buildPageUrl($path, array $query)
+    {
+        if (! empty($query)) {
+            $separator = Str::contains($path, '?') ? '&' : '?';
+
+            $path .= $separator .http_build_query($query, '', '&');
+        }
+
+        return $path;
+    }
+
+    /**
      * Get the URL for a given page number.
      *
      * @param  int  $page
@@ -155,15 +173,19 @@ abstract class AbstractPaginator implements HtmlableInterface
             $page = 1;
         }
 
-        list ($path, $query) = static::resolvePageUrl($page, $this->query, $this->path, $this->pageName);
-
-        if (! empty($query)) {
-            $path .= Str::contains($path, '?') ? '&' : '?';
-
-            $path .= http_build_query($query, '', '&');
-        }
+        $path = static::resolvePageUrl($page, $this->query, $this->path, $this->pageName);
 
         return $path .$this->buildFragment();
+    }
+
+    /**
+     * Build the full fragment portion of a URL.
+     *
+     * @return string
+     */
+    protected function buildFragment()
+    {
+        return $this->fragment ? '#' .$this->fragment : '';
     }
 
     /**
@@ -220,13 +242,13 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Build the full fragment portion of a URL.
+     * Get the set of query string values to the paginator.
      *
-     * @return string
+     * @return array
      */
-    protected function buildFragment()
+    public function getQuery()
     {
-        return $this->fragment ? '#' .$this->fragment : '';
+        return $this->query;
     }
 
     /**
@@ -327,14 +349,13 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Set the base path to assign to all URLs.
+     * Get the base path to assign to all URLs.
      *
-     * @param  string  $path
-     * @return $this
+     * @return string
      */
-    public function withPath($path)
+    public function getPath()
     {
-        return $this->setPath($path);
+        return $this->path;
     }
 
     /**
@@ -413,7 +434,7 @@ abstract class AbstractPaginator implements HtmlableInterface
      * @param  string  $pageName
      * @return string
      */
-    public static function resolvePageUrl($page, array $query, $path = '/', $pageName = 'page')
+    public static function resolvePageUrl($page, array $query, $path, $pageName = 'page')
     {
         if (isset(static::$pageUrlResolver)) {
             return call_user_func(static::$pageUrlResolver, $page, $query, $path, $pageName);
