@@ -116,7 +116,7 @@ class AssetManager
             $items = Arr::get($this->positions, "${type}.${position}", array());
 
             if (! empty($items)) {
-                $result = array_merge($result, $this->renderItems($items, $type));
+                $result = array_merge($result, $this->renderItems($items, $type, true));
             }
         }
 
@@ -156,12 +156,7 @@ class AssetManager
     protected function renderItems(array $items, $type, $sorted = true)
     {
         if ($sorted) {
-            usort($items, function ($a, $b)
-            {
-                if ($a['order'] === $b['order']) return 0;
-
-                return ($a['order'] < $b['order']) ? -1 : 1;
-            });
+            static::sortItems($items);
         }
 
         return array_map(function ($item) use ($type)
@@ -179,6 +174,25 @@ class AssetManager
             return sprintf($template, $asset);
 
         }, $items);
+    }
+
+    /**
+     * Sort the given items by their order.
+     *
+     * @param  array $items
+     *
+     * @return void
+     */
+    protected static function sortItems(array &$items)
+    {
+        usort($items, function ($a, $b)
+        {
+            if ($a['order'] === $b['order']) {
+                return 0;
+            }
+
+            return ($a['order'] < $b['order']) ? -1 : 1;
+        });
     }
 
     /**
