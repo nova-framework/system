@@ -140,7 +140,7 @@ class AssetManager
 
         // The assets type is valid.
         else if (! empty($items = $this->parseAssets($assets))) {
-            return implode("\n", $this->renderItems($items, $type));
+            return implode("\n", $this->renderItems($items, $type, false));
         }
     }
 
@@ -149,17 +149,20 @@ class AssetManager
      *
      * @param  array $items
      * @param string $type
+     * @param bool $sorted
      *
      * @return array
      */
-    protected function renderItems(array $items, $type)
+    protected function renderItems(array $items, $type, $sorted = true)
     {
-        usort($items, function ($a, $b)
-        {
-            if ($a['order'] == $b['order']) return 0;
+        if ($sorted) {
+            usort($items, function ($a, $b)
+            {
+                if ($a['order'] === $b['order']) return 0;
 
-            return ($a['order'] > $b['order']) ? -1 : 1;
-        });
+                return ($a['order'] < $b['order']) ? -1 : 1;
+            });
+        }
 
         return array_map(function ($item) use ($type)
         {
