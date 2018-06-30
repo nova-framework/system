@@ -36,12 +36,5 @@ class PaginationServiceProvider extends ServiceProvider
 
             return 1;
         });
-
-        Paginator::pageUrlResolver(function ($page, array $query, $path, $pageName = 'page')
-        {
-            $query = array_merge($query, array($pageName => $page));
-
-            return Paginator::buildPageUrl($path, $query);
-        });
     }
 }

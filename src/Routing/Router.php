@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Closure;
+use BadMethodCallException;
 
 
 class Router

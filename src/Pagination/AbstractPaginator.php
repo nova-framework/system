@@ -439,6 +439,10 @@ abstract class AbstractPaginator implements HtmlableInterface
         if (isset(static::$pageUrlResolver)) {
             return call_user_func(static::$pageUrlResolver, $page, $query, $path, $pageName);
         }
+
+        $query = array_merge($query, array($pageName => $page));
+
+        return static::buildPageUrl($path, $query);
     }
 
     /**
