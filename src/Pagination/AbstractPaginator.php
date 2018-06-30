@@ -144,24 +144,6 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Build the full URL for a page.
-     *
-     * @param  string  $path
-     * @param  array  $query
-     * @return string
-     */
-    public static function buildPageUrl($path, array $query)
-    {
-        if (! empty($query)) {
-            $separator = Str::contains($path, '?') ? '&' : '?';
-
-            $path .= $separator .http_build_query($query, '', '&');
-        }
-
-        return $path;
-    }
-
-    /**
      * Get the URL for a given page number.
      *
      * @param  int  $page
@@ -443,6 +425,24 @@ abstract class AbstractPaginator implements HtmlableInterface
         $query = array_merge($query, array($pageName => $page));
 
         return static::buildPageUrl($path, $query);
+    }
+
+    /**
+     * Build the full URL for a page.
+     *
+     * @param  string  $path
+     * @param  array  $query
+     * @return string
+     */
+    public static function buildPageUrl($path, array $query)
+    {
+        if (! empty($query)) {
+            $separator = Str::contains($path, '?') ? '&' : '?';
+
+            $path .= $separator .http_build_query($query, '', '&');
+        }
+
+        return $path;
     }
 
     /**
