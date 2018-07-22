@@ -43,40 +43,30 @@ class UrlGenerator
         //
         $query = array_merge($query, array($pageName => $page));
 
-        return $path .$this->buildQuery($query, $path) .$this->buildFragment($fragment);
+        return $this->buildUrl($path, $query, $fragment);
     }
 
     /**
      * Build the full query portion of a URL.
      *
-     * @param  array  $query
      * @param  string  $path
+     * @param  array  $query
+     * @param  string|null  $fragment
      * @return string
      */
-    protected function buildQuery($query, $path = '/')
+    protected function buildUrl($path, array $query, $fragment)
     {
         if (! empty($query)) {
             $separator = Str::contains($path, '?') ? '&' : '?';
 
-            return $separator .http_build_query($query, '', '&');
+            $path .= $separator .http_build_query($query, '', '&');
         }
 
-        return '';
-    }
-
-    /**
-     * Build the full fragment portion of a URL.
-     *
-     * @param  string|null  $fragment
-     * @return string
-     */
-    protected function buildFragment($fragment)
-    {
         if (! empty($fragment)) {
-            return '#' .$fragment;
+            $path .= '#' .$fragment;
         }
 
-        return  '';
+        return $path;
     }
 
     /**
