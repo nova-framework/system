@@ -40,10 +40,9 @@ class UrlGenerator
     {
         $pageName = $this->getPageName();
 
-        //
-        $query = array_merge($query, array($pageName => $page));
-
-        return $this->buildUrl($path, $query, $fragment);
+        return $this->buildUrl(
+            $path, array_merge($query, array($pageName => $page)), $fragment
+        );
     }
 
     /**
