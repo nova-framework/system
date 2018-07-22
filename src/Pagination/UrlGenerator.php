@@ -36,7 +36,7 @@ class UrlGenerator
      * @param  string|null  $fragment
      * @return string
      */
-    public function resolve($page, $path, array $query, $fragment)
+    public function pageUrl($page, $path, array $query, $fragment)
     {
         $pageName = $this->getPageName();
 
