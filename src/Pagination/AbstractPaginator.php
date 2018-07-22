@@ -62,6 +62,13 @@ abstract class AbstractPaginator implements HtmlableInterface
     protected $pageName = 'page';
 
     /**
+     * The URL Generator instance.
+     *
+     * @var \Nova\Pagination\UrlGenerator
+     */
+    protected $urlGenerator;
+
+    /**
      * The current page resolver callback.
      *
      * @var \Closure
@@ -83,11 +90,11 @@ abstract class AbstractPaginator implements HtmlableInterface
     protected static $viewFactoryResolver;
 
     /**
-     * The page URL resolver callback.
+     * The URL Generator resolver callback.
      *
      * @var \Closure
      */
-    protected static $pageUrlResolver;
+    protected static $urlGeneratorResolver;
 
     /**
      * The default pagination view.
@@ -155,19 +162,11 @@ abstract class AbstractPaginator implements HtmlableInterface
             $page = 1;
         }
 
-        $path = static::resolvePageUrl($page, $this->query, $this->path, $this->pageName);
+        if (! isset($this->urlGenerator)) {
+            $this->urlGenerator = static::resolveUrlGenerator($this->pageName);
+        }
 
-        return $path .$this->buildFragment();
-    }
-
-    /**
-     * Build the full fragment portion of a URL.
-     *
-     * @return string
-     */
-    protected function buildFragment()
-    {
-        return $this->fragment ? '#' .$this->fragment : '';
+        return $this->urlGenerator->resolve($page, $this->path, $this->query, $this->fragment);
     }
 
     /**
@@ -327,6 +326,10 @@ abstract class AbstractPaginator implements HtmlableInterface
     {
         $this->pageName = $name;
 
+        if (isset($this->urlGenerator)) {
+            $this->urlGenerator->setPageName($name);
+        }
+
         return $this;
     }
 
@@ -397,36 +400,29 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Set the current page resolver callback.
+     * Set the URL Generator resolver callback.
      *
      * @param  \Closure  $resolver
      * @return void
      */
-    public static function pageUrlResolver(Closure $resolver)
+    public static function urlGeneratorResolver(Closure $resolver)
     {
-        static::$pageUrlResolver = $resolver;
+        static::$urlGeneratorResolver = $resolver;
     }
 
     /**
-     * Resolve the page URL.
+     * Resolve the URL Generator instance.
      *
-     * @param  int  $page
-     * @param  array  $query
-     * @param  string  $path
      * @param  string  $pageName
-     * @return string
+     * @return \Nova\Pagination\UrlGenerator
      */
-    public static function resolvePageUrl($page, array $query, $path, $pageName = 'page')
+    public static function resolveUrlGenerator($pageName = 'page')
     {
-        if (isset(static::$pageUrlResolver)) {
-            return call_user_func(static::$pageUrlResolver, $page, $query, $path, $pageName);
+        if (isset(static::$urlGeneratorResolver)) {
+            return call_user_func(static::$urlGeneratorResolver, $pageName);
         }
 
-        $separator = Str::contains($path, '?') ? '&' : '?';
-
-        $parameters = array_merge($query, array($pageName => $page));
-
-        return $path .$separator .http_build_query($parameters, '', '&');
+        return new UrlGenerator($pageName);
     }
 
     /**
