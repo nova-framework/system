@@ -18,7 +18,6 @@ class UrlGenerator
     /**
      * Create a new URL Generator instance.
      *
-     * @param  string  $path
      * @param  string  $pageName
      * @return void
      */
