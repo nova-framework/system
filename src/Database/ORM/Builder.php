@@ -302,7 +302,7 @@ class Builder
         $results = $this->skip(($page - 1) * $perPage)->take($perPage + 1)->get($columns);
 
         return new SimplePaginator($results, $perPage, $page, array(
-            'path' => Paginator::resolveCurrentPath($pageName),
+            'path'     => Paginator::resolveCurrentPath($pageName),
             'pageName' => $pageName,
         ));
     }
