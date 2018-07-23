@@ -21,7 +21,7 @@ class PaginationServiceProvider extends ServiceProvider
             return $this->app['view'];
         });
 
-        Paginator::currentPathResolver(function ()
+        Paginator::currentPathResolver(function ($pageName = 'page')
         {
             return $this->app['request']->url();
         });
@@ -35,6 +35,11 @@ class PaginationServiceProvider extends ServiceProvider
             }
 
             return 1;
+        });
+
+        Paginator::urlGeneratorResolver(function ($pageName = 'page')
+        {
+            return new UrlGenerator($pageName);
         });
     }
 }

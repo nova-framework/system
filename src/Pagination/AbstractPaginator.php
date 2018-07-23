@@ -400,14 +400,14 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Set the URL Generator resolver callback.
+     * Set the current page resolver callback.
      *
      * @param  \Closure  $resolver
      * @return void
      */
-    public static function urlGeneratorResolver(Closure $resolver)
+    public static function currentPageResolver(Closure $resolver)
     {
-        static::$urlGeneratorResolver = $resolver;
+        static::$currentPageResolver = $resolver;
     }
 
     /**
@@ -426,14 +426,14 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
-     * Set the current page resolver callback.
+     * Set the URL Generator resolver callback.
      *
      * @param  \Closure  $resolver
      * @return void
      */
-    public static function currentPageResolver(Closure $resolver)
+    public static function urlGeneratorResolver(Closure $resolver)
     {
-        static::$currentPageResolver = $resolver;
+        static::$urlGeneratorResolver = $resolver;
     }
 
     /**
