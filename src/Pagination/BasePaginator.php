@@ -10,7 +10,7 @@ use ArrayIterator;
 use Closure;
 
 
-abstract class AbstractPaginator implements HtmlableInterface
+abstract class BasePaginator implements HtmlableInterface
 {
     /**
      * All of the items being paginated.

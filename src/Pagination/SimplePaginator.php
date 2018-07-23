@@ -13,7 +13,7 @@ use IteratorAggregate;
 use JsonSerializable;
 
 
-class SimplePaginator extends AbstractPaginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, JsonableInterface
+class SimplePaginator extends BasePaginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, JsonableInterface
 {
     /**
      * Determine if there are more items in the data source.

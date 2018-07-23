@@ -13,7 +13,7 @@ use IteratorAggregate;
 use JsonSerializable;
 
 
-class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, JsonableInterface
+class Paginator extends BasePaginator implements ArrayableInterface, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, JsonableInterface
 {
     /**
      * The total number of items before slicing.
