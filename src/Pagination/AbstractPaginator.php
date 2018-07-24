@@ -8,6 +8,7 @@ use Nova\Support\Str;
 
 use ArrayIterator;
 use Closure;
+use RuntimeException;
 
 
 abstract class AbstractPaginator implements HtmlableInterface
@@ -69,6 +70,13 @@ abstract class AbstractPaginator implements HtmlableInterface
     protected $urlGenerator;
 
     /**
+     * The URL Generator resolver callback.
+     *
+     * @var \Closure
+     */
+    protected static $urlGeneratorResolver;
+
+    /**
      * The current page resolver callback.
      *
      * @var \Closure
@@ -88,13 +96,6 @@ abstract class AbstractPaginator implements HtmlableInterface
      * @var \Closure
      */
     protected static $viewFactoryResolver;
-
-    /**
-     * The URL Generator resolver callback.
-     *
-     * @var \Closure
-     */
-    protected static $urlGeneratorResolver;
 
     /**
      * The default pagination view.
@@ -349,6 +350,36 @@ abstract class AbstractPaginator implements HtmlableInterface
     }
 
     /**
+     * Get the URL Generator instance.
+     *
+     * @return \Nova\Pagination\UrlGenerator
+     */
+    public function getUrlGenerator()
+    {
+        if (isset($this->urlGenerator)) {
+            return $this->urlGenerator;
+        }
+
+        // Check if an URL Generator resolver was set.
+        else if (! isset(static::$urlGeneratorResolver)) {
+            throw new RuntimeException("URL Generator resolver not set on Paginator.");
+        }
+
+        return $this->urlGenerator = call_user_func(static::$urlGeneratorResolver, $this);
+    }
+
+    /**
+     * Set the URL Generator resolver callback.
+     *
+     * @param  \Closure  $resolver
+     * @return void
+     */
+    public static function urlGeneratorResolver(Closure $resolver)
+    {
+        static::$urlGeneratorResolver = $resolver;
+    }
+
+    /**
      * Resolve the current request path or return the default value.
      *
      * @param  string  $pageName
@@ -443,36 +474,6 @@ abstract class AbstractPaginator implements HtmlableInterface
     public static function defaultSimpleView($view)
     {
         static::$defaultSimpleView = $view;
-    }
-
-    /**
-     * Set the URL Generator resolver callback.
-     *
-     * @param  \Closure  $resolver
-     * @return void
-     */
-    public static function urlGeneratorResolver(Closure $resolver)
-    {
-        static::$urlGeneratorResolver = $resolver;
-    }
-
-    /**
-     * Get the URL Generator instance.
-     *
-     * @return \Nova\Pagination\UrlGenerator
-     */
-    public function getUrlGenerator()
-    {
-        if (isset($this->urlGenerator)) {
-            return $this->urlGenerator;
-        }
-
-        // The URL Generator resolver is not set, we will use the default generator.
-        else if (! isset(static::$urlGeneratorResolver)) {
-            return $this->urlGenerator = new UrlGenerator($this);
-        }
-
-        return $this->urlGenerator = call_user_func(static::$urlGeneratorResolver, $this);
     }
 
     /**
