@@ -349,20 +349,6 @@ abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
     }
 
     /**
-     * Get the URL Generator instance.
-     *
-     * @return \Nova\Pagination\UrlGenerator
-     */
-    public function getUrlGenerator()
-    {
-        if (! isset($this->urlGenerator)) {
-            return $this->urlGenerator = static::resolveUrlGenerator($this);
-        }
-
-        return $this->urlGenerator;
-    }
-
-    /**
      * Resolve the current request path or return the default value.
      *
      * @param  string  $pageName
@@ -417,32 +403,6 @@ abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
     }
 
     /**
-     * Resolve the URL Generator instance.
-     *
-     * @param  \Nova\Pagination\PaginatorInterface  $paginator
-     * @return \Nova\Pagination\UrlGenerator
-     */
-    public static function resolveUrlGenerator(PaginatorInterface $paginator)
-    {
-        if (isset(static::$urlGeneratorResolver)) {
-            return call_user_func(static::$urlGeneratorResolver, $paginator);
-        }
-
-        return new UrlGenerator($paginator);
-    }
-
-    /**
-     * Set the URL Generator resolver callback.
-     *
-     * @param  \Closure  $resolver
-     * @return void
-     */
-    public static function urlGeneratorResolver(Closure $resolver)
-    {
-        static::$urlGeneratorResolver = $resolver;
-    }
-
-    /**
      * Get an instance of the view factory from the resolver.
      *
      * @return \Nova\Contracts\View\Factory
@@ -483,6 +443,36 @@ abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
     public static function defaultSimpleView($view)
     {
         static::$defaultSimpleView = $view;
+    }
+
+    /**
+     * Set the URL Generator resolver callback.
+     *
+     * @param  \Closure  $resolver
+     * @return void
+     */
+    public static function urlGeneratorResolver(Closure $resolver)
+    {
+        static::$urlGeneratorResolver = $resolver;
+    }
+
+    /**
+     * Get the URL Generator instance.
+     *
+     * @return \Nova\Pagination\UrlGenerator
+     */
+    public function getUrlGenerator()
+    {
+        if (isset($this->urlGenerator)) {
+            return $this->urlGenerator;
+        }
+
+        // The URL Generator instance is not set.
+        else if (! isset(static::$urlGeneratorResolver)) {
+            return $this->urlGenerator = new UrlGenerator($this);
+        }
+
+        return $this->urlGenerator = call_user_func(static::$urlGeneratorResolver, $this);
     }
 
     /**

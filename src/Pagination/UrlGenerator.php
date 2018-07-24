@@ -30,9 +30,6 @@ class UrlGenerator
      * Resolve the URL for a given page number.
      *
      * @param  int  $page
-     * @param  string  $path
-     * @param  array  $query
-     * @param  string|null  $fragment
      * @return string
      */
     public function url($page)
