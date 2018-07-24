@@ -10,7 +10,7 @@ use ArrayIterator;
 use Closure;
 
 
-abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
+abstract class AbstractPaginator implements HtmlableInterface
 {
     /**
      * All of the items being paginated.
@@ -467,7 +467,7 @@ abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
             return $this->urlGenerator;
         }
 
-        // The URL Generator instance is not set.
+        // The URL Generator resolver is not set, we will use the default generator.
         else if (! isset(static::$urlGeneratorResolver)) {
             return $this->urlGenerator = new UrlGenerator($this);
         }

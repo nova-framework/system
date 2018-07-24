@@ -37,7 +37,7 @@ class PaginationServiceProvider extends ServiceProvider
             return 1;
         });
 
-        Paginator::urlGeneratorResolver(function (PaginatorInterface $paginator)
+        Paginator::urlGeneratorResolver(function (AbstractPaginator $paginator)
         {
             return new UrlGenerator($paginator);
         });

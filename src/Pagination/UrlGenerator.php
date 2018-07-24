@@ -21,7 +21,7 @@ class UrlGenerator
      * @param  \Nova\Pagination\PaginatorInterface  $paginator
      * @return void
      */
-    public function __construct(PaginatorInterface $paginator)
+    public function __construct(AbstractPaginator $paginator)
     {
         $this->paginator = $paginator;
     }
