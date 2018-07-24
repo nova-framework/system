@@ -10,7 +10,7 @@ use ArrayIterator;
 use Closure;
 
 
-abstract class BasePaginator implements HtmlableInterface
+abstract class BasePaginator implements PaginatorInterface, HtmlableInterface
 {
     /**
      * All of the items being paginated.
@@ -162,11 +162,7 @@ abstract class BasePaginator implements HtmlableInterface
             $page = 1;
         }
 
-        if (! isset($this->urlGenerator)) {
-            $this->urlGenerator = static::resolveUrlGenerator($this->pageName);
-        }
-
-        return $this->urlGenerator->pageUrl($page, $this->path, $this->query, $this->fragment);
+        return $this->getUrlGenerator()->url($page);
     }
 
     /**
@@ -326,10 +322,6 @@ abstract class BasePaginator implements HtmlableInterface
     {
         $this->pageName = $name;
 
-        if (isset($this->urlGenerator)) {
-            $this->urlGenerator->setPageName($name);
-        }
-
         return $this;
     }
 
@@ -354,6 +346,20 @@ abstract class BasePaginator implements HtmlableInterface
         $this->path = $path;
 
         return $this;
+    }
+
+    /**
+     * Get the URL Generator instance.
+     *
+     * @return \Nova\Pagination\UrlGenerator
+     */
+    public function getUrlGenerator()
+    {
+        if (! isset($this->urlGenerator)) {
+            return $this->urlGenerator = static::resolveUrlGenerator($this);
+        }
+
+        return $this->urlGenerator;
     }
 
     /**
@@ -413,16 +419,16 @@ abstract class BasePaginator implements HtmlableInterface
     /**
      * Resolve the URL Generator instance.
      *
-     * @param  string  $pageName
+     * @param  \Nova\Pagination\PaginatorInterface  $paginator
      * @return \Nova\Pagination\UrlGenerator
      */
-    public static function resolveUrlGenerator($pageName = 'page')
+    public static function resolveUrlGenerator(PaginatorInterface $paginator)
     {
         if (isset(static::$urlGeneratorResolver)) {
-            return call_user_func(static::$urlGeneratorResolver, $pageName);
+            return call_user_func(static::$urlGeneratorResolver, $paginator);
         }
 
-        return new UrlGenerator($pageName);
+        return new UrlGenerator($paginator);
     }
 
     /**

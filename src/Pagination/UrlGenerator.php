@@ -8,22 +8,22 @@ use Nova\Support\Str;
 class UrlGenerator
 {
     /**
-     * The query string variable used to store the page.
+     * The Paginator implementation.
      *
-     * @var string
+     * @var \Nova\Pagination\PaginatorInterface
      */
-    protected $pageName = 'page';
+    protected $paginator;
 
 
     /**
      * Create a new URL Generator instance.
      *
-     * @param  string  $pageName
+     * @param  \Nova\Pagination\PaginatorInterface  $paginator
      * @return void
      */
-    public function __construct($pageName)
+    public function __construct(PaginatorInterface $paginator)
     {
-        $this->pageName = $pageName;
+        $this->paginator = $paginator;
     }
 
     /**
@@ -35,12 +35,19 @@ class UrlGenerator
      * @param  string|null  $fragment
      * @return string
      */
-    public function pageUrl($page, $path, array $query, $fragment)
+    public function url($page)
     {
-        $pageName = $this->getPageName();
+        $paginator = $this->getPaginator();
+
+        //
+        $pageName = $paginator->getPageName();
+
+        $query = array_merge(
+            $paginator->getQuery(), array($pageName => $page)
+        );
 
         return $this->buildUrl(
-            $path, array_merge($query, array($pageName => $page)), $fragment
+            $paginator->getPath(), $query, $paginator->fragment()
         );
     }
 
@@ -68,25 +75,12 @@ class UrlGenerator
     }
 
     /**
-     * Set the query string variable used to store the page.
-     *
-     * @param  string  $name
-     * @return $this
-     */
-    public function setPageName($name)
-    {
-        $this->pageName = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get the query string variable used to store the page.
+     * Get the Paginator implementation.
      *
      * @return string
      */
-    public function getPageName()
+    public function getPaginator()
     {
-        return $this->pageName;
+        return $this->paginator;
     }
 }
