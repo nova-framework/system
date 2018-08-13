@@ -6,6 +6,7 @@ use Nova\View\Compilers\MarkdownCompiler;
 use Nova\View\Compilers\TemplateCompiler;
 use Nova\View\Engines\EngineResolver;
 use Nova\View\Engines\CompilerEngine;
+use Nova\View\Engines\FileEngine;
 use Nova\View\Engines\PhpEngine;
 use Nova\View\Factory;
 use Nova\View\FileViewFinder;
@@ -49,7 +50,7 @@ class ViewServiceProvider extends ServiceProvider
         {
             $resolver = new EngineResolver();
 
-            foreach (array('php', 'template', 'markdown') as $engine) {
+            foreach (array('php', 'template', 'markdown', 'file') as $engine) {
                 $method = 'register' .ucfirst($engine) .'Engine';
 
                 call_user_func(array($this, $method), $resolver);
@@ -122,6 +123,20 @@ class ViewServiceProvider extends ServiceProvider
         $resolver->register('markdown', function() use ($app)
         {
             return new CompilerEngine($app['markdown.compiler'], $app['files']);
+        });
+    }
+
+    /**
+     * Register the File engine implementation.
+     *
+     * @param  \Nova\View\Engines\EngineResolver  $resolver
+     * @return void
+     */
+    public function registerFileEngine($resolver)
+    {
+        $resolver->register('file', function()
+        {
+            return new FileEngine();
         });
     }
 

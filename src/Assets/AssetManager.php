@@ -163,8 +163,16 @@ class AssetManager
         {
             $asset = Arr::get($item, 'asset');
 
-            if (($mode = Arr::get($item, 'mode')) === 'view') {
-                $mode = 'inline'; // The 'view' mode is a specialized 'inline'
+            //
+            $mode = Arr::get($item, 'mode', 'default');
+
+            if ($mode === 'inline') {
+                $asset = sprintf("\n%s\n", trim($asset));
+            }
+
+            // The 'view' mode is a specialized 'inline'
+            else if ($mode === 'view') {
+                $mode = 'inline';
 
                 $asset = $this->views->fetch($asset);
             }
