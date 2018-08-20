@@ -120,7 +120,7 @@ class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAc
      */
     protected function elements()
     {
-        $window = $this->getUrlWindow();
+        $window = $this->getUrlWindow($this->onEachSide);
 
         return array_filter(array(
             $window['first'],
@@ -191,10 +191,12 @@ class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAc
      */
     protected function getSliderTooCloseToBeginning($window)
     {
+        $lastPage = $this->lastPage();
+
         return array(
             'first'  => $this->getUrlRange(1, $window + 2),
             'slider' => null,
-            'last'   => $this->getUrlRange($this->lastPage() - 1, $this->lastPage()),
+            'last'   => $this->getUrlRange($lastPage - 1, $lastPage),
         );
     }
 
@@ -206,10 +208,9 @@ class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAc
      */
     protected function getSliderTooCloseToEnding($window)
     {
-        $last = $this->getUrlRange(
-            $this->lastPage() - ($window + 2),
-            $this->lastPage()
-        );
+        $lastPage = $this->lastPage();
+
+        $last = $this->getUrlRange($lastPage - ($window + 2), $lastPage);
 
         return array(
             'first'  => $this->getUrlRange(1, 2),
@@ -226,15 +227,19 @@ class Paginator extends AbstractPaginator implements ArrayableInterface, ArrayAc
      */
     protected function getFullSlider($onEachSide)
     {
+        $currentPage = $this->currentPage();
+
         $slider = $this->getUrlRange(
-            $this->currentPage() - $onEachSide,
-            $this->currentPage() + $onEachSide
+            $currentPage - $onEachSide,
+            $currentPage + $onEachSide
         );
+
+        $lastPage = $this->lastPage();
 
         return array(
             'first'  => $this->getUrlRange(1, 2),
             'slider' => $slider,
-            'last'   => $this->getUrlRange($this->lastPage() - 1, $this->lastPage()),
+            'last'   => $this->getUrlRange($lastPage - 1, $lastPage),
         );
     }
 

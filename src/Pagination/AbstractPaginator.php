@@ -63,6 +63,13 @@ abstract class AbstractPaginator implements HtmlableInterface
     protected $pageName = 'page';
 
     /**
+     * The number of links to display on each side of current page link.
+     *
+     * @var int
+     */
+    public $onEachSide = 3;
+
+    /**
      * The URL Generator instance.
      *
      * @var \Nova\Pagination\UrlGenerator
@@ -345,6 +352,19 @@ abstract class AbstractPaginator implements HtmlableInterface
     public function setPath($path)
     {
         $this->path = $path;
+
+        return $this;
+    }
+
+    /**
+     * Set the number of links to display on each side of current page link.
+     *
+     * @param  int  $count
+     * @return this
+     */
+    public function onEachSide($count)
+    {
+        $this->onEachSide = $count;
 
         return $this;
     }
