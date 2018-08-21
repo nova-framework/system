@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.0.87';
+    const VERSION = '4.0.88';
 
     /**
      * Indicates if the application has "booted".
@@ -1071,30 +1071,31 @@ class Application extends Container implements ResponsePreparerInterface
     public function registerCoreContainerAliases()
     {
         $aliases = array(
-            'app'            => 'Nova\Foundation\Application',
-            'forge'          => 'Nova\Console\Application',
-            'auth'           => 'Nova\Auth\AuthManager',
-            'cache'          => 'Nova\Cache\CacheManager',
-            'cache.store'    => 'Nova\Cache\Repository',
-            'config'         => 'Nova\Config\Repository',
-            'cookie'         => 'Nova\Cookie\CookieJar',
-            'encrypter'      => 'Nova\Encryption\Encrypter',
-            'db'             => 'Nova\Database\DatabaseManager',
-            'events'         => 'Nova\Events\Dispatcher',
-            'files'          => 'Nova\Filesystem\Filesystem',
-            'hash'           => 'Nova\Hashing\HasherInterface',
-            'language'       => 'Nova\Language\LanguageManager',
-            'log'            => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
-            'mailer'         => 'Nova\Mail\Mailer',
-            'redirect'       => 'Nova\Routing\Redirector',
-            'request'        => 'Nova\Http\Request',
-            'router'         => 'Nova\Routing\Router',
-            'session'        => 'Nova\Session\SessionManager',
-            'session.store'  => 'Nova\Session\Store',
-            'url'            => 'Nova\Routing\UrlGenerator',
-            'validator'      => 'Nova\Validation\Factory',
-            'view'           => 'Nova\View\Factory',
-            'assets'         => 'Nova\Assets\AssetManager',
+            'app'               => 'Nova\Foundation\Application',
+            'forge'             => 'Nova\Console\Application',
+            'auth'              => 'Nova\Auth\AuthManager',
+            'cache'             => 'Nova\Cache\CacheManager',
+            'cache.store'       => 'Nova\Cache\Repository',
+            'config'            => 'Nova\Config\Repository',
+            'cookie'            => 'Nova\Cookie\CookieJar',
+            'encrypter'         => 'Nova\Encryption\Encrypter',
+            'db'                => 'Nova\Database\DatabaseManager',
+            'events'            => 'Nova\Events\Dispatcher',
+            'files'             => 'Nova\Filesystem\Filesystem',
+            'hash'              => 'Nova\Hashing\HasherInterface',
+            'language'          => 'Nova\Language\LanguageManager',
+            'log'               => array('Nova\Log\Writer', 'Psr\Log\LoggerInterface'),
+            'mailer'            => 'Nova\Mail\Mailer',
+            'redirect'          => 'Nova\Routing\Redirector',
+            'request'           => 'Nova\Http\Request',
+            'router'            => 'Nova\Routing\Router',
+            'session'           => 'Nova\Session\SessionManager',
+            'session.store'     => 'Nova\Session\Store',
+            'url'               => 'Nova\Routing\UrlGenerator',
+            'validator'         => 'Nova\Validation\Factory',
+            'view'              => 'Nova\View\Factory',
+            'assets'            => 'Nova\Assets\AssetManager',
+            'assets.dispatcher' => 'Nova\Assets\AssetDispatcher',
         );
 
         foreach ($aliases as $key => $value) {

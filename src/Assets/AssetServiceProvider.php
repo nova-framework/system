@@ -45,7 +45,7 @@ class AssetServiceProvider extends ServiceProvider
      */
     protected function registerAssetDispatcher()
     {
-        $this->app->bindShared('assets.dispatcher', function ($app)
+        $this->app->singleton('assets.dispatcher', function ($app)
         {
             $dispatcher = new AssetDispatcher($app);
 
