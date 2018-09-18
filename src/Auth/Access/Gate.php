@@ -185,6 +185,10 @@ class Gate implements GateInterface
      */
     public function allows($ability, $arguments = array())
     {
+        if (! is_array($arguments)) {
+            $arguments = array_slice(func_get_args(), 1);
+        }
+
         return $this->check($ability, $arguments);
     }
 
@@ -197,7 +201,11 @@ class Gate implements GateInterface
      */
     public function denies($ability, $arguments = array())
     {
-        return ! $this->allows($ability, $arguments);
+        if (! is_array($arguments)) {
+            $arguments = array_slice(func_get_args(), 1);
+        }
+
+        return ! $this->check($ability, $arguments);
     }
 
     /**
@@ -209,6 +217,10 @@ class Gate implements GateInterface
      */
     public function check($ability, $arguments = array())
     {
+        if (! is_array($arguments)) {
+            $arguments = array_slice(func_get_args(), 1);
+        }
+
         try {
             $result = $this->raw($ability, $arguments);
         }
@@ -230,6 +242,10 @@ class Gate implements GateInterface
      */
     public function authorize($ability, $arguments = array())
     {
+        if (! is_array($arguments)) {
+            $arguments = array_slice(func_get_args(), 1);
+        }
+
         $result = $this->raw($ability, $arguments);
 
         if ($result instanceof Response) {
@@ -243,18 +259,17 @@ class Gate implements GateInterface
      * Get the raw result for the given ability for the current user.
      *
      * @param  string  $ability
-     * @param  array|mixed  $arguments
+     * @param  array  $arguments
      * @return mixed
      */
-    protected function raw($ability, $arguments = array())
+    protected function raw($ability, array $arguments = array())
     {
         if (is_null($user = $this->resolveUser())) {
             return false;
         }
 
-        $arguments = is_array($arguments) ? $arguments : array($arguments);
-
-        if (is_null($result = $this->callBeforeCallbacks($user, $ability, $arguments))) {
+        // The user instance is valid.
+        else if (is_null($result = $this->callBeforeCallbacks($user, $ability, $arguments))) {
             $result = $this->callAuthCallback($user, $ability, $arguments);
         }
 
