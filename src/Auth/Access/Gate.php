@@ -6,6 +6,7 @@ use Nova\Auth\Access\GateInterface;
 use Nova\Auth\Access\HandlesAuthorizationTrait;
 use Nova\Auth\Access\Response;
 use Nova\Auth\Access\AuthorizationException;
+use Nova\Auth\UserInterface as User;
 use Nova\Container\Container;
 use Nova\Support\Str;
 
@@ -130,9 +131,11 @@ class Gate implements GateInterface
     {
         return function () use ($callback)
         {
-            list($class, $method) = explode('@', $callback);
+            list ($class, $method) = explode('@', $callback);
 
-            return call_user_func_array(array($this->resolvePolicy($class), $method), func_get_args());
+            $instance = $this->resolvePolicy($class);
+
+            return call_user_func_array(array($instance, $method), func_get_args());
         };
     }
 
@@ -262,14 +265,15 @@ class Gate implements GateInterface
      * @param  array  $arguments
      * @return mixed
      */
-    protected function raw($ability, array $arguments = array())
+    protected function raw($ability, array $arguments)
     {
         if (is_null($user = $this->resolveUser())) {
             return false;
         }
 
-        // The user instance is valid.
-        else if (is_null($result = $this->callBeforeCallbacks($user, $ability, $arguments))) {
+        $result = $this->callBeforeCallbacks($user, $ability, $arguments);
+
+        if (is_null($result)) {
             $result = $this->callAuthCallback($user, $ability, $arguments);
         }
 
@@ -286,7 +290,7 @@ class Gate implements GateInterface
      * @param  array  $arguments
      * @return bool
      */
-    protected function callAuthCallback($user, $ability, array $arguments)
+    protected function callAuthCallback(User $user, $ability, array $arguments)
     {
         $callback = $this->resolveAuthCallback($user, $ability, $arguments);
 
@@ -301,12 +305,12 @@ class Gate implements GateInterface
      * @param  array  $arguments
      * @return bool|null
      */
-    protected function callBeforeCallbacks($user, $ability, array $arguments)
+    protected function callBeforeCallbacks(User $user, $ability, array $arguments)
     {
-        $arguments = array_merge([$user, $ability], $arguments);
+        $arguments = array_merge(array($user, $ability), $arguments);
 
-        foreach ($this->beforeCallbacks as $before) {
-            if (! is_null($result = call_user_func_array($before, $arguments))) {
+        foreach ($this->beforeCallbacks as $callback) {
+            if (! is_null($result = call_user_func_array($callback, $arguments))) {
                 return $result;
             }
         }
@@ -321,12 +325,12 @@ class Gate implements GateInterface
      * @param  bool  $result
      * @return void
      */
-    protected function callAfterCallbacks($user, $ability, array $arguments, $result)
+    protected function callAfterCallbacks(User $user, $ability, array $arguments, $result)
     {
-        $arguments = array_merge([$user, $ability, $result], $arguments);
+        $arguments = array_merge(array($user, $ability, $result), $arguments);
 
-        foreach ($this->afterCallbacks as $after) {
-            call_user_func_array($after, $arguments);
+        foreach ($this->afterCallbacks as $callback) {
+            call_user_func_array($callback, $arguments);
         }
     }
 
@@ -338,11 +342,14 @@ class Gate implements GateInterface
      * @param  array  $arguments
      * @return callable
      */
-    protected function resolveAuthCallback($user, $ability, array $arguments)
+    protected function resolveAuthCallback(User $user, $ability, array $arguments)
     {
         if ($this->firstArgumentCorrespondsToPolicy($arguments)) {
             return $this->resolvePolicyCallback($user, $ability, $arguments);
-        } else if (isset($this->abilities[$ability])) {
+        }
+
+        //
+        else if (isset($this->abilities[$ability])) {
             return $this->abilities[$ability];
         }
 
@@ -383,35 +390,25 @@ class Gate implements GateInterface
      * @param  array  $arguments
      * @return callable
      */
-    protected function resolvePolicyCallback($user, $ability, array $arguments)
+    protected function resolvePolicyCallback(User $user, $ability, array $arguments)
     {
         return function () use ($user, $ability, $arguments)
         {
             $instance = $this->getPolicyFor(head($arguments));
 
             if (method_exists($instance, 'before')) {
-                // We will prepend the user and ability onto the arguments so that the before
-                // callback can determine which ability is being called. Then we will call
-                // into the policy before methods with the arguments and get the result.
-                $beforeArguments = array_merge(array($user, $ability), $arguments);
+                $parameters = array_merge(array($user, $ability), $arguments);
 
-                $result = call_user_func_array(array($instance, 'before'), $beforeArguments);
-
-                // If we recieved a non-null result from the before method, we will return it
-                // as the result of a check. This allows developers to override the checks
-                // in the policy and return a result for all rules defined in the class.
-                if (! is_null($result)) {
+                if (! is_null($result = call_user_func_array(array($instance, 'before'), $parameters))) {
                     return $result;
                 }
             }
 
-            $callable = array($instance, Str::camel($ability));
-
-            if (! is_callable($callable)) {
+            if (! method_exists($instance, $method = Str::camel($ability))) {
                 return false;
             }
 
-            return call_user_func_array($callable, array_merge(array($user), $arguments));
+            return call_user_func_array(array($instance, $method), array_merge(array($user), $arguments));
         };
     }
 
