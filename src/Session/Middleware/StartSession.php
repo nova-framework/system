@@ -205,7 +205,15 @@ class StartSession
      */
     protected function createCookie(array $config, SessionInterface $session)
     {
-        $expire = $this->getCookieExpirationDate($config);
+        $expireOnClose = Arr::get($config, 'expireOnClose', false);
+
+        if ($expireOnClose !== false) {
+            $lifetime = Arr::get($config, 'lifetime', 180);
+
+            $expire = Carbon::now()->addMinutes($lifetime);
+        } else {
+            $expire = 0;
+        }
 
         $secure = Arr::get($config, 'secure', false);
 
@@ -217,25 +225,6 @@ class StartSession
             $config['domain'],
             $secure
         );
-    }
-
-    /**
-     * Get the cookie lifetime in seconds.
-     *
-     * @param  array  $config
-     * @return int
-     */
-    protected function getCookieExpirationDate(array $config)
-    {
-        $expireOnClose = Arr::get($config, 'expireOnClose', false);
-
-        if (! $expireOnClose) {
-            $lifetime = Arr::get($config, 'lifetime', 180);
-
-            return Carbon::now()->addMinutes($lifetime);
-        }
-
-        return 0;
     }
 
     /**
