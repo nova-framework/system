@@ -229,13 +229,13 @@ class StartSession
     {
         $expireOnClose = Arr::get($config, 'expireOnClose', false);
 
-        if ($expireOnClose) {
-            return 0;
+        if (! $expireOnClose) {
+            $lifetime = Arr::get($config, 'lifetime', 180);
+
+            return Carbon::now()->addMinutes($lifetime);
         }
 
-        $lifetime = Arr::get($config, 'lifetime', 180);
-
-        return Carbon::now()->addMinutes($lifetime);
+        return 0;
     }
 
     /**
