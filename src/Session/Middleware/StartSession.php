@@ -205,12 +205,14 @@ class StartSession
      */
     protected function createCookie(array $config, SessionInterface $session)
     {
+        $expire = $this->getCookieExpirationDate($config);
+
         $secure = Arr::get($config, 'secure', false);
 
         return new Cookie(
             $session->getName(),
             $session->getId(),
-            $this->getCookieExpirationDate($config),
+            $expire,
             $config['path'],
             $config['domain'],
             $secure
