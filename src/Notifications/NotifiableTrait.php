@@ -69,8 +69,8 @@ trait NotifiableTrait
             return null;
         }
 
-        // If the email field is like: admin@novaframework.dev
-        if (preg_match('/^\w+@\w+\.dev$/s', $this->email) === 1) {
+        // If the email field is like: admin@novaframework.local
+        if (preg_match('/^\w+@\w+\.local$/s', $this->email) === 1) {
             return Config::get('mail.from.address');
         }
 

@@ -394,9 +394,9 @@ class Gate implements GateInterface
     {
         return function () use ($user, $ability, $arguments)
         {
-            $instance = $this->getPolicyFor(head($arguments));
+            $class = head($arguments);
 
-            if (method_exists($instance, 'before')) {
+            if (method_exists($instance = $this->getPolicyFor($class), 'before')) {
                 $parameters = array_merge(array($user, $ability), $arguments);
 
                 if (! is_null($result = call_user_func_array(array($instance, 'before'), $parameters))) {

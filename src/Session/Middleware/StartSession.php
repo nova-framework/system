@@ -55,7 +55,10 @@ class StartSession
     {
         $this->sessionHandled = true;
 
-        if ($this->sessionConfigured()) {
+        //
+        $sessionConfigured = $this->sessionConfigured();
+
+        if ($sessionConfigured) {
             $session = $this->startSession($request);
 
             $request->setSession($session);
@@ -63,7 +66,7 @@ class StartSession
 
         $response = $next($request);
 
-        if ($this->sessionConfigured()) {
+        if ($sessionConfigured) {
             $this->storeCurrentUrl($request, $session);
 
             $this->collectGarbage($session);
@@ -83,7 +86,9 @@ class StartSession
      */
     public function terminate($request, $response)
     {
-        if ($this->sessionHandled && $this->sessionConfigured() && ! $this->usingCookieSessions()) {
+        $sessionConfigured = $this->sessionConfigured();
+
+        if ($this->sessionHandled && $sessionConfigured && ! $this->usingCookieSessions()) {
             $this->manager->driver()->save();
         }
     }
@@ -96,7 +101,13 @@ class StartSession
      */
     protected function startSession(Request $request)
     {
-        with($session = $this->getSession($request))->setRequestOnHandler($request);
+        $session = $this->manager->driver();
+
+        $session->setId(
+            $this->getSessionId($request, $session)
+        );
+
+        $session->setRequestOnHandler($request);
 
         $session->start();
 
@@ -104,18 +115,17 @@ class StartSession
     }
 
     /**
-     * Get the session implementation from the manager.
+     * Get the session ID from the request.
      *
      * @param  \Nova\Http\Request  $request
-     * @return \Nova\Session\SessionInterface
+     * @param  \Nova\Session\SessionInterface $session
+     * @return string|null
      */
-    public function getSession(Request $request)
+    protected function getSessionId(Request $request, SessionInterface $session)
     {
-        $session = $this->manager->driver();
+        $name = $session->getName();
 
-        $session->setId($request->cookies->get($session->getName()));
-
-        return $session;
+        return $request->cookies->get($name);
     }
 
     /**
@@ -125,7 +135,7 @@ class StartSession
      * @param  \Nova\Session\SessionInterface  $session
      * @return void
      */
-    protected function storeCurrentUrl(Request $request, $session)
+    protected function storeCurrentUrl(Request $request, SessionInterface $session)
     {
         if (($request->method() === 'GET') && $request->route() && ! $request->ajax()) {
             $session->setPreviousUrl($request->fullUrl());
@@ -140,10 +150,12 @@ class StartSession
      */
     protected function collectGarbage(SessionInterface $session)
     {
-        $config = $this->manager->getSessionConfig();
+        $config = $this->getSessionConfig();
 
         if ($this->configHitsLottery($config)) {
-            $session->getHandler()->gc($this->getSessionLifetimeInSeconds());
+            $lifetime = Arr::get($config, 'lifetime', 180);
+
+            $session->getHandler()->gc($lifetime * 60);
         }
     }
 
@@ -155,7 +167,11 @@ class StartSession
      */
     protected function configHitsLottery(array $config)
     {
-        return mt_rand(1, $config['lottery'][1]) <= $config['lottery'][0];
+        list ($trigger, $max) = $config['lottery'];
+
+        $value = mt_rand(1, $max);
+
+        return ($value <= $trigger);
     }
 
     /**
@@ -171,34 +187,53 @@ class StartSession
             $this->manager->driver()->save();
         }
 
-        if ($this->sessionIsPersistent($config = $this->manager->getSessionConfig())) {
-            $response->headers->setCookie(new Cookie(
-                $session->getName(), $session->getId(), $this->getCookieExpirationDate(),
-                $config['path'], $config['domain'], Arr::get($config, 'secure', false)
-            ));
+        $config = $this->getSessionConfig();
+
+        if ($this->sessionIsPersistent($config)) {
+            $cookie = $this->createCookie($config, $session);
+
+            $response->headers->setCookie($cookie);
         }
     }
 
     /**
-     * Get the session lifetime in seconds.
+     * Create a Cookie instance for the specified Session and configuration.
      *
-     * @return int
+     * @param  array  $config
+     * @param  \Nova\Session\SessionInterface  $session
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
-    protected function getSessionLifetimeInSeconds()
+    protected function createCookie(array $config, SessionInterface $session)
     {
-        return Arr::get($this->manager->getSessionConfig(), 'lifetime') * 60;
+        $secure = Arr::get($config, 'secure', false);
+
+        return new Cookie(
+            $session->getName(),
+            $session->getId(),
+            $this->getCookieExpirationDate($config),
+            $config['path'],
+            $config['domain'],
+            $secure
+        );
     }
 
     /**
      * Get the cookie lifetime in seconds.
      *
+     * @param  array  $config
      * @return int
      */
-    protected function getCookieExpirationDate()
+    protected function getCookieExpirationDate(array $config)
     {
-        $config = $this->manager->getSessionConfig();
+        $expireOnClose = Arr::get($config, 'expireOnClose', false);
 
-        return $config['expireOnClose'] ? 0 : Carbon::now()->addMinutes($config['lifetime']);
+        if ($expireOnClose) {
+            return 0;
+        }
+
+        $lifetime = Arr::get($config, 'lifetime', 180);
+
+        return Carbon::now()->addMinutes($lifetime);
     }
 
     /**
@@ -208,7 +243,9 @@ class StartSession
      */
     protected function sessionConfigured()
     {
-        return ! is_null(Arr::get($this->manager->getSessionConfig(), 'driver'));
+        $config = $this->getSessionConfig();
+
+        return Arr::has($config, 'driver');
     }
 
     /**
@@ -219,7 +256,9 @@ class StartSession
      */
     protected function sessionIsPersistent(array $config = null)
     {
-        $config = $config ?: $this->manager->getSessionConfig();
+        if (is_null($config)) {
+            $config = $this->getSessionConfig();
+        }
 
         return ! in_array($config['driver'], array(null, 'array'));
     }
@@ -235,8 +274,22 @@ class StartSession
             return false;
         }
 
-        $handler = $this->manager->driver()->getHandler();
+        $session = $this->manager->driver();
+
+        //
+        $handler = $session->getHandler();
 
         return ($handler instanceof CookieSessionHandler);
+    }
+
+
+    /**
+     * Returns the Session configuration from manager.
+     *
+     * @return array
+     */
+    protected function getSessionConfig()
+    {
+        return $this->manager->getSessionConfig();
     }
 }

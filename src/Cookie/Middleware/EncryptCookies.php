@@ -60,7 +60,9 @@ class EncryptCookies
      */
     public function handle($request, Closure $next)
     {
-        return $this->encrypt($next($this->decrypt($request)));
+        $response = $next($this->decrypt($request));
+
+        return $this->encrypt($response);
     }
 
     /**
@@ -94,9 +96,11 @@ class EncryptCookies
      */
     protected function decryptCookie($cookie)
     {
-        return is_array($cookie)
-            ? $this->decryptArray($cookie)
-            : $this->encrypter->decrypt($cookie);
+        if (is_array($cookie)) {
+            return $this->decryptArray($cookie);
+        }
+
+        return $this->encrypter->decrypt($cookie);
     }
 
     /**
@@ -126,13 +130,17 @@ class EncryptCookies
      */
     protected function encrypt(Response $response)
     {
-        foreach ($response->headers->getCookies() as $cookie) {
+        $cookies = $response->headers->getCookies();
+
+        foreach ($cookies as $cookie) {
             if ($this->isDisabled($cookie->getName())) {
                 continue;
             }
 
+            $value = $cookie->getValue();
+
             $response->headers->setCookie($this->duplicate(
-                $cookie, $this->encrypter->encrypt($cookie->getValue())
+                $cookie, $this->encrypter->encrypt($value)
             ));
         }
 

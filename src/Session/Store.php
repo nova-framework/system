@@ -137,7 +137,7 @@ class Store implements SessionInterface
      */
     protected function initializeLocalBag($bag)
     {
-        $this->bagData[$bag->getStorageKey()] = $this->pull($bag->getStorageKey(), []);
+        $this->bagData[$bag->getStorageKey()] = $this->pull($bag->getStorageKey(), array());
     }
 
     /**
@@ -253,9 +253,12 @@ class Store implements SessionInterface
      */
     protected function addBagDataToSession()
     {
-        foreach (array_merge($this->bags, array($this->metaBag)) as $bag)
-        {
-            $this->put($bag->getStorageKey(), $this->bagData[$bag->getStorageKey()]);
+        $bags = array_merge($this->bags, array($this->metaBag));
+
+        foreach ($bags as $bag) {
+            $name = $bag->getStorageKey();
+
+            $this->put($name, $this->getBagData($name));
         }
     }
 
@@ -606,7 +609,7 @@ class Store implements SessionInterface
     {
         return $this->put('_previous.url', $url);
     }
-    
+
     /**
      * Set the existence of the session on the handler if applicable.
      *
