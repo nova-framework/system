@@ -1,6 +1,6 @@
 ![Nova Framework](https://novaframework.com/templates/nova4/assets/img/nova.png)
 
-# Nova Framework 4.0 (Kernel)
+# Nova Framework 4.1 (Kernel)
 
 [![Total Downloads](https://img.shields.io/packagist/dt/nova-framework/system.svg)](https://packagist.org/packages/nova-framework/system)
 [![Dependency Status](https://www.versioneye.com/user/projects/554367f738331321e2000005/badge.svg)](https://www.versioneye.com/user/projects/554367f738331321e2000005)
@@ -14,7 +14,7 @@
 
 ## What is the Nova Framework?
 
-Nova Framework is a PHP 5.6 MVC system. It's designed to be lightweight and modular, allowing developers to build better and easy to maintain code with PHP.
+Nova Framework is a PHP 7.1 MVC system. It's designed to be lightweight and modular, allowing developers to build better and easy to maintain code with PHP.
 
 ## Requirements
 
