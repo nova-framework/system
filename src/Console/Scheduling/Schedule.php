@@ -6,9 +6,9 @@ use Nova\Container\Container;
 use Nova\Console\Scheduling\CacheMutex;
 use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
+use Nova\Support\ProcessUtils;
 
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\ProcessUtils;
 
 
 class Schedule
