@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "php": "^7.1.3",
+        "php": ">=7.1.5",
         "danielstjules/stringy": "~1.8",
         "jeremeamia/superclosure": "~2.2",
         "nesbot/carbon": "^1.21",
