@@ -20,7 +20,7 @@ Nova Framework is a PHP 7.1 MVC system. It's designed to be lightweight and modu
 
 **The framework requirements are limited.**
 
-- PHP 5.5 or greater.
+- PHP 7.1 or greater.
 - Apache Web Server or equivalent with mod rewrite support.
 - IIS with URL Rewrite module installed - [http://www.iis.net/downloads/microsoft/url-rewrite](http://www.iis.net/downloads/microsoft/url-rewrite)
 
