@@ -286,17 +286,45 @@ class Connection implements ConnectionInterface
      */
     public function select($query, $bindings = array(), $useReadPdo = true)
     {
-        return $this->run($query, $bindings, function($me, $query, $bindings) use ($useReadPdo)
+        return $this->run($query, $bindings, function ($me, $query, $bindings) use ($useReadPdo)
         {
             if ($me->pretending()) return array();
 
-            //
-            $statement = $this->getPdoForSelect($useReadPdo)->prepare($query);
+            $bindings = $me->prepareBindings($bindings);
 
-            $statement->execute($me->prepareBindings($bindings));
+            //
+            $statement = $me->createPdoStatement($query, $this->getPdoForSelect($useReadPdo));
+
+            $statement->execute($bindings);
 
             return $statement->fetchAll($me->getFetchMode());
         });
+    }
+
+    /**
+     * Parse and wrap the variables from query, then return a propared PDO Statement instance.
+     *
+     * @param  string  $query
+     * @param  \PDO  $pdo
+     * @return \PDOStatement
+     */
+    protected function createPdoStatement($query, $pdo = null)
+    {
+        if (is_null($pdo)) {
+            $pdo = $this->getPdo();
+        }
+
+        $grammar = $this->getQueryGrammar();
+
+        $query = preg_replace_callback('#\{(.*?)\}#', function ($matches) use ($grammar)
+        {
+            $value = $matches[1];
+
+            return $grammar->wrap($value);
+
+        }, $query);
+
+        return $pdo->prepare($query);
     }
 
     /**
@@ -355,13 +383,16 @@ class Connection implements ConnectionInterface
      */
     public function statement($query, $bindings = array())
     {
-        return $this->run($query, $bindings, function($me, $query, $bindings)
+        return $this->run($query, $bindings, function ($me, $query, $bindings)
         {
             if ($me->pretending()) return true;
 
             $bindings = $me->prepareBindings($bindings);
 
-            return $me->getPdo()->prepare($query)->execute($bindings);
+            //
+            $statement = $me->createPdoStatement($query);
+
+            return $statement->execute($bindings);
         });
     }
 
@@ -374,14 +405,16 @@ class Connection implements ConnectionInterface
      */
     public function affectingStatement($query, $bindings = array())
     {
-        return $this->run($query, $bindings, function($me, $query, $bindings)
+        return $this->run($query, $bindings, function ($me, $query, $bindings)
         {
             if ($me->pretending()) return 0;
 
-            //
-            $statement = $me->getPdo()->prepare($query);
+            $bindings = $me->prepareBindings($bindings);
 
-            $statement->execute($me->prepareBindings($bindings));
+            //
+            $statement = $me->createPdoStatement($query);
+
+            $statement->execute($bindings);
 
             return $statement->rowCount();
         });
@@ -395,11 +428,13 @@ class Connection implements ConnectionInterface
      */
     public function unprepared($query)
     {
-        return $this->run($query, array(), function($me, $query)
+        return $this->run($query, array(), function ($me, $query)
         {
             if ($me->pretending()) return true;
 
-            return (bool) $me->getPdo()->exec($query);
+            $result = $me->getPdo()->exec($query);
+
+            return (bool) $result;
         });
     }
 
@@ -416,7 +451,10 @@ class Connection implements ConnectionInterface
         foreach ($bindings as $key => $value) {
             if ($value instanceof DateTime) {
                 $bindings[$key] = $value->format($grammar->getDateFormat());
-            } else if ($value === false) {
+            }
+
+            // The value is not a DateTime instance.
+            else if ($value === false) {
                 $bindings[$key] = 0;
             }
         }
