@@ -1530,7 +1530,7 @@ class Builder
     }
 
     /**
-     * Get a paginator only supporting simple next and previous links.
+     * Paginate the given query into a paginator.
      *
      * @param  int  $perPage
      * @param  array  $columns
@@ -1540,16 +1540,22 @@ class Builder
      */
     public function paginate($perPage = 15, $columns = array('*'), $pageName = 'page', $page = null)
     {
-        $page = $page ?: Paginator::resolveCurrentPage($pageName);
+        if (is_null($page)) {
+            $page = Paginator::resolveCurrentPage($pageName);
+        }
 
+        $path = Paginator::resolveCurrentPath($pageName);
+
+        //
         $total = $this->getPaginationCount();
 
-        $results = ($total > 0) ? $this->forPage($page, $perPage)->get($columns) : collect();
+        if ($total > 0) {
+            $results = $this->forPage($page, $perPage)->get($columns);
+        } else {
+            $results = collect();
+        }
 
-        return new Paginator($results, $total, $perPage, $page, array(
-            'path'     => Paginator::resolveCurrentPath($pageName),
-            'pageName' => $pageName,
-        ));
+        return new Paginator($results, $total, $perPage, $page, compact('path', 'pageName'));
     }
 
     /**
@@ -1565,14 +1571,18 @@ class Builder
      */
     public function simplePaginate($perPage = 15, $columns = array('*'), $pageName = 'page', $page = null)
     {
-        $page = $page ?: Paginator::resolveCurrentPage($pageName);
+        if (is_null($page)) {
+            $page = Paginator::resolveCurrentPage($pageName);
+        }
 
-        $results = $this->skip(($page - 1) * $perPage)->take($perPage + 1)->get($columns);
+        $path = Paginator::resolveCurrentPath($pageName);
 
-        return new SimplePaginator($results, $perPage, $page, array(
-            'path'     => Paginator::resolveCurrentPath($pageName),
-            'pageName' => $pageName,
-        ));
+        //
+        $offset = ($page - 1) * $perPage;
+
+        $results = $this->skip($offset)->take($perPage + 1)->get($columns);
+
+        return new SimplePaginator($results, $perPage, $page, compact('path', 'pageName'));
     }
 
     /**

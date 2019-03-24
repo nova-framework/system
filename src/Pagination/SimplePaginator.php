@@ -56,6 +56,23 @@ class SimplePaginator extends AbstractPaginator implements ArrayableInterface, A
     }
 
     /**
+     * Create and return a new SimplePaginator instance.
+     *
+     * @param  int  $page
+     * @return bool
+     */
+    public static function make(array $items, $perPage = 15, $pageName = 'page', $page = null)
+    {
+        if (is_null($page)) {
+            $page = static::resolveCurrentPage($pageName);
+        }
+
+        $path = static::resolveCurrentPath($pageName);
+
+        return new static($items, $perPage, $page, compact('path', 'pageName'));
+    }
+
+    /**
      * Get the current page for the request.
      *
      * @param  int  $currentPage

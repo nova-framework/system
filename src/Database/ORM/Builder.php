@@ -267,18 +267,25 @@ class Builder
      */
     public function paginate($perPage = null, $columns = array('*'), $pageName = 'page', $page = null)
     {
-        $page = $page ?: Paginator::resolveCurrentPage($pageName);
+        if (is_null($page)) {
+            $page = Paginator::resolveCurrentPage($pageName);
+        }
 
-        $perPage = $perPage ?: $this->model->getPerPage();
+        $path = Paginator::resolveCurrentPath($pageName);
+
+        if (is_null($perPage)) {
+            $perPage = $this->model->getPerPage();
+        }
 
         $total = $this->query->getPaginationCount();
 
-        $results = ($total > 0) ? $this->forPage($page, $perPage)->get($columns) : $this->model->newCollection();
+        if ($total > 0) {
+            $results = $this->forPage($page, $perPage)->get($columns);
+        } else {
+            $results = $this->model->newCollection();
+        }
 
-        return new Paginator($results, $total, $perPage, $page, array(
-            'path'     => Paginator::resolveCurrentPath($pageName),
-            'pageName' => $pageName,
-        ));
+        return new Paginator($results, $total, $perPage, $page, compact('path', 'pageName'));
     }
 
     /**
@@ -292,19 +299,21 @@ class Builder
      */
     public function simplePaginate($perPage = null, $columns = array('*'), $pageName = 'page', $page = null)
     {
-        $page = $page ?: Paginator::resolveCurrentPage($pageName);
+        if (is_null($page)) {
+            $page = Paginator::resolveCurrentPage($pageName);
+        }
 
-        $perPage = $perPage ?: $this->model->getPerPage();
+        $path = Paginator::resolveCurrentPath($pageName);
 
-        // Next we will set the limit and offset for this query so that when we get the
-        // results we get the proper section of results. Then, we'll create the full
-        // paginator instances for these results with the given page and per page.
-        $results = $this->skip(($page - 1) * $perPage)->take($perPage + 1)->get($columns);
+        if (is_null($perPage)) {
+            $perPage = $this->model->getPerPage();
+        }
 
-        return new SimplePaginator($results, $perPage, $page, array(
-            'path'     => Paginator::resolveCurrentPath($pageName),
-            'pageName' => $pageName,
-        ));
+        $offset = ($page - 1) * $perPage;
+
+        $results = $this->skip($offset)->take($perPage + 1)->get($columns);
+
+        return new SimplePaginator($results, $perPage, $page, compact('path', 'pageName'));
     }
 
     /**
