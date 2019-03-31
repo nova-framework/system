@@ -247,8 +247,7 @@ class RouteCollection implements Countable, IteratorAggregate
         $path = ($request->path() == '/') ? '/' : '/' .$request->path();
 
         $paths = array(
-            $request->getHost() .$path,
-            $path
+            $request->getHost() .$path, $path
         );
 
         foreach ($paths as $path) {
