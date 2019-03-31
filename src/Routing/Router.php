@@ -135,7 +135,7 @@ class Router
 
         $this->container = $container ?: new Container;
 
-        $this->bind('_missing', function($value)
+        $this->bind('_missing', function ($value)
         {
             return explode('/', $value);
         });

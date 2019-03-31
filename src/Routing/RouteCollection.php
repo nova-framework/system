@@ -21,7 +21,15 @@ class RouteCollection implements Countable, IteratorAggregate
      *
      * @var array
      */
-    protected $routes = array();
+    protected $routes = array(
+        'GET'     => array(),
+        'POST'    => array(),
+        'PUT'     => array(),
+        'DELETE'  => array(),
+        'PATCH'   => array(),
+        'HEAD'    => array(),
+        'OPTIONS' => array(),
+    );
 
     /**
      * An flattened array of all of the routes.
@@ -67,13 +75,15 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function addToCollections($route)
     {
-        $domainAndUri = $route->domain().$route->getUri();
+        $domainAndUri = $route->domain() .$route->getUri();
 
         foreach ($route->methods() as $method) {
             $this->routes[$method][$domainAndUri] = $route;
         }
 
-        $this->allRoutes[$method.$domainAndUri] = $route;
+        $key = $method .$domainAndUri;
+
+        $this->allRoutes[$key] = $route;
     }
 
     /**
@@ -129,7 +139,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function match(Request $request)
     {
-        $routes = $this->get($request->getMethod());
+        $routes = $this->get(
+            $request->getMethod()
+        );
 
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
@@ -160,7 +172,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function checkForAlternateVerbs($request)
     {
-        $methods = array_diff(Router::$verbs, array($request->getMethod()));
+        $methods = array_diff(
+            Router::$verbs, (array) $request->getMethod()
+        );
 
         // Here we will spin through all verbs except for the current request verb and
         // check to see if any routes respond to them. If they do, we will return a
@@ -168,7 +182,9 @@ class RouteCollection implements Countable, IteratorAggregate
         $others = array();
 
         foreach ($methods as $method) {
-            if (! is_null($this->check($this->get($method), $request, false))) {
+            $route = $this->check($this->get($method), $request, false);
+
+            if (! is_null($route)) {
                 $others[] = $method;
             }
         }
@@ -209,6 +225,18 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function check(array $routes, $request, $includingMethod = true)
     {
+        $path = ($request->path() == '/') ? '/' : '/' .$request->path();
+
+        if ($includingMethod && ! is_null($route = Arr::get($routes, $path))) {
+            // The precheck made directly against the URI was successful, then we have a Route
+            // which does not use a domain, but we still need a full matching of it, before to
+            // decide wheter or not this Route instance is the proper one and we can return it.
+
+            if ($route->matches($request, false)) {
+                return $route;
+            }
+        }
+
         return Arr::first($routes, function ($key, $value) use ($request, $includingMethod)
         {
             return $value->matches($request, $includingMethod);
