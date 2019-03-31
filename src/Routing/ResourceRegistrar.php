@@ -55,14 +55,18 @@ class ResourceRegistrar
         // We need to extract the base resource from the resource name. Nested resources
         // are supported in the framework, but we need to know what name to use for a
         // place-holder on the route wildcards, which should be the base resources.
-        $base = $this->getResourceWildcard(last(explode('.', $name)));
+        $segments = explode('.', $name);
 
-        $defaults = $this->resourceDefaults;
+        $base = $this->getResourceWildcard(
+            last($segments)
+        );
 
-        foreach ($this->getResourceMethods($defaults, $options) as $method) {
+        $methods = $this->getResourceMethods($this->resourceDefaults, $options);
+
+        foreach ($methods as $method) {
             $method = 'addResource' .ucfirst($method);
 
-            $this->{$method}($name, $base, $controller, $options);
+            call_user_func(array($this, $method), $name, $base, $controller, $options);
         }
     }
 
@@ -76,7 +80,7 @@ class ResourceRegistrar
      */
     protected function prefixedResource($name, $controller, array $options)
     {
-        list($name, $prefix) = $this->getResourcePrefix($name);
+        list ($name, $prefix) = $this->getResourcePrefix($name);
 
         // We need to extract the base resource from the resource name. Nested resources
         // are supported in the framework, but we need to know what name to use for a
@@ -103,7 +107,9 @@ class ResourceRegistrar
         // last segment, which will be considered the final resources name we use.
         $prefix = implode('/', array_slice($segments, 0, -1));
 
-        return array(end($segments), $prefix);
+        return array(
+            end($segments), $prefix
+        );
     }
 
     /**
@@ -143,7 +149,11 @@ class ResourceRegistrar
 
         $uri = $this->getNestedResourceUri($segments);
 
-        return str_replace('/{' .$this->getResourceWildcard(end($segments)) .'}', '', $uri);
+        $name = $this->getResourceWildcard(
+            end($segments)
+        );
+
+        return str_replace('/{' .$name .'}', '', $uri);
     }
 
     /**
@@ -159,7 +169,9 @@ class ResourceRegistrar
         // entire string for the resource URI that contains all nested resources.
         return implode('/', array_map(function ($segment)
         {
-            return $segment .'/{'.$this->getResourceWildcard($segment) .'}';
+            $name = $this->getResourceWildcard($segment);
+
+            return $segment .'/{' .$name .'}';
 
         }, $segments));
     }
@@ -200,7 +212,7 @@ class ResourceRegistrar
         $prefix = isset($options['as']) ? $options['as'] .'.' : '';
 
         if (! $this->router->hasGroupStack()) {
-            return $prefix.$resource.'.'.$method;
+            return $prefix .$resource .'.' .$method;
         }
 
         return $this->getGroupResourceName($prefix, $resource, $method);
@@ -216,7 +228,9 @@ class ResourceRegistrar
      */
     protected function getGroupResourceName($prefix, $resource, $method)
     {
-        $group = trim(str_replace('/', '.', $this->router->getLastGroupPrefix()), '.');
+        $group = trim(
+            str_replace('/', '.', $this->router->getLastGroupPrefix()), '.'
+        );
 
         if (empty($group)) {
             return trim("{$prefix}{$resource}.{$method}", '.');
