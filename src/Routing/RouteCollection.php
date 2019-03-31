@@ -228,9 +228,8 @@ class RouteCollection implements Countable, IteratorAggregate
         $path = ($request->path() == '/') ? '/' : '/' .$request->path();
 
         if ($includingMethod && ! is_null($route = Arr::get($routes, $path))) {
-            // The pre-check made directly against the URI was successful, then we have a Route
-            // which doesn't have a domain set, but we will need a full matching of it to decide
-            // wheter or not this Route instance is the proper one and we can return it.
+            // The pre-check made directly against the URI was successful, finding a Route
+            // which doesn't use a domain or named variables, then we will complete its matching.
 
             if ($route->matches($request, true)) {
                 return $route;
