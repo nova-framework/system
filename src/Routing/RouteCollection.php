@@ -225,21 +225,39 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function check(array $routes, $request, $includingMethod = true)
     {
-        $path = ($request->path() == '/') ? '/' : '/' .$request->path();
-
-        if ($includingMethod && ! is_null($route = Arr::get($routes, $path))) {
-            // The pre-check made directly against the URI was successful, finding a Route
-            // which doesn't use a domain or named variables, then we will complete its matching.
-
-            if ($route->matches($request, true)) {
-                return $route;
-            }
+        if ($includingMethod && ! is_null($route = $this->fastCheck($routes, $request))) {
+            return $route;
         }
 
         return Arr::first($routes, function ($key, $value) use ($request, $includingMethod)
         {
             return $value->matches($request, $includingMethod);
         });
+    }
+
+    /**
+     * Determine if a route in the array matches the request - the fast way.
+     *
+     * @param  array  $routes
+     * @param  \Nova\http\Request  $request
+     * @return \Nova\Routing\Route|null
+     */
+    protected function fastCheck(array $routes, $request)
+    {
+        $path = ($request->path() == '/') ? '/' : '/' .$request->path();
+
+        $paths = array(
+            $request->getHost() .$path,
+            $path
+        );
+
+        foreach ($paths as $path) {
+            $route = Arr::get($routes, $path);
+
+            if (! is_null($route) && $route->matches($request, true)) {
+                return $route;
+            }
+        }
     }
 
     /**
