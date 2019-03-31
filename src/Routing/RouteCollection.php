@@ -232,7 +232,7 @@ class RouteCollection implements Countable, IteratorAggregate
             // which does not use a domain, but we still need a full matching of it, before to
             // decide wheter or not this Route instance is the proper one and we can return it.
 
-            if ($route->matches($request, false)) {
+            if ($route->matches($request, true)) {
                 return $route;
             }
         }
