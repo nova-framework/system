@@ -236,7 +236,7 @@ class RouteCollection implements Countable, IteratorAggregate
     }
 
     /**
-     * Determine if a route in the array matches the request - the fast way.
+     * Determine if a route in the array fully matches the request - the fast way.
      *
      * @param  array  $routes
      * @param  \Nova\http\Request  $request
