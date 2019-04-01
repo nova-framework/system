@@ -146,7 +146,12 @@ class RouteCollection implements Countable, IteratorAggregate
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
-        $route = $this->check($routes, $request);
+
+        if (! is_null($route = $this->fastCheck($routes, $request))) {
+            // We found a matching route using the fast way.
+        } else {
+            $route = $this->check($routes, $request);
+        }
 
         if (! is_null($route)) {
             return $route->bind($request);
@@ -225,10 +230,6 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function check(array $routes, $request, $includingMethod = true)
     {
-        if ($includingMethod && ! is_null($route = $this->fastCheck($routes, $request))) {
-            return $route;
-        }
-
         return Arr::first($routes, function ($key, $value) use ($request, $includingMethod)
         {
             return $value->matches($request, $includingMethod);
@@ -249,9 +250,12 @@ class RouteCollection implements Countable, IteratorAggregate
         $path = ($request->path() == '/') ? '/' : '/' .$request->path();
 
         foreach (array($domain .$path, $path) as $key) {
-            $route = Arr::get($routes, $key);
+            if (is_null($route = Arr::get($routes, $key))) {
+                continue;
+            }
 
-            if (! is_null($route) && $route->matches($request, true)) {
+            // We will do a full matching on the found route.
+            else if ($route->matches($request, true)) {
                 return $route;
             }
         }
