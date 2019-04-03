@@ -139,7 +139,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function match(Request $request)
     {
-        $routes = $this->get($request->getMethod());
+        $routes = $this->get(
+            $request->getMethod()
+        );
 
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
@@ -186,7 +188,9 @@ class RouteCollection implements Countable, IteratorAggregate
 
         return array_filter($methods, function ($method) use ($request)
         {
-            $route = $this->check($this->get($method), $request, false);
+            $route = $this->check(
+                $this->get($method), $request, false
+            );
 
             return ! is_null($route);
         });
