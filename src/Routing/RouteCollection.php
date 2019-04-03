@@ -244,17 +244,16 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function fastCheck(array $routes, $request)
     {
-        $domain = $request->getHost();
-
         $path = ($request->path() == '/') ? '/' : '/' .$request->path();
 
-        foreach (array($domain .$path, $path) as $key) {
-            if (is_null($route = Arr::get($routes, $key))) {
-                continue;
-            }
+        $keys = array(
+            $request->getHost() .$path, $path
+        );
 
-            // We will do a full matching on the found route.
-            else if ($route->matches($request, true)) {
+        foreach ($keys as $key) {
+            $route = Arr::get($routes, $key);
+
+            if (! is_null($route) && $route->matches($request, true)) {
                 return $route;
             }
         }
