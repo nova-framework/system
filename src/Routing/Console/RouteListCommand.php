@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Foundation\Console;
+namespace Nova\Routing\Console;
 
 use Nova\Http\Request;
 use Nova\Routing\ControllerDispatcher;
@@ -117,12 +117,14 @@ class RouteListCommand extends Command
     */
     protected function getRouteInformation(Route $route)
     {
+        $methods = implode('|', $route->methods());
+
         return $this->filterRoute(array(
-            'host'   => $route->domain(),
-            'method' => implode('|', $route->methods()),
-            'uri'    => $route->uri(),
-            'name'   => $route->getName(),
-            'action' => $route->getActionName(),
+            'host'       => $route->domain(),
+            'method'     => $methods,
+            'uri'        => $route->uri(),
+            'name'       => $route->getName(),
+            'action'     => $route->getActionName(),
             'middleware' => $this->getMiddleware($route),
         ));
     }

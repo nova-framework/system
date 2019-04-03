@@ -6,7 +6,6 @@ use Nova\Foundation\Console\UpCommand;
 use Nova\Foundation\Console\DownCommand;
 use Nova\Foundation\Console\ServeCommand;
 use Nova\Foundation\Console\OptimizeCommand;
-use Nova\Foundation\Console\RouteListCommand;
 use Nova\Foundation\Console\ModelMakeCommand;
 use Nova\Foundation\Console\ConsoleMakeCommand;
 use Nova\Foundation\Console\EnvironmentCommand;
@@ -68,7 +67,6 @@ class ForgeServiceProvider extends ServiceProvider
         'PolicyMake'       => 'command.policy.make',
         'ProviderMake'     => 'command.provider.make',
         'RequestMake'      => 'command.request.make',
-        'RouteList'        => 'command.route.list',
         'Serve'            => 'command.serve',
         'SharedMake'       => 'command.shared.make',
         'AssetLink'        => 'command.assets-link',
@@ -363,19 +361,6 @@ class ForgeServiceProvider extends ServiceProvider
         $this->app->singleton('command.request.make', function ($app)
         {
             return new RequestMakeCommand($app['files']);
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerRouteListCommand()
-    {
-        $this->app->singleton('command.route.list', function ($app)
-        {
-            return new RouteListCommand($app['router']);
         });
     }
 
