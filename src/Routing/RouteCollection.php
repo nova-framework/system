@@ -145,7 +145,9 @@ class RouteCollection implements Countable, IteratorAggregate
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
 
-        if (is_null($route = $this->fastCheck($routes, $request))) {
+        $route = $this->fastCheck($routes, $request);
+
+        if (is_null($route)) {
             $route = $this->check($routes, $request);
         }
 
@@ -157,7 +159,9 @@ class RouteCollection implements Countable, IteratorAggregate
         // another HTTP verb. If it is we will need to throw a MethodNotAllowed and
         // inform the user agent of which HTTP verb it should use for this route.
 
-        if (! empty($others = $this->checkForAlternateVerbs($request))) {
+        $others = $this->checkForAlternateVerbs($request);
+
+        if (! empty($others)) {
             return $this->getOtherMethodsRoute($request, $others);
         }
 
