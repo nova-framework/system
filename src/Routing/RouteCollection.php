@@ -147,9 +147,9 @@ class RouteCollection implements Countable, IteratorAggregate
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
 
-        if (! is_null($route = $this->fastCheck($routes, $request))) {
-            // We found a matching route using the fast way.
-        } else {
+        $route = $this->fastCheck($routes, $request);
+
+        if (is_null($route)) {
             $route = $this->check($routes, $request);
         }
 
@@ -157,12 +157,13 @@ class RouteCollection implements Countable, IteratorAggregate
             return $route->bind($request);
         }
 
-        // If no route was found, we will check if a matching is route is specified on
+        // If no route was found, we will check if a matching route is specified on
         // another HTTP verb. If it is we will need to throw a MethodNotAllowed and
         // inform the user agent of which HTTP verb it should use for this route.
+
         $others = $this->checkForAlternateVerbs($request);
 
-        if (count($others) > 0) {
+        if (! empty($others)) {
             return $this->getOtherMethodsRoute($request, $others);
         }
 
@@ -184,17 +185,15 @@ class RouteCollection implements Countable, IteratorAggregate
         // Here we will spin through all verbs except for the current request verb and
         // check to see if any routes respond to them. If they do, we will return a
         // proper error response with the correct headers on the response string.
-        $others = array();
 
-        foreach ($methods as $method) {
-            $route = $this->check($this->get($method), $request, false);
+        return array_filter($methods, function ($method) use ($request)
+        {
+            $route = $this->check(
+                $this->get($method), $request, false
+            );
 
-            if (! is_null($route)) {
-                $others[] = $method;
-            }
-        }
-
-        return $others;
+            return ! is_null($route);
+        });
     }
 
     /**
@@ -230,9 +229,9 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function check(array $routes, $request, $includingMethod = true)
     {
-        return Arr::first($routes, function ($key, $value) use ($request, $includingMethod)
+        return Arr::first($routes, function ($key, $route) use ($request, $includingMethod)
         {
-            return $value->matches($request, $includingMethod);
+            return $route->matches($request, $includingMethod);
         });
     }
 
