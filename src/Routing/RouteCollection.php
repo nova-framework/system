@@ -147,9 +147,9 @@ class RouteCollection implements Countable, IteratorAggregate
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
 
-        $route = $this->fastCheck($routes, $request);
+        if (is_null($route = $this->fastCheck($routes, $request))) {
+            // No route found in the fast way - we will fallback to classic checking.
 
-        if (is_null($route)) {
             $route = $this->check($routes, $request);
         }
 
