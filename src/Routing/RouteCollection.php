@@ -145,9 +145,9 @@ class RouteCollection implements Countable, IteratorAggregate
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
 
-        if (is_null($route = $this->fastCheck($routes, $request))) {
-            // No route found in the fast way - we will fallback to classic checking.
-
+        if (! is_null($route = $this->fastCheck($routes, $request))) {
+            // Nothing to do - a route was found in the fast way.
+        } else {
             $route = $this->check($routes, $request);
         }
 
@@ -240,13 +240,11 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function fastCheck(array $routes, $request)
     {
+        $domain = $request->getHost();
+
         $path = ($request->path() == '/') ? '/' : '/' .$request->path();
 
-        $keys = array(
-            $request->getHost() .$path, $path
-        );
-
-        foreach ($keys as $key) {
+        foreach (array($domain .$path, $path) as $key) {
             $route = Arr::get($routes, $key);
 
             if (! is_null($route) && $route->matches($request, true)) {
