@@ -146,7 +146,7 @@ class RouteCollection implements Countable, IteratorAggregate
         // by the consumer. Otherwise we will check for routes with another verb.
 
         if (! is_null($route = $this->fastCheck($routes, $request))) {
-            // Nothing to do - a route was found in the fast way.
+            // A route was found in the fast way.
         } else {
             $route = $this->check($routes, $request);
         }
