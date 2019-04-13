@@ -281,9 +281,9 @@ class Event
             with(new PhpExecutableFinder)->find(false)
         );
 
-        $forgeBinary = defined('FORGE_BINARY') ? Utils::escapeArgument(FORGE_BINARY) : 'forge';
+        $forgeBinary = defined('FORGE_BINARY') ? ProcessUtils::escapeArgument(FORGE_BINARY) : 'forge';
 
-        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish ' .Utils::escapeArgument($this->mutexName());
+        $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish ' . ProcessUtils::escapeArgument($this->mutexName());
 
         return '(' .$this->command .$redirect .$output .' 2>&1 ' .$delimiter .' ' .$finished .') > '
             . ProcessUtils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
