@@ -286,7 +286,7 @@ class Event
         $finished = $phpBinary .' ' .$forgeBinary .' schedule:finish ' .Utils::escapeArgument($this->mutexName());
 
         return '(' .$this->command .$redirect .$output .' 2>&1 ' .$delimiter .' ' .$finished .') > '
-            .Utils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
+            . ProcessUtils::escapeArgument($this->getDefaultOutput()) .' 2>&1 &';
     }
 
     /**
