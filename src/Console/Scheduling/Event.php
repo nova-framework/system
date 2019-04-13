@@ -6,10 +6,10 @@ use Nova\Container\Container;
 use Nova\Console\Scheduling\MutexInterface as Mutex;
 use Nova\Foundation\Application;
 use Nova\Mail\Mailer;
+use Nova\Support\ProcessUtils;
 
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessUtils as Utils;
 
 use Carbon\Carbon;
 use Cron\CronExpression;
@@ -267,7 +267,7 @@ class Event
      */
     protected function compileCommand()
     {
-        $output = Utils::escapeArgument($this->output);
+        $output = ProcessUtils::escapeArgument($this->output);
 
         $redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
@@ -277,7 +277,7 @@ class Event
 
         $delimiter = windows_os() ? '&' : ';';
 
-        $phpBinary = Utils::escapeArgument(
+        $phpBinary = ProcessUtils::escapeArgument(
             with(new PhpExecutableFinder)->find(false)
         );
 
