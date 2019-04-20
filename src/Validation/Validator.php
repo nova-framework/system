@@ -236,7 +236,11 @@ class Validator implements MessageProviderInterface
      */
     public function each($attribute, $rules)
     {
-        $data = Arr::get($this->data, $attribute);
+        if (! is_array($rules)) {
+            $rules = array($rules);
+        }
+
+        $data = Arr::get($this->data, $attribute, array());
 
         if (! is_array($data)) {
             if ($this->hasRule($attribute, 'Array')) {
