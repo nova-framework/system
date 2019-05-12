@@ -141,6 +141,18 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         $routes = $this->get($request->getMethod());
 
+        //
+        // We will sort first the routes according with their order.
+
+        usort($routes, function ($a, $b)
+        {
+            if ($a->order() == $b->order()) {
+                return 0;
+            }
+
+            return ($a->order() < $b->order()) ? -1 : 1;
+        });
+
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.

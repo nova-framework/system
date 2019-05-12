@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.1.5';
+    const VERSION = '4.1.6';
 
     /**
      * Indicates if the application has "booted".

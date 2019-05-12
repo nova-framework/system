@@ -115,6 +115,13 @@ class Route
      */
     protected static $validators;
 
+    /**
+     * The processing order.
+     *
+     * @var int
+     */
+    protected $order = 0;
+
 
     /**
      * Create a new Route instance.
@@ -604,6 +611,23 @@ class Route
             new SchemeValidator(),
             new HostValidator(),
         );
+    }
+
+    /**
+     * Set/Get the processing order for the route.
+     *
+     * @param  int|null  $order
+     * @return $this
+     */
+    public function order($order = null)
+    {
+        if (is_null($order)) {
+            return $this->order;
+        }
+
+        $this->order = (int) $order;
+
+        return $this;
     }
 
     /**
