@@ -614,6 +614,26 @@ class Route
     }
 
     /**
+     * Sort the given array of Route instances by order.
+     *
+     * @param  int|null  $order
+     * @return $this
+     */
+    public static function sortByOrder(array $routes)
+    {
+        usort($routes, function ($a, $b)
+        {
+            if ($a->order == $b->order) {
+                return 0;
+            }
+
+            return ($a->order < $b->order) ? -1 : 1;
+        });
+
+        return $routes;
+    }
+
+    /**
      * Set/Get the processing order for the route.
      *
      * @param  int|null  $order
