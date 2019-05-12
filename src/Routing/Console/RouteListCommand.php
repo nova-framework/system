@@ -58,7 +58,7 @@ class RouteListCommand extends Command
     * @var array
     */
     protected $headers = array(
-        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware'
+        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware', 'Order'
     );
 
     /**
@@ -101,7 +101,11 @@ class RouteListCommand extends Command
     {
         $results = array();
 
-        foreach($this->routes as $route) {
+        $routes = Route::sortByOrder(
+            $this->routes->getRoutes()
+        );
+
+        foreach($routes as $route) {
             $results[] = $this->getRouteInformation($route);
         }
 
@@ -126,6 +130,7 @@ class RouteListCommand extends Command
             'name'       => $route->getName(),
             'action'     => $route->getActionName(),
             'middleware' => $this->getMiddleware($route),
+            'order'      => $route->order(),
         ));
     }
 
