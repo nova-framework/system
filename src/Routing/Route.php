@@ -614,10 +614,10 @@ class Route
     }
 
     /**
-     * Sort the given array of Route instances by order.
+     * Sort the given array of Route instances by their order.
      *
-     * @param  int|null  $order
-     * @return $this
+     * @param  array  $routes
+     * @return array
      */
     public static function sortByOrder(array $routes)
     {
