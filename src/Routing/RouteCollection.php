@@ -141,7 +141,7 @@ class RouteCollection implements Countable, IteratorAggregate
     {
         $method = $request->getMethod();
 
-        $routes = Route::sortByOrder(
+        $routes = Route::sort(
             $this->get($method)
         );
 

@@ -101,7 +101,7 @@ class RouteListCommand extends Command
     {
         $results = array();
 
-        $routes = Route::sortByOrder(
+        $routes = Route::sort(
             $this->routes->getRoutes()
         );
 

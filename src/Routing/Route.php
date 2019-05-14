@@ -623,7 +623,7 @@ class Route
      * @param  array  $routes
      * @return array
      */
-    public static function sortByOrder(array $routes)
+    public static function sort(array $routes)
     {
         usort($routes, function ($a, $b)
         {
