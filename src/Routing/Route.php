@@ -143,8 +143,12 @@ class Route
             $this->methods[] = 'HEAD';
         }
 
-        if (isset($this->action['prefix'])) {
-            $this->prefix($this->action['prefix']);
+        if (! is_null($prefix = Arr::get($this->action, 'prefix'))) {
+            $this->prefix($prefix);
+        }
+
+        if (! is_null($order = Arr::get($this->action, 'order'))) {
+            $this->order = (int) $order;
         }
     }
 
