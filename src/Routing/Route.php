@@ -628,7 +628,7 @@ class Route
         usort($routes, function ($a, $b)
         {
             if ($a->order == $b->order) {
-                return 0;
+                return strcmp($a->uri, $b->uri);
             }
 
             return ($a->order < $b->order) ? -1 : 1;
