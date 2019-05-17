@@ -18,18 +18,6 @@ abstract class Controller
 
 
     /**
-     * Execute an action on the controller.
-     *
-     * @param string  $method
-     * @param array   $params
-     * @return mixed
-     */
-    public function callAction($method, array $parameters)
-    {
-        return call_user_func_array(array($this, $method), $parameters);
-    }
-
-    /**
      * Register middleware on the controller.
      *
      * @param  string  $middleware

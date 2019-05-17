@@ -11,6 +11,7 @@ use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\RouteCompiler;
 use Nova\Routing\RouteDependencyResolverTrait;
+use Nova\Support\Facades\Config;
 use Nova\Support\Arr;
 use Nova\Support\Str;
 
@@ -625,6 +626,10 @@ class Route
      */
     public static function sort(array $routes)
     {
+        if (! Config::get('routing.sortRoutes', true)) {
+            return $routes;
+        }
+
         usort($routes, function ($a, $b)
         {
             if ($a->order == $b->order) {
