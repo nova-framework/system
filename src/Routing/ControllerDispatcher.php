@@ -45,15 +45,13 @@ class ControllerDispatcher
             $route->parametersWithoutNulls(), $controller, $method
         );
 
-        if (! method_exists($controller, 'callAction')) {
+        if (! method_exists($controller, $callerMethod = 'callAction')) {
             return call_user_func_array(array($controller, $method), $parameters);
         }
 
-        $parameters = $this->resolveClassMethodDependencies(
-            array($method, $parameters), $controller, 'callAction'
-        );
-
-        return call_user_func_array(array($controller, 'callAction'), $parameters);
+        return call_user_func_array(array($controller, $callerMethod), $this->resolveClassMethodDependencies(
+            array($method, $parameters), $controller, $callerMethod
+        ));
     }
 
     /**
