@@ -193,10 +193,8 @@ class Route
      */
     protected function runCallable()
     {
-        $callable = $this->action['uses'];
-
         $parameters = $this->resolveMethodDependencies(
-            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
+            $this->parametersWithoutNulls(), new ReflectionFunction($callable = Arr::get($this->action,'uses'))
         );
 
         return call_user_func_array($callable, $parameters);
@@ -235,13 +233,15 @@ class Route
      */
     public function getController()
     {
-        if (! isset($this->controller)) {
-            list ($controller, $this->method) = $this->parseControllerCallback();
-
-            return $this->controller = $this->container->make($controller);
+        if (isset($this->controller)) {
+            return $this->controller;
         }
 
-        return $this->controller;
+        $callback = Arr::get($this->action, 'uses');
+
+        list ($controller, $this->method) = Str::parseCallback($callback);
+
+        return $this->controller = $this->container->make($controller);
     }
 
     /**
@@ -251,23 +251,15 @@ class Route
      */
     public function getControllerMethod()
     {
-        if (! isset($this->method)) {
-            list (, $method) = $this->parseControllerCallback();
-
-            return $this->method = $method;
+        if (isset($this->method)) {
+            return $this->method;
         }
 
-        return $this->method;
-    }
+        $callback = Arr::get($this->action, 'uses');
 
-    /**
-     * Parse the controller.
-     *
-     * @return array
-     */
-    protected function parseControllerCallback()
-    {
-        return Str::parseCallback($this->action['uses']);
+        list (, $method) = Str::parseCallback($callback);
+
+        return $this->method = $method;
     }
 
     /**

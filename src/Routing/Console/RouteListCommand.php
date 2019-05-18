@@ -123,13 +123,15 @@ class RouteListCommand extends Command
     {
         $methods = implode('|', $route->methods());
 
+        $middleware = implode(', ', $this->getMiddleware($route));
+
         return $this->filterRoute(array(
             'host'       => $route->domain(),
             'method'     => $methods,
             'uri'        => $route->uri(),
             'name'       => $route->getName(),
             'action'     => $route->getActionName(),
-            'middleware' => $this->getMiddleware($route),
+            'middleware' => $middleware,
             'order'      => $route->order(),
         ));
     }
@@ -155,59 +157,11 @@ class RouteListCommand extends Command
      */
     protected function getMiddleware($route)
     {
-        $middlewares = array_values($route->middleware());
+        return array_map(function ($middleware)
+        {
+            return ($middleware instanceof Closure) ? 'Closure' : $middleware;
 
-        $actionName = $route->getActionName();
-
-        if (! empty($actionName) && ($actionName !== 'Closure')) {
-            $middlewares = array_merge($middlewares, $this->getControllerMiddleware($actionName));
-        }
-
-        return implode(', ', $middlewares);
-    }
-
-    /**
-     * Get the middleware for the given Controller@action name.
-     *
-     * @param  string  $actionName
-     * @return array
-     */
-    protected function getControllerMiddleware($actionName)
-    {
-        list($controller, $method) = explode('@', $actionName);
-
-        return $this->getControllerMiddlewareFromInstance(
-            $this->container->make($controller), $method
-        );
-    }
-
-    /**
-     * Get the middlewares for the given controller instance and method.
-     *
-     * @param  \Nova\Routing\Controller  $controller
-     * @param  string  $method
-     * @return array
-     */
-    protected function getControllerMiddlewareFromInstance($controller, $method)
-    {
-        $middlewares = $this->router->getMiddleware();
-
-        //
-        $results = array();
-
-        foreach ($controller->getMiddleware() as $middleware => $options) {
-            if (ControllerDispatcher::methodExcludedByOptions($method, $options)) {
-                continue;
-            }
-
-            list($name, $parameters) = array_pad(explode(':', $middleware, 2), 2, null);
-
-            $middleware = Arr::get($middlewares, $name, $name);
-
-            $results[] = (! $middleware instanceof Closure) ? $middleware : $name;
-        }
-
-        return $results;
+        }, $route->middleware());
     }
 
     /**
