@@ -67,17 +67,13 @@ class ControllerDispatcher
             return array();
         }
 
-        $results = array();
+        $results = array_filter($controller->getMiddleware(), function ($options, $middleware) use ($method)
+        {
+            return ! static::methodExcludedByOptions($method, $options);
 
-        foreach ($controller->getMiddleware() as $middleware => $options) {
-            if (static::methodExcludedByOptions($method, $options)) {
-                continue;
-            }
+        }, ARRAY_FILTER_USE_BOTH);
 
-            $results[] = $middleware;
-        }
-
-        return $results;
+        return array_keys($results);
     }
 
     /**
@@ -89,7 +85,7 @@ class ControllerDispatcher
      */
     public static function methodExcludedByOptions($method, array $options)
     {
-        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except']));
+        return ((isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
+                (isset($options['except']) && in_array($method, (array) $options['except'])));
     }
 }
