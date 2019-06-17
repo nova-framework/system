@@ -618,7 +618,7 @@ class Route
      */
     public static function sort(array $routes)
     {
-        if (! Config::get('routing.sortRoutes', true)) {
+        if (! Config::get('routing.sorting', true)) {
             return $routes;
         }
 
