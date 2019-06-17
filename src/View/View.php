@@ -12,6 +12,7 @@ use Nova\Support\Contracts\ArrayableInterface as Arrayable;
 use Nova\Support\Contracts\RenderableInterface as Renderable;
 use Nova\Support\Contracts\MessageProviderInterface as MessageProvider;
 use Nova\Support\MessageBag;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 use Nova\View\Engines\EngineInterface;
 use Nova\View\Factory;
@@ -92,7 +93,8 @@ class View implements ArrayAccess, Renderable
             $this->factory->flushSectionsIfDoneRendering();
 
             return $response ?: $contents;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $this->factory->flushSections();
 
             throw $e;
@@ -130,10 +132,9 @@ class View implements ArrayAccess, Renderable
      */
     public function renderSections()
     {
-        $env = $this->factory;
-
-        return $this->render(function ($view) use ($env) {
-            return $env->getSections();
+        return $this->render(function ($view)
+        {
+            return $this->factory->getSections();
         });
     }
 
@@ -154,16 +155,11 @@ class View implements ArrayAccess, Renderable
      */
     public function gatherData()
     {
-        $data = array_merge($this->factory->getShared(), $this->data);
+        return array_map(function ($value)
+        {
+            return ($value instanceof Renderable) ? $value->render() : $value;
 
-        // All nested Views are evaluated before the main View.
-        foreach ($data as $key => $value) {
-            if ($value instanceof Renderable) {
-                $data[$key] = $value->render();
-            }
-        }
-
-        return $data;
+        }, array_merge($this->factory->getShared(), $this->data));
     }
 
     /**
@@ -184,8 +180,10 @@ class View implements ArrayAccess, Renderable
      */
     public function nest($key, $view, array $data = array())
     {
-        // The nested View instance inherit parent Data if none is given.
-        if (empty($data)) $data = $this->data;
+        // The nested View instance inherits the parent Data if none is given.
+        if (empty($data)) {
+            $data = $this->getData();
+        }
 
         return $this->with($key, $this->factory->make($view, $data));
     }
@@ -241,6 +239,17 @@ class View implements ArrayAccess, Renderable
         $this->factory->share($key, $value);
 
         return $this;
+    }
+
+    /**
+     * Returns true if the variable is set in the view data.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return isset($this->data[$key]);
     }
 
     /**
@@ -307,7 +316,7 @@ class View implements ArrayAccess, Renderable
      */
     public function offsetGet($offset)
     {
-        return isset($this->data[$offset]) ? $this->data[$offset] : null;
+        return Arr::get($this->data, $offset);
     }
 
     /**
@@ -331,7 +340,7 @@ class View implements ArrayAccess, Renderable
      */
     public function __get($key)
     {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return Arr::get($this->data, $key);
     }
 
     /**
