@@ -56,6 +56,11 @@ class View implements ArrayAccess, Renderable
      */
     protected $data = array();
 
+    /**
+     * @var bool  Either or not the View is an Layout.
+     */
+    protected $layout = false;
+
 
     /**
      * Constructor
@@ -155,11 +160,13 @@ class View implements ArrayAccess, Renderable
      */
     public function gatherData()
     {
+        $data = array_merge($this->factory->getShared(), $this->data);
+
         return array_map(function ($value)
         {
             return ($value instanceof Renderable) ? $value->render() : $value;
 
-        }, array_merge($this->factory->getShared(), $this->data));
+        }, $data);
     }
 
     /**
@@ -242,14 +249,20 @@ class View implements ArrayAccess, Renderable
     }
 
     /**
-     * Returns true if the variable is set in the view data.
+     * Set/Get the Layout flag on this View instance.
      *
-     * @param  string  $key
-     * @return bool
+     * @param  bool|null  $value
+     * @return View|bool
      */
-    public function has($key)
+    public function layout($value = null)
     {
-        return isset($this->data[$key]);
+        if (is_null($value)) {
+            return $this->layout;
+        }
+
+        $this->layout = (bool) $value;
+
+        return $this;
     }
 
     /**
