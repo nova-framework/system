@@ -57,7 +57,7 @@ class ControllerDispatcher
     /**
      * Get the middleware for the controller instance.
      *
-     * @param  \Nova\Routing\Controller  $controller
+     * @param  mixed  $controller
      * @param  string  $method
      * @return array
      */
@@ -67,13 +67,12 @@ class ControllerDispatcher
             return array();
         }
 
-        $results = array_filter($controller->getMiddleware(), function ($options, $middleware) use ($method)
+        $middleware = $controller->getMiddleware();
+
+        return array_keys(array_filter($middleware, function ($options) use ($method)
         {
             return ! static::methodExcludedByOptions($method, $options);
-
-        }, ARRAY_FILTER_USE_BOTH);
-
-        return array_keys($results);
+        }));
     }
 
     /**
@@ -83,9 +82,12 @@ class ControllerDispatcher
      * @param  array  $options
      * @return bool
      */
-    public static function methodExcludedByOptions($method, array $options)
+    protected static function methodExcludedByOptions($method, array $options)
     {
-        return ((isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-                (isset($options['except']) && in_array($method, (array) $options['except'])));
+        if (isset($options['only']) && ! in_array($method, (array) $options['only'])) {
+            return true;
+        }
+
+        return isset($options['except']) && in_array($method, (array) $options['except']);
     }
 }

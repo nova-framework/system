@@ -41,7 +41,7 @@ class Application extends Container implements ResponsePreparerInterface
      *
      * @var string
      */
-    const VERSION = '4.1.16';
+    const VERSION = '4.1.17';
 
     /**
      * Indicates if the application has "booted".
@@ -167,8 +167,12 @@ class Application extends Container implements ResponsePreparerInterface
      */
     protected function registerBaseServiceProviders()
     {
-        foreach (array('Event', 'Log', 'Exception', 'Routing') as $name) {
-            $this->{"register{$name}Provider"}();
+        $providers = array('Event', 'Log', 'Exception', 'Routing');
+
+        foreach ($providers as $provider) {
+            $method = sprintf('register%sProvider', $provider);
+
+            call_user_func(array($this, $method));
         }
     }
 
@@ -338,7 +342,7 @@ class Application extends Container implements ResponsePreparerInterface
 
         $this->markAsRegistered($provider);
 
-        if ($this->booted) {
+        if ($this->isBooted()) {
             $this->bootProvider($provider);
         }
 
@@ -427,16 +431,20 @@ class Application extends Container implements ResponsePreparerInterface
      */
     public function registerDeferredProvider($provider, $service = null)
     {
-        if ($service) unset($this->deferredServices[$service]);
+        if (! is_null($service)) {
+            unset($this->deferredServices[$service]);
+        }
 
         $this->register($instance = new $provider($this));
 
-        if (! $this->booted) {
-            $this->booting(function() use ($instance)
-            {
-                $this->bootProvider($instance);
-            });
+        if ($this->isBooted()) {
+            return;
         }
+
+        $this->booting(function() use ($instance)
+        {
+            $this->bootProvider($instance);
+        });
     }
 
     /**
@@ -525,7 +533,7 @@ class Application extends Container implements ResponsePreparerInterface
      */
     public function boot()
     {
-        if ($this->booted) {
+        if ($this->isBooted()) {
             return;
         }
 
