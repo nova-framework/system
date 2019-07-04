@@ -53,7 +53,7 @@ class QuasarBroadcaster extends Broadcaster
         $this->publicKey = Arr::get($config, 'key');
         $this->secretKey = Arr::get($config, 'secret');
 
-        $this->options = Arr::get($config, 'options');
+        $this->options = Arr::get($config, 'options', array());
     }
 
     /**
@@ -69,15 +69,72 @@ class QuasarBroadcaster extends Broadcaster
 
         $socketId = $request->input('socket_id');
 
-        if (Str::startsWith($channel, 'presence-')) {
+        if (! Str::startsWith($channel, 'presence-')) {
+            $result = $this->socketAuth($channel, $socketId);
+        } else {
             $user = $request->user();
 
-            return $this->presenceAuth(
+            $result = $this->presenceAuth(
                 $channel, $socketId, $user->getAuthIdentifier(), $result
             );
         }
 
-        return $this->socketAuth($channel, $socketId);
+        return json_decode($result, true);
+    }
+
+    /**
+     * Creates a socket signature.
+     *
+     * @param string $socketId
+     * @param string $customData
+     *
+     * @return string
+     */
+    protected function socketAuth($channel, $socketId, $customData = null)
+    {
+        if (preg_match('/^[-a-z0-9_=@,.;]+$/i', $channel) !== 1) {
+            throw new BroadcastException('Invalid channel name ' .$channel);
+        }
+
+        //
+        else if (preg_match('/^(?:\/[a-z0-9]+#)?[a-z0-9]+$/i', $socketId) !== 1) {
+            throw new BroadcastException('Invalid socket ID ' .$socketId);
+        }
+
+        if (! is_null($customData)) {
+            $auth = hash_hmac('sha256', $socketId .':' .$channel .':' .$customData, $this->secretKey, false);
+        } else {
+            $auth = hash_hmac('sha256', $socketId .':' .$channel, $this->secretKey, false);
+        }
+
+        $signature = compact('auth');
+
+        // Add the custom data if it has been supplied.
+        if (! is_null($customData)) {
+            $signature['payload'] = $customData;
+        }
+
+        return json_encode($signature);
+    }
+
+    /**
+     * Creates a presence signature (an extension of socket signing).
+     *
+     * @param string $socketId
+     * @param string $userId
+     * @param mixed  $userInfo
+     *
+     * @return string
+     */
+    protected function presenceAuth($channel, $socketId, $userId, $userInfo = null)
+    {
+        $userData = array('userId' => $userId);
+
+        if (! is_null($userInfo)) {
+            $userData['userInfo'] = $userInfo;
+        }
+
+        return $this->socketAuth($channel, $socketId, json_encode($userData));
     }
 
     /**
@@ -141,8 +198,8 @@ class QuasarBroadcaster extends Broadcaster
      * @return bool
      * @throws \Nova\Broadcasting\BroadcastException
      */
-     protected function executeHttpRequest($url, array $payload, $hash)
-     {
+    protected function executeHttpRequest($url, array $payload, $hash)
+    {
         $client = new HttpClient();
 
         try {
@@ -161,59 +218,5 @@ class QuasarBroadcaster extends Broadcaster
         catch (RequestException $e) {
             throw new BroadcastException($e->getMessage());
         }
-     }
-
-    /**
-     * Creates a socket signature.
-     *
-     * @param string $socketId
-     * @param string $customData
-     *
-     * @return string
-     */
-    public function socketAuth($channel, $socketId, $customData = null)
-    {
-        if (preg_match('/^[-a-z0-9_=@,.;]+$/i', $channel) !== 1) {
-            throw new BroadcastException('Invalid channel name ' .$channel);
-        }
-
-        if (preg_match('/^(?:\/[a-z0-9]+#)?[a-z0-9]+$/i', $socketId) !== 1) {
-            throw new BroadcastException('Invalid socket ID ' .$socketId);
-        }
-
-        if (! is_null($customData)) {
-            $signature = hash_hmac('sha256', $socketId .':' .$channel .':' .$customData, $this->secretKey, false);
-        } else {
-            $signature = hash_hmac('sha256', $socketId .':' .$channel, $this->secretKey, false);
-        }
-
-        $signature = array('auth' => $signature);
-
-        // Add the custom data if it has been supplied.
-        if (! is_null($customData)) {
-            $signature['payload'] = $customData;
-        }
-
-        return json_encode($signature);
-    }
-
-    /**
-     * Creates a presence signature (an extension of socket signing).
-     *
-     * @param string $socketId
-     * @param string $userId
-     * @param mixed  $userInfo
-     *
-     * @return string
-     */
-    public function presenceAuth($channel, $socketId, $userId, $userInfo = null)
-    {
-        $userData = array('userId' => $userId);
-
-        if (! is_null($userInfo)) {
-            $userData['userInfo'] = $userInfo;
-        }
-
-        return $this->socketAuth($channel, $socketId, json_encode($userData));
     }
 }
