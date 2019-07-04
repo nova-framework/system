@@ -179,13 +179,26 @@ class QuasarBroadcaster extends Broadcaster
 
         $hash = hash_hmac('sha256', $content, $this->secretKey, false);
 
-        // Compute the server URL.
-        $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
-        $port = Arr::get($this->options, 'httpPort', 2121);
-
-        $url = $host .':' .$port .'/' .$path;
+        // Compute the Quasar server URL.
+        $url = $this->resolveServerUrl($path);
 
         return $this->executeHttpRequest($url, $payload, $hash);
+    }
+
+    /**
+     * Compute the full URL of Quasar server.
+     *
+     * @param string  $path
+     *
+     * @return string
+     */
+    protected function resolveServerUrl($path)
+    {
+        $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
+
+        $port = (int) Arr::get($this->options, 'httpPort', 2121);
+
+        return sprintf('%s:%d/%s', $host, $port, $path);
     }
 
     /**
