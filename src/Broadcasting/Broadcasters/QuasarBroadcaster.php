@@ -181,7 +181,7 @@ class QuasarBroadcaster extends Broadcaster
     }
 
     /**
-     * Compute the full URL of Quasar server.
+     * Compute the full URL to server.
      *
      * @param string  $path
      *
