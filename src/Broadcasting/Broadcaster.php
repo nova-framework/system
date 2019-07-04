@@ -86,21 +86,33 @@ abstract class Broadcaster implements BroadcasterInterface
 
             $request->setUserResolver(function ()
             {
-                if (! isset($this->authGuest)) {
-                    $session = $this->container['session'];
-
-                    if (empty($id = $session->get('broadcasting.guest'))) {
-                        $session->set('broadcasting.guest', $id = dechex(time()) . Str::random(16));
-                    }
-
-                    return $this->authGuest = new GuestUser($id);
-                }
-
-                return $this->authGuest;
+                return $this->resolveGuestUser();
             });
         }
 
         return $this->verifyUserCanAccessChannel($request, $channel);
+    }
+
+    /**
+     * Resolve the Guest User instance with local caching.
+     *
+     * @return \Nova\Broadcasting\Auth\Guest
+     */
+    protected function resolveGuestUser()
+    {
+        if (isset($this->authGuest)) {
+            return $this->authGuest;
+        }
+
+        $session = $this->container['session'];
+
+        if (empty($id = $session->get('broadcasting.guest'))) {
+            $id = dechex(time()) . Str::random(16);
+
+            $session->set('broadcasting.guest', $id);
+        }
+
+        return $this->authGuest = new GuestUser($id);
     }
 
     /**
@@ -146,7 +158,7 @@ abstract class Broadcaster implements BroadcasterInterface
     protected function callChannelCallback($callback, $parameters)
     {
         if (is_string($callback)) {
-            list($className, $method) = Str::parseCallback($callback, 'join');
+            list ($className, $method) = Str::parseCallback($callback, 'join');
 
             $callback = array(
                 $instance = $this->container->make($className), $method

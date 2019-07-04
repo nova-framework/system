@@ -87,7 +87,9 @@ class QuasarBroadcaster extends Broadcaster
     {
         $socket = Arr::pull($payload, 'socket');
 
-        $this->trigger($this->formatChannels($channels), $event, $payload, $socket);
+        $this->trigger(
+            $this->formatChannels($channels), $event, $payload, $socket
+        );
     }
 
     /**
@@ -104,25 +106,44 @@ class QuasarBroadcaster extends Broadcaster
      */
     protected function trigger($channels, $event, $data, $socketId = null)
     {
+        $event = str_replace('\\', '.', $event);
+
         $payload = array(
             'channels' => json_encode($channels),
-            'event'    => str_replace('\\', '.', $event),
+            'event'    => $event,
             'data'     => json_encode($data),
             'socketId' => $socketId ?: '',
         );
 
-        $path = 'apps/' .$this->publicKey .'/events';
+        $path = sprintf('apps/%s/events', $this->publicKey);
 
-        //
-        $hash = hash_hmac('sha256', "POST\n" .$path .':' .json_encode($payload), $this->secretKey, false);
+        $content = "POST\n" .$path .':' .json_encode($payload);
 
-        // Compute the server URL.
+        // Compute the hash.
+        $hash = hash_hmac('sha256', $content, $this->secretKey, false);
+
+        return $this->executeHttpRequest($path, $payload, $hash);
+    }
+
+    /**
+     * Execute a HTTP request to the Quasar webserver.
+     *
+     * @param string  $path
+     * @param array  $payload
+     * @param string  $hash
+     *
+     * @return bool
+     * @throws \Nova\Broadcasting\BroadcastException
+     */
+     protected function executeHttpRequest($path, array $payload, $hash)
+     {
         $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
         $port = Arr::get($this->options, 'httpPort', 2121);
 
+        // Compute the server URL.
         $url = $host .':' .$port .'/' .$path;
 
-        // Create a Guzzle Http Client instance.
+        // Create a new Guzzle Http Client instance.
         $client = new HttpClient();
 
         try {
@@ -141,7 +162,7 @@ class QuasarBroadcaster extends Broadcaster
         catch (RequestException $e) {
             throw new BroadcastException($e->getMessage());
         }
-    }
+     }
 
     /**
      * Creates a socket signature.

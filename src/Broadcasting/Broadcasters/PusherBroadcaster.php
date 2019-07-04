@@ -50,14 +50,14 @@ class PusherBroadcaster extends Broadcaster
 
         $socketId = $request->input('socket_id');
 
-        if (Str::startsWith($channel, 'presence-')) {
+        if (! Str::startsWith($channel, 'presence-')) {
+            $result = $this->pusher->socket_auth($channel, $socketId);
+        } else {
             $user = $request->user();
 
             $result = $this->pusher->presence_auth(
                 $channel, $socketId, $user->getAuthIdentifier(), $result
             );
-        } else {
-            $result = $this->pusher->socket_auth($channel, $socketId);
         }
 
         return json_decode($result, true);
@@ -72,7 +72,9 @@ class PusherBroadcaster extends Broadcaster
 
         $event = str_replace('\\', '.', $event);
 
-        $response = $this->pusher->trigger($this->formatChannels($channels), $event, $payload, $socket, true);
+        $response = $this->pusher->trigger(
+            $this->formatChannels($channels), $event, $payload, $socket, true
+        );
 
         if (($response['status'] >= 200) && ($response['status'] <= 299)) {
             return;
