@@ -117,33 +117,32 @@ class QuasarBroadcaster extends Broadcaster
 
         $path = sprintf('apps/%s/events', $this->publicKey);
 
+        // Compute the hash.
         $content = "POST\n" .$path .':' .json_encode($payload);
 
-        // Compute the hash.
         $hash = hash_hmac('sha256', $content, $this->secretKey, false);
 
-        return $this->executeHttpRequest($path, $payload, $hash);
+        // Compute the server URL.
+        $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
+        $port = Arr::get($this->options, 'httpPort', 2121);
+
+        $url = $host .':' .$port .'/' .$path;
+
+        return $this->executeHttpRequest($url, $payload, $hash);
     }
 
     /**
      * Execute a HTTP request to the Quasar webserver.
      *
-     * @param string  $path
+     * @param string  $url
      * @param array  $payload
      * @param string  $hash
      *
      * @return bool
      * @throws \Nova\Broadcasting\BroadcastException
      */
-     protected function executeHttpRequest($path, array $payload, $hash)
+     protected function executeHttpRequest($url, array $payload, $hash)
      {
-        $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
-        $port = Arr::get($this->options, 'httpPort', 2121);
-
-        // Compute the server URL.
-        $url = $host .':' .$port .'/' .$path;
-
-        // Create a new Guzzle Http Client instance.
         $client = new HttpClient();
 
         try {
