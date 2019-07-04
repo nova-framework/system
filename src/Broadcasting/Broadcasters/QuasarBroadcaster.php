@@ -159,7 +159,6 @@ class QuasarBroadcaster extends Broadcaster
      * @param string|null  $socketId        [optional]
      *
      * @return bool
-     * @throws \Nova\Broadcasting\BroadcastException
      */
     protected function trigger($channels, $event, $data, $socketId = null)
     {
@@ -172,17 +171,13 @@ class QuasarBroadcaster extends Broadcaster
             'socketId' => $socketId ?: '',
         );
 
-        $path = sprintf('apps/%s/events', $this->publicKey);
+        $url = $this->resolveServerUrl(
+            $path = sprintf('apps/%s/events', $this->publicKey)
+        );
 
-        // Compute the hash.
-        $content = "POST\n" .$path .':' .json_encode($payload);
-
-        $hash = hash_hmac('sha256', $content, $this->secretKey, false);
-
-        // Compute the Quasar server URL.
-        $url = $this->resolveServerUrl($path);
-
-        return $this->executeHttpRequest($url, $payload, $hash);
+        return $this->executeHttpRequest(
+            $url, $payload, $this->createRequestHash($path, $payload)
+        );
     }
 
     /**
@@ -199,6 +194,21 @@ class QuasarBroadcaster extends Broadcaster
         $port = (int) Arr::get($this->options, 'httpPort', 2121);
 
         return sprintf('%s:%d/%s', $host, $port, $path);
+    }
+
+    /**
+     * Compute the request hash.
+     *
+     * @param string  $path
+     * @param array  $data
+     *
+     * @return string
+     */
+    protected function createRequestHash($path, array $data)
+    {
+        $payload = "POST\n" .$path .':' .json_encode($payload);
+
+        return hash_hmac('sha256', $payload, $this->secretKey, false);
     }
 
     /**
