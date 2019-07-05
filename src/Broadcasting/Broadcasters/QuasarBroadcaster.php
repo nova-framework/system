@@ -176,7 +176,7 @@ class QuasarBroadcaster extends Broadcaster
         );
 
         return $this->executeHttpRequest(
-            $url, $payload, $this->createRequestHash($path, $payload)
+            $url, $payload, $this->createHash($path, $payload)
         );
     }
 
@@ -204,7 +204,7 @@ class QuasarBroadcaster extends Broadcaster
      *
      * @return string
      */
-    protected function createRequestHash($path, array $data)
+    protected function createHash($path, array $data)
     {
         $payload = "POST\n" .$path .':' .json_encode($data);
 
