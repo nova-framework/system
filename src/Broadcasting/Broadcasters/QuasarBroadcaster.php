@@ -171,12 +171,12 @@ class QuasarBroadcaster extends Broadcaster
             'socketId' => $socketId ?: '',
         );
 
-        $url = $this->serverUrl(
+        $url = $this->createServerUrl(
             $path = sprintf('apps/%s/events', $this->publicKey)
         );
 
         return $this->executeHttpRequest(
-            $url, $payload, $this->createHash($path, $payload)
+            $url, $payload, $this->createBearerHash($path, $payload)
         );
     }
 
@@ -187,7 +187,7 @@ class QuasarBroadcaster extends Broadcaster
      *
      * @return string
      */
-    protected function serverUrl($path)
+    protected function createServerUrl($path)
     {
         $host = Arr::get($this->options, 'httpHost', '127.0.0.1');
 
@@ -204,7 +204,7 @@ class QuasarBroadcaster extends Broadcaster
      *
      * @return string
      */
-    protected function createHash($path, array $data)
+    protected function createBearerHash($path, array $data)
     {
         $payload = "POST\n" .$path .':' .json_encode($data);
 
