@@ -704,19 +704,6 @@ class Route
     }
 
     /**
-     * Add a prefix to the route URI.
-     *
-     * @param  string  $prefix
-     * @return $this
-     */
-    public function prefix($prefix)
-    {
-        $this->uri = trim($prefix, '/') .'/' .trim($this->uri, '/');
-
-        return $this;
-    }
-
-    /**
      * Get the URI associated with the route.
      *
      * @return string
@@ -812,7 +799,7 @@ class Route
      * Set the URI that the route responds to.
      *
      * @param  string  $uri
-     * @return \Nova\Routing\Route
+     * $this
      */
     public function setUri($uri)
     {
@@ -834,6 +821,19 @@ class Route
     }
 
     /**
+     * Add a prefix to the route URI.
+     *
+     * @param  string  $prefix
+     * @return $this
+     */
+    public function prefix($prefix)
+    {
+        $this->uri = trim($prefix, '/') .'/' .trim($this->uri, '/');
+
+        return $this;
+    }
+
+    /**
      * Get the name of the route instance.
      *
      * @return string
@@ -843,6 +843,19 @@ class Route
         if (isset($this->action['as'])) {
             return $this->action['as'];
         }
+    }
+
+    /**
+     * Add or change the route name.
+     *
+     * @param  string  $name
+     * @return $this
+     */
+    public function name($name)
+    {
+        $this->action['as'] = isset($this->action['as']) ? $this->action['as'] .$name : $name;
+
+        return $this;
     }
 
     /**

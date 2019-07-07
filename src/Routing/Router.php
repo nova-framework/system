@@ -258,6 +258,19 @@ class Router
     }
 
     /**
+     * Register an array of resource controllers.
+     *
+     * @param  array  $resources
+     * @return void
+     */
+    public function resources(array $resources)
+    {
+        foreach ($resources as $name => $controller) {
+            $this->resource($name, $controller);
+        }
+    }
+
+    /**
      * Route a resource to a controller.
      *
      * @param  string  $name
