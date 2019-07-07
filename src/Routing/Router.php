@@ -2,6 +2,7 @@
 
 namespace Nova\Routing;
 
+use Nova\Http\RedirectResponse;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Events\Dispatcher;
@@ -238,6 +239,22 @@ class Router
     public function match($methods, $uri, $action)
     {
         return $this->addRoute(array_map('strtoupper', (array) $methods), $uri, $action);
+    }
+
+    /**
+     * Create a redirect from one URI to another.
+     *
+     * @param  string  $uri
+     * @param  string  $destination
+     * @param  int  $status
+     * @return \Nova\Routing\Route
+     */
+    public function redirect($uri, $destination, $status = 301)
+    {
+        return $this->any($uri, function () use ($destination, $status)
+        {
+            return new RedirectResponse($destination, $status);
+        });
     }
 
     /**
