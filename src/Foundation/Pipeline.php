@@ -132,19 +132,4 @@ class Pipeline
 
         return call_user_func_array(array($pipe, $this->method), $parameters);
     }
-
-    /**
-     * Get the container instance.
-     *
-     * @return \Nova\Container\Container
-     * @throws \RuntimeException
-     */
-    protected function getContainer()
-    {
-        if (! isset($this->container)) {
-            throw new RuntimeException('A container instance has not been passed to the Pipeline.');
-        }
-
-        return $this->container;
-    }
 }
