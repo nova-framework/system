@@ -51,6 +51,17 @@ class AssetDispatcher
      */
     protected $hints = array();
 
+    /**
+     * The wildcard patterns supported by the router.
+     *
+     * @var array
+     */
+    public static $patterns = array(
+        '(:any)' => '([^/]+)',
+        '(:num)' => '([0-9]+)',
+        '(:all)' => '(.*)',
+    );
+
 
     /**
      * Create a new Default Dispatcher instance.
@@ -87,7 +98,7 @@ class AssetDispatcher
     public function dispatch(SymfonyRequest $request)
     {
         if (! is_null($route = $this->findRoute($request))) {
-            list($callback, $parameters) = $route;
+            list ($callback, $parameters) = $route;
 
             array_unshift($parameters, $request);
 
@@ -109,7 +120,11 @@ class AssetDispatcher
 
         $uri = $request->path();
 
-        foreach ($this->routes as $pattern => $callback) {
+        foreach ($this->routes as $route => $callback) {
+            $pattern = str_replace(
+                array_keys(static::$patterns), array_values(static::$patterns),  $route
+            );
+
             if (preg_match('#^' .$pattern .'$#s', $uri, $matches)) {
                 return array($callback, array_slice($matches, 1));
             }
