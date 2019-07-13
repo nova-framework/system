@@ -2,7 +2,7 @@
 
 namespace Nova\Foundation\Console;
 
-use Nova\Assets\AssetDispatcher;
+use Nova\Routing\Assets\AssetDispatcher;
 use Nova\Console\Command;
 use Nova\Foundation\Publishers\AssetPublisher;
 use Nova\Support\Str;
