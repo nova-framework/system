@@ -60,7 +60,9 @@ class Pipeline
      */
     public function handle($passable, Closure $callback)
     {
-        $pipeline = array_reduce(array_reverse($this->pipes), function ($stack, $pipe)
+        $pipes = array_reverse($this->pipes);
+
+        $pipeline = array_reduce($pipes, function ($stack, $pipe)
         {
             return $this->createSlice($stack, $pipe);
 
@@ -113,7 +115,7 @@ class Pipeline
 
         // The pipe is not a Closure instance.
         else if (! is_object($pipe)) {
-            list($name, $parameters) = $this->parsePipeString($pipe);
+            list ($name, $parameters) = $this->parsePipeString($pipe);
 
             $pipe = $this->getContainer()->make($name);
 
