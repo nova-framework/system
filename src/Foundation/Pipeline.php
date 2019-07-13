@@ -3,13 +3,12 @@
 namespace Nova\Foundation;
 
 use Nova\Container\Container;
-use Nova\Foundation\PipelineInterface;
 
 use Closure;
 use RuntimeException;
 
 
-class Pipeline implements PipelineInterface
+class Pipeline
 {
     /**
      * The container implementation.
