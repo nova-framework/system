@@ -11,7 +11,7 @@ use Nova\Http\Response;
 use Nova\Config\FileLoader;
 use Nova\Container\Container;
 use Nova\Filesystem\Filesystem;
-use Nova\Pipeline\Pipeline;
+use Nova\Foundation\Pipeline;
 use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;

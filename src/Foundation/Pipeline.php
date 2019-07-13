@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Pipeline;
+namespace Nova\Foundation;
 
 use Nova\Container\Container;
-use Nova\Pipeline\PipelineInterface;
+use Nova\Foundation\PipelineInterface;
 
 use Closure;
 use RuntimeException;

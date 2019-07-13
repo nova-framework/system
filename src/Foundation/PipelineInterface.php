@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Pipeline;
+namespace Nova\Foundation;
 
 use Closure;
 

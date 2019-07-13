@@ -4,7 +4,7 @@ namespace Nova\Bus;
 
 
 use Nova\Container\Container;
-use Nova\Pipeline\Pipeline;
+use Nova\Foundation\Pipeline;
 use Nova\Queue\QueueInterface;
 use Nova\Queue\ShouldQueueInterface;
 use Nova\Bus\QueueingDispatcherInterface;
