@@ -113,35 +113,24 @@ class Pipeline
             return call_user_func($pipe, $passable, $stack);
         }
 
-        // The pipe is not a Closure instance.
+        $parameters = array($passable, $stack);
+
+        if (is_string($pipe)) {
+            list ($name, $payload) = array_pad(explode(':', $pipe, 2), 2, null);
+
+            if (! empty($payload)) {
+                $parameters = array_merge($parameters, explode(',', $payload));
+            }
+
+            $pipe = $this->container->make($name);
+        }
+
+        // The pipes must be either a Closure, a string or an object instance.
         else if (! is_object($pipe)) {
-            list ($name, $parameters) = $this->parsePipeString($pipe);
-
-            $pipe = $this->getContainer()->make($name);
-
-            $parameters = array_merge(array($passable, $stack), $parameters);
-        } else {
-            $parameters = array($passable, $stack);
+            throw new RuntimeException('An invalid pipe has been passed to the Pipeline.');
         }
 
         return call_user_func_array(array($pipe, $this->method), $parameters);
-    }
-
-    /**
-     * Parse full pipe string to get name and parameters.
-     *
-     * @param  string $pipe
-     * @return array
-     */
-    protected function parsePipeString($pipe)
-    {
-        list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, array());
-
-        if (is_string($parameters)) {
-            $parameters = explode(',', $parameters);
-        }
-
-        return array($name, $parameters);
     }
 
     /**
