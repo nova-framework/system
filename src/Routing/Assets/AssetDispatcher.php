@@ -336,7 +336,7 @@ class AssetDispatcher
     {
         $namespace = str_replace('_', '-', $namespace);
 
-        $this->hints[$namespace] = rtrim($hint, DS) .DS;
+        $this->hints[$namespace] = rtrim($hint, DS);
     }
 
     /**
