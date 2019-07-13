@@ -1,9 +1,9 @@
 <?php
 
-namespace Nova\Assets;
+namespace Nova\Routing\Assets;
 
-use Nova\Assets\AssetDispatcher;
-use Nova\Assets\AssetManager;
+use Nova\Routing\Assets\AssetDispatcher;
+use Nova\Routing\Assets\AssetManager;
 use Nova\Http\Request;
 use Nova\Http\Response;
 use Nova\Support\ServiceProvider;

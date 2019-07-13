@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Assets\Middleware;
+namespace Nova\Routing\Middleware;
 
 use Nova\Foundation\Application;
 

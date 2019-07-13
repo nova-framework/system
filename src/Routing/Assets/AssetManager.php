@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Assets;
+namespace Nova\Routing\Assets;
 
 use Nova\Support\Arr;
 use Nova\View\Factory as ViewFactory;
