@@ -41,12 +41,12 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('db.factory', function($app)
+        $this->app->singleton('db.factory', function($app)
         {
             return new ConnectionFactory($app);
         });
 
-        $this->app->bindShared('db', function($app)
+        $this->app->singleton('db', function($app)
         {
             return new DatabaseManager($app, $app['db.factory']);
         });

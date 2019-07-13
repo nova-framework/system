@@ -26,7 +26,7 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('schedule', function ($app)
+        $this->app->singleton('schedule', function ($app)
         {
             return new Schedule($app);
         });
@@ -42,7 +42,7 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     protected function registerScheduleRunCommand()
     {
-        $this->app->bindShared('command.schedule.run', function ($app)
+        $this->app->singleton('command.schedule.run', function ($app)
         {
             return new ScheduleRunCommand($app['schedule']);
         });
@@ -57,7 +57,7 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     protected function registerScheduleFinishCommand()
     {
-        $this->app->bindShared('command.schedule.finish', function ($app)
+        $this->app->singleton('command.schedule.finish', function ($app)
         {
             return new ScheduleFinishCommand($app['schedule']);
         });

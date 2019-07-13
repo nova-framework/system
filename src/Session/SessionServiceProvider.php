@@ -43,7 +43,7 @@ class SessionServiceProvider extends ServiceProvider
      */
     protected function registerSessionManager()
     {
-        $this->app->bindShared('session', function($app)
+        $this->app->singleton('session', function($app)
         {
             return new SessionManager($app);
         });

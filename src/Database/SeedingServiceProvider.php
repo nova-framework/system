@@ -9,7 +9,7 @@ use Nova\Database\Seeder;
 use Nova\Support\ServiceProvider;
 
 
-class SeedServiceProvider extends ServiceProvider
+class SeedingServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
@@ -29,7 +29,7 @@ class SeedServiceProvider extends ServiceProvider
 
         $this->registerMakeCommand();
 
-        $this->app->bindShared('seeder', function($app)
+        $this->app->singleton('seeder', function($app)
         {
             return new Seeder();
         });
@@ -44,7 +44,7 @@ class SeedServiceProvider extends ServiceProvider
      */
     protected function registerSeedCommand()
     {
-        $this->app->bindShared('command.seed', function($app)
+        $this->app->singleton('command.seed', function($app)
         {
             return new SeedCommand($app['db']);
         });
@@ -57,7 +57,7 @@ class SeedServiceProvider extends ServiceProvider
      */
     protected function registerMakeCommand()
     {
-        $this->app->bindShared('command.seeder.make', function ($app)
+        $this->app->singleton('command.seeder.make', function ($app)
         {
             return new SeederMakeCommand($app['files'], $app['composer']);
         });

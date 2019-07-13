@@ -15,7 +15,6 @@ use Nova\Foundation\Console\KeyGenerateCommand;
 use Nova\Foundation\Console\ListenerMakeCommand;
 use Nova\Foundation\Console\PolicyMakeCommand;
 use Nova\Foundation\Console\ProviderMakeCommand;
-use Nova\Foundation\Console\NotificationMakeCommand;
 use Nova\Foundation\Console\RequestMakeCommand;
 use Nova\Foundation\Console\ClearCompiledCommand;
 use Nova\Foundation\Console\ClearLogCommand;
@@ -62,7 +61,6 @@ class ForgeServiceProvider extends ServiceProvider
         'KeyGenerate'      => 'command.key.generate',
         'ListenerMake'     => 'command.listener.make',
         'ModelMake'        => 'command.model.make',
-        'NotificationMake' => 'command.notification.make',
         'Optimize'         => 'command.optimize',
         'PolicyMake'       => 'command.policy.make',
         'ProviderMake'     => 'command.provider.make',
@@ -99,7 +97,7 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerAssetPublishCommand()
     {
-        $this->app->bindShared('asset.publisher', function($app)
+        $this->app->singleton('asset.publisher', function($app)
         {
             $publisher = new AssetPublisher($app['files'], $app['path.public']);
 
@@ -111,7 +109,7 @@ class ForgeServiceProvider extends ServiceProvider
             return $publisher;
         });
 
-        $this->app->bindShared('command.asset.publish', function($app)
+        $this->app->singleton('command.asset.publish', function($app)
         {
             $assetPublisher  = $app['asset.publisher'];
 
@@ -126,7 +124,7 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerConfigPublishCommand()
     {
-        $this->app->bindShared('config.publisher', function($app)
+        $this->app->singleton('config.publisher', function($app)
         {
             $path = $app['path'] .DS .'Config';
 
@@ -135,7 +133,7 @@ class ForgeServiceProvider extends ServiceProvider
             return $publisher;
         });
 
-        $this->app->bindShared('command.config.publish', function($app)
+        $this->app->singleton('command.config.publish', function($app)
         {
             $configPublisher = $app['config.publisher'];
 
@@ -304,19 +302,6 @@ class ForgeServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerNotificationMakeCommand()
-    {
-        $this->app->singleton('command.notification.make', function ($app)
-        {
-            return new NotificationMakeCommand($app['files']);
-        });
-    }
-
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
     protected function registerOptimizeCommand()
     {
         $this->app->singleton('command.optimize', function ($app)
@@ -423,7 +408,7 @@ class ForgeServiceProvider extends ServiceProvider
      */
     protected function registerViewPublishCommand()
     {
-        $this->app->bindShared('view.publisher', function($app)
+        $this->app->singleton('view.publisher', function($app)
         {
             $viewPath = $app['path'] .DS .'Views';
 
@@ -437,7 +422,7 @@ class ForgeServiceProvider extends ServiceProvider
             return $publisher;
         });
 
-        $this->app->bindShared('command.view.publish', function($app)
+        $this->app->singleton('command.view.publish', function($app)
         {
             return new ViewPublishCommand($app['packages'], $app['view.publisher']);
         });

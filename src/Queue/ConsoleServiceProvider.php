@@ -34,27 +34,27 @@ class ConsoleServiceProvider extends ServiceProvider
             return new TableCommand($app['files']);
         });
 
-        $this->app->bindShared('command.queue.failed', function()
+        $this->app->singleton('command.queue.failed', function()
         {
             return new ListFailedCommand;
         });
 
-        $this->app->bindShared('command.queue.retry', function()
+        $this->app->singleton('command.queue.retry', function()
         {
             return new RetryCommand;
         });
 
-        $this->app->bindShared('command.queue.forget', function()
+        $this->app->singleton('command.queue.forget', function()
         {
             return new ForgetFailedCommand;
         });
 
-        $this->app->bindShared('command.queue.flush', function()
+        $this->app->singleton('command.queue.flush', function()
         {
             return new FlushFailedCommand;
         });
 
-        $this->app->bindShared('command.queue.failed-table', function($app)
+        $this->app->singleton('command.queue.failed-table', function($app)
         {
             return new FailedTableCommand($app['files']);
         });

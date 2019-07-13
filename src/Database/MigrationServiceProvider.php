@@ -45,7 +45,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerRepository()
     {
-        $this->app->bindShared('migration.repository', function($app)
+        $this->app->singleton('migration.repository', function($app)
         {
             $table = $app['config']['database.migrations'];
 
@@ -60,7 +60,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerMigrator()
     {
-        $this->app->bindShared('migrator', function($app)
+        $this->app->singleton('migrator', function($app)
         {
             $repository = $app['migration.repository'];
 
@@ -96,7 +96,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerMigrateCommand()
     {
-        $this->app->bindShared('command.migrate', function($app)
+        $this->app->singleton('command.migrate', function($app)
         {
             $packagePath = $app['path.base'] .DS .'vendor';
 
@@ -111,7 +111,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerRollbackCommand()
     {
-        $this->app->bindShared('command.migrate.rollback', function($app)
+        $this->app->singleton('command.migrate.rollback', function($app)
         {
             return new RollbackCommand($app['migrator']);
         });
@@ -124,7 +124,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerResetCommand()
     {
-        $this->app->bindShared('command.migrate.reset', function($app)
+        $this->app->singleton('command.migrate.reset', function($app)
         {
             return new ResetCommand($app['migrator']);
         });
@@ -137,7 +137,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerRefreshCommand()
     {
-        $this->app->bindShared('command.migrate.refresh', function($app)
+        $this->app->singleton('command.migrate.refresh', function($app)
         {
             return new RefreshCommand;
         });
@@ -150,7 +150,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerStatusCommand()
     {
-        $this->app->bindShared('command.migrate.status', function ($app)
+        $this->app->singleton('command.migrate.status', function ($app)
         {
             return new StatusCommand($app['migrator']);
         });
@@ -163,7 +163,7 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerInstallCommand()
     {
-        $this->app->bindShared('command.migrate.install', function($app)
+        $this->app->singleton('command.migrate.install', function($app)
         {
             return new InstallCommand($app['migration.repository']);
         });
@@ -176,12 +176,12 @@ class MigrationServiceProvider extends ServiceProvider
      */
     protected function registerMakeCommand()
     {
-        $this->app->bindShared('migration.creator', function($app)
+        $this->app->singleton('migration.creator', function($app)
         {
             return new MigrationCreator($app['files']);
         });
 
-        $this->app->bindShared('command.migrate.make', function($app)
+        $this->app->singleton('command.migrate.make', function($app)
         {
             $creator = $app['migration.creator'];
 

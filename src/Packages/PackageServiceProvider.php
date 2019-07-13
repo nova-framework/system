@@ -29,7 +29,7 @@ class PackageServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('packages', function ($app)
+        $this->app->singleton('packages', function ($app)
         {
             $repository = new Repository($app['config'], $app['files']);
 

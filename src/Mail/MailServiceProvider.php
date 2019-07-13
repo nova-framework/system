@@ -26,7 +26,7 @@ class MailServiceProvider extends ServiceProvider
     {
         $me = $this;
 
-        $this->app->bindShared('mailer', function($app) use ($me)
+        $this->app->singleton('mailer', function($app) use ($me)
         {
             $me->registerSwiftMailer();
 

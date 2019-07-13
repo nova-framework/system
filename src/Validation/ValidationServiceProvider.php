@@ -32,7 +32,7 @@ class ValidationServiceProvider extends ServiceProvider
     {
         $this->registerPresenceVerifier();
 
-        $this->app->bindShared('validator', function($app)
+        $this->app->singleton('validator', function($app)
         {
             $config = $app['config'];
 
@@ -56,7 +56,7 @@ class ValidationServiceProvider extends ServiceProvider
      */
     protected function registerPresenceVerifier()
     {
-        $this->app->bindShared('validation.presence', function($app)
+        $this->app->singleton('validation.presence', function($app)
         {
             return new DatabasePresenceVerifier($app['db']);
         });

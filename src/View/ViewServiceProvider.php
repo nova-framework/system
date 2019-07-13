@@ -46,7 +46,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function registerEngineResolver()
     {
-        $this->app->bindShared('view.engine.resolver', function($app)
+        $this->app->singleton('view.engine.resolver', function($app)
         {
             $resolver = new EngineResolver();
 
@@ -87,7 +87,7 @@ class ViewServiceProvider extends ServiceProvider
         // The Compiler engine requires an instance of the CompilerInterface, which in
         // this case will be the Template compiler, so we'll first create the compiler
         // instance to pass into the engine so it can compile the views properly.
-        $app->bindShared('template.compiler', function($app)
+        $app->singleton('template.compiler', function($app)
         {
             $cachePath = $app['config']['view.compiled'];
 
@@ -113,7 +113,7 @@ class ViewServiceProvider extends ServiceProvider
         // The Compiler engine requires an instance of the CompilerInterface, which in
         // this case will be the Markdown compiler, so we'll first create the compiler
         // instance to pass into the engine so it can compile the views properly.
-        $app->bindShared('markdown.compiler', function($app)
+        $app->singleton('markdown.compiler', function($app)
         {
             $cachePath = $app['config']['view.compiled'];
 
@@ -147,7 +147,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function registerFactory()
     {
-        $this->app->bindShared('view', function($app)
+        $this->app->singleton('view', function($app)
         {
             // Next we need to grab the engine resolver instance that will be used by the
             // environment. The resolver will be used by an environment to get each of
@@ -176,7 +176,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function registerViewFinder()
     {
-        $this->app->bindShared('view.finder', function($app)
+        $this->app->singleton('view.finder', function($app)
         {
             $paths = $app['config']->get('view.paths', array());
 
@@ -191,7 +191,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function registerSection()
     {
-        $this->app->bindShared('view.section', function($app)
+        $this->app->singleton('view.section', function($app)
         {
             return new Section($app['view']);
         });
