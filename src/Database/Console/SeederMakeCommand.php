@@ -1,6 +1,6 @@
 <?php
 
-namespace Nova\Database\Console\Seeds;
+namespace Nova\Database\Console;
 
 use Nova\Console\GeneratorCommand;
 use Nova\Filesystem\Filesystem;

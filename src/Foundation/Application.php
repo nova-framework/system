@@ -16,7 +16,6 @@ use Nova\Support\Facades\Facade;
 use Nova\Support\ServiceProvider;
 use Nova\Events\EventServiceProvider;
 use Nova\Log\LogServiceProvider;
-use Nova\Routing\RoutingServiceProvider;
 use Nova\Exception\ExceptionServiceProvider;
 use Nova\Config\FileEnvironmentVariablesLoader;
 
@@ -167,7 +166,7 @@ class Application extends Container implements ResponsePreparerInterface
      */
     protected function registerBaseServiceProviders()
     {
-        $providers = array('Event', 'Log', 'Exception', 'Routing');
+        $providers = array('Event', 'Log', 'Exception');
 
         foreach ($providers as $provider) {
             $method = sprintf('register%sProvider', $provider);
@@ -204,16 +203,6 @@ class Application extends Container implements ResponsePreparerInterface
     protected function registerExceptionProvider()
     {
         $this->register(new ExceptionServiceProvider($this));
-    }
-
-    /**
-     * Register the routing service provider.
-     *
-     * @return void
-     */
-    protected function registerRoutingProvider()
-    {
-        $this->register(new RoutingServiceProvider($this));
     }
 
     /**

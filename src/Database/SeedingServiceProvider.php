@@ -2,8 +2,6 @@
 
 namespace Nova\Database;
 
-use Nova\Database\Console\Seeds\SeedCommand;
-use Nova\Database\Console\Seeds\SeederMakeCommand;
 use Nova\Database\Seeder;
 
 use Nova\Support\ServiceProvider;
@@ -46,7 +44,7 @@ class SeedingServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.seed', function($app)
         {
-            return new SeedCommand($app['db']);
+            return new Console\SeedCommand($app['db']);
         });
     }
 
@@ -59,7 +57,7 @@ class SeedingServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.seeder.make', function ($app)
         {
-            return new SeederMakeCommand($app['files'], $app['composer']);
+            return new Console\SeederMakeCommand($app['files'], $app['composer']);
         });
     }
 
@@ -70,7 +68,9 @@ class SeedingServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('seeder', 'command.seed', 'command.seeder.make');
+        return array(
+            'seeder', 'command.seed', 'command.seeder.make'
+        );
     }
 
 }

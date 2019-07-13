@@ -30,6 +30,9 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerResponseFactory();
 
         $this->registerControllerDispatcher();
+
+        // Register the additional service providers.
+        $this->app->register('Nova\Routing\Assets\AssetServiceProvider');
     }
 
     /**
