@@ -97,12 +97,15 @@ class AssetDispatcher
      */
     public function dispatch(SymfonyRequest $request)
     {
-        if (! is_null($route = $this->findRoute($request))) {
-            list ($callback, $parameters) = $route;
+        $response = $this->dispatchToRoute($request);
 
-            array_unshift($parameters, $request);
+        if ($response instanceof SymfonyResponse) {
+            return $response;
+        }
 
-            return call_user_func_array($callback, $parameters);
+        //
+        else if (is_string($response) && ! empty($response)) {
+            return $this->serve($response, $request);
         }
     }
 
@@ -112,7 +115,7 @@ class AssetDispatcher
      * @param  string  $uri
      * @return string|null
      */
-    protected function findRoute(Request $request)
+    protected function dispatchToRoute(Request $request)
     {
         if (! in_array($request->method(), array('GET', 'HEAD', 'OPTIONS'))) {
             return;
@@ -125,9 +128,13 @@ class AssetDispatcher
                 array_keys(static::$patterns), array_values(static::$patterns),  $route
             );
 
-            if (preg_match('#^' .$pattern .'$#s', $uri, $matches)) {
-                return array($callback, array_slice($matches, 1));
+            if (preg_match('#^' .$pattern .'$#s', $uri, $parameters) !== 1) {
+                continue;
             }
+
+            $parameters[0] = $request;
+
+            return call_user_func_array($callback, $parameters);
         }
     }
 
