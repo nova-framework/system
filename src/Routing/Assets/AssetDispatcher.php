@@ -360,12 +360,13 @@ class AssetDispatcher
     /**
      * Get the path for a registered namespace.
      *
-     * @param  string  $namespace
+     * @param  string  $vendor
+     * @param  string  $package
      * @return string|null
      */
-    public function getPackagePath($namespace)
+    public function getPackagePath($vendor, $package)
     {
-        $namespace = str_replace('_', '-', $namespace);
+        $namespace = str_replace('_', '-', $vendor .'/' .$package);
 
         return Arr::get($this->hints, $namespace);
     }
