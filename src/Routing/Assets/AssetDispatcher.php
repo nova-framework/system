@@ -59,6 +59,7 @@ class AssetDispatcher
     public static $patterns = array(
         '(:any)' => '([^/]+)',
         '(:num)' => '([0-9]+)',
+        '(:hex)' => '([a-fA-F0-9]+)',
         '(:all)' => '(.*)',
     );
 
@@ -91,7 +92,7 @@ class AssetDispatcher
      * For proper Assets serving, the file URI should be either of the following:
      *
      * /assets/css/style.css
-     * /plugins/blog/assets/css/style.css
+     * /packages/modules/blog/css/style.css
      *
      * @return \Symfony\Component\HttpFoundation\Response|null
      */
@@ -103,7 +104,7 @@ class AssetDispatcher
             return $response;
         }
 
-        //
+        // The response is not a Symfony Response instance.
         else if (is_string($response) && ! empty($response)) {
             return $this->serve($response, $request);
         }
@@ -124,18 +125,37 @@ class AssetDispatcher
         $uri = $request->path();
 
         foreach ($this->routes as $route => $callback) {
-            $pattern = str_replace(
-                array_keys(static::$patterns), array_values(static::$patterns),  $route
-            );
+            $pattern = $this->compilePattern($route);
 
-            if (preg_match('#^' .$pattern .'$#s', $uri, $parameters) !== 1) {
-                continue;
+            if (preg_match('#^' .$pattern .'$#s', $uri, $parameters) === 1) {
+                $parameters[0] = $request;
+
+                return $this->runCallback($callback, $parameters);
             }
-
-            $parameters[0] = $request;
-
-            return call_user_func_array($callback, $parameters);
         }
+    }
+
+    protected function compilePattern($route)
+    {
+        return str_replace(
+            array_keys(static::$patterns), array_values(static::$patterns), $route
+        );
+    }
+
+    /**
+     * Run the given route callback.
+     *
+     * @param  \Closure  $callback
+     * @param  array  $parameters
+     * @return string|null
+     */
+    protected function runCallback($callback, $parameters)
+    {
+        if (! is_null($response = call_user_func_array($callback, $parameters))) {
+            return $response;
+        }
+
+        return new Response('File Not Found', 404);
     }
 
     /**
