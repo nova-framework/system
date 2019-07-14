@@ -106,7 +106,7 @@ class AssetDispatcher
         $uri = $request->path();
 
         foreach ($this->routes as $route => $callback) {
-            $pattern = $this->compilePattern($route);
+            $pattern = static::compileRoutePattern($route);
 
             if (preg_match('#^' .$pattern .'$#s', $uri, $matches) === 1) {
                 return $this->process($callback, $matches, $request);
@@ -114,7 +114,7 @@ class AssetDispatcher
         }
     }
 
-    protected function compilePattern($pattern)
+    protected static function compileRoutePattern($pattern)
     {
         return str_replace(
             array_keys(static::$patterns), array_values(static::$patterns), $pattern
