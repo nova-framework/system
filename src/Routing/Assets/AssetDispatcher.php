@@ -94,6 +94,7 @@ class AssetDispatcher
      * /assets/css/style.css
      * /packages/modules/blog/css/style.css
      *
+     * @param  \Symfony\Component\HttpFoundation\Response $request
      * @return \Symfony\Component\HttpFoundation\Response|null
      */
     public function dispatch(SymfonyRequest $request)
@@ -110,7 +111,7 @@ class AssetDispatcher
             if (preg_match('#^' .$pattern .'$#s', $uri, $parameters) === 1) {
                 $parameters[0] = $request;
 
-                return $this->runCallback($callback, $parameters);
+                return $this->runCallback($callback, $parameters, $request);
             }
         }
     }
@@ -127,9 +128,10 @@ class AssetDispatcher
      *
      * @param  \Closure  $callback
      * @param  array  $parameters
+     * @param  \Symfony\Component\HttpFoundation\Response $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function runCallback($callback, $parameters)
+    protected function runCallback($callback, $parameters, $request)
     {
         $response = call_user_func_array($callback, $parameters);
 
