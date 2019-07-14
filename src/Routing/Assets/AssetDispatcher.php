@@ -114,10 +114,10 @@ class AssetDispatcher
         }
     }
 
-    protected function compilePattern($route)
+    protected function compilePattern($pattern)
     {
         return str_replace(
-            array_keys(static::$patterns), array_values(static::$patterns), $route
+            array_keys(static::$patterns), array_values(static::$patterns), $pattern
         );
     }
 
