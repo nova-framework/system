@@ -37,7 +37,7 @@ class AssetServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the Assets Dispatcher.
+     * Register the Assets Dispatcher instance.
      *
      * @return void
      */
