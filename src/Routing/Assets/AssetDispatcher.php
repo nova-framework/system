@@ -349,7 +349,7 @@ class AssetDispatcher
     protected function getPackageNamespace($package, $namespace)
     {
         if (is_null($namespace)) {
-            list($vendor, $namespace) = explode('/', $package);
+            list ($vendor, $namespace) = explode('/', $package);
 
             return Str::snake($namespace);
         }
