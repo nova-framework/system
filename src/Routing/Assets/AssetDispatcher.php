@@ -151,15 +151,14 @@ class AssetDispatcher
     /**
      * Serve a Package File.
      *
-     * @param  string  $vendor
-     * @param  string  $package
+     * @param  string  $namespace
      * @param  string  $path
      * @param  \Symfony\Component\HttpFoundation\Request  $request
      * @return  \Symfony\Component\HttpFoundation\Response
      */
-    public function servePackageFile($vendor, $package, $path, SymfonyRequest $request)
+    public function servePackageFile($namespace, $path, SymfonyRequest $request)
     {
-        if (empty($basePath = $this->getPackagePath($vendor, $package))) {
+        if (empty($basePath = $this->getPackagePath($namespace))) {
             return Response::make('File Not Found', 404);
         }
 
@@ -410,13 +409,12 @@ class AssetDispatcher
     /**
      * Get the path for a registered namespace.
      *
-     * @param  string  $vendor
-     * @param  string  $package
+     * @param  string  $namespace
      * @return string|null
      */
-    public function getPackagePath($vendor, $package)
+    public function getPackagePath($namespace)
     {
-        $namespace = str_replace('_', '-', $vendor .'/' .$package);
+        $namespace = str_replace('_', '-', $namespace);
 
         return Arr::get($this->hints, $namespace);
     }
