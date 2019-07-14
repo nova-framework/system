@@ -149,6 +149,46 @@ class AssetDispatcher
     }
 
     /**
+     * Serve a Package File.
+     *
+     * @param  string  $vendor
+     * @param  string  $package
+     * @param  string  $path
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @return  \Symfony\Component\HttpFoundation\Response
+     */
+    public function servePackageFile($vendor, $package, $path, SymfonyRequest $request)
+    {
+        if (empty($basePath = $this->getPackagePath($vendor, $package))) {
+            return Response::make('File Not Found', 404);
+        }
+
+        $path = $basePath .DS .str_replace('/', DS, $path);
+
+        return $this->serve($path, $request);
+    }
+
+    /**
+     * Serve a Vendor File.
+     *
+     * @param  string  $path
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @return  \Symfony\Component\HttpFoundation\Response
+     */
+    public function serveVendorFile($path, SymfonyRequest $request)
+    {
+        $basePath = BASEPATH .'vendor';
+
+        if (! Str::startsWith($path, $this->getVendorPaths())) {
+            return new Response('File Not Found', 404);
+        }
+
+        $path = $basePath .DS .str_replace('/', DS, $path);
+
+        return $this->serve($path, $request);
+    }
+
+    /**
      * Serve a File.
      *
      * @param  string  $path
@@ -161,7 +201,7 @@ class AssetDispatcher
      */
     public function serve($path, SymfonyRequest $request, $disposition = 'inline', $fileName = null, $prepared = true)
     {
-        if (! file_exists($path)) {
+        if (! file_exists($path = realpath($path))) {
             return new Response('File Not Found', 404);
         } else if (! is_readable($path)) {
             return new Response('Unauthorized Access', 403);
