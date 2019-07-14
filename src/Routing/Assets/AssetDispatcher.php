@@ -98,26 +98,6 @@ class AssetDispatcher
      */
     public function dispatch(SymfonyRequest $request)
     {
-        $response = $this->dispatchToRoute($request);
-
-        if ($response instanceof SymfonyResponse) {
-            return $response;
-        }
-
-        // The response is not a Symfony Response instance.
-        else if (is_string($response) && ! empty($path = realpath($response))) {
-            return $this->serve($path, $request);
-        }
-    }
-
-    /**
-     * Dispatch an URI and return the associated file path.
-     *
-     * @param  string  $uri
-     * @return string|null
-     */
-    protected function dispatchToRoute(Request $request)
-    {
         if (! in_array($request->method(), array('GET', 'HEAD', 'OPTIONS'))) {
             return;
         }
@@ -147,12 +127,19 @@ class AssetDispatcher
      *
      * @param  \Closure  $callback
      * @param  array  $parameters
-     * @return string|null
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function runCallback($callback, $parameters)
     {
-        if (! is_null($response = call_user_func_array($callback, $parameters))) {
+        $response = call_user_func_array($callback, $parameters);
+
+        if ($response instanceof SymfonyResponse) {
             return $response;
+        }
+
+        // The response is not a Symfony Response instance.
+        else if (is_string($response) && ! empty($path = realpath($response))) {
+            return $this->serve($path, $request);
         }
 
         return new Response('File Not Found', 404);
