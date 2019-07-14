@@ -105,8 +105,8 @@ class AssetDispatcher
         }
 
         // The response is not a Symfony Response instance.
-        else if (is_string($response) && ! empty($response)) {
-            return $this->serve($response, $request);
+        else if (is_string($response) && ! empty($path = realpath($response))) {
+            return $this->serve($path, $request);
         }
     }
 
