@@ -108,10 +108,8 @@ class AssetDispatcher
         foreach ($this->routes as $route => $callback) {
             $pattern = $this->compilePattern($route);
 
-            if (preg_match('#^' .$pattern .'$#s', $uri, $parameters) === 1) {
-                $parameters[0] = $request;
-
-                return $this->runCallback($callback, $parameters, $request);
+            if (preg_match('#^' .$pattern .'$#s', $uri, $matches) === 1) {
+                return $this->process($callback, $matches, $request);
             }
         }
     }
@@ -124,15 +122,18 @@ class AssetDispatcher
     }
 
     /**
-     * Run the given route callback.
+     * Run the given route callback and process the response.
      *
      * @param  \Closure  $callback
      * @param  array  $parameters
      * @param  \Symfony\Component\HttpFoundation\Response $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function runCallback($callback, $parameters, $request)
+    protected function process($callback, $parameters, $request)
     {
+        $parameters[0] = $request; // We will replace the first item (the matched URI) with the Request instance.
+
+        //
         $response = call_user_func_array($callback, $parameters);
 
         if ($response instanceof SymfonyResponse) {
