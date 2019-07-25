@@ -51,7 +51,7 @@ class NotificationSender
      * @param  \Nova\Bus\Dispatcher  $bus
      * @return void
      */
-    public function __construct($manager, EventDispatcher $events, BusDispatcher $bus)
+    public function __construct(ChannelManager $manager, EventDispatcher $events, BusDispatcher $bus)
     {
         $this->manager = $manager;
         $this->events  = $events;
