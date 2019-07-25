@@ -2,6 +2,8 @@
 
 namespace Nova\Notifications;
 
+use Nova\Bus\Dispatcher as BusDispatcher;
+use Nova\Events\Dispatcher as EventDispatcher;
 use Nova\Foundation\Application;
 use Nova\Support\Manager;
 
