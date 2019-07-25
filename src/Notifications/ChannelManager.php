@@ -2,23 +2,16 @@
 
 namespace Nova\Notifications;
 
-use Nova\Bus\DispatcherInterface as Bus;
-use Nova\Database\ORM\Collection as ModelCollection;
-use Nova\Events\Dispatcher;
+use Nova\Bus\DispatcherInterface as BusDispatcher;
+use Nova\Events\Dispatcher as EventDispatcher;
 use Nova\Foundation\Application;
-use Nova\Queue\ShouldQueueInterface;
-use Nova\Support\Collection;
 use Nova\Support\Manager;
 
 use Nova\Notifications\Channels\BroadcastChannel;
 use Nova\Notifications\Channels\DatabaseChannel;
 use Nova\Notifications\Channels\MailChannel;
-use Nova\Notifications\Events\NotificationSending;
-use Nova\Notifications\Events\NotificationSent;
 use Nova\Notifications\DispatcherInterface;
-use Nova\Notifications\SendQueuedNotifications;
-
-use Ramsey\Uuid\Uuid;
+use Nova\Notifications\NotificationSender;
 
 use InvalidArgumentException;
 
@@ -26,18 +19,11 @@ use InvalidArgumentException;
 class ChannelManager extends Manager implements DispatcherInterface
 {
     /**
-     * The events dispatcher instance.
+     * The notifications sender instance.
      *
-     * @var \Nova\Events\Dispatcher
+     * @var \Nova\Notifications\NotificationSender
      */
-    protected $events;
-
-    /**
-     * The command bus dispatcher instance.
-     *
-     * @var \Nova\Bus\Dispatcher
-     */
-    protected $bus;
+    protected $sender;
 
     /**
      * The default channels used to deliver messages.
@@ -51,15 +37,17 @@ class ChannelManager extends Manager implements DispatcherInterface
      * Create a new manager instance.
      *
      * @param  \Nova\Foundation\Application  $app
+     * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
-    public function __construct(Application $app, Dispatcher $events)
+    public function __construct(Application $app, EventDispatcher $events)
     {
-        $this->app    = $app;
-        $this->events = $events;
+        $this->app = $app;
 
         //
-        $this->bus = $app->make(Bus::class);
+        $bus = $app->make(BusDispatcher::class);
+
+        $this->sender = new NotificationSender($this, $events, $bus);
     }
 
     /**
@@ -71,19 +59,7 @@ class ChannelManager extends Manager implements DispatcherInterface
      */
     public function send($notifiables, $notification)
     {
-        $notifiables = $this->formatNotifiables($notifiables);
-
-        if (! $notification instanceof ShouldQueueInterface) {
-            return $this->sendNow($notifiables, $notification);
-        }
-
-        foreach ($notifiables as $notifiable) {
-            $notificationId = Uuid::uuid4()->toString();
-
-            foreach ($notification->via($notifiable) as $channel) {
-                $this->queueToNotifiable($notifiable, $notificationId, clone $notification, $channel);
-            }
-        }
+        $this->sender->send($notifiables, $notification);
     }
 
     /**
@@ -96,104 +72,7 @@ class ChannelManager extends Manager implements DispatcherInterface
      */
     public function sendNow($notifiables, $notification, array $channels = null)
     {
-        $notifiables = $this->formatNotifiables($notifiables);
-
-        $original = clone $notification;
-
-        foreach ($notifiables as $notifiable) {
-            if (empty($viaChannels = $channels ?: $notification->via($notifiable))) {
-                continue;
-            }
-
-            $notificationId = Uuid::uuid4()->toString();
-
-            foreach ((array) $viaChannels as $channel) {
-                $this->sendToNotifiable($notifiable, $notificationId, clone $original, $channel);
-            }
-        }
-    }
-
-    /**
-     * Send the given notification to the given notifiable via a channel.
-     *
-     * @param  mixed  $notifiable
-     * @param  string  $id
-     * @param  mixed  $notification
-     * @param  string  $channel
-     * @return void
-     */
-    protected function sendToNotifiable($notifiable, $id, $notification, $channel)
-    {
-        if (is_null($notification->id)) {
-            $notification->id = $id;
-        }
-
-        if ($this->shouldSendNotification($notifiable, $notification, $channel)) {
-            $response = $this->driver($channel)->send($notifiable, $notification);
-
-            $this->events->dispatch(
-                new NotificationSent($notifiable, $notification, $channel, $response)
-            );
-        }
-    }
-
-    /**
-     * Determines if the notification can be sent.
-     *
-     * @param  mixed  $notifiable
-     * @param  mixed  $notification
-     * @param  string  $channel
-     * @return bool
-     */
-    protected function shouldSendNotification($notifiable, $notification, $channel)
-    {
-        $result = $this->events->until(
-            new NotificationSending($notifiable, $notification, $channel)
-        );
-
-        return ($result !== false);
-    }
-
-    /**
-     * Queue the given notification to the given notifiable via a channel.
-     *
-     * @param  mixed  $notifiable
-     * @param  string  $id
-     * @param  mixed  $notification
-     * @param  string  $channel
-     * @return void
-     */
-    protected function queueToNotifiable($notifiable, $id, $notification, $channel)
-    {
-        $notification->id = $id;
-        
-        $job = with(new SendQueuedNotifications($notifiable, $notification, array($channel)))
-            ->onConnection($notification->connection)
-            ->onQueue($notification->queue)
-            ->delay($notification->delay);
-
-        $this->bus->dispatch($job);
-    }
-
-    /**
-     * Format the notifiables into a Collection / array if necessary.
-     *
-     * @param  mixed  $notifiables
-     * @return ModelCollection|array
-     */
-    protected function formatNotifiables($notifiables)
-    {
-        if ((! $notifiables instanceof Collection) && ! is_array($notifiables)) {
-            $items = array($notifiables);
-
-            if ($notifiables instanceof Model) {
-                return new ModelCollection($items);
-            }
-
-            return $items;
-        }
-
-        return $notifiables;
+        $this->sender->sendNow($notifiables, $notification, $channels);
     }
 
     /**
