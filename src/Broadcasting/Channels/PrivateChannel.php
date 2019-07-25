@@ -15,6 +15,6 @@ class PrivateChannel extends BaseChannel
      */
     public function __construct($name)
     {
-        parent::__construct('private-' .$name);
+        $this->name = sprintf('private-%s', $name);
     }
 }

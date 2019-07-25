@@ -15,6 +15,6 @@ class PublicChannel extends BaseChannel
      */
     public function __construct($name)
     {
-        parent::__construct($name);
+        $this->name = $name;
     }
 }

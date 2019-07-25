@@ -15,6 +15,6 @@ class PresenceChannel extends BaseChannel
      */
     public function __construct($name)
     {
-        parent::__construct('presence-' .$name);
+        $this->name = sprintf('presence-%s', $name);
     }
 }
