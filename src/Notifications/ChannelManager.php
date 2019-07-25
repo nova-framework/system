@@ -2,8 +2,6 @@
 
 namespace Nova\Notifications;
 
-use Nova\Bus\DispatcherInterface as BusDispatcher;
-use Nova\Events\Dispatcher as EventDispatcher;
 use Nova\Foundation\Application;
 use Nova\Support\Manager;
 
@@ -37,16 +35,14 @@ class ChannelManager extends Manager implements DispatcherInterface
      * Create a new manager instance.
      *
      * @param  \Nova\Foundation\Application  $app
-     * @param  \Nova\Bus\Dispatcher  $bus
-     * @param  \Nova\Events\Dispatcher  $events
+     * @param  \Nova\Notifications\NotificationSender  $sender
      * @return void
      */
-    public function __construct(Application $app, BusDispatcher $bus, EventDispatcher $events)
+    public function __construct(Application $app, NotificationSender $sender)
     {
         $this->app = $app;
 
-        //
-        $this->sender = new NotificationSender($this, $bus, $events);
+        $this->sender = $sender;
     }
 
     /**

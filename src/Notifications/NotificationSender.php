@@ -5,13 +5,11 @@ namespace Nova\Notifications;
 use Nova\Bus\Dispatcher as BusDispatcher;
 use Nova\Database\ORM\Collection as ModelCollection;
 use Nova\Events\Dispatcher as EventDispatcher;
-use Nova\Foundation\Application;
 use Nova\Queue\ShouldQueueInterface;
 use Nova\Support\Collection;
 
 use Nova\Notifications\Events\NotificationSending;
 use Nova\Notifications\Events\NotificationSent;
-use Nova\Notifications\DispatcherInterface;
 use Nova\Notifications\SendQueuedNotifications;
 
 use Ramsey\Uuid\Uuid;
@@ -46,16 +44,15 @@ class NotificationSender
     /**
      * Create a new notification sender instance.
      *
-     * @param  \Nova\Notifications\ChannelManager  $manager
-     * @param  \Nova\Bus\Dispatcher  $bus
      * @param  \Nova\Events\Dispatcher  $events
+     * @param  \Nova\Bus\Dispatcher  $bus
      * @return void
      */
-    public function __construct(ChannelManager $manager, BusDispatcher $bus, EventDispatcher $events)
+    public function __construct(EventDispatcher $events, BusDispatcher $bus)
     {
-        $this->manager = $manager;
-        $this->bus     = $bus;
-        $this->events  = $events;
+        $this->events = $events;
+
+        $this->bus = $bus;
     }
 
     /**

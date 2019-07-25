@@ -4,6 +4,7 @@ namespace Nova\Notifications;
 
 use Nova\Bus\DispatcherInterface as BusDispatcher;
 use Nova\Notifications\ChannelManager;
+use Nova\Notifications\NotificationSender;
 use Nova\Support\ServiceProvider;
 
 
@@ -24,11 +25,16 @@ class NotificationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('notifications', function ($app)
+        $this->app->singleton('notifications.sender', function ($app)
         {
             $bus = $app->make(BusDispatcher::class);
 
-            return new ChannelManager($app, $bus, $app['events']);
+            return new NotificationSender($app['events'], $bus);
+        });
+
+        $this->app->singleton('notifications', function ($app)
+        {
+            return new ChannelManager($app, $app['notifications.sender']);
         });
     }
 
@@ -39,6 +45,6 @@ class NotificationServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('notifications');
+        return array('notifications', 'notifications.sender');
     }
 }
