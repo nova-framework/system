@@ -2,10 +2,10 @@
 
 namespace Nova\Broadcasting\Channels;
 
-use Nova\Broadcasting\Channels\PublicChannel;
+use Nova\Broadcasting\Channel as BaseChannel;
 
 
-class PrivateChannel extends PublicChannel
+class PrivateChannel extends BaseChannel
 {
     /**
      * Create a new channel instance.

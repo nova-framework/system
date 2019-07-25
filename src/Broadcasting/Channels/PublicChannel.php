@@ -2,16 +2,11 @@
 
 namespace Nova\Broadcasting\Channels;
 
+use Nova\Broadcasting\Channel as BaseChannel;
 
-class PublicChannel
+
+class PublicChannel extends BaseChannel
 {
-    /**
-     * The channel's name.
-     *
-     * @var string
-     */
-    public $name;
-
     /**
      * Create a new channel instance.
      *
@@ -20,26 +15,6 @@ class PublicChannel
      */
     public function __construct($name)
     {
-        $this->name = $name;
-    }
-
-    /**
-     * Gets the channel name.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Convert the channel instance to a string.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->name;
+        parent::__construct($name);
     }
 }

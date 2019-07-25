@@ -4,7 +4,7 @@ namespace Nova\Broadcasting;
 
 use Nova\Broadcasting\Auth\Guest as GuestUser;
 use Nova\Broadcasting\BroadcasterInterface;
-use Nova\Broadcasting\Channels\PublicChannel as Channel;
+use Nova\Broadcasting\Channel;
 use Nova\Container\Container;
 use Nova\Database\ORM\Model;
 use Nova\Database\ORM\ModelNotFoundException;
