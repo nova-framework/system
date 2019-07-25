@@ -125,11 +125,11 @@ class ChannelManager extends Manager implements DispatcherInterface
             return parent::createDriver($driver);
         }
         catch (InvalidArgumentException $e) {
-            if (class_exists($driver)) {
-                return $this->app->make($driver);
+            if (! class_exists($driver)) {
+                throw $e;
             }
 
-            throw $e;
+            return $this->app->make($driver);
         }
     }
 
