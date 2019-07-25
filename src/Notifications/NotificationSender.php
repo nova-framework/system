@@ -29,33 +29,33 @@ class NotificationSender
     protected $manager;
 
     /**
-     * The events dispatcher instance.
-     *
-     * @var \Nova\Events\Dispatcher
-     */
-    protected $events;
-
-    /**
      * The command bus dispatcher instance.
      *
      * @var \Nova\Bus\Dispatcher
      */
     protected $bus;
 
+    /**
+     * The events dispatcher instance.
+     *
+     * @var \Nova\Events\Dispatcher
+     */
+    protected $events;
+
 
     /**
      * Create a new notification sender instance.
      *
      * @param  \Nova\Notifications\ChannelManager  $manager
-     * @param  \Nova\Events\Dispatcher  $events
      * @param  \Nova\Bus\Dispatcher  $bus
+     * @param  \Nova\Events\Dispatcher  $events
      * @return void
      */
-    public function __construct(ChannelManager $manager, EventDispatcher $events, BusDispatcher $bus)
+    public function __construct(ChannelManager $manager, BusDispatcher $bus, EventDispatcher $events)
     {
         $this->manager = $manager;
-        $this->events  = $events;
         $this->bus     = $bus;
+        $this->events  = $events;
     }
 
     /**
