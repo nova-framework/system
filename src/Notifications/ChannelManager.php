@@ -35,14 +35,16 @@ class ChannelManager extends Manager implements DispatcherInterface
      * Create a new manager instance.
      *
      * @param  \Nova\Foundation\Application  $app
-     * @param  \Nova\Notifications\NotificationSender  $sender
+     * @param  \Nova\Events\Dispatcher  $events
+     * @param  \Nova\Bus\Dispatcher  $bus
      * @return void
      */
-    public function __construct(Application $app, NotificationSender $sender)
+    public function __construct(Application $app, EventDispatcher $events, BusDispatcher $bus)
     {
         $this->app = $app;
 
-        $this->sender = $sender;
+        //
+        $this->sender = new NotificationSender($this, $events, $bus);
     }
 
     /**

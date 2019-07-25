@@ -10,6 +10,7 @@ use Nova\Support\Collection;
 
 use Nova\Notifications\Events\NotificationSending;
 use Nova\Notifications\Events\NotificationSent;
+use Nova\Notifications\ChannelManager;
 use Nova\Notifications\SendQueuedNotifications;
 
 use Ramsey\Uuid\Uuid;
@@ -27,18 +28,18 @@ class NotificationSender
     protected $manager;
 
     /**
-     * The command bus dispatcher instance.
-     *
-     * @var \Nova\Bus\Dispatcher
-     */
-    protected $bus;
-
-    /**
      * The events dispatcher instance.
      *
      * @var \Nova\Events\Dispatcher
      */
     protected $events;
+
+    /**
+     * The command bus dispatcher instance.
+     *
+     * @var \Nova\Bus\Dispatcher
+     */
+    protected $bus;
 
 
     /**
@@ -48,8 +49,10 @@ class NotificationSender
      * @param  \Nova\Bus\Dispatcher  $bus
      * @return void
      */
-    public function __construct(EventDispatcher $events, BusDispatcher $bus)
+    public function __construct(ChannelManager $manager, EventDispatcher $events, BusDispatcher $bus)
     {
+        $this->manager = $manager;
+
         $this->events = $events;
 
         $this->bus = $bus;
@@ -122,7 +125,7 @@ class NotificationSender
         }
 
         if ($this->shouldSendNotification($notifiable, $notification, $channel)) {
-            $response = $this->driver($channel)->send($notifiable, $notification);
+            $response = $this->manager->channel($channel)->send($notifiable, $notification);
 
             $this->events->dispatch(
                 new NotificationSent($notifiable, $notification, $channel, $response)

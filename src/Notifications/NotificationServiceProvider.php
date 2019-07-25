@@ -25,16 +25,11 @@ class NotificationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('notifications.sender', function ($app)
+        $this->app->singleton('notifications', function ($app)
         {
             $bus = $app->make(BusDispatcher::class);
 
-            return new NotificationSender($app['events'], $bus);
-        });
-
-        $this->app->singleton('notifications', function ($app)
-        {
-            return new ChannelManager($app, $app['notifications.sender']);
+            return new ChannelManager($app, $app['events'], $bus);
         });
     }
 
@@ -45,6 +40,6 @@ class NotificationServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('notifications', 'notifications.sender');
+        return array('notifications');
     }
 }
