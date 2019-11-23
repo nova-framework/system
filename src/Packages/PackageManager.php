@@ -3,8 +3,13 @@
 namespace Nova\Packages;
 
 use Nova\Foundation\Application;
+use Nova\Packages\Exception\ProviderMissingException;
 use Nova\Packages\Repository;
+use Nova\Support\Arr;
 use Nova\Support\Str;
+
+use Exception;
+use LogicException;
 
 
 class PackageManager
@@ -41,62 +46,58 @@ class PackageManager
     {
         $packages = $this->repository->enabled();
 
-        $packages->each(function($properties)
+        $packages->each(function ($properties)
         {
-            $this->registerServiceProvider($properties);
+            try {
+                $provider = $this->resolveServiceProvider($properties);
+
+                $this->app->register($provider);
+            }
+            catch (Exception $e) {
+                // Do nothing.
+            }
         });
     }
 
     /**
-     * Register the Package Service Provider.
+     * Resolve the class name of a Package Service Provider.
      *
      * @param array $properties
      *
-     * @return void
-     *
-     * @throws \Nova\Packages\FileMissingException
+     * @return string
+     * @throws \LogicException|\Nova\Packages\Exception\ProviderMissingException
      */
-    protected function registerServiceProvider($properties)
+    protected function resolveServiceProvider(array $properties)
     {
-        $namespace = $this->resolveNamespace($properties);
+        if (empty($name = Arr::get($properties, 'name'))) {
+            throw new LogicException('Invalid Package properties');
+        }
 
-        $name = Str::studly(
-            isset($properties['type']) ? $properties['type'] : 'package'
-        );
+        $namespace = Arr::get($properties, 'namespace', str_replace('/', '\\', $name));
 
-        // The main service provider from a package should be named like:
+        // The default service provider from a package should be named like:
         // AcmeCorp\Pages\Providers\PackageServiceProvider
 
-        $provider = "{$namespace}\\Providers\\{$name}ServiceProvider";
+        $type = Arr::get($properties, 'type', 'package');
 
-        if (! class_exists($provider)) {
-            // We will try to find the alternate service provider, named like:
-            // AcmeCorp\Pages\PageServiceProvider
+        $provider = sprintf('%s\\Providers\\%sServiceProvider', $namespace, Str::studly($type));
 
-            $name = Str::singular(
-                $properties['basename']
-            );
-
-            if (! class_exists($provider = "{$namespace}\\{$name}ServiceProvider")) {
-                return;
-            }
+        if (class_exists($provider)) {
+            return $provider;
         }
 
-        $this->app->register($provider);
-    }
+        // The alternate service provider from a package should be named like:
+        // AcmeCorp\Pages\PageServiceProvider
 
-    /**
-     * Resolve the correct Package namespace.
-     *
-     * @param array $properties
-     */
-    public function resolveNamespace($properties)
-    {
-        if (isset($properties['namespace'])) {
-            return $properties['namespace'];
+        $basename = Arr::get($properties, 'basename', basename($name));
+
+        $provider = sprintf('%s\%sServiceProvider', $namespace, Str::singular($basename));
+
+        if (class_exists($provider)) {
+            return $provider;
         }
 
-        return Str::studly($properties['slug']);
+        throw new ProviderMissingException('Package Service Provider not found');
     }
 
     /**
@@ -106,12 +107,12 @@ class PackageManager
      *
      * @return string
      */
-    public function resolveClassPath($properties)
+    public function resolveClassPath(array $properties)
     {
         $path = $properties['path'];
 
         if ($properties['type'] == 'package') {
-            return $path .'src' .DS;
+            $path .= 'src' .DS;
         }
 
         return $path;

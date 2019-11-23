@@ -151,7 +151,7 @@ class Router
      */
     public function get($uri, $action)
     {
-        return $this->addRoute(['GET', 'HEAD'], $uri, $action);
+        return $this->addRoute(array('GET', 'HEAD'), $uri, $action);
     }
 
     /**
@@ -238,7 +238,22 @@ class Router
      */
     public function match($methods, $uri, $action)
     {
-        return $this->addRoute(array_map('strtoupper', (array) $methods), $uri, $action);
+        $methods = array_map('strtoupper', (array) $methods);
+
+        return $this->addRoute($methods, $uri, $action);
+    }
+
+    /**
+     * Register a new fallback route.
+     *
+     * @param  \Closure|array|string|callable|null  $action
+     * @return \Nova\Routing\Route
+     */
+    public function fallback($action)
+    {
+        return $this->addRoute(array('GET', 'HEAD'), "{fallback}", $action)
+            ->where('fallback', '(.*)')
+            ->fallback();
     }
 
     /**
@@ -323,19 +338,6 @@ class Router
         }
 
         $this->groupStack[] = $attributes;
-    }
-
-    /**
-     * Merge the given array with the last group stack.
-     *
-     * @param  array  $new
-     * @return array
-     */
-    public function mergeWithLastGroup($new)
-    {
-        $old = last($this->groupStack);
-
-        return static::mergeGroup($new, $old);
     }
 
     /**
@@ -534,11 +536,11 @@ class Router
      */
     protected function addWhereClausesToRoute($route)
     {
-        $route->where(
-            array_merge($this->patterns, Arr::get($route->getAction(), 'where', array()))
-        );
+        $action = $route->getAction();
 
-        return $route;
+        return $route->where(array_merge(
+            $this->patterns, Arr::get($action, 'where', array())
+        ));
     }
 
     /**
@@ -549,7 +551,13 @@ class Router
      */
     protected function mergeGroupAttributesIntoRoute($route)
     {
-        $action = $this->mergeWithLastGroup($route->getAction());
+        $group = last($this->groupStack);
+
+        unset($group['fallback']);
+
+        $action = static::mergeGroup(
+            $route->getAction(), $group
+        );
 
         $route->setAction($action);
     }

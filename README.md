@@ -1,6 +1,6 @@
 ![Nova Framework](https://novaframework.com/themes/nova/assets/images/nova.png)
 
-# Nova Framework 4.1 (Kernel)
+# Nova Framework 4.2 (Kernel)
 
 [![Total Downloads](https://img.shields.io/packagist/dt/nova-framework/system.svg)](https://packagist.org/packages/nova-framework/system)
 [![Dependency Status](https://www.versioneye.com/user/projects/554367f738331321e2000005/badge.svg)](https://www.versioneye.com/user/projects/554367f738331321e2000005)

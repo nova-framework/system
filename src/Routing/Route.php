@@ -11,7 +11,6 @@ use Nova\Routing\Matching\SchemeValidator;
 use Nova\Routing\Matching\UriValidator;
 use Nova\Routing\RouteCompiler;
 use Nova\Routing\RouteDependencyResolverTrait;
-use Nova\Support\Facades\Config;
 use Nova\Support\Arr;
 use Nova\Support\Str;
 
@@ -45,6 +44,13 @@ class Route
      * @var array
      */
     protected $action;
+
+    /**
+     * Indicates whether the route is a fallback route.
+     *
+     * @var bool
+     */
+    protected $fallback = false;
 
     /**
      * The Controller method.
@@ -116,13 +122,6 @@ class Route
      */
     protected static $validators;
 
-    /**
-     * The processing order.
-     *
-     * @var int
-     */
-    protected $order = 0;
-
 
     /**
      * Create a new Route instance.
@@ -148,8 +147,8 @@ class Route
             $this->prefix($prefix);
         }
 
-        if (! is_null($order = Arr::get($this->action, 'order'))) {
-            $this->order = (int) $order;
+        if (! is_null($fallback = Arr::get($this->action, 'fallback'))) {
+            $this->fallback = (bool) $fallback;
         }
     }
 
@@ -611,47 +610,6 @@ class Route
     }
 
     /**
-     * Sort the given array of Route instances by their order.
-     *
-     * @param  array  $routes
-     * @return array
-     */
-    public static function sort(array $routes)
-    {
-        if (! Config::get('routing.sorting', true)) {
-            return $routes;
-        }
-
-        usort($routes, function ($a, $b)
-        {
-            if ($a->order == $b->order) {
-                return strcmp($a->uri, $b->uri);
-            }
-
-            return ($a->order < $b->order) ? -1 : 1;
-        });
-
-        return $routes;
-    }
-
-    /**
-     * Set/Get the processing order for the route.
-     *
-     * @param  int|null  $order
-     * @return $this
-     */
-    public function order($order = null)
-    {
-        if (is_null($order)) {
-            return $this->order;
-        }
-
-        $this->order = (int) $order;
-
-        return $this;
-    }
-
-    /**
      * Set a default value for the route.
      *
      * @param  string  $key
@@ -701,6 +659,28 @@ class Route
     protected function parseWhere($name, $expression)
     {
         return is_array($name) ? $name : array($name => $expression);
+    }
+
+    /**
+     * Returns true if the flag of fallback mode is set.
+     *
+     * @return bool
+     */
+    public function isFallback()
+    {
+        return $this->fallback;
+    }
+
+    /**
+     * Set the flag of fallback mode.
+     *
+     * @return $this
+     */
+    public function fallback()
+    {
+        $this->fallback = true;
+
+        return $this;
     }
 
     /**

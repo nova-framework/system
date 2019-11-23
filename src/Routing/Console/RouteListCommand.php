@@ -58,7 +58,7 @@ class RouteListCommand extends Command
     * @var array
     */
     protected $headers = array(
-        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware', 'Order'
+        'Domain', 'Method', 'URI', 'Name', 'Action', 'Middleware'
     );
 
     /**
@@ -99,17 +99,24 @@ class RouteListCommand extends Command
     */
     protected function getRoutes()
     {
-        $results = array();
+        $routes = $this->routes->getRoutes();
 
-        $routes = Route::sort(
-            $this->routes->getRoutes()
-        );
+        //
+        $fallbacks = array();
 
-        foreach($routes as $route) {
-            $results[] = $this->getRouteInformation($route);
+        foreach ($routes as $key => $route) {
+            if ($route->isFallback()) {
+                $fallbacks[$key] = $route;
+
+                unset($routes[$key]);
+            }
         }
 
-        return array_filter($results);
+        return array_map(function ($route)
+        {
+            return $this->getRouteInformation($route);
+
+        }, array_merge($routes, $fallbacks));
     }
 
     /**
@@ -123,6 +130,8 @@ class RouteListCommand extends Command
     {
         $methods = implode('|', $route->methods());
 
+        $action = str_replace('\\Controllers\\', '\\...\\', $route->getActionName());
+
         $middleware = implode(', ', $this->getMiddleware($route));
 
         return $this->filterRoute(array(
@@ -130,9 +139,8 @@ class RouteListCommand extends Command
             'method'     => $methods,
             'uri'        => $route->uri(),
             'name'       => $route->getName(),
-            'action'     => $route->getActionName(),
-            'middleware' => $middleware,
-            'order'      => $route->order(),
+            'action'     => $action,
+            'middleware' => $middleware
         ));
     }
 
@@ -159,7 +167,11 @@ class RouteListCommand extends Command
     {
         return array_map(function ($middleware)
         {
-            return ($middleware instanceof Closure) ? 'Closure' : $middleware;
+            if ($middleware instanceof Closure) {
+                return 'Closure';
+            }
+
+            return str_replace('\\Middleware\\', '\\...\\', $middleware);
 
         }, $route->middleware());
     }

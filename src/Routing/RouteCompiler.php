@@ -34,19 +34,29 @@ class RouteCompiler
      */
     public function compile()
     {
+        $route = $this->createSymfonyRoute();
+
+        return $route->compile();
+    }
+
+    /**
+     * Create a Symfony Route from the inner Route instance.
+     *
+     * @return \Symfony\Component\Routing\CompiledRoute
+     */
+    protected function createSymfonyRoute()
+    {
         $route = $this->getRoute();
 
-        //
-        $optionals = $this->extractOptionalParameters($uri = $route->uri());
+        if (empty($domain = $route->domain())) {
+            $domain = '';
+        }
 
-        $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri);
+        $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri = $route->uri());
 
-        $domain = $route->domain() ?: '';
+        $optionals = $this->extractOptionalParameters($uri);
 
-        return with(
-            new SymfonyRoute($path, $optionals, $route->patterns(), array(), $domain)
-
-        )->compile();
+        return new SymfonyRoute($path, $optionals, $route->patterns(), array(), $domain);
     }
 
     /**
@@ -60,7 +70,11 @@ class RouteCompiler
     {
         preg_match_all('/\{(\w+?)\?\}/', $uri, $matches);
 
-        return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
+        if (! isset($matches[1])) {
+            return array();
+        }
+
+        return array_fill_keys($matches[1], null);
     }
 
     /**

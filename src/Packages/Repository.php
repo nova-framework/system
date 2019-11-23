@@ -59,7 +59,7 @@ class Repository
 
     public function all()
     {
-        return $this->getCached()->sortBy('order');
+        return $this->getPackagesCached()->sortBy('order');
     }
 
     /**
@@ -84,9 +84,7 @@ class Repository
      */
     public function sortBy($key)
     {
-        $collection = $this->all();
-
-        return $collection->sortBy($key);
+        return $this->getPackagesCached()->sortBy($key);
     }
 
     /**
@@ -98,9 +96,7 @@ class Repository
      */
     public function sortByDesc($key)
     {
-        $collection = $this->all();
-
-        return $collection->sortByDesc($key);
+        return $this->getPackagesCached()->sortByDesc($key);
     }
 
     /**
@@ -112,11 +108,7 @@ class Repository
      */
     public function exists($slug)
     {
-        if (Str::length($slug) > 3) {
-            $slug = Str::snake($slug);
-        } else {
-            $slug = Str::lower($slug);
-        }
+        $slug = (Str::length($slug) <= 3) ? Str::lower($slug) : Str::snake($slug);
 
         $slugs = $this->slugs()->toArray();
 
@@ -190,11 +182,7 @@ class Repository
      */
     public function getPackagePath($slug)
     {
-        if (Str::length($slug) > 3) {
-            $package = Str::studly($slug);
-        } else {
-            $package = Str::upper($slug);
-        }
+        $package = (Str::length($slug) <= 3) ? Str::upper($slug) : Str::studly($slug);
 
         return $this->getPackagesPath() .DS .$package .DS;
     }
@@ -228,11 +216,7 @@ class Repository
      */
     public function getModulePath($slug)
     {
-        if (Str::length($slug) > 3) {
-            $module = Str::studly($slug);
-        } else {
-            $module = Str::upper($slug);
-        }
+        $module = (Str::length($slug) <= 3) ? Str::upper($slug) : Str::studly($slug);
 
         return $this->getModulesPath() .DS .$module .DS;
     }
@@ -268,11 +252,7 @@ class Repository
      */
     public function getThemePath($slug)
     {
-        if (Str::length($slug) > 3) {
-            $theme = Str::studly($slug);
-        } else {
-            $theme = Str::upper($slug);
-        }
+        $theme = (Str::length($slug) <= 3) ? Str::upper($slug) : Str::studly($slug);
 
         return $this->getThemesPath() .DS .$theme .DS;
     }
@@ -308,9 +288,7 @@ class Repository
     {
         $path = $this->getCachePath();
 
-        $packages = $this->getPackages();
-
-        $this->writeCache($path, $packages);
+        $this->writeCache($path, $this->getPackages());
     }
 
     protected function getPackages()
@@ -332,12 +310,12 @@ class Repository
         $packages = collect();
 
         foreach ($items as $name => $packagePath) {
-            $packagePath = Str::finish($packagePath, DS);
-
             $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
 
             $packages->put($name, array(
-                'path'     => $packagePath,
+                'path' => tr::finish($packagePath, DS),
+
+                //
                 'location' => $location,
                 'type'     => 'package',
             ));
@@ -366,10 +344,10 @@ class Repository
             {
                 $name = $vendor .'/' .basename($path);
 
-                $path = Str::finish($path, DS);
-
                 $packages->put($name, array(
-                    'path'     => $path,
+                    'path' => Str::finish($path, DS),
+
+                    //
                     'location' => 'local',
                     'type'     => 'module',
                 ));
@@ -399,10 +377,10 @@ class Repository
             {
                 $name = $vendor .'/' .basename($path);
 
-                $path = Str::finish($path, DS);
-
                 $packages->put($name, array(
-                    'path'     => $path,
+                    'path' => Str::finish($path, DS),
+
+                    //
                     'location' => 'local',
                     'type'     => 'theme',
                 ));
@@ -416,12 +394,9 @@ class Repository
         {
             $basename = $this->getPackageName($name);
 
-            if (Str::length($basename) > 3) {
-                $slug =  Str::snake($basename);
-            } else {
-                $slug = Str::lower($basename);
-            }
+            $slug = (Str::length($basename) <= 3) ? Str::lower($basename) : Str::snake($basename);
 
+            //
             $properties['name'] = $name;
             $properties['slug'] = $slug;
 
@@ -450,30 +425,26 @@ class Repository
      *
      * @return Collection
      */
-    public function getCached()
+    protected function getPackagesCached()
     {
         if (isset(static::$packages)) {
             return static::$packages;
         }
 
-        $path = $this->getCachePath();
-
         $configPath = app_path('Config/Packages.php');
 
         $packagesPath = base_path('vendor/nova-packages.php');
 
-        if ($this->isCacheExpired($path, $packagesPath) || $this->isCacheExpired($path, $configPath)) {
-            $packages = $this->getPackages();
+        //
+        $path = $this->getCachePath();
 
-            $this->writeCache($path, $packages);
+        if (! $this->isCacheExpired($path, $packagesPath) && ! $this->isCacheExpired($path, $configPath)) {
+            $data = (array) $this->files->getRequire($path);
+
+            return static::$packages = collect($data);
         }
 
-        // The packages cache is valid.
-        else {
-            $packages = collect(
-                $this->files->getRequire($path)
-            );
-        }
+        $this->writeCache($path, $packages = $this->getPackages());
 
         return static::$packages = $packages;
     }
@@ -485,7 +456,7 @@ class Repository
      * @param  array  $packages
      * @return void
      */
-    public function writeCache($path, $packages)
+    protected function writeCache($path, $packages)
     {
         $data = array();
 
@@ -521,7 +492,7 @@ PHP;
     * @param  string  $path
     * @return bool
     */
-    public function isCacheExpired($cachePath, $path)
+    protected function isCacheExpired($cachePath, $path)
     {
         if (! $this->files->exists($cachePath)) {
             return true;
@@ -529,11 +500,11 @@ PHP;
 
         $lastModified = $this->files->lastModified($path);
 
-        if ($lastModified >= $this->files->lastModified($cachePath)) {
-            return true;
+        if ($lastModified < $this->files->lastModified($cachePath)) {
+            return false;
         }
 
-        return false;
+        return rue;
     }
 
     /**
@@ -559,7 +530,7 @@ PHP;
             return $package;
         }
 
-        list($vendor, $namespace) = explode('/', $package);
+        list ($vendor, $namespace) = explode('/', $package);
 
         return $namespace;
     }

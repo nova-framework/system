@@ -139,23 +139,13 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     public function match(Request $request)
     {
-        $method = $request->getMethod();
-
-        $routes = Route::sort(
-            $this->get($method)
-        );
+        $routes = $this->get($request->getMethod());
 
         // First, we will see if we can find a matching route for this current request
         // method. If we can, great, we can just return it so that it can be called
         // by the consumer. Otherwise we will check for routes with another verb.
 
-        if (! is_null($route = $this->fastCheck($routes, $request))) {
-            // A route was found in the fast way.
-        } else {
-            $route = $this->check($routes, $request);
-        }
-
-        if (! is_null($route)) {
+         if (! is_null($route = $this->findRoute($routes, $request))) {
             return $route->bind($request);
         }
 
@@ -163,13 +153,39 @@ class RouteCollection implements Countable, IteratorAggregate
         // another HTTP verb. If it is we will need to throw a MethodNotAllowed and
         // inform the user agent of which HTTP verb it should use for this route.
 
-        $others = $this->checkForAlternateVerbs($request);
-
-        if (! empty($others)) {
+        if (! empty($others = $this->checkForAlternateVerbs($request))) {
             return $this->getOtherMethodsRoute($request, $others);
         }
 
         throw new NotFoundHttpException;
+    }
+
+    /**
+     * Find the first route matching a given request.
+     *
+     * @param  array  $routes
+     * @param  \Nova\Http\Request  $request
+     * @return \Nova\Routing\Route|null
+     */
+    protected function findRoute($routes, $request)
+    {
+        if (! is_null($route = $this->fastCheck($routes, $request))) {
+            return $route;
+        }
+
+        $fallbacks = array();
+
+        foreach ($routes as $key => $route) {
+            if ($route->isFallback()) {
+                $fallbacks[$key] = $route;
+
+                unset($routes[$key]);
+            }
+        }
+
+        $routes = array_merge($routes, $fallbacks);
+
+        return $this->check($routes, $request);
     }
 
     /**
@@ -244,14 +260,16 @@ class RouteCollection implements Countable, IteratorAggregate
      */
     protected function fastCheck(array $routes, $request)
     {
-        $domain = $request->getHost();
+        if (($path = $request->path()) != '/') {
+            $path = '/' . trim($path, '/');
+        }
 
-        $path = ($request->path() == '/') ? '/' : '/' .$request->path();
+        $keys = array(
+            $request->getHost() .$path, $path
+        );
 
-        foreach (array($domain .$path, $path) as $key) {
-            $route = Arr::get($routes, $key);
-
-            if (! is_null($route) && $route->matches($request, true)) {
+        foreach ($keys as $key) {
+            if (! is_null($route = Arr::get($routes, $key)) && $route->matches($request)) {
                 return $route;
             }
         }
