@@ -3,7 +3,6 @@
 namespace Nova\Localization\Middleware;
 
 use Nova\Foundation\Application;
-use Nova\Support\Facades\Cookie;
 
 use Closure;
 
@@ -57,14 +56,7 @@ class SetupLanguage
         if ($session->has('language')) {
             $locale = $session->get('language');
         } else {
-            $cookie = PREFIX .'language';
-
-            if (empty($locale = $request->cookie($cookie))) {
-                $locale = $this->app['config']->get('app.locale');
-
-                // Store also the current Language in a Cookie lasting five years.
-                Cookie::queue($cookie, $locale, Cookie::FIVEYEARS);
-            }
+            $locale = $request->cookie(PREFIX .'language', $this->app['config']['app.locale']);
 
             $session->set('language', $locale);
         }
