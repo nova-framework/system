@@ -176,16 +176,18 @@ class RouteCollection implements Countable, IteratorAggregate
         $fallbacks = array();
 
         foreach ($routes as $key => $route) {
-            if ($route->isFallback()) {
-                $fallbacks[$key] = $route;
-
-                unset($routes[$key]);
+            if (! $route->isFallback()) {
+                continue;
             }
+
+            $fallbacks[$key] = $route;
+
+            unset($routes[$key]);
         }
 
-        $routes = array_merge($routes, $fallbacks);
-
-        return $this->check($routes, $request);
+        return $this->check(
+            array_merge($routes, $fallbacks), $request
+        );
     }
 
     /**

@@ -105,11 +105,13 @@ class RouteListCommand extends Command
         $fallbacks = array();
 
         foreach ($routes as $key => $route) {
-            if ($route->isFallback()) {
-                $fallbacks[$key] = $route;
-
-                unset($routes[$key]);
+            if (! $route->isFallback()) {
+                continue;
             }
+
+            $fallbacks[$key] = $route;
+
+            unset($routes[$key]);
         }
 
         return array_map(function ($route)
