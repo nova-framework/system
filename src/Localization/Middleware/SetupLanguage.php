@@ -38,12 +38,25 @@ class SetupLanguage
      */
     public function handle($request, Closure $next)
     {
+        $this->updateLocale($request);
+
+        return $next($request);
+    }
+
+    /**
+     * Update the Application locale.
+     *
+     * @param  \Nova\Http\Request  $request
+     * @return void
+     */
+    protected function updateLocale($request)
+    {
         $session = $this->app['session'];
 
         if (! $session->has('language')) {
-            $cookie = $request->cookie(PREFIX .'language', null);
-
-            $locale = $cookie ?: $this->app['config']->get('app.locale');
+            if (empty($locale = $request->cookie(PREFIX .'language'))) {
+                $locale = $this->app['config']->get('app.locale');
+            }
 
             $session->set('language', $locale);
         } else {
@@ -51,8 +64,5 @@ class SetupLanguage
         }
 
         $this->app['language']->setLocale($locale);
-
-        return $next($request);
     }
-
 }
