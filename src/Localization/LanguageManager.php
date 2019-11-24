@@ -197,6 +197,7 @@ class LanguageManager
 
         // Setup the Carbon locale.
         Carbon::setLocale($locale);
+
         CarbonImmutable::setLocale($locale);
         CarbonPeriod::setLocale($locale);
         CarbonInterval::setLocale($locale);
