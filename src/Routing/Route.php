@@ -642,23 +642,13 @@ class Route
      */
     public function where($name, $expression = null)
     {
-        foreach ($this->parseWhere($name, $expression) as $name => $expression) {
+        $wheres = is_array($name) ? $name : array($name => $expression);
+
+        foreach ($wheres as $name => $expression) {
             $this->wheres[$name] = $expression;
         }
 
         return $this;
-    }
-
-    /**
-     * Parse arguments to the where method into an array.
-     *
-     * @param  array|string  $name
-     * @param  string  $expression
-     * @return array
-     */
-    protected function parseWhere($name, $expression)
-    {
-        return is_array($name) ? $name : array($name => $expression);
     }
 
     /**
