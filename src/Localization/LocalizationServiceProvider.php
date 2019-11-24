@@ -17,28 +17,6 @@ class LocalizationServiceProvider extends ServiceProvider
 
 
     /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $session = $this->app['session'];
-
-        if (! $session->has('language')) {
-            $cookie = $this->app['request']->cookie(PREFIX .'language', null);
-
-            $locale = $cookie ?: $this->app['config']->get('app.locale');
-
-            $session->set('language', $locale);
-        } else {
-            $locale = $session->get('language');
-        }
-
-        $this->app['language']->setLocale($locale);
-    }
-
-    /**
      * Register the Service Provider.
      *
      * @return void
