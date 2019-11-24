@@ -4,9 +4,13 @@ namespace Nova\Localization;
 
 use Nova\Foundation\Application;
 use Nova\Localization\Language;
+use Nova\Support\Arr;
 use Nova\Support\Str;
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterval;
+use Carbon\CarbonPeriod;
 
 
 class LanguageManager
@@ -67,9 +71,10 @@ class LanguageManager
             // Namespace for the Framework path.
             'nova' => dirname(__DIR__) .DS .'Language',
 
-            // Namespaces for the Site paths.
+            // Namespace for the Application path.
             'app' => APPPATH .'Language',
 
+            // Namespace for the Shared path.
             'shared' => BASEPATH .'shared' .DS .'Language',
         );
     }
@@ -190,13 +195,17 @@ class LanguageManager
         // Setup the Framework locale.
         $this->locale = $locale;
 
-        // Retrieve the full locale from languages list.
-        $language = array_get($this->languages, $locale .'.locale', 'en_US') .'.utf8';
-
-        // Setup the Carbon and PHP's time locale.
-        setlocale(LC_TIME, $language);
-
+        // Setup the Carbon locale.
         Carbon::setLocale($locale);
+        CarbonImmutable::setLocale($locale);
+        CarbonPeriod::setLocale($locale);
+        CarbonInterval::setLocale($locale);
+
+        // Retrieve the full locale from languages list.
+        $locale = Arr::get($this->languages, $locale .'.locale', 'en_US');
+
+        // Setup the PHP's time locale.
+        setlocale(LC_TIME, $locale .'.utf8');
     }
 
     /**
