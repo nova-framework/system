@@ -204,7 +204,7 @@ class LanguageManager
 
         // Retrieve the full qualified locale from languages list.
         $locale = Str::finish(
-            Arr::get($this->languages, $locale .'.locale', 'en_US.utf8'), '.utf8'
+            Arr::get($this->languages, $locale .'.locale', 'en_US'), '.utf8'
         );
 
         // Setup the PHP's Time locale.
