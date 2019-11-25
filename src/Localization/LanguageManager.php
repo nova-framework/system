@@ -202,11 +202,13 @@ class LanguageManager
         CarbonPeriod::setLocale($locale);
         CarbonInterval::setLocale($locale);
 
-        // Retrieve the full locale from languages list.
-        $locale = Arr::get($this->languages, $locale .'.locale', 'en_US.utf8');
+        // Retrieve the full qualified locale from languages list.
+        $locale = Str::finish(
+            Arr::get($this->languages, $locale .'.locale', 'en_US.utf8'), '.utf8'
+        );
 
         // Setup the PHP's Time locale.
-        setlocale(LC_TIME, Str::finish($locale, '.utf8'));
+        setlocale(LC_TIME, $locale);
     }
 
     /**
