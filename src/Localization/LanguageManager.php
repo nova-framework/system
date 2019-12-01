@@ -122,13 +122,13 @@ class LanguageManager
      */
     protected function getPackageNamespace($package, $namespace)
     {
-        if (is_null($namespace)) {
-            list($vendor, $namespace) = explode('/', $package);
-
-            return Str::snake($namespace);
+        if (! is_null($namespace)) {
+            return $namespace;
         }
 
-        return $namespace;
+        list ($vendor, $namespace) = explode('/', $package);
+
+        return Str::snake($namespace);
     }
 
     /**

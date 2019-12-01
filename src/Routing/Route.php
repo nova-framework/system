@@ -664,11 +664,12 @@ class Route
     /**
      * Set the flag of fallback mode.
      *
+     * @param  bool  $value
      * @return $this
      */
-    public function fallback()
+    public function fallback($value = true)
     {
-        $this->fallback = true;
+        $this->fallback = (bool) $value;
 
         return $this;
     }
