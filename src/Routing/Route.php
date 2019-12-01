@@ -662,7 +662,7 @@ class Route
     }
 
     /**
-     * Set the flag of fallback mode.
+     * Set the flag of fallback mode on the route.
      *
      * @param  bool  $value
      * @return $this
