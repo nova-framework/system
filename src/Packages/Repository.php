@@ -504,7 +504,7 @@ PHP;
             return false;
         }
 
-        return rue;
+        return true;
     }
 
     /**

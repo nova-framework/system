@@ -107,7 +107,7 @@ class PackageManager
      *
      * @return string
      */
-    public function resolveClassPath(array $properties)
+    public function resolveClassPath($properties)
     {
         $path = $properties['path'];
 
