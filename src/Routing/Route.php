@@ -143,12 +143,12 @@ class Route
             $this->methods[] = 'HEAD';
         }
 
-        if (! empty($prefix = Arr::get($this->action, 'prefix'))) {
+        if (! is_null($prefix = Arr::get($this->action, 'prefix'))) {
             $this->prefix($prefix);
         }
 
         if (! is_null($fallback = Arr::get($this->action, 'fallback'))) {
-            $this->fallback = (bool) $fallback;
+            $this->fallback($fallback);
         }
     }
 
