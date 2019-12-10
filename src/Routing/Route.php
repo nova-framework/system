@@ -192,8 +192,10 @@ class Route
      */
     protected function runCallable()
     {
+        $callable = Arr::get($this->action, 'uses');
+
         $parameters = $this->resolveMethodDependencies(
-            $this->parametersWithoutNulls(), new ReflectionFunction($callable = Arr::get($this->action,'uses'))
+            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
         );
 
         return call_user_func_array($callable, $parameters);
