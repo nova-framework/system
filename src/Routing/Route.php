@@ -143,7 +143,7 @@ class Route
             $this->methods[] = 'HEAD';
         }
 
-        if (! is_null($prefix = Arr::get($this->action, 'prefix'))) {
+        if (! empty($prefix = Arr::get($this->action, 'prefix'))) {
             $this->prefix($prefix);
         }
 
