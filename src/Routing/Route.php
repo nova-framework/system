@@ -25,6 +25,13 @@ class Route
     use RouteDependencyResolverTrait;
 
     /**
+     * The container instance used by the route.
+     *
+     * @var \Nova\Container\Container
+     */
+    protected $container;
+
+    /**
      * The URI pattern the route responds to.
      *
      * @var string
@@ -51,20 +58,6 @@ class Route
      * @var bool
      */
     protected $fallback = false;
-
-    /**
-     * The Controller method.
-     *
-     * @var mixed
-     */
-    protected $method;
-
-    /**
-     * The Controller instance.
-     *
-     * @var mixed
-     */
-    protected $controller;
 
     /**
      * The default values for the route.
@@ -109,11 +102,18 @@ class Route
     protected $computedMiddleware;
 
     /**
-     * The container instance used by the route.
+     * The Controller instance.
      *
-     * @var \Nova\Container\Container
+     * @var mixed
      */
-    protected $container;
+    protected $controllerInstance;
+
+    /**
+     * The Controller method.
+     *
+     * @var mixed
+     */
+    protected $controllerMethod;
 
     /**
      * The validators used by the routes.
@@ -164,15 +164,33 @@ class Route
         }
 
         try {
-            if (! $this->isControllerAction()) {
-                return $this->runCallable();
-            }
-
-            return $this->runController();
+            return $this->runActionCallback();
         }
         catch (HttpResponseException $e) {
             return $e->getResponse();
         }
+    }
+
+    /**
+     * Runs the route action and returns the response.
+     *
+     * @return mixed
+     */
+    protected function runActionCallback()
+    {
+        if (! $this->isControllerAction()) {
+            $callback = Arr::get($this->action, 'uses');
+
+            $parameters = $this->resolveMethodDependencies(
+                $this->parametersWithoutNulls(), new ReflectionFunction($callback)
+            );
+
+            return call_user_func_array($callback, $parameters);
+        }
+
+        return $this->controllerDispatcher()->dispatch(
+            $this, $this->getControllerInstance(), $this->getControllerMethod()
+        );
     }
 
     /**
@@ -183,34 +201,6 @@ class Route
     protected function isControllerAction()
     {
         return is_string($this->action['uses']);
-    }
-
-    /**
-     * Run the route action and return the response.
-     *
-     * @return mixed
-     */
-    protected function runCallable()
-    {
-        $callable = Arr::get($this->action, 'uses');
-
-        $parameters = $this->resolveMethodDependencies(
-            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
-        );
-
-        return call_user_func_array($callable, $parameters);
-    }
-
-    /**
-     * Run the route action and return the response.
-     *
-     * @return mixed
-     */
-    protected function runController()
-    {
-        return $this->controllerDispatcher()->dispatch(
-            $this, $this->getController(), $this->getControllerMethod()
-        );
     }
 
     /**
@@ -232,17 +222,17 @@ class Route
      *
      * @return mixed
      */
-    public function getController()
+    public function getControllerInstance()
     {
-        if (isset($this->controller)) {
-            return $this->controller;
+        if (isset($this->controllerInstance)) {
+            return $this->controllerInstance;
         }
 
         $callback = Arr::get($this->action, 'uses');
 
-        list ($controller, $this->method) = Str::parseCallback($callback);
+        list ($controller, $this->controllerMethod) = Str::parseCallback($callback);
 
-        return $this->controller = $this->container->make($controller);
+        return $this->controllerInstance = $this->container->make($controller);
     }
 
     /**
@@ -252,15 +242,13 @@ class Route
      */
     public function getControllerMethod()
     {
-        if (isset($this->method)) {
-            return $this->method;
+        if (! isset($this->controllerMethod)) {
+            $callback = Arr::get($this->action, 'uses');
+
+            list (, $this->controllerMethod) = Str::parseCallback($callback);
         }
 
-        $callback = Arr::get($this->action, 'uses');
-
-        list (, $method) = Str::parseCallback($callback);
-
-        return $this->method = $method;
+        return $this->controllerMethod;
     }
 
     /**
@@ -294,11 +282,11 @@ class Route
      */
     protected function compileRoute()
     {
-        if (! $this->compiled) {
-            return $this->compiled = with(new RouteCompiler($this))->compile();
+        if (! is_null($this->compiled)) {
+            return $this->compiled;
         }
 
-        return $this->compiled;
+        return $this->compiled = with(new RouteCompiler($this))->compile();
     }
 
     /**
@@ -365,7 +353,7 @@ class Route
         }
 
         return ControllerDispatcher::getMiddleware(
-            $this->getController(), $this->getControllerMethod()
+            $this->getControllerInstance(), $this->getControllerMethod()
         );
     }
 
@@ -509,18 +497,18 @@ class Route
         // If the route has a regular expression for the host part of the URI, we will
         // compile that and get the parameter matches for this domain. We will then
         // merge them into this parameters array so that this array is completed.
-        $params = $this->matchToKeys(
-            array_slice($this->bindPathParameters($request), 1)
-        );
+        $parameters = $this->bindPathParameters($request);
 
         // If the route has a regular expression for the host part of the URI, we will
         // compile that and get the parameter matches for this domain. We will then
         // merge them into this parameters array so that this array is completed.
         if (! is_null($this->compiled->getHostRegex())) {
-            $params = $this->bindHostParameters($request, $params);
+            $parameters = array_merge(
+                $this->bindHostParameters($request), $parameters
+            );
         }
 
-        return $this->parameters = $this->replaceDefaults($params);
+        return $this->parameters = $this->replaceDefaults($parameters);
     }
 
     /**
@@ -531,23 +519,26 @@ class Route
      */
     protected function bindPathParameters(Request $request)
     {
-        preg_match($this->compiled->getRegex(), '/' .$request->decodedPath(), $matches);
+        $regex = $this->compiled->getRegex();
 
-        return $matches;
+        preg_match($regex, '/' .$request->decodedPath(), $matches);
+
+        return $this->matchToKeys($matches);
     }
 
     /**
      * Extract the parameter list from the host part of the request.
      *
      * @param  \Nova\Http\Request  $request
-     * @param  array  $parameters
      * @return array
      */
     protected function bindHostParameters(Request $request, $parameters)
     {
-        preg_match($this->compiled->getHostRegex(), $request->getHost(), $matches);
+        $regex = $this->compiled->getHostRegex();
 
-        return array_merge($this->matchToKeys(array_slice($matches, 1)), $parameters);
+        preg_match($regex, $request->getHost(), $matches);
+
+        return $this->matchToKeys($matches);
     }
 
     /**
@@ -558,13 +549,13 @@ class Route
      */
     protected function matchToKeys(array $matches)
     {
-        $parameterNames = $this->parameterNames();
-
-        if (count($parameterNames) == 0) {
+        if (empty($parameterNames = $this->parameterNames())) {
             return array();
         }
 
-        $parameters = array_intersect_key($matches, array_flip($parameterNames));
+        $parameters = array_intersect_key(
+            $matches, array_flip($parameterNames)
+        );
 
         return array_filter($parameters, function ($value)
         {
@@ -753,9 +744,7 @@ class Route
      */
     public function domain()
     {
-        if (isset($this->action['domain'])) {
-            return $this->action['domain'];
-        }
+        return Arr::get($this->action, 'domain');
     }
 
     /**
@@ -788,9 +777,7 @@ class Route
      */
     public function getPrefix()
     {
-        if (isset($this->action['prefix'])) {
-            return $this->action['prefix'];
-        }
+        return Arr::get($this->action, 'prefix');
     }
 
     /**
@@ -813,9 +800,7 @@ class Route
      */
     public function getName()
     {
-        if (isset($this->action['as'])) {
-            return $this->action['as'];
-        }
+        return Arr::get($this->action, 'as');
     }
 
     /**
@@ -826,7 +811,11 @@ class Route
      */
     public function name($name)
     {
-        $this->action['as'] = isset($this->action['as']) ? $this->action['as'] .$name : $name;
+        if (! empty($namePrefix = Arr::get($this->action, 'as'))) {
+            $name = $namePrefix .$name;
+        }
+
+        $this->action['as'] = $name;
 
         return $this;
     }
@@ -838,7 +827,7 @@ class Route
      */
     public function getActionName()
     {
-        return isset($this->action['controller']) ? $this->action['controller'] : 'Closure';
+        return Arr::get($this->action, 'controller', 'Closure');
     }
 
     /**
