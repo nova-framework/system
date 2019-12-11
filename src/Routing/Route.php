@@ -419,7 +419,7 @@ class Route
     public function parameters()
     {
         if (! isset($this->parameters)) {
-            throw new \LogicException("Route is not bound.");
+            throw new \LogicException("The Route is not bound.");
         }
 
         return array_map(function ($value)
