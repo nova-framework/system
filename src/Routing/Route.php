@@ -262,11 +262,12 @@ class Route
     {
         $this->compileRoute();
 
-        foreach ($this->getValidators() as $validator) {
-            if (! $includingMethod && ($validator instanceof MethodValidator)) {
-                continue;
-            }
+        $validators = array_filter($this->getValidators(), function ($validator) use ($includingMethod)
+        {
+            return ($validator instanceof MethodValidator) ? $includingMethod : true;
+        });
 
+        foreach ($validators as $validator) {
             if (! $validator->matches($this, $request)) {
                 return false;
             }
