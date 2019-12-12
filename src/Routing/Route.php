@@ -178,17 +178,29 @@ class Route
      */
     protected function runActionCallback()
     {
-        if (! $this->isControllerAction()) {
-            $callback = Arr::get($this->action, 'uses');
-
-            $parameters = $this->resolveMethodDependencies(
-                $this->parametersWithoutNulls(), new ReflectionFunction($callback)
-            );
-
-            return call_user_func_array($callback, $parameters);
+        if ($this->isControllerAction()) {
+            return $this->runControllerAction();
         }
 
-        return $this->controllerDispatcher()->dispatch(
+        $callback = Arr::get($this->action, 'uses');
+
+        $parameters = $this->resolveMethodDependencies(
+            $this->parametersWithoutNulls(), new ReflectionFunction($callback)
+        );
+
+        return call_user_func_array($callback, $parameters);
+    }
+
+    /**
+     * Runs the route action and returns the response.
+     *
+     * @return mixed
+     */
+    protected function runControllerAction()
+    {
+        $dispatcher = new ControllerDispatcher($this->container);
+
+        return $dispatcher->dispatch(
             $this, $this->getControllerInstance(), $this->getControllerMethod()
         );
     }
@@ -201,20 +213,6 @@ class Route
     protected function isControllerAction()
     {
         return is_string($this->action['uses']);
-    }
-
-    /**
-     * Get the dispatcher for the route's controller.
-     *
-     * @return \Nova\Routing\ControllerDispatcher
-     */
-    public function controllerDispatcher()
-    {
-        if ($this->container->bound('routing.controller.dispatcher')) {
-            return $this->container['routing.controller.dispatcher'];
-        }
-
-        return new ControllerDispatcher($this->container);
     }
 
     /**

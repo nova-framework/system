@@ -3,7 +3,6 @@
 namespace Nova\Routing;
 
 use Nova\Filesystem\Filesystem;
-use Nova\Routing\ControllerDispatcher;
 use Nova\Routing\ResponseFactory;
 use Nova\Routing\Router;
 use Nova\Routing\Redirector;
@@ -28,8 +27,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->registerRedirector();
 
         $this->registerResponseFactory();
-
-        $this->registerControllerDispatcher();
 
         // Register the additional service providers.
         $this->app->register('Nova\Routing\Assets\AssetServiceProvider');
@@ -108,19 +105,6 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app->singleton('response.factory', function ($app)
         {
             return new ResponseFactory();
-        });
-    }
-
-    /**
-     * Register the URL generator service.
-     *
-     * @return void
-     */
-    protected function registerControllerDispatcher()
-    {
-        $this->app->singleton('routing.controller.dispatcher', function ($app)
-        {
-            return new ControllerDispatcher($app);
         });
     }
 }
