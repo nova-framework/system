@@ -46,12 +46,25 @@ class ControllerDispatcher
         );
 
         if (! method_exists($controller, $callerMethod = 'callAction')) {
-            return call_user_func_array(array($controller, $method), $parameters);
+            return $this->run($controller, $method, $parameters);
         }
 
-        return call_user_func_array(array($controller, $callerMethod), $this->resolveClassMethodDependencies(
+        return $this->run($controller, $callerMethod, $this->resolveClassMethodDependencies(
             array($method, $parameters), $controller, $callerMethod
         ));
+    }
+
+    /**
+     * Runs the controller method and returns the response.
+     *
+     * @param  mixed  $controller
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    protected function run($controller, $method, $parameters)
+    {
+        return call_user_func_array(array($controller, $method), $parameters);
     }
 
     /**
