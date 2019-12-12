@@ -40,9 +40,9 @@ class RouteCompiler
             $domain = '';
         }
 
-        $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri = $route->uri());
+        $optionals = $this->extractOptionalParameters($uri = $route->uri());
 
-        $optionals = $this->extractOptionalParameters($uri);
+        $path = preg_replace('/\{(\w+?)\?\}/', '{$1}', $uri);
 
         return with(
             new SymfonyRoute($path, $optionals, $route->patterns(), array(), $domain)
@@ -61,11 +61,7 @@ class RouteCompiler
     {
         preg_match_all('/\{(\w+?)\?\}/', $uri, $matches);
 
-        if (! isset($matches[1])) {
-            return array();
-        }
-
-        return array_fill_keys($matches[1], null);
+        return isset($matches[1]) ? array_fill_keys($matches[1], null) : array();
     }
 
     /**
