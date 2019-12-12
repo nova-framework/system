@@ -46,10 +46,10 @@ class ControllerDispatcher
         );
 
         if (! method_exists($controller, $callerMethod = 'callAction')) {
-            return $this->runController($controller, $method, $parameters);
+            return $this->run($controller, $method, $parameters);
         }
 
-        return $this->runController($controller, $callerMethod, $this->resolveClassMethodDependencies(
+        return $this->run($controller, $callerMethod, $this->resolveClassMethodDependencies(
             array($method, $parameters), $controller, $callerMethod
         ));
     }
@@ -62,7 +62,7 @@ class ControllerDispatcher
      * @param  array  $parameters
      * @return mixed
      */
-    protected function runController($controller, $method, $parameters)
+    protected function run($controller, $method, $parameters)
     {
         return call_user_func_array(array($controller, $method), $parameters);
     }
