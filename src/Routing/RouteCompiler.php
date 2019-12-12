@@ -34,18 +34,6 @@ class RouteCompiler
      */
     public function compile()
     {
-        $route = $this->createSymfonyRoute();
-
-        return $route->compile();
-    }
-
-    /**
-     * Create a Symfony Route from the inner Route instance.
-     *
-     * @return \Symfony\Component\Routing\CompiledRoute
-     */
-    protected function createSymfonyRoute()
-    {
         $route = $this->getRoute();
 
         if (empty($domain = $route->domain())) {
@@ -56,7 +44,10 @@ class RouteCompiler
 
         $optionals = $this->extractOptionalParameters($uri);
 
-        return new SymfonyRoute($path, $optionals, $route->patterns(), array(), $domain);
+        return with(
+            new SymfonyRoute($path, $optionals, $route->patterns(), array(), $domain)
+
+        )->compile();
     }
 
     /**
