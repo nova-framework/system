@@ -154,6 +154,28 @@ class Handler implements HandlerInterface
     }
 
     /**
+     * Create a response object from the given validation exception.
+     *
+     * @param  \Nova\Validation\ValidationException  $e
+     * @param  \Nova\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function convertValidationExceptionToResponse(ValidationException $e, Request $request)
+    {
+        if ($e->response) {
+            return $e->response;
+        }
+
+        $errors = $e->validator->errors()->getMessages();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return Response::json($errors, 422);
+        }
+
+        return Redirect::back()->withInput($request->input())->withErrors($errors);
+    }
+
+    /**
      * Prepare response containing exception render.
      *
      * @param  \Nova\Http\Request  $request
@@ -192,28 +214,6 @@ class Handler implements HandlerInterface
     protected function renderHttpException(HttpException $e, Request $request)
     {
         return $this->convertExceptionToResponse($e, $request);
-    }
-
-    /**
-     * Create a response object from the given validation exception.
-     *
-     * @param  \Nova\Validation\ValidationException  $e
-     * @param  \Nova\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    protected function convertValidationExceptionToResponse(ValidationException $e, Request $request)
-    {
-        if ($e->response) {
-            return $e->response;
-        }
-
-        $errors = $e->validator->errors()->getMessages();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return Response::json($errors, 422);
-        }
-
-        return Redirect::back()->withInput($request->input())->withErrors($errors);
     }
 
     /**

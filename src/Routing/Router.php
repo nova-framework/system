@@ -246,7 +246,7 @@ class Router
     /**
      * Register a new fallback route.
      *
-     * @param  \Closure|array|string|callable|null  $action
+     * @param  \Closure|array|string  $action
      * @return \Nova\Routing\Route
      */
     public function fallback($action)
