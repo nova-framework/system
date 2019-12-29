@@ -94,7 +94,7 @@ class Handler implements HandlerInterface
     }
 
     /**
-     * Determine if the exception should be reported.
+     * Determine if the exception should not be reported.
      *
      * @param  \Exception  $e
      * @return bool
@@ -105,7 +105,7 @@ class Handler implements HandlerInterface
             HttpResponseException::class
         ));
 
-        foreach ($this->dontReport as $type) {
+        foreach ($dontReport as $type) {
             if ($e instanceof $type) {
                 return true;
             }

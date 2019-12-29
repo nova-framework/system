@@ -492,7 +492,7 @@ class Router
      * Find the Closure in an action array.
      *
      * @param  array  $action
-     * @return \Closure
+     * @return \Closure|null
      */
     protected function findActionClosure(array $action)
     {
