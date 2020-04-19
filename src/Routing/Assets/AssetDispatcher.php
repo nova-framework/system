@@ -99,26 +99,39 @@ class AssetDispatcher
      */
     public function dispatch(SymfonyRequest $request)
     {
-        if (! in_array($request->method(), array('GET', 'HEAD', 'OPTIONS'))) {
-            return;
-        }
+        $method = $request->method();
 
-        $uri = $request->path();
+        if (in_array($method, array('GET', 'HEAD', 'OPTIONS'))) {
+            $path = $request->path();
 
-        foreach ($this->routes as $route => $callback) {
-            $pattern = static::compileRoutePattern($route);
+            foreach ($this->routes as $route => $callback) {
+                $pattern = static::compileRoutePattern($route);
 
-            if (preg_match('#^' .$pattern .'$#s', $uri, $matches) === 1) {
-                return $this->process($callback, $matches, $request);
+                if (preg_match($pattern, $path, $parameters) !== 1) {
+                    continue;
+                }
+
+                // We will replace the first item (the matched URI) with the Request instance.
+                $parameters[0] = $request;
+
+                return $this->callRouteCallback($callback, $parameters, $request);
             }
         }
     }
 
-    protected static function compileRoutePattern($pattern)
+    /**
+     * Compile the given route patttern.
+     *
+     * @param  string  $route
+     * @return string
+     */
+    protected static function compileRoutePattern($route)
     {
-        return str_replace(
-            array_keys(static::$patterns), array_values(static::$patterns), $pattern
+        $pattern = str_replace(
+            array_keys(static::$patterns), array_values(static::$patterns), $route
         );
+
+        return sprintf('#^%s$#s', $pattern);
     }
 
     /**
@@ -129,11 +142,8 @@ class AssetDispatcher
      * @param  \Symfony\Component\HttpFoundation\Response $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function process($callback, $parameters, $request)
+    protected function callRouteCallback($callback, $parameters, $request)
     {
-        $parameters[0] = $request; // We will replace the first item (the matched URI) with the Request instance.
-
-        //
         $response = call_user_func_array($callback, $parameters);
 
         if ($response instanceof SymfonyResponse) {
