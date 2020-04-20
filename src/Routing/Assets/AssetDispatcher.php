@@ -103,21 +103,19 @@ class AssetDispatcher
 
         if (! in_array($method, array('GET', 'HEAD', 'OPTIONS'))) {
             //
-        } else if (! is_null($route = $this->findRouteByPath($request))) {
+        } else if (! is_null($route = $this->findRouteByPath($request->path()))) {
             return $this->callRouteCallback($route, $request);
         }
     }
 
     /**
-     * Find the assets route matching the Request instance.
+     * Find the assets route matching the Request path, if any.
      *
-     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @param  string $path
      * @return array|null
      */
-    protected function findRouteByPath(SymfonyRequest $request)
+    protected function findRouteByPath($path)
     {
-        $path = $request->path();
-
         foreach ($this->routes as $route => $callback) {
             $pattern = static::compileRoutePattern($route);
 
