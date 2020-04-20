@@ -116,8 +116,11 @@ class AssetDispatcher
      */
     protected function findRouteByPath($path)
     {
-        foreach ($this->routes as $route => $callback) {
-            $pattern = static::compileRoutePattern($route);
+        $searches = array_keys(static::$patterns);
+        $replaces = array_values(static::$patterns);
+
+        foreach ($this->getRoutes() as $route => $callback) {
+            $pattern = sprintf('#^%s$#s', str_replace($searches, $replaces, $route));
 
             if (preg_match($pattern, $path, $matches) === 1) {
                 $parameters = array_slice($matches, 1);
@@ -125,21 +128,6 @@ class AssetDispatcher
                 return compact('callback', 'parameters');
             }
         }
-    }
-
-    /**
-     * Compile the given route patttern.
-     *
-     * @param  string  $route
-     * @return string
-     */
-    protected static function compileRoutePattern($route)
-    {
-        $pattern = str_replace(
-            array_keys(static::$patterns), array_values(static::$patterns), $route
-        );
-
-        return sprintf('#^%s$#s', $pattern);
     }
 
     /**
@@ -443,12 +431,22 @@ class AssetDispatcher
     }
 
     /**
-     * Returns all registered namespaces with the router.
+     * Returns all registered namespaces on the assets dispatcher.
      *
      * @return array
      */
     public function getHints()
     {
         return $this->hints;
+    }
+
+    /**
+     * Returns all registered routes on the assets dispatcher.
+     *
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 }
