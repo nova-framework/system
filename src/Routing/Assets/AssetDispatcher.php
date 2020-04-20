@@ -81,13 +81,13 @@ class AssetDispatcher
      * @param  \Closure  $callback
      * @return void
      */
-    public function route($pattern, $callback)
+    public function route($pattern, Closure $callback)
     {
         $this->routes[$pattern] = $callback;
     }
 
     /**
-     * Dispatch a Assets File Response.
+     * Dispatch an Assets File Response.
      *
      * For proper Assets serving, the file URI should be either of the following:
      *
@@ -101,20 +101,30 @@ class AssetDispatcher
     {
         $method = $request->method();
 
-        if (in_array($method, array('GET', 'HEAD', 'OPTIONS'))) {
-            $path = $request->path();
+        if (! in_array($method, array('GET', 'HEAD', 'OPTIONS'))) {
+            //
+        } else if (! is_null($route = $this->findRoute($request))) {
+            return $this->callRouteCallback($route, $request);
+        }
+    }
 
-            foreach ($this->routes as $route => $callback) {
-                $pattern = static::compileRoutePattern($route);
+    /**
+     * Run the given route callback and process the response.
+     *
+     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @return array|null
+     */
+    protected function findRoute(SymfonyRequest $request)
+    {
+        $path = $request->path();
 
-                if (preg_match($pattern, $path, $parameters) !== 1) {
-                    continue;
-                }
+        foreach ($this->routes as $route => $callback) {
+            $pattern = static::compileRoutePattern($route);
 
-                // We will replace the first item (the matched URI) with the Request instance.
-                $parameters[0] = $request;
+            if (preg_match($pattern, $path, $matches) === 1) {
+                $parameters = array_slice($matches, 1);
 
-                return $this->callRouteCallback($callback, $parameters, $request);
+                return compact('callback', 'parameters');
             }
         }
     }
@@ -137,13 +147,18 @@ class AssetDispatcher
     /**
      * Run the given route callback and process the response.
      *
-     * @param  \Closure  $callback
-     * @param  array  $parameters
-     * @param  \Symfony\Component\HttpFoundation\Response $request
+     * @param  array  $route
+     * @param  \Symfony\Component\HttpFoundation\Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function callRouteCallback($callback, $parameters, $request)
+    protected function callRouteCallback(array $route, SymfonyRequest $request)
     {
+        extract($route);
+
+        // We will prepend the Request instance to parameters.
+        array_unshift($parameters, $request);
+
+        //
         $response = call_user_func_array($callback, $parameters);
 
         if ($response instanceof SymfonyResponse) {
