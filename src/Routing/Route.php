@@ -155,16 +155,17 @@ class Route
     /**
      * Run the route action and return the response.
      *
+     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    public function run()
+    public function run(Request $request)
     {
         if (! isset($this->container)) {
             $this->container = new Container();
         }
 
         try {
-            return $this->runActionCallback();
+            return $this->runActionCallback($request);
         }
         catch (HttpResponseException $e) {
             return $e->getResponse();
@@ -174,12 +175,13 @@ class Route
     /**
      * Runs the route action and returns the response.
      *
+     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    protected function runActionCallback()
+    protected function runActionCallback(Request $request)
     {
         if ($this->isControllerAction()) {
-            return $this->runControllerAction();
+            return $this->runControllerAction($request);
         }
 
         $callback = Arr::get($this->action, 'uses');
@@ -194,14 +196,15 @@ class Route
     /**
      * Runs the route action and returns the response.
      *
+     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    protected function runControllerAction()
+    protected function runControllerAction(Request $request)
     {
         $dispatcher = new ControllerDispatcher($this->container);
 
         return $dispatcher->dispatch(
-            $this, $this->getControllerInstance(), $this->getControllerMethod()
+            $this, $request, $this->getControllerInstance(), $this->getControllerMethod()
         );
     }
 

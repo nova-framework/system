@@ -3,6 +3,7 @@
 namespace Nova\Routing;
 
 use Nova\Container\Container;
+use Nova\Http\Request;
 use Nova\Routing\RouteDependencyResolverTrait;
 use Nova\Support\Arr;
 
@@ -36,23 +37,22 @@ class ControllerDispatcher
      * Dispatch a request to a given controller and method.
      *
      * @param  \Nova\Routing\Route  $route
+     * @param  \Nova\Http\Request  $request
      * @param  mixed  $controller
      * @param  string  $method
      * @return mixed
      */
-    public function dispatch(Route $route, $controller, $method)
+    public function dispatch(Route $route, Request $request, $controller, $method)
     {
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method
         );
 
-        if (! method_exists($controller, $callerMethod = 'callAction')) {
-            return $this->run($controller, $method, $parameters);
+        if (! method_exists($controller, 'callAction')) {
+            return call_user_func_array(array($controller, $method), $parameters);
         }
 
-        return $this->run($controller, $callerMethod, $this->resolveClassMethodDependencies(
-            array($method, $parameters), $controller, $callerMethod
-        ));
+        return $controller->callAction($method, $parameters, $request);
     }
 
     /**
