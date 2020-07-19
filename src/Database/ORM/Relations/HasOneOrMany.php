@@ -22,6 +22,7 @@ abstract class HasOneOrMany extends Relation
      */
     protected $localKey;
 
+
     /**
      * Create a new has many relationship instance.
      *
@@ -33,7 +34,7 @@ abstract class HasOneOrMany extends Relation
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $localKey)
     {
-        $this->localKey = $localKey;
+        $this->localKey   = $localKey;
         $this->foreignKey = $foreignKey;
 
         parent::__construct($query, $parent);
@@ -126,7 +127,11 @@ abstract class HasOneOrMany extends Relation
     {
         $value = $dictionary[$key];
 
-        return $type == 'one' ? reset($value) : $this->related->newCollection($value);
+        if ($type == 'one') {
+            return reset($value);
+        }
+
+        return $this->related->newCollection($value);
     }
 
     /**
@@ -142,7 +147,9 @@ abstract class HasOneOrMany extends Relation
         $foreign = $this->getPlainForeignKey();
 
         foreach ($results as $result) {
-            $dictionary[$result->{$foreign}][] = $result;
+            $key = $result->{$foreign};
+
+            $dictionary[$key][] = $result;
         }
 
         return $dictionary;
@@ -217,7 +224,9 @@ abstract class HasOneOrMany extends Relation
     public function update(array $attributes)
     {
         if ($this->related->usesTimestamps()) {
-            $attributes[$this->relatedUpdatedAt()] = $this->related->freshTimestamp();
+            $key = $this->relatedUpdatedAt();
+
+            $attributes[$key] = $this->related->freshTimestamp();
         }
 
         return $this->query->update($attributes);

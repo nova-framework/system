@@ -245,10 +245,14 @@ class HasManyThrough extends Relation
     protected function getSelectColumns(array $columns = array('*'))
     {
         if ($columns == array('*')) {
-            $columns = array($this->related->getTable().'.*');
+            $column = $this->related->getTable() .'.*';
+
+            $columns = array($column);
         }
 
-        return array_merge($columns, array($this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->firstKey));
+        $column = $this->parent->getTable() .'.' .$this->firstKey .' as related_' .$this->firstKey;
+
+        return array_merge($columns, array($column));
     }
 
     /**
@@ -262,9 +266,7 @@ class HasManyThrough extends Relation
     {
         $this->query->addSelect($this->getSelectColumns($columns));
 
-        $pager = $this->query->paginate($perPage, $columns);
-
-        return $pager;
+        return $this->query->paginate($perPage, $columns);
     }
 
     /**
