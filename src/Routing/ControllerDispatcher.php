@@ -48,23 +48,10 @@ class ControllerDispatcher
             $route->parametersWithoutNulls(), $controller, $method
         );
 
-        if (! method_exists($controller, 'callAction')) {
-            return call_user_func_array(array($controller, $method), $parameters);
+        if (method_exists($controller, 'callAction')) {
+            return $controller->callAction($method, $parameters, $request);
         }
 
-        return $controller->callAction($method, $parameters, $request);
-    }
-
-    /**
-     * Runs the controller method and returns the response.
-     *
-     * @param  mixed  $controller
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     */
-    protected function run($controller, $method, $parameters)
-    {
         return call_user_func_array(array($controller, $method), $parameters);
     }
 
