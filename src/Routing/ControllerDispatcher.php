@@ -4,6 +4,7 @@ namespace Nova\Routing;
 
 use Nova\Container\Container;
 use Nova\Routing\RouteDependencyResolverTrait;
+use Nova\Support\Arr;
 
 use Closure;
 
@@ -97,10 +98,7 @@ class ControllerDispatcher
      */
     protected static function methodExcludedByOptions($method, array $options)
     {
-        if (isset($options['only']) && ! in_array($method, (array) $options['only'])) {
-            return true;
-        }
-
-        return isset($options['except']) && in_array($method, (array) $options['except']);
+        return (! empty($option = Arr::get($options, 'only')) && ! in_array($method, (array) $option)) ||
+               (! empty($option = Arr::get($options, 'except')) && in_array($method, (array) $option));
     }
 }
