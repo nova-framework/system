@@ -165,7 +165,11 @@ class Route
         }
 
         try {
-            return $this->runActionCallback($request);
+            if (! $this->isControllerAction()) {
+                return $this->runActionCallback();
+            }
+
+            return $this->runControllerAction($request);
         }
         catch (HttpResponseException $e) {
             return $e->getResponse();
@@ -173,17 +177,12 @@ class Route
     }
 
     /**
-     * Runs the route action and returns the response.
+     * Runs the action callback and returns the response.
      *
-     * @param  \Nova\Http\Request  $request
      * @return mixed
      */
-    protected function runActionCallback(Request $request)
+    protected function runActionCallback()
     {
-        if ($this->isControllerAction()) {
-            return $this->runControllerAction($request);
-        }
-
         $callback = Arr::get($this->action, 'uses');
 
         $parameters = $this->resolveMethodDependencies(
@@ -194,7 +193,7 @@ class Route
     }
 
     /**
-     * Runs the route action and returns the response.
+     * Runs the controller action and returns the response.
      *
      * @param  \Nova\Http\Request  $request
      * @return mixed
