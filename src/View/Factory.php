@@ -103,34 +103,6 @@ class Factory
      */
     protected $renderCount = 0;
 
-    /**
-     *  Cached information about Modules.
-     *
-     * @var array
-     */
-    protected $modules = array();
-
-    /**
-     *  Cached information about Plugins.
-     *
-     * @var array
-     */
-    protected $plugins = array();
-
-    /**
-     * Cached information about the default Theme.
-     *
-     * @var string|null
-     */
-    protected $defaultTheme;
-
-    /**
-     * Cached information about the current Language.
-     *
-     * @var \Nova\Language\Language
-     */
-    protected $language;
-
 
     /**
      * Create new View Factory instance.
@@ -277,6 +249,7 @@ class Factory
         // If is actually data in the array, we will loop through the data and append
         // an instance of the partial view to the final result HTML passing in the
         // iterated value of this data array, allowing the views to access them.
+
         if (count($data) > 0) {
             foreach ($data as $key => $value) {
                 $data = array('key' => $key, $iterator => $value);
@@ -288,6 +261,7 @@ class Factory
         // If there is no data in the array, we will render the contents of the empty
         // view. Alternatively, the "empty view" could be a raw string that begins
         // with "raw|" for convenience and to let this know that it is a string.
+
         else if (! starts_with($empty, 'raw|')) {
             $result = $this->make($empty)->render();
         } else {
@@ -461,7 +435,7 @@ class Factory
     /**
      * Build a class based container callback Closure.
      *
-     * @param  string  $class
+     * @param  string  $className
      * @param  string  $prefix
      * @return \Closure
      */
@@ -469,14 +443,15 @@ class Factory
     {
         $container = $this->container;
 
-        list($class, $method) = $this->parseClassEvent($class, $prefix);
+        list ($className, $method) = $this->parseClassEvent($className, $prefix);
 
         // Once we have the class and method name, we can build the Closure to resolve
         // the instance out of the IoC container and call the method on it with the
         // given arguments that are passed to the Closure as the composer's data.
-        return function() use ($class, $method, $container)
+
+        return function () use ($className, $method, $container)
         {
-            $callable = array($container->make($class), $method);
+            $callable = array($container->make($className), $method);
 
             return call_user_func_array($callable, func_get_args());
         };
@@ -485,19 +460,19 @@ class Factory
     /**
      * Parse a class based composer name.
      *
-     * @param  string  $class
+     * @param  string  $className
      * @param  string  $prefix
      * @return array
      */
-    protected function parseClassEvent($class, $prefix)
+    protected function parseClassEvent($className, $prefix)
     {
-        if (str_contains($class, '@')) {
-            return explode('@', $class);
+        if (str_contains($className, '@')) {
+            return explode('@', $className);
         }
 
         $method = str_contains($prefix, 'composing') ? 'compose' : 'create';
 
-        return array($class, $method);
+        return array($className, $method);
     }
 
     /**

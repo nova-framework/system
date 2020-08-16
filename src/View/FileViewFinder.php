@@ -84,7 +84,8 @@ class FileViewFinder implements ViewFinderInterface
             return $this->views[$name];
         }
 
-        if ($this->hasHintInformation($name = trim($name))) {
+        //
+        else if ($this->hasHintInformation($name = trim($name))) {
             return $this->views[$name] = $this->findNamedPathView($name);
         }
 
@@ -99,7 +100,7 @@ class FileViewFinder implements ViewFinderInterface
      */
     protected function findNamedPathView($name)
     {
-        list($namespace, $view) = $this->getNamespaceSegments($name);
+        list ($namespace, $view) = $this->getNamespaceSegments($name);
 
         $paths = $this->hints[$namespace];
 
@@ -130,7 +131,7 @@ class FileViewFinder implements ViewFinderInterface
             throw new \InvalidArgumentException("View [$name] has an invalid name.");
         }
 
-        if ( ! isset($this->hints[$segments[0]])) {
+        if (! isset($this->hints[$segments[0]])) {
             throw new \InvalidArgumentException("No hint path defined for [{$segments[0]}].");
         }
 
@@ -275,18 +276,21 @@ class FileViewFinder implements ViewFinderInterface
         $paths = $this->hints[$namespace];
 
         // The folder of Views Override should be located in the same directory with the Views one.
-        // For example: <BASEPATH>/themes/Bootstrap/Views -> <BASEPATH>/themes/Bootstrap/Override
+        // For example: <BASEPATH>/themes/Bootstrap/Views -> <BASEPATH>/themes/Bootstrap/Overrides
 
         $path = dirname(head($paths)) .DS .'Overrides';
 
         if (! in_array($path, $this->paths) && $this->files->isDirectory($path)) {
             // If there was previously added another Views overriding path, we will remove it.
 
-            if (Str::endsWith(head($this->paths), DS .'Overrides')) {
-                array_shift($this->paths);
-            }
+            $paths = array_filter($this->paths, function ($path)
+            {
+                return ! Str::endsWith($path, DS .'Overrides');
+            });
 
-            array_unshift($this->paths, $path);
+            array_unshift($paths, $path);
+
+            $this->paths = $paths;
         }
     }
 
