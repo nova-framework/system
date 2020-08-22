@@ -30,10 +30,12 @@ class MarkdownCompiler extends Compiler implements CompilerInterface
             $this->setPath($path);
         }
 
-        $contents = $this->compileString($this->files->get($path));
+        $content = $this->compileString($this->files->get($path));
 
-        if ( ! is_null($this->cachePath)) {
-            $this->files->put($this->getCompiledPath($this->getPath()), $contents);
+        if (! is_null($this->cachePath)) {
+            $compiled = $this->getCompiledPath($this->getPath());
+
+            $this->files->put($compiled, $content);
         }
     }
 
@@ -66,8 +68,6 @@ class MarkdownCompiler extends Compiler implements CompilerInterface
      */
     public function compileString($value)
     {
-        $parsedown = new Parsedown();
-
-        return $parsedown->text($value);
+        return with(new Parsedown())->text($value);
     }
 }
