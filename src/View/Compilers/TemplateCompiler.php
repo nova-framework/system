@@ -72,7 +72,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      *
      * @var array
      */
-    protected $verbatimBlocks = [];
+    protected $verbatimBlocks = array();
 
     /**
      * Counter to keep track of nested forelse statements.
