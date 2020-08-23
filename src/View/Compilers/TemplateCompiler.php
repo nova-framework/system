@@ -97,12 +97,12 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         $path = $this->getPath();
 
         //
-        $content = $this->compileString($this->files->get($path));
+        $contents = $this->compileString($this->files->get($path));
 
         if ( ! is_null($this->cachePath)) {
             $compiled = $this->getCompiledPath($path);
 
-            $this->files->put($compiled, $content);
+            $this->files->put($compiled, $contents);
         }
     }
 

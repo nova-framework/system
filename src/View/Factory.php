@@ -508,7 +508,10 @@ class Factory
     {
         if (! empty($content)) {
             $this->extendSection($section, $content);
-        } else if (ob_start()) {
+        }
+
+        //
+        else if (ob_start()) {
             $this->sectionStack[] = $section;
         }
     }
@@ -543,15 +546,18 @@ class Factory
      */
     public function stopSection($overwrite = false)
     {
-        $last = array_pop($this->sectionStack);
+        $content = ob_get_clean();
+
+        //
+        $section = array_pop($this->sectionStack);
 
         if ($overwrite) {
-            $this->sections[$last] = ob_get_clean();
+            $this->sections[$section] = $content;
         } else {
-            $this->extendSection($last, ob_get_clean());
+            $this->extendSection($section, $content);
         }
 
-        return $last;
+        return $section;
     }
 
     /**
@@ -561,15 +567,18 @@ class Factory
      */
     public function appendSection()
     {
-        $last = array_pop($this->sectionStack);
+        $content = ob_get_clean();
 
-        if (isset($this->sections[$last]))  {
-            $this->sections[$last] .= ob_get_clean();
-        } else {
-            $this->sections[$last] = ob_get_clean();
+        //
+        $section = array_pop($this->sectionStack);
+
+        if (isset($this->sections[$section]))  {
+            $content = $this->sections[$section] . $content;
         }
 
-        return $last;
+        $this->sections[$section] = $content;
+
+        return $section;
     }
 
     /**
@@ -597,13 +606,9 @@ class Factory
      */
     public function yieldContent($section, $default = '')
     {
-        $sectionContent = $default;
+        $content = isset($this->sections[$section]) ? $this->sections[$section] : $default;
 
-        if (isset($this->sections[$section])) {
-            $sectionContent = $this->sections[$section];
-        }
-
-        return str_replace('@parent', '', $sectionContent);
+        return str_replace('@parent', '', $content);
     }
 
     /**

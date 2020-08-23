@@ -5,6 +5,7 @@ namespace Nova\View\Engines;
 use Nova\View\Engines\EngineInterface;
 
 use Exception;
+use Throwable;
 
 
 class PhpEngine implements EngineInterface
@@ -51,13 +52,11 @@ class PhpEngine implements EngineInterface
         // We'll evaluate the contents of the view inside a try/catch block so we can
         // flush out any stray output that might get out before an error occurs or
         // an exception is thrown. This prevents any partial views from leaking.
+
         try {
             include $__path;
         }
-        catch (\Exception $e) {
-            $this->handleViewException($e, $obLevel);
-        }
-        catch (\Throwable $e) {
+        catch (Exception | Throwable $e) {
             $this->handleViewException($e, $obLevel);
         }
 

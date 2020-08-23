@@ -90,11 +90,16 @@ class View implements ArrayAccess, Renderable
         try {
             $contents = $this->renderContents();
 
-            $response = isset($callback) ? $callback($this, $contents) : null;
+            if (isset($callback)) {
+                $response = call_user_func($callback, $this, $contents);
+            } else {
+                $response = null;
+            }
 
             // Once we have the contents of the view, we will flush the sections if we are
             // done rendering all views so that there is nothing left hanging over when
             // another view gets rendered in the future by the application developer.
+
             $this->factory->flushSectionsIfDoneRendering();
 
             return $response ?: $contents;
@@ -116,6 +121,7 @@ class View implements ArrayAccess, Renderable
         // We will keep track of the amount of views being rendered so we can flush
         // the section after the complete rendering operation is done. This will
         // clear out the sections for any separate views that may be rendered.
+
         $this->factory->incrementRender();
 
         $this->factory->callComposer($this);
@@ -125,6 +131,7 @@ class View implements ArrayAccess, Renderable
         // Once we've finished rendering the view, we'll decrement the render count
         // so that each sections get flushed out next time a view is created and
         // no old sections are staying around in the memory of an environment.
+
         $this->factory->decrementRender();
 
         return $contents;
@@ -137,7 +144,7 @@ class View implements ArrayAccess, Renderable
      */
     public function renderSections()
     {
-        return $this->render(function ($view)
+        return $this->render(function ($view, $contents)
         {
             return $this->factory->getSections();
         });
