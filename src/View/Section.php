@@ -55,16 +55,6 @@ class Section
      *
      * @return string
      */
-    public function end()
-    {
-        return $this->factory->stopSection();
-    }
-
-    /**
-     * Stop injecting content into a section.
-     *
-     * @return string
-     */
     public function stop()
     {
         return $this->factory->stopSection();
