@@ -252,7 +252,9 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return preg_replace_callback($pattern, function ($match)
         {
-            if (method_exists($this, $method = 'compile' .ucfirst($match[1]))) {
+            $method = sprintf('compile%s', ucfirst($match[1]));
+
+            if (method_exists($this, $method)) {
                 $match[0] = call_user_func(array($this, $method), Arr::get($match, 3));
             }
 
