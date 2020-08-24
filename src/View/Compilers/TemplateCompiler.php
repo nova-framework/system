@@ -135,8 +135,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function compileString($value)
     {
-        $result = '';
-
         if (strpos($value, '@verbatim') !== false) {
             $value = $this->storeVerbatimBlocks($value);
         }
@@ -145,9 +143,12 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         // Here we will loop through all of the tokens returned by the Zend lexer and parse each one into the corresponding valid PHP.
         // We will then have this template as the correctly rendered PHP that can be rendered natively.
-        foreach (token_get_all($value) as $token) {
-            $result .= is_array($token) ? $this->parseToken($token) : $token;
-        }
+
+        $result = implode(array_map(function ($token)
+        {
+            return is_array($token) ? $this->parseToken($token) : $token;
+
+        }, token_get_all($value)));
 
         if (! empty($this->verbatimBlocks)) {
             $result = $this->restoreVerbatimBlocks($result);
@@ -155,8 +156,11 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         // If there are any footer lines that need to get added to a template we will add them here at the end of the template.
         // This gets used mainly for the template inheritance via the extends keyword that should be appended.
+
         if (count($this->footer) > 0) {
-            $result = ltrim($result, PHP_EOL) .PHP_EOL .implode(PHP_EOL, array_reverse($this->footer));
+            $footer = implode(PHP_EOL, array_reverse($this->footer));
+
+            $result = ltrim($result, PHP_EOL) .PHP_EOL .$footer;
         }
 
         return $result;
@@ -170,10 +174,12 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function storeVerbatimBlocks($value)
     {
-        return preg_replace_callback('/(?<!@)@verbatim(.*?)@endverbatim/s', function ($matches) {
+        return preg_replace_callback('/(?<!@)@verbatim(.*?)@endverbatim/s', function ($matches)
+        {
             $this->verbatimBlocks[] = $matches[1];
 
             return $this->verbatimPlaceholder;
+
         }, $value);
     }
 
@@ -185,13 +191,15 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function restoreVerbatimBlocks($result)
     {
-        $result = preg_replace_callback('/' .preg_quote($this->verbatimPlaceholder) .'/', function ()
+        $pattern = sprintf('/%s/', preg_quote($this->verbatimPlaceholder));
+
+        $result = preg_replace_callback($pattern, function ()
         {
             return array_shift($this->verbatimBlocks);
 
         }, $result);
 
-        $this->verbatimBlocks = [];
+        $this->verbatimBlocks = array();
 
         return $result;
     }
@@ -204,7 +212,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function parseToken($token)
     {
-        list($id, $content) = $token;
+        list ($id, $content) = $token;
 
         if ($id == T_INLINE_HTML) {
             foreach ($this->compilers as $type) {
@@ -230,6 +238,29 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         }
 
         return $value;
+    }
+
+    /**
+     * Compile Template Statements that start with "@"
+     *
+     * @param  string  $value
+     * @return mixed
+     */
+    protected function compileStatements($value)
+    {
+        $pattern = '/\B@(\w+)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x';
+
+        return preg_replace_callback($pattern, function ($match)
+        {
+            $method = 'compile' .ucfirst($match[1]);
+
+            if (method_exists($this, $method)) {
+                $match[0] = call_user_func(array($this, $method), Arr::get($match, 3));
+            }
+
+            return isset($match[3]) ? $match[0] : $match[0] .$match[2];
+
+        }, $value);
     }
 
     /**
@@ -263,26 +294,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Compile Template Statements that start with "@"
-     *
-     * @param  string  $value
-     * @return mixed
-     */
-    protected function compileStatements($value)
-    {
-        $callback = function($match)
-        {
-            if (method_exists($this, $method = 'compile' .ucfirst($match[1]))) {
-                $match[0] = call_user_func(array($this, $method), Arr::get($match, 3));
-            }
-
-            return isset($match[3]) ? $match[0] : $match[0] .$match[2];
-        };
-
-        return preg_replace_callback('/\B@(\w+)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $value);
-    }
-
-    /**
      * Compile the "regular" echo statements.
      *
      * @param  string  $value
@@ -292,14 +303,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $pattern = sprintf('/(@)?%s\s*(.+?)\s*%s(\r?\n)?/s', $this->contentTags[0], $this->contentTags[1]);
 
-        $callback = function($matches)
+        return preg_replace_callback($pattern, function ($matches)
         {
             $whitespace = empty($matches[3]) ? '' : $matches[3] .$matches[3];
 
             return $matches[1] ? substr($matches[0], 1) : '<?php echo ' .$this->compileEchoDefaults($matches[2]) .'; ?>' .$whitespace;
-        };
 
-        return preg_replace_callback($pattern, $callback, $value);
+        }, $value);
     }
 
     /**
@@ -312,14 +322,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $pattern = sprintf('/%s\s*(.+?)\s*%s(\r?\n)?/s', $this->escapedTags[0], $this->escapedTags[1]);
 
-        $callback = function($matches)
+        return preg_replace_callback($pattern, function($matches)
         {
             $whitespace = empty($matches[2]) ? '' : $matches[2] .$matches[2];
 
-            return '<?php echo e('.$this->compileEchoDefaults($matches[1]).'); ?>'.$whitespace;
-        };
+            return '<?php echo e(' .$this->compileEchoDefaults($matches[1]) .'); ?>' .$whitespace;
 
-        return preg_replace_callback($pattern, $callback, $value);
+        }, $value);
     }
 
     /**
@@ -507,9 +516,22 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function compileForelse($expression)
     {
-        $empty = '$__empty_' . ++$this->forelseCounter;
+        $empty = sprintf('$__empty_%d', ++$this->forelseCounter);
 
         return "<?php {$empty} = true; foreach{$expression}: {$empty} = false; ?>";
+    }
+
+    /**
+     * Compile the forelse statements into valid PHP.
+     *
+     * @param  string  $expression
+     * @return string
+     */
+    protected function compileEmpty($expression)
+    {
+        $empty = sprintf('$__empty_%d', $this->forelseCounter--);
+
+        return "<?php endforeach; if ({$empty}): ?>";
     }
 
     /**
@@ -554,19 +576,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     protected function compileElseif($expression)
     {
         return "<?php elseif{$expression}: ?>";
-    }
-
-    /**
-     * Compile the forelse statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compileEmpty($expression)
-    {
-        $empty = '$__empty_' . $this->forelseCounter--;
-
-        return "<?php endforeach; if ({$empty}): ?>";
     }
 
     /**
@@ -711,9 +720,9 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $expression = $this->stripParentheses($expression);
 
-        $data = "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
+        $line = "<?php echo \$__env->make($expression, array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>";
 
-        $this->footer[] = $data;
+        $this->footer[] = $line;
 
         return '';
     }
@@ -798,7 +807,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function createMatcher($function)
     {
-        return '/(?<!\w)(\s*)@'.$function.'(\s*\(.*\))/';
+        return sprintf('/(?<!\w)(\s*)@%s(\s*\(.*\))/', $function);
     }
 
     /**
@@ -809,7 +818,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function createOpenMatcher($function)
     {
-        return '/(?<!\w)(\s*)@'.$function.'(\s*\(.*)\)/';
+        return sprintf('/(?<!\w)(\s*)@%s(\s*\(.*)\)/', $function);
     }
 
     /**
@@ -820,7 +829,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function createPlainMatcher($function)
     {
-        return '/(?<!\w)(\s*)@'.$function.'(\s*)/';
+        return sprintf('/(?<!\w)(\s*)@%s(\s*)/', $function);
     }
 
     /**
@@ -833,9 +842,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     public function setContentTags($openTag, $closeTag, $escaped = false)
     {
-        $property = ($escaped === true) ? 'escapedTags' : 'contentTags';
+        $tags = array(preg_quote($openTag), preg_quote($closeTag));
 
-        $this->{$property} = array(preg_quote($openTag), preg_quote($closeTag));
+        if ($escaped === true) {
+            $this->escapedTags = $tags;
+        } else {
+            $this->contentTags = $tags;
+        }
     }
 
     /**
