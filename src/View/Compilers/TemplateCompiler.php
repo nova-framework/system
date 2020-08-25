@@ -250,15 +250,15 @@ class TemplateCompiler extends Compiler implements CompilerInterface
     {
         $pattern = '/\B@(\w+)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x';
 
-        return preg_replace_callback($pattern, function ($match)
+        return preg_replace_callback($pattern, function ($matches)
         {
-            $method = sprintf('compile%s', ucfirst($match[1]));
+            list ($matched, $keyword, $whitespace, $expression) = array_pad($matches, 4, null);
 
-            if (method_exists($this, $method)) {
-                $match[0] = call_user_func(array($this, $method), Arr::get($match, 3));
+            if (method_exists($this, $method = 'compile' .ucfirst($keyword))) {
+                $matched = call_user_func(array($this, $method), $expression);
             }
 
-            return isset($match[3]) ? $match[0] : $match[0] .$match[2];
+            return ! empty($expression) ? $matched : $matched .$whitespace;
 
         }, $value);
     }
@@ -305,9 +305,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return preg_replace_callback($pattern, function ($matches)
         {
-            $whitespace = empty($matches[3]) ? '' : $matches[3] .$matches[3];
+            list ($matched, $verbatim, $value, $whitespace) = array_pad($matches, 4, '');
 
-            return $matches[1] ? substr($matches[0], 1) : '<?php echo ' .$this->compileEchoDefaults($matches[2]) .'; ?>' .$whitespace;
+            if ($verbatim) {
+                return substr($matched, 1);
+            }
+
+            return '<?php echo ' .$this->compileEchoDefaults($value) .'; ?>' .$whitespace;
 
         }, $value);
     }
@@ -324,9 +328,9 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return preg_replace_callback($pattern, function($matches)
         {
-            $whitespace = empty($matches[2]) ? '' : $matches[2] .$matches[2];
+            list (, $value, $whitespace) = array_pad($matches, 3, '');
 
-            return '<?php echo e(' .$this->compileEchoDefaults($matches[1]) .'); ?>' .$whitespace;
+            return '<?php echo e(' .$this->compileEchoDefaults($value) .'); ?>' .$whitespace;
 
         }, $value);
     }
