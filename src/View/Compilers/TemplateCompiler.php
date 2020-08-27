@@ -218,11 +218,9 @@ class TemplateCompiler extends Compiler implements CompilerInterface
             return $content;
         }
 
-        return array_reduce($this->compilers, function ($content, $compiler)
+        return array_reduce($this->compilers, function ($content, $type)
         {
-            $method = 'compile' .$compiler;
-
-            return call_user_func(array($this, $method), $content);
+            return call_user_func(array($this, "compile{$type}"), $content);
 
         }, $content);
     }
