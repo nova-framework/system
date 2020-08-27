@@ -212,17 +212,19 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function parseToken($token)
     {
-        list ($id, $content) = $token;
+        list ($id, $content) = array_pad($token, 2, '');
 
-        if ($id == T_INLINE_HTML) {
-            foreach ($this->compilers as $type) {
-                $method = 'compile' .$type;
-
-                $content = call_user_func(array($this, $method), $content);
-            }
+        if ($id != T_INLINE_HTML) {
+            return $content;
         }
 
-        return $content;
+        return array_reduce($this->compilers, function ($content, $compiler)
+        {
+            $method = 'compile' .$compiler;
+
+            return call_user_func(array($this, $method), $content);
+
+        }, $content);
     }
 
     /**
@@ -305,7 +307,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return preg_replace_callback($pattern, function ($matches)
         {
-            list ($matched, $verbatim, $value, $whitespace) = array_pad($matches, 4, '');
+            list (, $verbatim, $value, $whitespace) = array_pad($matches, 4, '');
 
             if ($verbatim) {
                 return substr($matched, 1);
