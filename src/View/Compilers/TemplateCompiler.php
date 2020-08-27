@@ -139,8 +139,6 @@ class TemplateCompiler extends Compiler implements CompilerInterface
             $value = $this->storeVerbatimBlocks($value);
         }
 
-        $this->footer = array();
-
         // Here we will loop through all of the tokens returned by the Zend lexer and parse each one into the corresponding valid PHP.
         // We will then have this template as the correctly rendered PHP that can be rendered natively.
 
@@ -157,13 +155,15 @@ class TemplateCompiler extends Compiler implements CompilerInterface
         // If there are any footer lines that need to get added to a template we will add them here at the end of the template.
         // This gets used mainly for the template inheritance via the extends keyword that should be appended.
 
-        if (count($this->footer) > 0) {
-            $footer = implode(PHP_EOL, array_reverse($this->footer));
-
-            $result = ltrim($result, PHP_EOL) .PHP_EOL .$footer;
+        if (empty($this->footer)) {
+            return $result;
         }
 
-        return $result;
+        $footer = implode(PHP_EOL, array_reverse($this->footer));
+
+        $this->footer = array();
+
+        return ltrim($result, PHP_EOL) .PHP_EOL .$footer;
     }
 
     /**
@@ -252,13 +252,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return preg_replace_callback($pattern, function ($matches)
         {
-            list ($matched, $keyword, $whitespace, $expression) = array_pad($matches, 4, null);
+            list ($content, $keyword, $whitespace, $expression) = array_pad($matches, 4, null);
 
             if (method_exists($this, $method = 'compile' .ucfirst($keyword))) {
-                $matched = call_user_func(array($this, $method), $expression);
+                $content = call_user_func(array($this, $method), $expression);
             }
 
-            return ! empty($expression) ? $matched : $matched .$whitespace;
+            return ! empty($expression) ? $content : $content .$whitespace;
 
         }, $value);
     }
