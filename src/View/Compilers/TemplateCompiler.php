@@ -212,19 +212,19 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function parseToken($token)
     {
-        list ($id, $content) = array_pad($token, 2, '');
+        list ($type, $value) = array_pad($token, 2, '');
 
-        if ($id != T_INLINE_HTML) {
-            return $content;
+        if ($type != T_INLINE_HTML) {
+            return $value;
         }
 
-        return array_reduce($this->compilers, function ($content, $compiler)
+        return array_reduce($this->compilers, function ($value, $compiler)
         {
             $method = 'compile' .$compiler;
 
-            return call_user_func(array($this, $method), $content);
+            return call_user_func(array($this, $method), $value);
 
-        }, $content);
+        }, $value);
     }
 
     /**
