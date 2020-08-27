@@ -235,11 +235,11 @@ class TemplateCompiler extends Compiler implements CompilerInterface
      */
     protected function compileExtensions($value)
     {
-        foreach ($this->extensions as $compiler) {
-            $value = call_user_func($compiler, $value, $this);
-        }
+        return array_reduce($this->extensions, function ($value, $compiler)
+        {
+            return call_user_func($compiler, $value, $this);
 
-        return $value;
+        }, $value);
     }
 
     /**
