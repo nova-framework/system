@@ -27,18 +27,27 @@ class LocalizationServiceProvider extends ServiceProvider
         {
             $locale = $app['config']['app.locale'];
 
-            return new LanguageManager($app, $locale, array(
-
-                // Namespace for the System path.
-                'system' => dirname(__DIR__) .DS .'Language',
-
-                // Namespace for the Application path.
-                'app' => APPPATH .'Language',
-
-                // Namespace for the Shared path.
-                'shared' => BASEPATH .'shared' .DS .'Language',
-            ));
+            return new LanguageManager($app, $locale, $this->getDefaultNamespaces());
         });
+    }
+
+    /**
+     * Get the default Language namespace.
+     *
+     * @return array
+     */
+    protected function getDefaultNamespaces()
+    {
+        return  array(
+            // Namespace for the System path.
+            'system' => dirname(__DIR__) .DS .'Language',
+
+            // Namespace for the Application path.
+            'app' => APPPATH .'Language',
+
+            // Namespace for the Shared path.
+            'shared' => BASEPATH .'shared' .DS .'Language',
+        );
     }
 
     /**
