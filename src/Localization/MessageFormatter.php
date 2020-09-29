@@ -43,20 +43,20 @@ class MessageFormatter
      */
     protected function fallbackFormat($pattern, $parameters, $locale)
     {
-        $tokens = $this->tokenizePattern($pattern);
-
-        foreach ($tokens as $key => $token) {
+        $tokens = array_map(function ($token) use ($parameters, $locale)
+        {
             if (! is_array($token)) {
-                continue;
+                return $token;
             }
 
             // The token is an ICU command.
-            else if (($value = $this->parseToken($token, $parameters, $locale)) === false) {
-                throw new LogicException('Message pattern is invalid.');
+            else if (($value = $this->parseToken($token, $parameters, $locale)) !== false) {
+                return $value;
             }
 
-            $tokens[$key] = $value;
-        }
+            throw new LogicException('Message pattern is invalid.');
+
+        }, $this->tokenizePattern($pattern));
 
         return implode('', $tokens);
     }

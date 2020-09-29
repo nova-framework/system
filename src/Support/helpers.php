@@ -85,10 +85,11 @@ if (! function_exists('__'))
      */
     function __($message, $args = null)
     {
-        if (! $message) return '';
+        if (empty($message)) {
+            return '';
+        }
 
-        //
-        $params = (func_num_args() === 2) ? (array)$args : array_slice(func_get_args(), 1);
+        $params = (func_num_args() === 2) ? (array) $args : array_slice(func_get_args(), 1);
 
         return app('language')->instance('app')->translate($message, $params);
     }
@@ -106,12 +107,22 @@ if (! function_exists('__d'))
      */
     function __d($domain, $message, $args = null)
     {
-        if (! $message) return '';
+        if (empty($message)) {
+            return '';
+        }
 
-        //
-        $params = (func_num_args() === 3) ? (array)$args : array_slice(func_get_args(), 2);
+        $params = (func_num_args() === 3) ? (array) $args : array_slice(func_get_args(), 2);
 
-        return app('language')->instance($domain)->translate($message, $params);
+        // Split the optional group from the domain string.
+        if (count($segments = explode('.', $domain)) > 1) {
+            $domain = $segments[0];
+
+            $group = implode('.', array_slice($segments, 1));
+        } else {
+            $group = null;
+        }
+
+        return app('language')->instance($domain)->translate($message, $params, $group);
     }
 }
 

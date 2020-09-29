@@ -103,23 +103,30 @@ class Language
     /**
      * Translate a message with optional formatting
      * @param string $message Original message.
-     * @param array $params Optional params for formatting.
+     * @param array $parameters Optional params for formatting.
+     * @param string|null $group The messages group
      * @return string
      */
-    public function translate($message, array $params = array())
+    public function translate($message, array $parameters = array(), $group = null)
     {
-        // Update the current message with the domain translation, if we have one.
+        $translation = $this->translateMessage($message, $group);
+
+        return with(new MessageFormatter())->format($translation, $parameters, $this->locale);
+    }
+
+    /**
+     * Translate a message
+     * @param string $message Original message.
+     * @param string|null $group The messages group
+     * @return string
+     */
+    protected function translateMessage($message, $group)
+    {
         if (isset($this->messages[$message]) && ! empty($this->messages[$message])) {
-            $message = $this->messages[$message];
+            return $this->messages[$message];
         }
 
-        if (empty($params)) {
-            return $message;
-        }
-
-        $formatter = new MessageFormatter();
-
-        return $formatter->format($message, $params, $this->locale);
+        return $message;
     }
 
     /**
