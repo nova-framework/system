@@ -77,7 +77,7 @@ class LanguageManager
      * Get instance of Language with domain and code (optional).
      * @param string $domain Optional custom domain
      * @param string $code Optional custom language code.
-     * @return Language
+     * @return \Nova\Localization\Language
      */
     public function instance($domain = 'app', $code = null)
     {
@@ -103,11 +103,22 @@ class LanguageManager
             return $this->instances[$id];
         }
 
-        $path = Arr::get($this->hints, $domain);
+        return $this->instances[$id] = $this->createLanguageInstance($domain, $code);
+    }
 
-        $info = Arr::get($this->languages, $code);
+    /**
+     * Create a new Language instance.
+     * @param string $domain
+     * @param string $code
+     * @return \Nova\Localization\Language
+     */
+    protected function createLanguageInstance($domain, $code)
+    {
+        $namespace = Arr::get($this->hints, $domain);
 
-        return $this->instances[$id] = new Language($this, $domain, $path, $code, $info);
+        $info = Arr::get($this->languages, $code, array());
+
+        return new Language($this, $this->app['files'], $domain, $code, $namespace, $info);
     }
 
     /**

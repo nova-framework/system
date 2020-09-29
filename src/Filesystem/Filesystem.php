@@ -78,7 +78,9 @@ class Filesystem
      */
     public function getRequire($path)
     {
-        if ($this->isFile($path)) return require $path;
+        if ($this->isFile($path)) {
+            return require $path;
+        }
 
         throw new FileNotFoundException("File does not exist at path {$path}");
     }
