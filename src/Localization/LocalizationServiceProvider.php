@@ -32,7 +32,7 @@ class LocalizationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the default Language namespace.
+     * Get the default Language namespaces.
      *
      * @return array
      */
