@@ -121,11 +121,11 @@ class Language
     {
         $translation = $this->translateMessage($message, $group);
 
-        if (! empty($parameters)) {
-            return with(new MessageFormatter())->format($translation, $parameters, $this->locale);
+        if (empty($parameters)) {
+            return $translation;
         }
 
-        return $translation;
+        return with(new MessageFormatter())->format($translation, $parameters, $this->locale());
     }
 
     /**
