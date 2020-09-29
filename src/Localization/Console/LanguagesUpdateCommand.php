@@ -87,31 +87,37 @@ class LanguagesUpdateCommand extends Command
         );
 
         if ($this->option('path')) {
-            $path = $this->option('path');
-
-            return $this->handlePath($path, $languages);
+            $paths = (array) $this->option('path');
         }
 
-        $paths = $this->scanWorkPaths($config);
+        // A custom path is not specified.
+        else {
+            $paths = $this->scanWorkPaths($config);
+        }
 
+        //
         // Update the Language files in the available Domains.
+
         foreach ($paths as $path) {
-            $this->handlePath($path, $languages);
+            $this->processPath($path, $languages);
         }
     }
 
-    protected function handlePath($path, array $languages)
+    protected function processPath($path, array $languages)
     {
         if (! $this->files->isDirectory($path)) {
-            return $this->error('Not a directory: "' .$path .'"');
+            $this->error(PHP_EOL .'Not a directory: "' .$path .'"');
         }
 
         //
         else if (! $this->files->isDirectory($path .DS .'Language')) {
-            return $this->comment('Not a translatable path: "' .$path .'"');
+            $this->comment(PHP_EOL .'Not a translatable path: "' .$path .'"');
         }
 
-        return $this->updateLanguageFiles($path, $languages);
+        //
+        else {
+            $this->updateLanguageFiles($path, $languages);
+        }
     }
 
     protected function scanWorkPaths(Config $config)
@@ -161,10 +167,8 @@ class LanguagesUpdateCommand extends Command
             return;
         }
 
-        // Extract the messages from files.
-        $messages = $this->extractMessages($paths, $withoutDomain);
-
-        if (empty($messages)) {
+        //
+        else if (empty($messages = $this->extractMessages($paths, $withoutDomain))) {
             return;
         }
 
