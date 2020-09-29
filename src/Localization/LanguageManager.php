@@ -12,6 +12,8 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
 
+use LogicException;
+
 
 class LanguageManager
 {
@@ -55,28 +57,20 @@ class LanguageManager
      * Create new Language Manager instance.
      *
      * @param  \core\Application  $app
+     * @param  string $locale
+     * @param  array $hints
      * @return void
      */
-    function __construct(Application $app, $locale)
+    function __construct(Application $app, $locale, array $hints)
     {
         $this->app = $app;
 
         $this->locale = $locale;
 
+        $this->hints = $hints;
+
         // Setup the know Languages.
         $this->languages = $app['config']['languages'];
-
-        // Setup the default path hints.
-        $this->hints = array(
-            // Namespace for the Framework path.
-            'nova' => dirname(__DIR__) .DS .'Language',
-
-            // Namespace for the Application path.
-            'app' => APPPATH .'Language',
-
-            // Namespace for the Shared path.
-            'shared' => BASEPATH .'shared' .DS .'Language',
-        );
     }
 
     /**
@@ -85,17 +79,35 @@ class LanguageManager
      * @param string $code Optional custom language code.
      * @return Language
      */
-    public function instance($domain = 'app', $locale = null)
+    public function instance($domain = 'app', $code = null)
     {
-        $locale = $locale ?: $this->locale;
+        if (is_null($code)) {
+            $code = $this->getLocale();
+        }
+
+        // Check if the language code is known, with fallback to English.
+        if (! Arr::has($this->languages, $code)) {
+            $code = 'en';
+        }
+
+        // Check if the requested domain is known.
+        if (! Arr::has($this->hints, $domain)) {
+            throw new LogicException("Unknown language domain [$domain]");
+        }
 
         // The ID code is something like: 'en/system', 'en/app' or 'en/file_manager'
-        $id = $locale .'/' .$domain;
+        $id = sprintf('%s/%s', $code, $domain);
 
         // Returns the Language domain instance, if it already exists.
-        if (isset($this->instances[$id])) return $this->instances[$id];
+        if (isset($this->instances[$id])) {
+            return $this->instances[$id];
+        }
 
-        return $this->instances[$id] = new Language($this, $domain, $locale);
+        $path = Arr::get($this->hints, $domain);
+
+        $info = Arr::get($this->languages, $code);
+
+        return $this->instances[$id] = new Language($this, $domain, $path, $code, $info);
     }
 
     /**
@@ -144,14 +156,24 @@ class LanguageManager
     }
 
     /**
-     * Returns all registered namespaces with the config
-     * loader.
+     * Returns all registered namespaces with the config loader.
      *
      * @return array
      */
     public function getNamespaces()
     {
         return $this->hints;
+    }
+
+    /**
+     * Returns all registered namespaces with the config loader.
+     *
+     * @param  string  $domain
+     * @return string
+     */
+    public function getNamespace($domain)
+    {
+        return Arr::get($this->hints, $domain);
     }
 
     /**

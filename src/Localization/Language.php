@@ -5,6 +5,7 @@ namespace Nova\Localization;
 use Nova\Localization\LanguageManager;
 use Nova\Localization\MessageFormatter;
 use Nova\Support\Facades\Log;
+use Nova\Support\Arr;
 
 use Exception;
 
@@ -42,53 +43,60 @@ class Language
     private $locale    = 'en-US';
     private $direction = 'ltr';
 
+    /**
+     * The current Language Domain.
+     */
+    private $path;
 
     /**
      * Create an new Language instance.
      *
+     * @param \Nova\Localization\LanguageManager $manager
      * @param string $domain
      * @param string $code
      * @param string $path
+     * @param array  $data
      */
-    public function __construct(LanguageManager $manager, $domain, $code)
+    public function __construct(LanguageManager $manager, $domain, $code, $path, array $data)
     {
-        $languages = $manager->getLanguages();
+        $this->manager = $manager;
+        $this->domain  = $domain;
+        $this->code    = $code;
 
-        if (isset($languages[$code]) && ! empty($languages[$code])) {
-            $info = $languages[$code];
+        // Setup the path to the translation files.
+        $this->path = $path .DS .strtoupper($code);
 
-            $this->code = $code;
+        // Extract the language data.
+        extract($data);
 
-            //
-            $this->info      = $info['info'];
-            $this->name      = $info['name'];
-            $this->locale    = $info['locale'];
-            $this->direction = $info['dir'];
-        } else {
-            $code = 'en';
+        $this->info      = $info;
+        $this->name      = $name;
+        $this->locale    = $locale;
+        $this->direction = $dir;
+
+        // Load the translation messages.
+        $this->loadMessages();
+    }
+
+    /**
+     * Load the messages from the translation file.
+     * @return void
+     */
+    protected function loadMessages()
+    {
+        // Determine the current Language file path.
+        $filePath = $this->getPath() .DS .'messages.php';
+
+        if (! is_readable($filePath)) {
+            return;
         }
 
-        $this->domain = $domain;
+        // The requested language file exists; retrieve the messages from it.
+        $messages = require $filePath;
 
-        // Determine the current Language file path.
-        $namespaces = $manager->getNamespaces();
-
-        // Check if the language file is readable.
-        if (! array_key_exists($domain, $namespaces)) return;
-
-        // Determine the Language(s) path.
-        $namespace = $namespaces[$domain];
-
-        $filePath = $namespace .DS .strtoupper($code) .DS .'messages.php';
-
-        if (is_readable($filePath)) {
-            // The requested language file exists; retrieve the messages from it.
-            $messages = require $filePath;
-
-            // Some consistency check of the messages, before setting them.
-            if (is_array($messages) && ! empty($messages)) {
-                $this->messages = $messages;
-            }
+        // Some consistency check of the messages, before setting them.
+        if (is_array($messages) && ! empty($messages)) {
+            $this->messages = $messages;
         }
     }
 
@@ -112,6 +120,15 @@ class Language
         $formatter = new MessageFormatter();
 
         return $formatter->format($message, $params, $this->locale);
+    }
+
+    /**
+     * Get current path
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
     }
 
     // Public Getters
