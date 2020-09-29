@@ -90,7 +90,7 @@ class LanguageManager
             $code = 'en';
         }
 
-        // Check if the requested domain is a known one.
+        // Check if the requested language domain is known.
         if (! isset($this->hints[$domain])) {
             throw new LogicException("Unknown language domain [$domain]");
         }
