@@ -86,8 +86,8 @@ class LanguagesUpdateCommand extends Command
             $config->get('languages', array())
         );
 
-        if ($this->option('path')) {
-            $paths = (array) $this->option('path');
+        if (! empty($path = $this->option('path'))) {
+            $paths = (array) $path;
         }
 
         // A custom path is not specified.
@@ -219,7 +219,7 @@ class LanguagesUpdateCommand extends Command
             $pattern = '#__d\(\'(?:.*)?\',.?\s?\'(.*)\'(?:,.*)?\)#smU';
         }
 
-        $this->comment("Using PATERN: '" .$pattern."'");
+        //$this->comment("Using the PATERN: '" .$pattern ."'");
 
         // Extract the messages from files and return them.
         $results = array();
