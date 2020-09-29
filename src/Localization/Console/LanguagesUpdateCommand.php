@@ -262,31 +262,29 @@ class LanguagesUpdateCommand extends Command
 
     protected function updateLanguageFile($language, $path, array $messages)
     {
-        $path = $path .str_replace('/', DS, '/Language/' .strtoupper($language) .'/messages.php');
+        $path = $path .str_replace('/', DS, sprintf('/Language/%s/messages.php', strtoupper($language)));
 
         $data = $this->getMessagesFromFile($path);
 
-        //
-        $result = array();
+        // Preserve the actual translations.
+        $translations = array();
 
         foreach ($messages as $key) {
-            $result[$key] = Arr::get($data, $key, '');
+            $translations[$key] = Arr::get($data, $key, '');
         }
 
-        $this->writeLanguageFile($path, $result);
+        $this->writeLanguageFile($path, $translations);
 
         $this->line('Written the Language file: "' .str_replace(BASEPATH, '', $path) .'"');
     }
 
     protected function getMessagesFromFile($path)
     {
-        $data = array();
-
         try {
             $data = $this->files->getRequire($path);
         }
         catch (Exception | Throwable $e) {
-            //
+            $data = array();
         }
 
         return is_array($data) ? $data : array();
