@@ -25,7 +25,10 @@ class LocalizationServiceProvider extends ServiceProvider
     {
         $this->app->singleton('language', function ($app)
         {
-            $defaultNamespaces = array(
+            $locale = $app['config']['app.locale'];
+
+            return new LanguageManager($app, $locale, array(
+
                 // Namespace for the Framework path.
                 'nova' => dirname(__DIR__) .DS .'Language',
 
@@ -34,14 +37,8 @@ class LocalizationServiceProvider extends ServiceProvider
 
                 // Namespace for the Shared path.
                 'shared' => BASEPATH .'shared' .DS .'Language',
-            );
-
-            return new LanguageManager($app, $app['config']['app.locale'], $defaultNamespaces);
+            ));
         });
-    }
-
-    protected function getDefaultLanguageHints()
-    {
     }
 
     /**
