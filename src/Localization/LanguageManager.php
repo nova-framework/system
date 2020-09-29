@@ -103,7 +103,7 @@ class LanguageManager
             return $this->instances[$id];
         }
 
-        return $this->instances[$id] = $this->createLanguageInstance($domain, $code);
+        return $this->instances[$id] = $this->createInstance($domain, $code);
     }
 
     /**
@@ -112,13 +112,13 @@ class LanguageManager
      * @param string $code
      * @return \Nova\Localization\Language
      */
-    protected function createLanguageInstance($domain, $code)
+    protected function createInstance($domain, $code)
     {
-        $namespace = Arr::get($this->hints, $domain);
+        $path = Arr::get($this->hints, $domain);
 
         $info = Arr::get($this->languages, $code, array());
 
-        return new Language($this, $this->app['files'], $domain, $code, $namespace, $info);
+        return new Language($this, $this->app['files'], $domain, $code, $path, $info);
     }
 
     /**
