@@ -86,12 +86,12 @@ class LanguageManager
         }
 
         // Check if the language code is known, with fallback to English.
-        if (! Arr::has($this->languages, $code)) {
+        if (! isset($this->languages[$code])) {
             $code = 'en';
         }
 
-        // Check if the requested domain is known.
-        if (! Arr::has($this->hints, $domain)) {
+        // Check if the requested domain is a known one.
+        if (! isset($this->hints[$domain])) {
             throw new LogicException("Unknown language domain [$domain]");
         }
 
