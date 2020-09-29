@@ -89,37 +89,34 @@ class LanguagesUpdateCommand extends Command
         if ($this->option('path')) {
             $path = $this->option('path');
 
-            if (! $this->files->isDirectory($path)) {
-                return $this->error('Not a directory: "' .$path .'"');
-            } else if (! $this->files->isDirectory($path .DS .'Language')) {
-                return $this->error('Not a translatable path: "' .$path .'"');
-            }
-
-            return $this->updateLanguageFiles($path, $languages);
+            return $this->handlePath($path, $languages);
         }
 
-        // Was not specified a custom directory.
-        else {
-            $paths = $this->scanWorkPaths($config);
-        }
+        $paths = $this->scanWorkPaths($config);
 
         // Update the Language files in the available Domains.
         foreach ($paths as $path) {
-            if (! $this->files->isDirectory($path)) {
-                continue;
-            } else if (! $this->files->isDirectory($path .DS .'Language')) {
-                $this->comment('Not a translatable path: "' .$path .'"');
-
-                continue;
-            }
-
-            $this->updateLanguageFiles($path, $languages);
+            $this->handlePath($path, $languages);
         }
+    }
+
+    protected function handlePath($path, array $languages)
+    {
+        if (! $this->files->isDirectory($path)) {
+            return $this->error('Not a directory: "' .$path .'"');
+        }
+
+        //
+        else if (! $this->files->isDirectory($path .DS .'Language')) {
+            return $this->comment('Not a translatable path: "' .$path .'"');
+        }
+
+        return $this->updateLanguageFiles($path, $languages);
     }
 
     protected function scanWorkPaths(Config $config)
     {
-        $result = array(
+        $results = array(
             app_path(),
             base_path('shared')
         );
@@ -134,22 +131,22 @@ class LanguagesUpdateCommand extends Command
             if ($this->files->isDirectory($path)) {
                 $directories = $this->files->glob($path .'/*', GLOB_ONLYDIR);
 
-                $result = array_merge($result, $directories);
+                $results = array_merge($results, $directories);
             }
         }
 
         // Search for the local Packages.
         $path = BASEPATH .'packages';
 
-        if ($this->files->isDirectory($path)) {
-            $result = array_merge($result, array_map(function ($path)
-            {
-                return $path .DS .'src';
-
-            }, $this->files->glob($path .'/*', GLOB_ONLYDIR)));
+        if (! $this->files->isDirectory($path)) {
+            return $results;
         }
 
-        return $result;
+        return array_merge($results, array_map(function ($path)
+        {
+            return $path .DS .'src';
+
+        }, $this->files->glob($path .'/*', GLOB_ONLYDIR)));
     }
 
     protected function updateLanguageFiles($path, $languages)
@@ -180,7 +177,7 @@ class LanguagesUpdateCommand extends Command
 
     protected function fileGrep($pattern, $path)
     {
-        $result = array();
+        $results = array();
 
         $fp = opendir($path);
 
@@ -193,7 +190,7 @@ class LanguagesUpdateCommand extends Command
             $fullPath = $path .DS .$fileName;
 
             if ($this->files->isDirectory($fullPath)) {
-                $result = array_merge($result, $this->fileGrep($pattern, $fullPath));
+                $results = array_merge($results, $this->fileGrep($pattern, $fullPath));
             }
 
             // The current path is not a directory.
@@ -203,11 +200,11 @@ class LanguagesUpdateCommand extends Command
 
             // We found a PHP or TPL file.
             else if (stristr(file_get_contents($fullPath), $pattern)) {
-                $result[] = $fullPath;
+                $results[] = $fullPath;
             }
         }
 
-        return array_unique($result);
+        return array_unique($results);
     }
 
     protected function extractMessages(array $paths, $withoutDomain)
@@ -221,30 +218,30 @@ class LanguagesUpdateCommand extends Command
         $this->comment("Using PATERN: '" .$pattern."'");
 
         // Extract the messages from files and return them.
-        $result = array();
+        $results = array();
 
         foreach ($paths as $path) {
             $content = $this->getFileContents($path);
 
-            if (preg_match_all($pattern, $content, $matches) !== false) {
-                if (empty($messages = $matches[1])) {
+            if (preg_match_all($pattern, $content, $matches) === false) {
+                continue;
+            } else if (empty($messages = $matches[1])) {
+                continue;
+            }
+
+            foreach ($messages as $message) {
+                //$message = trim($message);
+
+                if (($message == '$message, $args = null') || ($message == '$domain, $message, $args = null')) {
+                    // We will skip the translation functions definition.
                     continue;
                 }
 
-                foreach ($messages as $message) {
-                    //$message = trim($message);
-
-                    if ($message == '$msg, $args = null') {
-                        // We will skip the translation functions definition.
-                        continue;
-                    }
-
-                    $result[] = str_replace("\\'", "'", $message);
-                }
+                $results[] = str_replace("\\'", "'", $message);
             }
         }
 
-        return $result;
+        return $results;
     }
 
     protected function getFileContents($path)
@@ -252,10 +249,7 @@ class LanguagesUpdateCommand extends Command
         try {
             return $this->files->get($path);
         }
-        catch (Exception $e) {
-            //
-        }
-        catch (Throwable $e) {
+        catch (Exception | Throwable $e) {
             //
         }
 
@@ -287,10 +281,7 @@ class LanguagesUpdateCommand extends Command
         try {
             $data = $this->files->getRequire($path);
         }
-        catch (Exception $e) {
-            //
-        }
-        catch (Throwable $e) {
+        catch (Exception | Throwable $e) {
             //
         }
 
