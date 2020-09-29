@@ -29,7 +29,7 @@ trait HandlesAuthorizationTrait
      */
     protected function deny($message = null)
     {
-        $message = $message ?: __d('nova', 'This action is unauthorized.');
+        $message = $message ?: __d('system', 'This action is unauthorized.');
 
         throw new UnauthorizedException($message);
     }

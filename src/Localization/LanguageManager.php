@@ -122,7 +122,7 @@ class LanguageManager
     {
         $namespace = $this->getPackageNamespace($package, $namespace);
 
-        $this->addNamespace($namespace, $hint);
+        return $this->addNamespace($namespace, $hint);
     }
 
     /**
@@ -153,6 +153,8 @@ class LanguageManager
     public function addNamespace($namespace, $hint)
     {
         $this->hints[$namespace] = $hint;
+
+        return $this;
     }
 
     /**
@@ -231,6 +233,8 @@ class LanguageManager
 
         // Setup the PHP's Time locale.
         setlocale(LC_TIME, $locale);
+
+        return $this;
     }
 
     /**

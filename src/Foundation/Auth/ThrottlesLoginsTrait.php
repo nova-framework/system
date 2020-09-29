@@ -81,7 +81,7 @@ trait ThrottlesLoginsTrait
      */
     protected function getLockoutErrorMessage($seconds)
     {
-        return __d('nova', 'Too many login attempts. Please try again in {0} seconds.', $seconds);
+        return __d('system', 'Too many login attempts. Please try again in {0} seconds.', $seconds);
     }
 
     /**

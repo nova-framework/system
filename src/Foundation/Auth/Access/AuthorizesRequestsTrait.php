@@ -130,7 +130,7 @@ trait AuthorizesRequestsTrait
      */
     protected function createGateUnauthorizedException($ability, $arguments, $message = null, $previousException = null)
     {
-        $message = $message ?: __d('nova', 'This action is unauthorized.');
+        $message = $message ?: __d('system', 'This action is unauthorized.');
 
         return new HttpException(403, $message, $previousException);
     }

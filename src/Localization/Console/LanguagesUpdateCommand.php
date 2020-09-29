@@ -131,13 +131,11 @@ class LanguagesUpdateCommand extends Command
         );
 
         foreach ($paths as $path) {
-            if (! $this->files->isDirectory($path)) {
-                continue;
-            }
+            if ($this->files->isDirectory($path)) {
+                $directories = $this->files->glob($path .'/*', GLOB_ONLYDIR);
 
-            $result = array_merge(
-                $result, $this->files->glob($path .'/*', GLOB_ONLYDIR)
-            );
+                $result = array_merge($result, $directories);
+            }
         }
 
         // Search for the local Packages.

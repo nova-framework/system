@@ -761,10 +761,10 @@ class Event
     protected function getEmailSubject()
     {
         if (isset($this->description)) {
-            return __d('nova', 'Scheduled Job Output ({0})', $this->description);
+            return __d('system', 'Scheduled Job Output ({0})', $this->description);
         }
 
-        return __d('nova', 'Scheduled Job Output');
+        return __d('system', 'Scheduled Job Output');
     }
 
     /**
