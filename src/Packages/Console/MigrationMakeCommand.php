@@ -126,7 +126,7 @@ class MigrationMakeCommand extends MakeCommand
         $searches = array(
             '{{filename}}',
             '{{className}}',
-            '{{tablename}}',
+            '{{tableName}}',
         );
 
         $replaces = array(
