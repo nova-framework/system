@@ -313,7 +313,7 @@ class Repository
             $location = Str::startsWith($packagePath, $path) ? 'local' : 'vendor';
 
             $packages->put($name, array(
-                'path' => tr::finish($packagePath, DS),
+                'path' => Str::finish($packagePath, DS),
 
                 //
                 'location' => $location,
