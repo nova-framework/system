@@ -2,14 +2,13 @@
 
 namespace Nova\Routing\Console;
 
-use Nova\Console\Command;
-use Nova\Routing\Generators\MiddlewareGenerator;
+use Nova\Console\GeneratorCommand;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 
-class MiddlewareMakeCommand extends Command
+class MiddlewareMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
