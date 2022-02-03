@@ -4,10 +4,6 @@ namespace Nova\Routing\Console;
 
 use Nova\Console\GeneratorCommand;
 
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-
-
 class MiddlewareMakeCommand extends GeneratorCommand
 {
     /**
