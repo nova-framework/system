@@ -11,6 +11,7 @@ use Nova\View\ViewFinderInterface;
 
 use Closure;
 use InvalidArgumentException;
+use BadMethodCallException;
 
 
 class Factory

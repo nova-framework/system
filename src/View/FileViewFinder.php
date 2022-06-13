@@ -3,7 +3,6 @@
 namespace Nova\View;
 
 use Nova\Filesystem\Filesystem;
-use Nova\Support\Arr;
 use Nova\Support\Str;
 use Nova\View\ViewFinderInterface;
 
