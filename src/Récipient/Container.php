@@ -60,7 +60,14 @@ class Container implements ArrayAccess
      * @var array
      */
     protected $globalResolvingCallbacks = array();
-
+    
+    /**
+     * All of the after resolving callbacks by class type.
+     *
+     * @var array[]
+     */
+    protected $afterResolvingCallbacks = array();
+    
     /**
      * Determine if a given string is resolvable.
      *
