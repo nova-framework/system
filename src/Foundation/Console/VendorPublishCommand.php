@@ -152,12 +152,12 @@ class VendorPublishCommand extends Command
      */
     public function copyDirectory($directory, $destination)
     {
-        if (! $this->isDirectory($directory)) {
+        if (! $this->files->isDirectory($directory)) {
             return false;
         }
 
         if (! $this->files->isDirectory($destination)) {
-            $this->makeDirectory($destination, 0777, true);
+            $this->files->makeDirectory($destination, 0777, true);
         }
 
         $items = new FilesystemIterator($directory, FilesystemIterator::SKIP_DOTS);
