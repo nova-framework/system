@@ -1926,6 +1926,16 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     }
 
     /**
+     * Get the visible attributes for the model.
+     *
+     * @return array
+     */
+    public function getVisible()
+    {
+        return $this->visible;
+    }    
+    
+    /**
      * Set the visible attributes for the model.
      *
      * @param  array  $visible
